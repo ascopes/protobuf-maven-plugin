@@ -66,14 +66,26 @@
     <tag>HEAD</tag>
   </scm>
 
+  <modules>
+    <module>protobuf-maven-plugin</module>
+  </modules>
+
   <properties>
+    <!-- Dependencies -->
+    <junit.version>5.10.0</junit.version>
+    <maven-core.version>3.9.4</maven-core.version>
+    <maven-plugin-annotations.version>3.9.0</maven-plugin-annotations.version>
+    <maven-plugin-api.version>3.9.4</maven-plugin-api.version>
+    <maven-plugin-testing-harness.version>3.3.0</maven-plugin-testing-harness.version>
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <license-maven-plugin.version>4.3</license-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <maven-plugin-plugin.version>3.9.0</maven-plugin-plugin.version>
     <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 
     <!-- Plugin dependencies -->
@@ -87,6 +99,43 @@
     <project-scm-url>${project.organization.url}/protobuf-maven-plugin</project-scm-url>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+      <!-- TODO: swap all of this out with maven-bom when 4.0.0 comes out -->
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>${maven-plugin-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugin-tools</groupId>
+        <artifactId>maven-plugin-annotations</artifactId>
+        <version>${maven-plugin-annotations.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${maven-core.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugin-testing</groupId>
+        <artifactId>maven-plugin-testing-harness</artifactId>
+        <version>${maven-plugin-testing-harness.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -98,19 +147,50 @@
 
           <executions>
             <execution>
-              <id>jacoco-init</id>
+              <id>add-coverage-agent-to-surefire-args</id>
               <phase>initialize</phase>
               <goals>
                 <goal>prepare-agent</goal>
               </goals>
+
+              <configuration>
+                <destFile>${project.build.directory}/jacoco-unit.bin</destFile>
+              </configuration>
             </execution>
 
             <execution>
-              <id>jacoco-report</id>
+              <id>report-unit-test-coverage</id>
               <phase>test</phase>
               <goals>
                 <goal>report</goal>
               </goals>
+              <configuration>
+                <dataFile>${project.build.directory}/jacoco-unit.bin</dataFile>
+                <outputDirectory>${project.build.directory}/site/jacoco/unit</outputDirectory>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>add-coverage-agent-to-failsafe-args</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>prepare-agent-integration</goal>
+              </goals>
+              <configuration>
+                <destFile>${project.build.directory}/jacoco-int.bin</destFile>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>report-integration-test-coverage</id>
+              <phase>post-integration-test</phase>
+              <goals>
+                <goal>report-integration</goal>
+              </goals>
+              <configuration>
+                <dataFile>${project.build.directory}/jacoco-int.bin</dataFile>
+                <outputDirectory>${project.build.directory}/site/jacoco/int</outputDirectory>
+              </configuration>
             </execution>
           </executions>
         </plugin>
@@ -123,12 +203,69 @@
 
           <configuration>
             <compilerArgs>
-              <compilerArg>-Xlint:all</compilerArg>
+              <compilerArg>-Xlint:all,-processing,-serial</compilerArg>
             </compilerArgs>
             <failOnWarning>true</failOnWarning>
             <showDeprecation>true</showDeprecation>
             <release>11</release>
           </configuration>
+        </plugin>
+
+        <plugin>
+          <!-- Integration testing config -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${maven-failsafe-plugin.version}</version>
+
+          <configuration>
+            <includes>
+              <include>*IntegrationTest</include>
+            </includes>
+
+            <failIfNoTests>true</failIfNoTests>
+            <runOrder>random</runOrder>
+
+            <!--
+              This block is needed to show @DisplayName and @ParameterizedTest
+              in reports with the provided names.
+            -->
+            <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+              <disable>false</disable>
+              <version>3.0</version>
+              <usePhrasedFileName>false</usePhrasedFileName>
+              <usePhrasedTestSuiteClassName>true</usePhrasedTestSuiteClassName>
+              <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
+              <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
+            </statelessTestsetReporter>
+            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+              <disable>false</disable>
+              <printStacktraceOnError>true</printStacktraceOnError>
+              <printStacktraceOnFailure>true</printStacktraceOnFailure>
+              <usePhrasedFileName>false</usePhrasedFileName>
+              <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
+              <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
+            </statelessTestsetInfoReporter>
+          </configuration>
+
+          <dependencies>
+            <dependency>
+              <groupId>me.fabriciorby</groupId>
+              <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+              <version>${maven-surefire-junit5-tree-reporter.version}</version>
+            </dependency>
+          </dependencies>
+
+          <executions>
+            <execution>
+              <!-- Enable failsafe to run -->
+              <id>integration-test</id>
+              <!-- This must not run during the test phase - JaCoCo messes up the reporting! -->
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
@@ -153,12 +290,22 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>${maven-plugin-plugin.version}</version>
+        </plugin>
+
+        <plugin>
           <!-- Unit testing config -->
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${maven-surefire-plugin.version}</version>
 
           <configuration>
+            <excludes>
+              <exclude>*IntegrationTest</exclude>
+            </excludes>
+
             <!--
               This block is needed to show @DisplayName and @ParameterizedTest
               in reports with the provided names.
@@ -208,7 +355,7 @@
               <header>.mvn/license/license-header.txt</header>
               <includes>
                 <include>src/**/*.java</include>
-                <include>src/**/*.groovy</include>
+                <include>src/**/*.proto</include>
               </includes>
             </licenseSet>
           </licenseSets>
