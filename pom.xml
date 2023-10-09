@@ -16,8 +16,8 @@
 
   <licenses>
     <license>
-      <name>TODO: license name here</name>
-      <url>${project-scm-url}/blob/main/LICENSE.txt</url>
+      <name>Apache License v2.0</name>
+      <url>${project.url}/blob/main/LICENSE.txt</url>
     </license>
   </licenses>
 
