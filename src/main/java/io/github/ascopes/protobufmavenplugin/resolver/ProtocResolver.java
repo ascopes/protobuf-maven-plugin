@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin;
+package io.github.ascopes.protobufmavenplugin.resolver;
 
-import org.junit.jupiter.api.Test;
+import java.nio.file.Path;
 
-class DummyTest {
-  @Test
-  void testUnitTestsWork() {
-  }
+/**
+ * Base interface for a component that can resolve a {@code protoc} executable.
+ *
+ * @author Ashley Scopes
+ */
+public interface ProtocResolver {
+
+  /**
+   * Determine the path to the {@code protoc} executable.
+   *
+   * @return the path to the {@code protoc} executable.
+   * @throws ProtocResolutionException if resolution fails for any reason.
+   */
+  Path resolveProtoc() throws ProtocResolutionException;
 }

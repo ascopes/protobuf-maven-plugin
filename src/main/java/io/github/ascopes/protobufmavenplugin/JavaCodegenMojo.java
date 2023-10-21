@@ -16,25 +16,45 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-
+import org.apache.maven.plugins.annotations.Parameter;
+import org.eclipse.aether.RepositorySystem;
 
 /**
- * Generate Java classes from Protobuf sources.
+ * Generate Java source code from Protobuf source file definitions.
  *
  * @author Ashley Scopes
  */
 @Mojo(
-    name = "generate",
+    name = "generate-java",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresOnline = true,
     threadSafe = true
 )
-public class GenerateMojo extends AbstractMojo {
+public class JavaCodegenMojo extends AbstractMojo {
+
+  /**
+   * The repository system.
+   */
+  @Component
+  private RepositorySystem repositorySystem;
+
+  /**
+   * The Maven session that is in use.
+   */
+  @Parameter(defaultValue = "${session}", required = true, readonly = true)
+  private MavenSession session;
+
+  public JavaCodegenMojo() {
+  }
 
   @Override
-  public void execute() {
-    getLog().info("Hello, World!");
+  public void execute() throws MojoExecutionException, MojoFailureException {
   }
 }
