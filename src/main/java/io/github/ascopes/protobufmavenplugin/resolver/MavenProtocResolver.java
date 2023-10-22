@@ -28,7 +28,7 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 public final class MavenProtocResolver implements ProtocResolver {
 
-  private static final String DEFAULT_PROTOC_VERISON = "LATEST";
+  private static final String DEFAULT_PROTOC_VERSION = "LATEST";
 
   private String version;
 
