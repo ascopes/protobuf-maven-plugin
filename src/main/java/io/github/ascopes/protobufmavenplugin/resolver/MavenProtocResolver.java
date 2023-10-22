@@ -28,20 +28,32 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 public final class MavenProtocResolver implements ProtocResolver {
 
+  private static final String DEFAULT_PROTOC_VERISON = "LATEST";
+
   private String version;
 
+  /**
+   * Initialise this resolver.
+   */
   public MavenProtocResolver() {
-    version = "";
+    version = DEFAULT_PROTOC_VERSION;
   }
 
   /**
-   * Set the version of {@code protoc} to use, or set to an empty value to use the most recent
-   * version of {@code protoc} that is available (the default).
-   *
-   * @param version the version of {@code protoc} to use, or an empty value if the latest version
-   *                should be used instead.
+   * Get the {@code protoc} version to use.
+   * 
+   * @return the version of {@code protoc} to use.
    */
-  @Parameter(name = "version", property = "protoc.version")
+  public String getVersion() {
+    return version;
+  }
+
+  /**
+   * Set the version of {@code protoc} to use.
+   *
+   * @param version the version of {@code protoc} to use.
+   */
+  @Parameter(name = "version", property = "protoc.version", defaultValue = DEFAULT_PROTOC_VERSION)
   public void setVersion(String version) {
     this.version = Objects.requireNonNull(version);
   }
