@@ -32,12 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PathProtocResolverTest {
 
-  static {
-    // Call one of the methods to ensure classloading has completed prior to mocking taking place.
-    // See https://github.com/mockito/mockito/issues/3156.
-    HostEnvironment.isLinux();
-  }
-
   @Mock
   MockedStatic<HostEnvironment> platformMock;
 
