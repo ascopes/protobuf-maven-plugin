@@ -16,14 +16,20 @@
 
 package io.github.ascopes.protobufmavenplugin.resolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,7 +39,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PathProtocResolverTest {
 
   @Mock
-  MockedStatic<HostEnvironment> platformMock;
+  MockedStatic<HostEnvironment> hostEnvironmentMock;
+
+  @TempDir
+  Path temporaryDirectory;
 
   PathProtocResolver resolver;
 
@@ -42,11 +51,31 @@ class PathProtocResolverTest {
     resolver = new PathProtocResolver();
   }
 
+  @DisplayName("The default executable name is set to 'protoc'")
+  @Test
+  void defaultExecutableNameIsProtoc() {
+    // Then
+    assertThat(resolver.getExecutableName()).isEqualTo("protoc");
+  }
+
+  @DisplayName("The executable name can be overridden")
+  @Test
+  void executableNameCanBeOverridden() {
+    // Given
+    var newName = UUID.randomUUID().toString();
+
+    // When
+    resolver.setExecutableName(newName);
+
+    // Then
+    assertThat(resolver.getExecutableName()).isEqualTo(newName);
+  }
+
   @DisplayName("An empty $PATH results in a resolution exception being raised")
   @Test
   void emptyPathThrowsResolutionException() {
     // Given
-    platformMock.when(HostEnvironment::systemPath).thenReturn(List.of());
+    hostEnvironmentMock.when(HostEnvironment::systemPath).thenReturn(List.of());
 
     // Then
     assertThatThrownBy(resolver::resolveProtoc)
@@ -55,5 +84,35 @@ class PathProtocResolverTest {
         .hasMessage("No protoc binary was found in the $PATH");
   }
 
+  @DisplayName("Irrelevant files in PATH directories are ignored")
+  @Test
+  void irrelevantFilesInPathDirectoriesAreIgnored() throws IOException {
+    // Given
+    givenFileExists(temporaryDirectory, "foo", "bar");
+    givenFileExists(temporaryDirectory, "foo", "baz.exe");
 
+    var path = List.of(temporaryDirectory.resolve("foo"));
+    hostEnvironmentMock.when(HostEnvironment::systemPath).thenReturn(path);
+
+    // Then
+    assertThatThrownBy(resolver::resolveProtoc)
+        .isInstanceOf(ProtocResolutionException.class)
+        .hasNoCause()
+        .hasMessage("No protoc binary was found in the $PATH");
+  }
+
+  ///
+  /// Helpers
+  ///
+
+  private Path givenFileExists(Path root, String... parts) throws IOException {
+    var path = root;
+
+    for (var part : parts) {
+      path = path.resolve(part);
+    }
+
+    Files.createDirectories(path.getParent());
+    return Files.createFile(path);
+  }
 }
