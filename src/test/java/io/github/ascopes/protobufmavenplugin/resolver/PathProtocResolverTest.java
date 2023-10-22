@@ -18,39 +18,28 @@ package io.github.ascopes.protobufmavenplugin.resolver;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.nio.file.Path;
-import org.apache.commons.lang3.SystemProperties;
-import org.apache.commons.lang3.SystemUtils;
+import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.parallel.Isolated;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("PathProtocResolver tests")
 @ExtendWith(MockitoExtension.class)
-@Isolated("Modifies system environment variables")
 class PathProtocResolverTest {
 
   static {
-    // Works around a bug in Mockito that breaks classloading due to precedence with
-    // lazily loading class references: https://github.com/mockito/mockito/issues/3156.
-    SystemUtils.getEnvironmentVariable("foo", "bar");
+    // Call one of the methods to ensure classloading has completed prior to mocking taking place.
+    // See https://github.com/mockito/mockito/issues/3156.
+    HostEnvironment.isLinux();
   }
 
-  @Mock(answer = Answers.RETURNS_SMART_NULLS)
-  MockedStatic<SystemProperties> systemPropertiesMock;
-
-  @Mock(answer = Answers.RETURNS_SMART_NULLS)
-  MockedStatic<SystemUtils> systemUtilsMock;
-
-  @TempDir
-  Path tempDir;
+  @Mock
+  MockedStatic<HostEnvironment> platformMock;
 
   PathProtocResolver resolver;
 
@@ -59,12 +48,13 @@ class PathProtocResolverTest {
     resolver = new PathProtocResolver();
   }
 
+  @DisplayName("An empty $PATH results in a resolution exception being raised")
   @Test
-  void undefinedPathThrowsException() {
+  void emptyPathThrowsResolutionException() {
     // Given
-    systemUtilsMock.when(() -> SystemUtils.getEnvironmentVariable("PATH", ""))
-        .thenReturn("");
+    platformMock.when(HostEnvironment::systemPath).thenReturn(List.of());
 
+    // Then
     assertThatThrownBy(resolver::resolveProtoc)
         .isInstanceOf(ProtocResolutionException.class)
         .hasNoCause()

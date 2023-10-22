@@ -16,16 +16,12 @@
 
 package io.github.ascopes.protobufmavenplugin.resolver;
 
+import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Scanner;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.SystemProperties;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
@@ -37,10 +33,10 @@ import org.apache.maven.plugins.annotations.Parameter;
  * <ul>
  *   <li>The executable must be in one of the directories on the {@code $PATH}
  *       ({@code %PATH%} on Windows);
- *   <li>The binary must be marked as being executable ({@code chmod +x});
  *   <li>On POSIX systems, the binary must be named exactly "{@code protoc}";
  *   <li>On Windows systems, the binary must be named "{@code protoc}", ignoring case
- *       sensitivity and any file extension.
+ *       sensitivity, and ignoring any file extension (so "{@code PROTOC.EXE}" would be a direct
+ *       match here).
  * </ul>
  *
  * <p>The executable name can be overridden, but defaults to "{@code protoc}".
@@ -82,12 +78,9 @@ public final class PathProtocResolver implements ProtocResolver {
   @Override
   public Path resolveProtoc() throws ProtocResolutionException {
     try {
-      var pathVariableValue = SystemUtils.getEnvironmentVariable("PATH", "");
-
-      for (var indexableDirectory : determineIndexableDirectories(pathVariableValue)) {
+      for (var indexableDirectory : HostEnvironment.systemPath()) {
         try (var fileStream = Files.list(indexableDirectory)) {
           var result = fileStream
-              .filter(Files::isExecutable)
               .filter(this::isProtoc)
               .findFirst();
 
@@ -98,27 +91,16 @@ public final class PathProtocResolver implements ProtocResolver {
       }
 
       throw new ProtocResolutionException("No protoc binary was found in the $PATH");
+
     } catch (IOException ex) {
       throw new ProtocResolutionException("File system error", ex);
-    }
-  }
-
-  private List<Path> determineIndexableDirectories(String pathVariableValue) {
-    var separator = SystemProperties.getPathSeparator();
-
-    try (var scanner = new Scanner(pathVariableValue).useDelimiter(separator)) {
-      return scanner
-          .tokens()
-          .map(Path::of)
-          .filter(Files::isDirectory)
-          .collect(Collectors.toList());
     }
   }
 
   private boolean isProtoc(Path path) {
     var fileName = path.getFileName().toString();
 
-    if (SystemUtils.IS_OS_WINDOWS) {
+    if (HostEnvironment.isWindows()) {
       // Windows filename lookups will always be case-insensitive.
       fileName = fileName.toLowerCase(Locale.ROOT);
 

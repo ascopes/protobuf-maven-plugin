@@ -69,7 +69,6 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.24.2</assertj.version>
-    <commons-lang3.version>3.13.0</commons-lang3.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.0</junit.version>
     <maven-core.version>3.9.4</maven-core.version>
@@ -119,12 +118,6 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>${commons-lang3.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
