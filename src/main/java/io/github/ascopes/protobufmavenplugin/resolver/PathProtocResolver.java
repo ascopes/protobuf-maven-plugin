@@ -65,7 +65,7 @@ public final class PathProtocResolver implements ProtocResolver {
 
         try (var fileStream = Files.list(indexableDirectory)) {
           var result = fileStream
-              .filter(Files::isExecutable)
+              .filter(this::isExecutable)
               .filter(this::isProtoc)
               .findFirst();
 
@@ -81,6 +81,11 @@ public final class PathProtocResolver implements ProtocResolver {
     } catch (IOException ex) {
       throw new ProtocResolutionException("File system error", ex);
     }
+  }
+
+  private boolean isExecutable(Path path) {
+    // TODO(ascopes): Verify this is the correct logic...
+    return HostEnvironment.isWindows() || Files.isExecutable(path);
   }
 
   private boolean isProtoc(Path path) {
