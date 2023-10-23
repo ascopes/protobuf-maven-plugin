@@ -69,7 +69,6 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.24.2</assertj.version>
-    <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.0</junit.version>
     <maven-core.version>3.9.4</maven-core.version>
     <maven-plugin-annotations.version>3.9.0</maven-plugin-annotations.version>
@@ -140,14 +139,6 @@
       <artifactId>maven-core</artifactId>
       <version>${maven-core.version}</version>
       <!-- Provided by Maven at runtime -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jspecify</groupId>
-      <artifactId>jspecify</artifactId>
-      <version>${jspecify.version}</version>
-      <!-- Not needed at runtime -->
       <scope>provided</scope>
     </dependency>
 

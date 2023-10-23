@@ -16,6 +16,9 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import io.github.ascopes.protobufmavenplugin.resolver.MavenProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolver.PathProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolver.ProtocResolver;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -34,10 +37,9 @@ import org.eclipse.aether.RepositorySystem;
 @Mojo(
     name = "generate-java",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-    requiresOnline = true,
     threadSafe = true
 )
-public class JavaCodegenMojo extends AbstractMojo {
+public final class JavaCodegenMojo extends AbstractMojo {
 
   /**
    * The repository system.
@@ -51,10 +53,56 @@ public class JavaCodegenMojo extends AbstractMojo {
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
   private MavenSession session;
 
-  public JavaCodegenMojo() {
-  }
+  /**
+   * The version of protoc to use.
+   *
+   * <p>Only relevant for the {@code MAVEN} protoc resolver.
+   */
+  @Parameter(defaultValue = "LATEST")
+  private String version;
+
+  /**
+   * The version of protoc to use.
+   *
+   * <p>Only relevant for the {@code PATH} protoc resolver.
+   */
+  @Parameter(defaultValue = "protoc")
+  private String executableName;
+
+  /**
+   * How to resolve the protoc binary.
+   */
+  @Parameter(defaultValue = "MAVEN")
+  private ResolverKind resolverKind;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    var protocResolver = buildProtocResolver();
+  }
+
+  private ProtocResolver buildProtocResolver() {
+    switch (resolverKind) {
+      case MAVEN:
+        return new MavenProtocResolver(version);
+      case PATH:
+        return new PathProtocResolver(executableName);
+      default:
+        throw new IllegalStateException("unsupported resolver kind");
+    }
+  }
+
+  /**
+   * Valid protoc resolver kinds.
+   */
+  public enum ResolverKind {
+    /**
+     * Resolve protoc from the local/remote Maven repository.
+     */
+    MAVEN,
+
+    /**
+     * Resolve protoc from the {@code PATH} environment variable.
+     */
+    PATH,
   }
 }

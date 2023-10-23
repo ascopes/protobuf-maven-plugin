@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Objects;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,34 +46,11 @@ import org.slf4j.LoggerFactory;
 public final class PathProtocResolver implements ProtocResolver {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PathProtocResolver.class);
-  private static final String PROTOC_DEFAULT_BINARY = "protoc";
 
-  private String executableName;
+  private final String executableName;
 
-  /**
-   * Initialise this resolver.
-   */
-  public PathProtocResolver() {
-    executableName = PROTOC_DEFAULT_BINARY;
-  }
-
-  /**
-   * Get the executable name to use.
-   *
-   * @return the executable name.
-   */
-  public String getExecutableName() {
-    return executableName;
-  }
-
-  /**
-   * Set the executable name.
-   *
-   * @param executableName the name of the executable to look for.
-   */
-  @Parameter(name = "executableName", defaultValue = PROTOC_DEFAULT_BINARY)
-  public void setExecutableName(String executableName) {
-    this.executableName = Objects.requireNonNull(executableName);
+  public PathProtocResolver(String executableName) {
+    this.executableName = executableName;
   }
 
   @Override

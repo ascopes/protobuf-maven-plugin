@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,38 +43,12 @@ class PathProtocResolverTest {
   @TempDir
   Path temporaryDirectory;
 
-  PathProtocResolver resolver;
-
-  @BeforeEach
-  void setUp() {
-    resolver = new PathProtocResolver();
-  }
-
-  @DisplayName("The default executable name is set to 'protoc'")
-  @Test
-  void defaultExecutableNameIsProtoc() {
-    // Then
-    assertThat(resolver.getExecutableName()).isEqualTo("protoc");
-  }
-
-  @DisplayName("The executable name can be overridden")
-  @Test
-  void executableNameCanBeOverridden() {
-    // Given
-    var newName = UUID.randomUUID().toString();
-
-    // When
-    resolver.setExecutableName(newName);
-
-    // Then
-    assertThat(resolver.getExecutableName()).isEqualTo(newName);
-  }
-
   @DisplayName("An empty $PATH results in a resolution exception being raised")
   @Test
   void emptyPathThrowsResolutionException() {
     // Given
     hostEnvironmentMock.when(HostEnvironment::systemPath).thenReturn(List.of());
+    var resolver = new PathProtocResolver("foo");
 
     // Then
     assertThatThrownBy(resolver::resolveProtoc)
@@ -88,6 +61,8 @@ class PathProtocResolverTest {
   @Test
   void irrelevantFilesInPathDirectoriesAreIgnored() throws IOException {
     // Given
+    var resolver = new PathProtocResolver("bork");
+
     givenFileExists(temporaryDirectory, "foo", "bar");
     givenFileExists(temporaryDirectory, "foo", "baz.exe");
 

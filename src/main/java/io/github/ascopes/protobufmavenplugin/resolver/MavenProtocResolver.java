@@ -17,8 +17,6 @@
 package io.github.ascopes.protobufmavenplugin.resolver;
 
 import java.nio.file.Path;
-import java.util.Objects;
-import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Resolver for {@code protoc} which looks up the provided version in the Maven remote repositories
@@ -28,34 +26,10 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 public final class MavenProtocResolver implements ProtocResolver {
 
-  private static final String DEFAULT_PROTOC_VERSION = "LATEST";
+  private final String version;
 
-  private String version;
-
-  /**
-   * Initialise this resolver.
-   */
-  public MavenProtocResolver() {
-    version = DEFAULT_PROTOC_VERSION;
-  }
-
-  /**
-   * Get the {@code protoc} version to use.
-   * 
-   * @return the version of {@code protoc} to use.
-   */
-  public String getVersion() {
-    return version;
-  }
-
-  /**
-   * Set the version of {@code protoc} to use.
-   *
-   * @param version the version of {@code protoc} to use.
-   */
-  @Parameter(name = "version", property = "protoc.version", defaultValue = DEFAULT_PROTOC_VERSION)
-  public void setVersion(String version) {
-    this.version = Objects.requireNonNull(version);
+  public MavenProtocResolver(String version) {
+    this.version = version;
   }
 
   @Override
