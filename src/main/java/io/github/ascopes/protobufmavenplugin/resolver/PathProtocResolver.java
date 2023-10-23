@@ -23,6 +23,8 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolver for {@code protoc} that considers any executables in the {@code $PATH} environment
@@ -45,6 +47,7 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 public final class PathProtocResolver implements ProtocResolver {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(PathProtocResolver.class);
   private static final String PROTOC_DEFAULT_BINARY = "protoc";
 
   private String executableName;
@@ -79,13 +82,20 @@ public final class PathProtocResolver implements ProtocResolver {
   public Path resolveProtoc() throws ProtocResolutionException {
     try {
       for (var indexableDirectory : HostEnvironment.systemPath()) {
+        LOGGER.debug(
+            "Searching directory '{}' for protoc binary named '{}'",
+            indexableDirectory,
+            executableName
+        );
+
         try (var fileStream = Files.list(indexableDirectory)) {
           var result = fileStream
               .filter(this::isProtoc)
               .findFirst();
 
           if (result.isPresent()) {
-            return result.get();
+            var path = result.get();
+            LOGGER.info("Resolved protoc binary to '{}'", path);
           }
         }
       }
