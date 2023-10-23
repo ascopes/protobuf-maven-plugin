@@ -90,6 +90,7 @@ public final class PathProtocResolver implements ProtocResolver {
 
         try (var fileStream = Files.list(indexableDirectory)) {
           var result = fileStream
+              .filter(Files::isExecutable)
               .filter(this::isProtoc)
               .findFirst();
 
