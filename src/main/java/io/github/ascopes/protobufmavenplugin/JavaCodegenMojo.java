@@ -83,7 +83,7 @@ public final class JavaCodegenMojo extends AbstractMojo {
   private ProtocResolver buildProtocResolver() {
     switch (resolverKind) {
       case MAVEN:
-        return new MavenProtocResolver(version);
+        return new MavenProtocResolver(version, repositorySystem, session);
       case PATH:
         return new PathProtocResolver(executableName);
       default:

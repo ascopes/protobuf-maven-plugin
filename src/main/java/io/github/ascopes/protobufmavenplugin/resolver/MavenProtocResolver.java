@@ -17,6 +17,8 @@
 package io.github.ascopes.protobufmavenplugin.resolver;
 
 import java.nio.file.Path;
+import org.apache.maven.execution.MavenSession;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Resolver for {@code protoc} which looks up the provided version in the Maven remote repositories
@@ -27,9 +29,13 @@ import java.nio.file.Path;
 public final class MavenProtocResolver implements ProtocResolver {
 
   private final String version;
+  private final RepositorySystem repositorySystem;
+  private final MavenSession session;
 
-  public MavenProtocResolver(String version) {
+  public MavenProtocResolver(String version, RepositorySystem repositorySystem, MavenSession session) {
     this.version = version;
+    this.repositorySystem = repositorySystem;
+    this.session = session;
   }
 
   @Override
