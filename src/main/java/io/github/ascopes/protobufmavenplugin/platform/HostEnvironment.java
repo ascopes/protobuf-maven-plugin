@@ -25,7 +25,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * Host environment integration facilities.
+ * Host environment inspection facilities.
  *
  * @author Ashley Scopes
  */
@@ -67,7 +67,7 @@ public final class HostEnvironment {
    * @return the list of paths in the {@code PATH} environment variable.
    */
   public static List<Path> systemPath() {
-    var rawPath = Optional.ofNullable(System.getenv("PATH")).orElse("");;
+    var rawPath = Optional.ofNullable(System.getenv("PATH")).orElse("");
 
     try (var scanner = new Scanner(rawPath).useDelimiter(File.pathSeparator)) {
       return scanner
