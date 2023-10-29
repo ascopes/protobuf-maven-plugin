@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    open-pull-requests-limit: 99
+    rebase-strategy: auto
+    schedule:
+      interval: monthly
+    target-branch: main
+    assignees:
+      - ascopes
+    labels:
+      - ci
+
+  - package-ecosystem: maven
+    directory: /
+    open-pull-requests-limit: 99
+    rebase-strategy: auto
+    schedule:
+      interval: monthly
+    target-branch: main
+    assignees:
+      - ascopes
+    labels:
+      - dependencies
