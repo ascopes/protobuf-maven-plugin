@@ -62,14 +62,6 @@ public final class JavaCodegenMojo extends AbstractMojo {
   private String version;
 
   /**
-   * The version of protoc to use.
-   *
-   * <p>Only relevant for the {@code PATH} protoc resolver.
-   */
-  @Parameter(defaultValue = "protoc")
-  private String executableName;
-
-  /**
    * How to resolve the protoc binary.
    */
   @Parameter(defaultValue = "MAVEN")
@@ -85,7 +77,7 @@ public final class JavaCodegenMojo extends AbstractMojo {
       case MAVEN:
         return new MavenProtocResolver(version, repositorySystem, session);
       case PATH:
-        return new PathProtocResolver(executableName);
+        return new PathProtocResolver();
       default:
         throw new IllegalStateException("unsupported resolver kind");
     }

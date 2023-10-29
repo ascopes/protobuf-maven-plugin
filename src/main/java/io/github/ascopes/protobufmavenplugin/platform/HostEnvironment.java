@@ -16,12 +16,17 @@
 
 package io.github.ascopes.protobufmavenplugin.platform;
 
+import static java.util.function.Predicate.not;
+
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -67,8 +72,7 @@ public final class HostEnvironment {
    * @return the list of paths in the {@code PATH} environment variable.
    */
   public static List<Path> systemPath() {
-    var rawPath = Optional.ofNullable(System.getenv("PATH")).orElse("");
-
+    var rawPath = getEnvironmentVariable("PATH").orElse("");
     try (var scanner = new Scanner(rawPath).useDelimiter(File.pathSeparator)) {
       return scanner
           .tokens()
@@ -77,9 +81,34 @@ public final class HostEnvironment {
     }
   }
 
+  /**
+   * Get the Windows {@code PATHEXT} environment variable, split by the system path separator and
+   * placed in a case-insensitive set.
+   *
+   * @return the path extensions for the system, or an empty set if unspecified or not applicable.
+   */
+  public static Set<String> systemPathExtensions() {
+    var rawPathExtensions = getEnvironmentVariable("PATHEXT").orElse("");
+    var result = new TreeSet<>(String::compareToIgnoreCase);
+    result.addAll(explodeOnPathSeparator(rawPathExtensions));
+    return Collections.unmodifiableSet(result);
+  }
+
+  public static Optional<String> getEnvironmentVariable(String name) {
+    return Optional.ofNullable(System.getenv(name));
+  }
+
   private static String operatingSystem() {
     return Optional.ofNullable(System.getProperty("os.name"))
         .orElseThrow(() -> new IllegalStateException("No 'os.name' system property is set"));
+  }
+
+  private static List<String> explodeOnPathSeparator(String text) {
+    try (var scanner = new Scanner(text).useDelimiter(File.pathSeparator)) {
+      return scanner.tokens()
+          .filter(not(String::isBlank))
+          .collect(Collectors.toList());
+    }
   }
 
   private HostEnvironment() {

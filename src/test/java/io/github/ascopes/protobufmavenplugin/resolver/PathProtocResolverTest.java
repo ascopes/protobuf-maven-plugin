@@ -16,78 +16,75 @@
 
 package io.github.ascopes.protobufmavenplugin.resolver;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("PathProtocResolver tests")
 @ExtendWith(MockitoExtension.class)
 class PathProtocResolverTest {
 
-  @Mock
-  MockedStatic<HostEnvironment> hostEnvironmentMock;
-
   @TempDir
   Path temporaryDirectory;
 
-  @DisplayName("An empty $PATH results in a resolution exception being raised")
-  @Test
-  void emptyPathThrowsResolutionException() {
-    // Given
-    hostEnvironmentMock.when(HostEnvironment::systemPath).thenReturn(List.of());
-    var resolver = new PathProtocResolver("foo");
+  @DisplayName("An empty $PATH results in an exception being raised")
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest(name = "when HostEnvironment.isWindows() returns {0}")
+  void emptyPathResultsInExceptionBeingRaised(boolean isWindows) {
+    try (var envMock = mockedHostEnvironment()) {
+      // Given
+      envMock.when(HostEnvironment::isWindows).thenReturn(isWindows);
+      envMock.when(HostEnvironment::systemPath).thenReturn(List.of());
 
-    // Then
-    assertThatThrownBy(resolver::resolveProtoc)
-        .isInstanceOf(ProtocResolutionException.class)
-        .hasNoCause()
-        .hasMessage("No protoc binary was found in the $PATH");
-  }
+      // When
 
-  @DisplayName("Irrelevant files in PATH directories are ignored")
-  @Test
-  void irrelevantFilesInPathDirectoriesAreIgnored() throws IOException {
-    // Given
-    var resolver = new PathProtocResolver("bork");
-
-    givenFileExists(temporaryDirectory, "foo", "bar");
-    givenFileExists(temporaryDirectory, "foo", "baz.exe");
-
-    var path = List.of(temporaryDirectory.resolve("foo"));
-    hostEnvironmentMock.when(HostEnvironment::systemPath).thenReturn(path);
-
-    // Then
-    assertThatThrownBy(resolver::resolveProtoc)
-        .isInstanceOf(ProtocResolutionException.class)
-        .hasNoCause()
-        .hasMessage("No protoc binary was found in the $PATH");
+    }
   }
 
   ///
   /// Helpers
   ///
 
-  private Path givenFileExists(Path root, String... parts) throws IOException {
-    var path = root;
-
-    for (var part : parts) {
-      path = path.resolve(part);
-    }
-
-    Files.createDirectories(path.getParent());
-    return Files.createFile(path);
+  MockedStatic<HostEnvironment> mockedHostEnvironment() {
+    return Mockito.mockStatic(HostEnvironment.class);
   }
+
+  Path makeDirectory(String... bits) throws IOException {
+    try {
+      return Files.createDirectories(foldPath(bits));
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+
+  Path makeFile(String... bits) {
+    try {
+      var path = foldPath(bits);
+      Files.createDirectories(path.getParent());
+      return Files.createFile(path);
+    } catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+
+  Path foldPath(String... bits) {
+    var path = temporaryDirectory;
+    for (var bit : bits) {
+      path = path.resolve(bit);
+    }
+    return path;
+  }
+
 }

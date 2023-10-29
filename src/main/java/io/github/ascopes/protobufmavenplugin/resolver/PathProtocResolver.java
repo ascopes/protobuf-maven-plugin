@@ -20,7 +20,7 @@ import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,34 +39,30 @@ import org.slf4j.LoggerFactory;
  *       match here).
  * </ul>
  *
- * <p>The executable name can be overridden, but defaults to "{@code protoc}".
- *
  * @author Ashley Scopes
  */
 public final class PathProtocResolver implements ProtocResolver {
 
+  private static final String PROTOC = "protoc";
   private static final Logger LOGGER = LoggerFactory.getLogger(PathProtocResolver.class);
-
-  private final String executableName;
-
-  public PathProtocResolver(String executableName) {
-    this.executableName = executableName;
-  }
 
   @Override
   public Path resolveProtoc() throws ProtocResolutionException {
     try {
+      var predicate = HostEnvironment.isWindows()
+          ? isProtocWindows()
+          : isProtoc();
+
       for (var indexableDirectory : HostEnvironment.systemPath()) {
         LOGGER.debug(
             "Searching directory '{}' for protoc binary named '{}'",
             indexableDirectory,
-            executableName
+            PROTOC
         );
 
         try (var fileStream = Files.list(indexableDirectory)) {
           var result = fileStream
-              .filter(this::isExecutable)
-              .filter(this::isProtoc)
+              .filter(predicate)
               .findFirst();
 
           if (result.isPresent()) {
@@ -83,27 +79,24 @@ public final class PathProtocResolver implements ProtocResolver {
     }
   }
 
-  private boolean isExecutable(Path path) {
-    // TODO(ascopes): Verify this is the correct logic...
-    return HostEnvironment.isWindows() || Files.isExecutable(path);
+  private Predicate<Path> isProtoc() {
+    return path -> path.getFileName().toString().equals(PROTOC) && Files.isExecutable(path);
   }
 
-  private boolean isProtoc(Path path) {
-    var fileName = path.getFileName().toString();
+  private Predicate<Path> isProtocWindows() {
+    var pathExt = HostEnvironment.systemPathExtensions();
 
-    if (HostEnvironment.isWindows()) {
-      // Windows filename lookups will always be case-insensitive.
-      fileName = fileName.toLowerCase(Locale.ROOT);
+    return path -> {
+      var fileName = path.getFileName().toString();
+      var fileExtensionIndex = fileName.lastIndexOf('.');
+      var fileExtension = fileExtensionIndex < 0
+          ? ""
+          : fileName.substring(fileExtensionIndex);
+      var baseFileName = fileExtensionIndex < 0
+          ? fileName
+          : fileName.substring(0, fileExtensionIndex);
 
-      // Windows filename lookups will ignore the file extension, so we have to strip that out.
-      // We take the last part of the extension only, since Windows appears to only consider this
-      // (e.g. `foo.bar.baz` is considered to be named `foo.bar` with extension `.baz`.
-      var periodIndex = fileName.lastIndexOf('.');
-      if (periodIndex != -1) {
-        fileName = fileName.substring(0, periodIndex);
-      }
-    }
-
-    return fileName.equals(executableName);
+      return baseFileName.equalsIgnoreCase(PROTOC) && pathExt.contains(fileExtension);
+    };
   }
 }

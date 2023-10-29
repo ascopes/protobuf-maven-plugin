@@ -39,7 +39,7 @@ import org.junit.jupiter.api.parallel.Isolated;
 @ExtendWith(MockedSystemPropertiesExtension.class)
 @Isolated("Mocks system properties")
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface MockedSystemProperties {
 
   final class MockedSystemPropertiesExtension implements BeforeEachCallback, AfterEachCallback {
@@ -53,6 +53,13 @@ public @interface MockedSystemProperties {
       // we have to do it this way.
       initialProperties.putAll(System.getProperties());
       System.getProperties().clear();
+
+      // Prevent issues with the JRE reading os.* and java.* properties which may mess up things
+      // like Mocktio initialisation.
+      initialProperties.stringPropertyNames()
+          .stream()
+          .filter(key -> key.matches("^(os\\.|java\\.|file\\.|path\\.|user\\.).+"))
+          .forEach(key -> System.setProperty(key, initialProperties.getProperty(key)));
     }
 
     @Override
