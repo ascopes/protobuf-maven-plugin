@@ -79,7 +79,7 @@
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>    <license-maven-plugin.version>4.3</license-maven-plugin.version>
-    <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
