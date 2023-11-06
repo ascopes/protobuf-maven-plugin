@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 @DisplayName("HostEnvironment tests")
 @MockedSystemProperties
@@ -211,25 +209,4 @@ class HostEnvironmentTest {
         .hasNoCause()
         .hasMessage("No 'os.name' system property is set");
   }
-
-  @DisplayName(".systemPath() returns the expected system path")
-  @Test
-  void systemPathReturnsTheExpectedSystemPath() {
-    // TODO(ascopes): implement test again.
-  }
-
-  @DisplayName(".systemPathExtensions() returns the expected system path extensions")
-  @Test
-  void systemPathExtensionsReturnsTheExpectedSystemPathExtensions() {
-    // TODO(ascopes): implement test again.
-  }
-
-  ///
-  /// Helpers
-  ///
-
-  MockedStatic<HostEnvironment> mockedHostEnvironment() {
-    return Mockito.mockStatic(HostEnvironment.class, Mockito.CALLS_REAL_METHODS);
-  }
-
 }

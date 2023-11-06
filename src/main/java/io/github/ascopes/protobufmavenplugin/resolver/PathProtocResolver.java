@@ -48,12 +48,17 @@ public final class PathProtocResolver implements ProtocResolver {
 
   @Override
   public Path resolveProtoc() throws ProtocResolutionException {
-    try {
-      var predicate = HostEnvironment.isWindows()
-          ? isProtocWindows()
-          : isProtoc();
+    var predicate = HostEnvironment.isWindows()
+        ? isProtocWindows()
+        : isProtocPosix();
 
+    try {
       for (var indexableDirectory : HostEnvironment.systemPath()) {
+        if (!Files.isDirectory(indexableDirectory)) {
+          LOGGER.warn("Ignoring non-existent directory '{}' within $PATH", indexableDirectory);
+          continue;
+        }
+
         LOGGER.debug(
             "Searching directory '{}' for protoc binary named '{}'",
             indexableDirectory,
@@ -62,25 +67,26 @@ public final class PathProtocResolver implements ProtocResolver {
 
         try (var fileStream = Files.list(indexableDirectory)) {
           var result = fileStream
+              .peek(this::logFile)
               .filter(predicate)
-              .findFirst();
+              .findFirst()
+              .orElse(null);
 
-          if (result.isPresent()) {
-            var path = result.get();
-            LOGGER.info("Resolved protoc binary to '{}'", path);
+          if (result != null) {
+            LOGGER.info("Resolved protoc binary to '{}'", result);
+            return result;
           }
         }
       }
-
-      throw new ProtocResolutionException("No protoc binary was found in the $PATH");
-
     } catch (IOException ex) {
       throw new ProtocResolutionException("File system error", ex);
     }
+
+    throw new ProtocResolutionException("No protoc binary was found in the $PATH");
   }
 
-  private Predicate<Path> isProtoc() {
-    return path -> path.getFileName().toString().equals(PROTOC) && Files.isExecutable(path);
+  private void logFile(Path file) {
+    LOGGER.trace("Checking if '{}' is a potential '{}' candidate", file, PROTOC);
   }
 
   private Predicate<Path> isProtocWindows() {
@@ -98,5 +104,11 @@ public final class PathProtocResolver implements ProtocResolver {
 
       return baseFileName.equalsIgnoreCase(PROTOC) && pathExt.contains(fileExtension);
     };
+  }
+
+  private Predicate<Path> isProtocPosix() {
+    // On POSIX systems, we check if the file is named 'protoc' exactly. If it is, then we check
+    // that it has the executable bit set for the current user.
+    return path -> path.getFileName().toString().equals(PROTOC) && Files.isExecutable(path);
   }
 }

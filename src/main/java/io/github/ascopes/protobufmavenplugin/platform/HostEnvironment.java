@@ -91,7 +91,7 @@ public final class HostEnvironment {
     var rawPathExtensions = getEnvironmentVariable("PATHEXT").orElse("");
     var result = new TreeSet<>(String::compareToIgnoreCase);
     result.addAll(explodeOnPathSeparator(rawPathExtensions));
-    return Collections.unmodifiableSet(result);
+    return Collections.unmodifiableSortedSet(result);
   }
 
   public static Optional<String> getEnvironmentVariable(String name) {
