@@ -296,6 +296,9 @@
         <version>${maven-surefire-plugin.version}</version>
 
         <configuration>
+          <consoleOutputReporter>
+            <disable>true</disable>
+          </consoleOutputReporter>
           <!--
             This block is needed to show @DisplayName and @ParameterizedTest
             in reports with the provided names.
