@@ -82,7 +82,6 @@
     <license-maven-plugin.version>4.3</license-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.2.1</maven-failsafe-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-plugin-plugin.version>3.10.1</maven-plugin-plugin.version>
     <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
@@ -265,65 +264,6 @@
       </plugin>
 
       <plugin>
-        <!-- Integration testing config -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${maven-failsafe-plugin.version}</version>
-
-        <configuration>
-          <includes>
-            <include>*IntegrationTest</include>
-          </includes>
-
-          <failIfNoTests>true</failIfNoTests>
-          <runOrder>random</runOrder>
-
-          <!--
-            This block is needed to show @DisplayName and @ParameterizedTest
-            in reports with the provided names.
-          -->
-          <statelessTestsetReporter
-            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
-            <disable>false</disable>
-            <version>3.0</version>
-            <usePhrasedFileName>false</usePhrasedFileName>
-            <usePhrasedTestSuiteClassName>true</usePhrasedTestSuiteClassName>
-            <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
-            <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
-          </statelessTestsetReporter>
-          <statelessTestsetInfoReporter
-            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
-            <disable>false</disable>
-            <printStacktraceOnError>true</printStacktraceOnError>
-            <printStacktraceOnFailure>true</printStacktraceOnFailure>
-            <usePhrasedFileName>false</usePhrasedFileName>
-            <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
-            <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
-          </statelessTestsetInfoReporter>
-        </configuration>
-
-        <dependencies>
-          <dependency>
-            <groupId>me.fabriciorby</groupId>
-            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-            <version>${maven-surefire-junit5-tree-reporter.version}</version>
-          </dependency>
-        </dependencies>
-
-        <executions>
-          <execution>
-            <!-- Enable failsafe to run -->
-            <id>integration-test</id>
-            <!-- This must not run during the test phase - JaCoCo messes up the reporting! -->
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>${maven-jar-plugin.version}</version>
@@ -357,10 +297,6 @@
         <version>${maven-surefire-plugin.version}</version>
 
         <configuration>
-          <excludes>
-            <exclude>*IntegrationTest</exclude>
-          </excludes>
-
           <!--
             This block is needed to show @DisplayName and @ParameterizedTest
             in reports with the provided names.
@@ -392,7 +328,41 @@
             <version>${maven-surefire-junit5-tree-reporter.version}</version>
           </dependency>
         </dependencies>
+
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>*IntegrationTest</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+
+          <execution>
+            <!--
+                Use Surefire for ITs as we see failures with mocking/assertions in sealed packages
+                on Failsafe. Seems to be something to do with how Failsafe uses the compiled JAR
+                whereas Surefire uses the target/classes directory to test against instead.
+            -->
+            <id>integration-test</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>*IntegrationTest</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
+
       <plugin>
         <!-- Enforces our license header and allows adding it automatically to code. -->
         <groupId>com.mycila</groupId>

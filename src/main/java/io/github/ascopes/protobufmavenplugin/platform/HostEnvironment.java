@@ -72,10 +72,11 @@ public final class HostEnvironment {
    * @return the list of paths in the {@code PATH} environment variable.
    */
   public static List<Path> systemPath() {
-    var rawPath = getEnvironmentVariable("PATH").orElse("");
+    var rawPath = environmentVariable("PATH").orElse("");
     try (var scanner = new Scanner(rawPath).useDelimiter(File.pathSeparator)) {
       return scanner
           .tokens()
+          .distinct()
           .map(Path::of)
           .collect(Collectors.toUnmodifiableList());
     }
@@ -88,27 +89,27 @@ public final class HostEnvironment {
    * @return the path extensions for the system, or an empty set if unspecified or not applicable.
    */
   public static Set<String> systemPathExtensions() {
-    var rawPathExtensions = getEnvironmentVariable("PATHEXT").orElse("");
+    var rawPathExtensions = environmentVariable("PATHEXT").orElse("");
     var result = new TreeSet<>(String::compareToIgnoreCase);
-    result.addAll(explodeOnPathSeparator(rawPathExtensions));
+
+    try (var scanner = new Scanner(rawPathExtensions).useDelimiter(File.pathSeparator)) {
+      scanner
+          .tokens()
+          .filter(not(String::isBlank))
+          .forEach(result::add);
+    }
+
     return Collections.unmodifiableSortedSet(result);
   }
 
-  public static Optional<String> getEnvironmentVariable(String name) {
+  // Visible for testing purposes only.
+  static Optional<String> environmentVariable(String name) {
     return Optional.ofNullable(System.getenv(name));
   }
 
   private static String operatingSystem() {
     return Optional.ofNullable(System.getProperty("os.name"))
         .orElseThrow(() -> new IllegalStateException("No 'os.name' system property is set"));
-  }
-
-  private static List<String> explodeOnPathSeparator(String text) {
-    try (var scanner = new Scanner(text).useDelimiter(File.pathSeparator)) {
-      return scanner.tokens()
-          .filter(not(String::isBlank))
-          .collect(Collectors.toList());
-    }
   }
 
   private HostEnvironment() {
