@@ -64,6 +64,16 @@ public final class HostEnvironment {
   }
 
   /**
+   * Determine the reported CPU architecture.
+   *
+   * @return the reported CPU architecture.
+   */
+  public static String cpuArchitecture() {
+    return Optional.ofNullable(System.getProperty("os.arch"))
+        .orElseThrow(() -> new IllegalStateException("No 'os.arch' system property is set"));
+  }
+
+  /**
    * Get the paths in the system {@code PATH} environment variable, if set.
    *
    * <p>Results will be split by the OS-specific path separator, and parsed as file system paths

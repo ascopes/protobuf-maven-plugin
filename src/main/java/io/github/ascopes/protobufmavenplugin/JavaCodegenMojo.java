@@ -16,9 +16,11 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import io.github.ascopes.protobufmavenplugin.executor.DefaultProtocExecutor;
 import io.github.ascopes.protobufmavenplugin.resolver.MavenProtocResolver;
 import io.github.ascopes.protobufmavenplugin.resolver.PathProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolver.ProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolver.ProtocResolutionException;
+import java.nio.file.Path;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -27,7 +29,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.eclipse.aether.RepositorySystem;
+import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
 
 /**
  * Generate Java source code from Protobuf source file definitions.
@@ -42,10 +44,10 @@ import org.eclipse.aether.RepositorySystem;
 public final class JavaCodegenMojo extends AbstractMojo {
 
   /**
-   * The repository system.
+   * The artifact resolver.
    */
   @Component
-  private RepositorySystem repositorySystem;
+  private ArtifactResolver artifactResolver;
 
   /**
    * The Maven session that is in use.
@@ -56,45 +58,43 @@ public final class JavaCodegenMojo extends AbstractMojo {
   /**
    * The version of protoc to use.
    *
-   * <p>Only relevant for the {@code MAVEN} protoc resolver.
+   * <p>This can be a static version, "{@code LATEST}", or a valid Maven version range (such as
+   * "{@code [3.5.0,4.0.0)}"). It is recommended to use a static version to ensure your builds are
+   * reproducible.
+   *
+   * <p>Ignored if {@code usePath} is set to {@code true}.
+   *
+   * <p>If not specified explicitly, then this defaults to searching for the latest version that
+   * is available on the Maven remote repository.
    */
   @Parameter(defaultValue = "LATEST")
   private String version;
 
   /**
-   * How to resolve the protoc binary.
+   * If set to {@code true}, then instruct the plugin to look on the system {@code $PATH} for a
+   * {@code} protoc executable rather than querying the Maven remote repository.
    */
-  @Parameter(defaultValue = "MAVEN")
-  private ResolverKind resolverKind;
+  @Parameter(defaultValue = "false")
+  private boolean usePath;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    var protocResolver = buildProtocResolver();
+    var protocPath = resolveProtocPath();
+    var executor = new DefaultProtocExecutor(protocPath);
   }
 
-  private ProtocResolver buildProtocResolver() {
-    switch (resolverKind) {
-      case MAVEN:
-        return new MavenProtocResolver(version, repositorySystem, session);
-      case PATH:
-        return new PathProtocResolver();
-      default:
-        throw new IllegalStateException("unsupported resolver kind");
+  private Path resolveProtocPath() throws MojoExecutionException, MojoFailureException {
+    try {
+      var resolver = usePath
+          ? new PathProtocResolver()
+          : new MavenProtocResolver(version, artifactResolver, session);
+
+      return resolver.resolveProtoc();
+
+    } catch (ProtocResolutionException ex) {
+      throw new MojoExecutionException(ex.getMessage(), ex);
+    } catch (Exception ex) {
+      throw new MojoFailureException(ex.getMessage(), ex);
     }
-  }
-
-  /**
-   * Valid protoc resolver kinds.
-   */
-  public enum ResolverKind {
-    /**
-     * Resolve protoc from the local/remote Maven repository.
-     */
-    MAVEN,
-
-    /**
-     * Resolve protoc from the {@code PATH} environment variable.
-     */
-    PATH,
   }
 }
