@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 @DisplayName("HostEnvironment integration tests")
 class HostEnvironmentIntegrationTest {
-  // Who said tests can't rely on side effects? I hate you and wish a pox on your mailman!
 
   @DisplayName(".systemPath() returns the expected system path")
   @Test
