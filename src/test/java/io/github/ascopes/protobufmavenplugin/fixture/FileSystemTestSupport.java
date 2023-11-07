@@ -26,6 +26,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.HashSet;
+import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
@@ -49,7 +50,7 @@ public abstract class FileSystemTestSupport {
     }
   };
 
-  @TempDir
+  @TempDir(cleanup = CleanupMode.ALWAYS)
   Path baseDir;
 
   public Path givenFileExists(String... bits) {

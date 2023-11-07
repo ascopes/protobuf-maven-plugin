@@ -20,11 +20,11 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * Helpers to select things.
+ * Random test data.
  *
  * @author Ashley Scopes
  */
-public class RandomData {
+public final class RandomData {
   private static final Random RANDOM = new Random();
 
   public static <T> T oneOf(Iterable<T> iterable) {

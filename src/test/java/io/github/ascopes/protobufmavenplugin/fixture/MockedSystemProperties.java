@@ -42,6 +42,11 @@ import org.junit.jupiter.api.parallel.Isolated;
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface MockedSystemProperties {
 
+  /**
+   * JUnit extension implementation for mocking system properties.
+   *
+   * @author Ashley Scopes
+   */
   final class MockedSystemPropertiesExtension implements BeforeEachCallback, AfterEachCallback {
 
     private Properties initialProperties;
