@@ -9,8 +9,8 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <name>Protobuf Maven Plugin</name>
-  <description>Maven Plugin that generates Java sources from Protocol Buffer source files.
-  </description>
+  <description>Maven Plugin that generates source code from protobuf source files.</description>
+  <packaging>maven-plugin</packaging>
 
   <inceptionYear>2023</inceptionYear>
 
@@ -151,7 +151,7 @@
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-artifact-transfer</artifactId>
       <version>${maven-artifact-transfer.version}</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -311,6 +311,19 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>${maven-plugin-plugin.version}</version>
+
+        <executions>
+          <execution>
+            <id>generate-descriptors</id>
+            <goals>
+              <goal>descriptor</goal>
+              <goal>helpmojo</goal>
+            </goals>
+            <configuration>
+              <helpPackageName>io.github.ascopes.protobufmavenplugin</helpPackageName>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
