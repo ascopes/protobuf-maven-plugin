@@ -78,10 +78,12 @@
     <slf4j.version>2.0.9</slf4j.version>
 
     <!-- Plugins -->
+    <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
     <license-maven-plugin.version>4.3</license-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-failsafe-plugin.version>3.2.1</maven-failsafe-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-plugin-plugin.version>3.10.1</maven-plugin-plugin.version>
     <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
@@ -263,6 +265,28 @@
       </plugin>
 
       <plugin>
+        <!-- Integration testing config -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe-plugin.version}</version>
+
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>*IntegrationTest</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>${maven-jar-plugin.version}</version>
@@ -344,24 +368,6 @@
               </excludes>
             </configuration>
           </execution>
-
-          <execution>
-            <!--
-                Use Surefire for ITs as we see failures with mocking/assertions in sealed packages
-                on Failsafe. Seems to be something to do with how Failsafe uses the compiled JAR
-                whereas Surefire uses the target/classes directory to test against instead.
-            -->
-            <id>integration-test</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>*IntegrationTest</include>
-              </includes>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
@@ -426,6 +432,42 @@
             <version>${checkstyle.version}</version>
           </dependency>
         </dependencies>
+      </plugin>
+
+      <plugin>
+        <!-- Configure the integration test source directories. -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build-helper-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>add-integration-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/src/integration-test/java</source>
+              </sources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>add-integration-test-resources</id>
+            <phase>generate-test-resources</phase>
+            <goals>
+              <goal>add-test-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/integration-test/resources</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
