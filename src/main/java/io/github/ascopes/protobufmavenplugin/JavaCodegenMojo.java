@@ -26,6 +26,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(
     name = "generate-java",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresOnline = true,
     threadSafe = true
 )
 public final class JavaCodegenMojo extends AbstractCodegenMojo {

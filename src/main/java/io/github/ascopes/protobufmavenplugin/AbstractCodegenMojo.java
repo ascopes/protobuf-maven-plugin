@@ -32,6 +32,8 @@ import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
 /**
  * Base Mojo to generate protobuf sources.
  *
+ * <p>Can be extended for each language that this plugin supports.
+ *
  * @author Ashley Scopes
  */
 public abstract class AbstractCodegenMojo extends AbstractMojo {
@@ -57,20 +59,15 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * "{@code [3.5.0,4.0.0)}"). It is recommended to use a static version to ensure your builds are
    * reproducible.
    *
-   * <p>Ignored if {@code usePath} is set to {@code true}.
+   * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
+   * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
+   * development version of {@code protoc}.
    *
    * <p>If not specified explicitly, then this defaults to searching for the latest version that
    * is available on the Maven remote repository.
    */
-  @Parameter(defaultValue = "LATEST")
+  @Parameter(defaultValue = "LATEST", property = "protoc.version")
   private String version;
-
-  /**
-   * If set to {@code true}, then instruct the plugin to look on the system {@code $PATH} for a
-   * {@code protoc} executable rather than querying the Maven remote repository.
-   */
-  @Parameter(defaultValue = "false")
-  private boolean usePath;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -80,7 +77,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
 
   private Path resolveProtocPath() throws MojoExecutionException, MojoFailureException {
     try {
-      var resolver = usePath
+      var resolver = version.trim().equalsIgnoreCase("PATH")
           ? new PathProtocResolver()
           : new MavenProtocResolver(version, artifactResolver, session);
 
