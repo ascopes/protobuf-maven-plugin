@@ -101,7 +101,7 @@ public final class MavenProtocCoordinateFactory {
       case "aarch64":
         return "aarch_64";
 
-      case "x86_64":
+      case "amd64":
         return "x86_64";
 
       default:

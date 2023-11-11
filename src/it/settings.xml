@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<settings>
+  <!-- Tells Maven to try and resolve dependencies from the local repository before Maven central.
+      This reduces build times locally -->
+  <profiles>
+    <profile>
+      <id>it-repo</id>
+      <repositories>
+        <repository>
+          <id>local.central</id>
+          <url>@localRepositoryUrl@</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>local.central</id>
+          <url>@localRepositoryUrl@</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>it-repo</activeProfile>
+  </activeProfiles>
+</settings>

@@ -78,12 +78,11 @@
     <slf4j.version>2.0.9</slf4j.version>
 
     <!-- Plugins -->
-    <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
     <license-maven-plugin.version>4.3</license-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.2.1</maven-failsafe-plugin.version>
+    <maven-invoker-plugin.version>3.6.0</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-plugin-plugin.version>3.10.1</maven-plugin-plugin.version>
     <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
@@ -222,30 +221,33 @@
               <outputDirectory>${project.build.directory}/site/jacoco/unit</outputDirectory>
             </configuration>
           </execution>
-
-          <execution>
-            <id>add-coverage-agent-to-failsafe-args</id>
-            <phase>pre-integration-test</phase>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <destFile>${project.build.directory}/jacoco-int.bin</destFile>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>report-integration-test-coverage</id>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>report-integration</goal>
-            </goals>
-            <configuration>
-              <dataFile>${project.build.directory}/jacoco-int.bin</dataFile>
-              <outputDirectory>${project.build.directory}/site/jacoco/int</outputDirectory>
-            </configuration>
-          </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Checking style of code matches the Google code style -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${maven-checkstyle-plugin.version}</version>
+
+        <configuration>
+          <configLocation>.mvn/checkstyle/checkstyle.xml</configLocation>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
+          <includeResources>true</includeResources>
+          <sourceDirectories>${project.basedir}/src</sourceDirectories>
+          <suppressionsLocation>.mvn/checkstyle/suppressions.xml</suppressionsLocation>
+          <violationSeverity>info</violationSeverity>
+        </configuration>
+
+        <dependencies>
+          <dependency>
+            <!-- Force the usage of checkstyle v10 rather than v8.28 -->
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
       <plugin>
@@ -265,23 +267,30 @@
       </plugin>
 
       <plugin>
-        <!-- Integration testing config -->
+        <!-- Runs integration tests -->
+        <!-- See documentation at https://maven.apache.org/plugins/maven-invoker-plugin/integration-test-mojo.html -->
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${maven-failsafe-plugin.version}</version>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>${maven-invoker-plugin.version}</version>
+
+        <configuration>
+          <cloneClean>true</cloneClean>
+          <cloneProjectsTo>${project.build.directory}/it/tests</cloneProjectsTo>
+          <localRepositoryPath>${project.build.directory}/it/m2</localRepositoryPath>
+          <postBuildHookScript>verify</postBuildHookScript>
+          <settingsFile>src/it/settings.xml</settingsFile>
+          <showVersion>true</showVersion>
+          <writeJunitReport>true</writeJunitReport>
+        </configuration>
 
         <executions>
           <execution>
-            <id>default-test</id>
+            <id>integration-test</id>
             <phase>integration-test</phase>
             <goals>
-              <goal>integration-test</goal>
+              <goal>install</goal>
+              <goal>run</goal>
             </goals>
-            <configuration>
-              <includes>
-                <include>*IntegrationTest</include>
-              </includes>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -367,21 +376,6 @@
             <version>${maven-surefire-junit5-tree-reporter.version}</version>
           </dependency>
         </dependencies>
-
-        <executions>
-          <execution>
-            <id>default-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <excludes>
-                <exclude>*IntegrationTest</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -417,68 +411,6 @@
             <goals>
               <goal>check</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <!-- Checking style of code matches the Google code style -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${maven-checkstyle-plugin.version}</version>
-
-        <configuration>
-          <configLocation>.mvn/checkstyle/checkstyle.xml</configLocation>
-          <consoleOutput>true</consoleOutput>
-          <failsOnError>true</failsOnError>
-          <includeResources>true</includeResources>
-          <sourceDirectories>${project.basedir}/src</sourceDirectories>
-          <suppressionsLocation>.mvn/checkstyle/suppressions.xml</suppressionsLocation>
-          <violationSeverity>info</violationSeverity>
-        </configuration>
-
-        <dependencies>
-          <dependency>
-            <!-- Force the usage of checkstyle v10 rather than v8.28 -->
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${checkstyle.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <plugin>
-        <!-- Configure the integration test source directories. -->
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${build-helper-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>add-integration-test-sources</id>
-            <phase>generate-test-sources</phase>
-            <goals>
-              <goal>add-test-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${project.basedir}/src/integration-test/java</source>
-              </sources>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>add-integration-test-resources</id>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>add-test-resource</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/src/integration-test/resources</directory>
-                </resource>
-              </resources>
-            </configuration>
           </execution>
         </executions>
       </plugin>

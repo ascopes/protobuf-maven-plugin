@@ -42,7 +42,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * The artifact resolver.
    */
   @Component
-  private ArtifactResolver artifactResolver;
+  protected ArtifactResolver artifactResolver;
 
   /**
    * The Maven session that is in use.
@@ -50,7 +50,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * <p>This is passed in by Maven automatically, so can be ignored.
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
-  private MavenSession session;
+  protected MavenSession session;
 
   /**
    * The version of protoc to use.
@@ -67,7 +67,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * is available on the Maven remote repository.
    */
   @Parameter(defaultValue = "LATEST", property = "protoc.version")
-  private String version;
+  protected String version;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {

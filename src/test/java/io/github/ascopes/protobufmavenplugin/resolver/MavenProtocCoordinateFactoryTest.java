@@ -77,7 +77,7 @@ class MavenProtocCoordinateFactoryTest {
 
   @DisplayName("Supported Linux architectures resolve correctly")
   @CsvSource({
-      "  x86_64,   linux-x86_64",
+      "   amd64,   linux-x86_64",
       " aarch64, linux-aarch_64",
       "    s390,  linux-s390_64",
       "zarch_64,  linux-s390_64",
