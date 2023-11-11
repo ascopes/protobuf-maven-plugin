@@ -150,7 +150,8 @@
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-artifact-transfer</artifactId>
       <version>${maven-artifact-transfer.version}</version>
-      <scope>provided</scope>
+      <!-- Raises a build warning under Maven 3, but we can ignore it for now -->
+      <scope>compile</scope>
     </dependency>
 
     <dependency>

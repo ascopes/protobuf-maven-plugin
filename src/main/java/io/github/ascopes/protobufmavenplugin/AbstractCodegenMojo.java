@@ -55,7 +55,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
   /**
    * The version of protoc to use.
    *
-   * <p>This can be a static version, "{@code LATEST}", or a valid Maven version range (such as
+   * <p>This can be a static version, or a valid Maven version range (such as
    * "{@code [3.5.0,4.0.0)}"). It is recommended to use a static version to ensure your builds are
    * reproducible.
    *
@@ -63,10 +63,8 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
-   * <p>If not specified explicitly, then this defaults to searching for the latest version that
-   * is available on the Maven remote repository.
    */
-  @Parameter(defaultValue = "LATEST", property = "protoc.version")
+  @Parameter(required = true, property = "protoc.version")
   protected String version;
 
   @Override
