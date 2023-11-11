@@ -276,10 +276,13 @@
         <configuration>
           <cloneClean>true</cloneClean>
           <cloneProjectsTo>${project.build.directory}/it/tests</cloneProjectsTo>
+          <failIfNoProjects>true</failIfNoProjects>
           <localRepositoryPath>${project.build.directory}/it/m2</localRepositoryPath>
           <postBuildHookScript>verify</postBuildHookScript>
           <settingsFile>src/it/settings.xml</settingsFile>
+          <showErrors>true</showErrors>
           <showVersion>true</showVersion>
+          <streamLogsOnFailures>true</streamLogsOnFailures>
           <writeJunitReport>true</writeJunitReport>
         </configuration>
 
