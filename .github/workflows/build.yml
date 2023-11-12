@@ -18,20 +18,6 @@ jobs:
         java-version: [11, 21]
 
     steps:
-    - name: Install system dependencies
-      shell: bash
-      run: |-
-        case "${{ matrix.os-name }}" in
-          windows-*)
-            # Ensure shasum is available.
-            choco install psutils --ignore-checksums
-            ;;
-          macos-*)
-            # Upgrade bash, ensure shasum is available.
-            brew install bash coreutils
-            ;;
-        esac
-    
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -48,7 +34,7 @@ jobs:
 
     - name: Publish to codecov
       continue-on-error: true
-      if: always()
+      if: matrix.os-name == "ubuntu-latest" && always()
       shell: bash
       run: |-
         curl --fail https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring \
