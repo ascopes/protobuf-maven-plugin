@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
   workflow_call: {}
   workflow_dispatch: {}
 
@@ -36,7 +36,7 @@ jobs:
 
     - name: Publish to codecov
       continue-on-error: true
-      if: matrix.os-name == "ubuntu-latest" && always()
+      if: matrix.os-name == 'ubuntu-latest' && always()
       shell: bash
       run: |-
         curl --fail https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring \
