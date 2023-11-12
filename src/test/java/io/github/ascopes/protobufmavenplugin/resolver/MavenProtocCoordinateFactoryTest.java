@@ -40,7 +40,9 @@ class MavenProtocCoordinateFactoryTest {
 
   @DisplayName("Supported Windows architectures resolve correctly")
   @CsvSource({
+      " amd64, windows-x86_64",
       "x86_64, windows-x86_64",
+      "x86, windows-x86_32",
       "x86_32, windows-x86_32",
   })
   @ParameterizedTest(name = "for architecture {0}, expect classifier matching \"{1}\"")
@@ -119,6 +121,7 @@ class MavenProtocCoordinateFactoryTest {
   @DisplayName("Supported Mac OS architectures resolve correctly")
   @CsvSource({
       "aarch64, osx-aarch_64",
+      "  amd64,   osx-x86_64",
       " x86_64,   osx-x86_64",
   })
   @ParameterizedTest(name = "for architecture {0}, expect classifier matching \"{1}\"")

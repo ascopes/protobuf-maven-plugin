@@ -73,11 +73,12 @@ public final class MavenProtocCoordinateFactory {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
+      case "amd64":
       case "x86_64":
         return "x86_64";
 
-      case "x86_32":
       case "x86":
+      case "x86_32":
         return "x86_32";
 
       default:
@@ -116,6 +117,7 @@ public final class MavenProtocCoordinateFactory {
       case "aarch64":
         return "aarch_64";
 
+      case "amd64":
       case "x86_64":
         return "x86_64";
 
