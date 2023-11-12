@@ -24,7 +24,7 @@ jobs:
         case "${{ matrix.os-name }}" in
           windows-*)
             # Ensure shasum is available.
-            choco install psutils
+            choco install psutils --ignore-checksums
             ;;
           macos-*)
             # Upgrade bash, ensure shasum is available.
