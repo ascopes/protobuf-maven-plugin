@@ -213,7 +213,7 @@
 
         <executions>
           <execution>
-            <id>add-coverage-agent-to-surefire-args</id>
+            <id>prepare-coverage-agent</id>
             <phase>initialize</phase>
             <goals>
               <goal>prepare-agent</goal>
@@ -225,7 +225,7 @@
           </execution>
 
           <execution>
-            <id>report-unit-test-coverage</id>
+            <id>report-test-coverage</id>
             <phase>test</phase>
             <goals>
               <goal>report</goal>
@@ -340,9 +340,9 @@
 
         <executions>
           <execution>
-            <id>generate-descriptors</id>
+            <id>help-mojo</id>
+            <phase>generate-sources</phase>
             <goals>
-              <goal>descriptor</goal>
               <goal>helpmojo</goal>
             </goals>
             <configuration>
