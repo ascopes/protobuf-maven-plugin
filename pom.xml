@@ -56,8 +56,10 @@
 
   <organization>
     <name>Ashley Scopes (GitHub)</name>
-    <url>${project.url}</url>
+    <url>${project-organisation-url}</url>
   </organization>
+
+  <url>${project-site-url}</url>
 
   <scm>
     <url>scm:git:${project-scm-url}</url>
@@ -85,6 +87,7 @@
     <maven-invoker-plugin.version>3.6.0</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-plugin-plugin.version>3.10.1</maven-plugin-plugin.version>
+    <maven-project-info-reports-plugin.version>3.4.5</maven-project-info-reports-plugin.version>
     <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
 
     <!-- Plugin dependencies -->
@@ -98,6 +101,7 @@
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project-organization-url>https://github.com/ascopes</project-organization-url>
+    <project-site-url>https://ascopes.github.io/protobuf-maven-plugin</project-site-url>
     <project-scm-url>${project.organization.url}/protobuf-maven-plugin</project-scm-url>
   </properties>
 
@@ -350,6 +354,12 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>${maven-project-info-reports-plugin.version}</version>
       </plugin>
 
       <plugin>

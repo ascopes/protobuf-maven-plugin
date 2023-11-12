@@ -39,3 +39,37 @@ jobs:
         shasum -a 256 -c codecov.SHA256SUM
         chmod -v +x codecov
         ./codecov -v
+
+  site:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    needs:
+      - build
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Generate site
+      run: ./mvnw -B site
+
+    - name: Upload site
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: target/site
+
+    - name: Deploy site
+      id: site
+      uses: actions/deploy-pages@v2
