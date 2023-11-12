@@ -26,6 +26,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
 import java.util.HashSet;
+import org.opentest4j.TestAbortedException;
 import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -93,6 +94,8 @@ public abstract class FileSystemTestSupport {
       perms.add(PosixFilePermission.GROUP_EXECUTE);
       perms.add(PosixFilePermission.OTHERS_EXECUTE);
       Files.setPosixFilePermissions(path, perms);
+    } catch (UnsupportedOperationException ex) {
+      throw new TestAbortedException("Your OS does not support setting file permissions", ex);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
@@ -105,6 +108,8 @@ public abstract class FileSystemTestSupport {
       perms.remove(PosixFilePermission.GROUP_EXECUTE);
       perms.remove(PosixFilePermission.OTHERS_EXECUTE);
       Files.setPosixFilePermissions(path, perms);
+    } catch (UnsupportedOperationException ex) {
+      throw new TestAbortedException("Your OS does not support setting file permissions", ex);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
@@ -113,6 +118,8 @@ public abstract class FileSystemTestSupport {
   public void givenFileOrDirectoryIsInaccessible(Path path) {
     try {
       Files.setPosixFilePermissions(path, EnumSet.noneOf(PosixFilePermission.class));
+    } catch (UnsupportedOperationException ex) {
+      throw new TestAbortedException("Your OS does not support setting file permissions", ex);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
