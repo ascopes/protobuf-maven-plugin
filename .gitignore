@@ -4,3 +4,6 @@ target/
 # IntelliJ IDEA
 .idea/
 *.iml
+
+# JVM agent descriptors
+.attach*
