@@ -56,7 +56,7 @@
 
   <organization>
     <name>Ashley Scopes (GitHub)</name>
-    <url>${project-organisation-url}</url>
+    <url>${project-organization-url}</url>
   </organization>
 
   <url>${project-site-url}</url>
