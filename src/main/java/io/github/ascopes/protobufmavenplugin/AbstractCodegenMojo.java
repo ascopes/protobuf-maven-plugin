@@ -21,6 +21,7 @@ import io.github.ascopes.protobufmavenplugin.resolver.MavenProtocResolver;
 import io.github.ascopes.protobufmavenplugin.resolver.PathProtocResolver;
 import io.github.ascopes.protobufmavenplugin.resolver.ProtocResolutionException;
 import java.nio.file.Path;
+import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -42,7 +43,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * The artifact resolver.
    */
   @Component
-  protected ArtifactResolver artifactResolver;
+  private ArtifactResolver artifactResolver;
 
   /**
    * The Maven session that is in use.
@@ -50,7 +51,7 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * <p>This is passed in by Maven automatically, so can be ignored.
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
-  protected MavenSession session;
+  private MavenSession session;
 
   /**
    * The version of protoc to use.
@@ -62,10 +63,37 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
-   *
    */
   @Parameter(required = true, property = "protoc.version")
-  protected String version;
+  private String version;
+
+  /**
+   * The root directories to look for protobuf sources in.
+   */
+  @Parameter(defaultValue = "${project.basedir}/src/main/protobuf")
+  private Set<String> sourceDirectories;
+
+  /**
+   * The directory to output generated sources to.
+   */
+  @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc")
+  private String outputDirectory;
+
+  /**
+   * Whether to treat {@code protoc} compiler warnings as errors.
+   */
+  @Parameter(defaultValue = "false")
+  private boolean fatalWarnings;
+
+  /**
+   * Whether to attempt to force builds to be reproducible.
+   *
+   * <p>When enabled, {@code protoc} may attempt to keep things like map ordering
+   * consistent between builds as long as the same version of {@code protoc} is
+   * used each time.
+   */
+  @Parameter(defaultValue = "false")
+  private boolean reproducibleBuilds;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
