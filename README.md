@@ -1,3 +1,7 @@
+![Java 11+](https://img.shields.io/badge/Java-11+-blue?logo=openjdk&logoColor=white)
+[![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/ascopes/protobuf-maven-plugin/graph/badge.svg?token=bW37uc04cL)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
+
 # protobuf-maven-plugin
 
 **A work-in-progress** to build a modern Maven plugin for generating protobuf
