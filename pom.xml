@@ -47,6 +47,11 @@
       <id>ossrh</id>
       <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <site>
+      <id>github-pages</id>
+      <name>github-pages</name>
+      <url>${project-site-url}</url>
+    </site>
   </distributionManagement>
 
   <issueManagement>
