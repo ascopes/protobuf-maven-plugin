@@ -110,7 +110,7 @@ public final class MavenProtocCoordinateFactory {
     }
   }
 
-  private String determineArchitectureForMacOs() {
+  private String determineArchitectureForMacOs() throws ProtocResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -122,13 +122,7 @@ public final class MavenProtocCoordinateFactory {
         return "x86_64";
 
       default:
-        LOGGER.warn(
-            "No supported protoc version was found for Mac OS systems using the '{}' architecture,"
-                + " attempting to fall back to the Universal Binary distribution. Your mileage may"
-                + " vary with this approach.",
-            arch
-        );
-        return "universal_binary";
+        throw noResolvableProtocFor("Mac OS", arch);
     }
   }
 

@@ -141,18 +141,18 @@ class MavenProtocCoordinateFactoryTest {
     }
   }
 
-  @DisplayName("Unsupported Mac OS architectures fall back to the universal binary")
+  @DisplayName("Unsupported Mac OS architectures result in an exception")
   @Test
-  void unsupportedMacOsArchitecturesFallBackToTheUniversalBinary() throws ProtocResolutionException {
+  void unsupportedMacOsArchitecturesResultInException() throws ProtocResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenMacOsWithArch(hostEnvironment, "something-crazy-unknown");
 
-      // When
-      var actualCoordinate = factory.create("7.8.9");
-
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, "7.8.9", "osx-universal_binary");
+      assertThatThrownBy(() -> factory.create("7.8.9"))
+          .isInstanceOf(ProtocResolutionException.class)
+          .hasMessage("No resolvable protoc version for Mac OS 'something-crazy-unknown' systems found")
+          .hasNoCause();
     }
   }
 
