@@ -32,7 +32,7 @@ jobs:
 
     - name: Build with Maven
       shell: bash
-      run: ./mvnw -B verify javadoc:jar
+      run: ./mvnw -B verify
 
     - name: Publish to codecov
       continue-on-error: true
@@ -73,7 +73,7 @@ jobs:
         cache: maven
 
     - name: Generate site
-      run: ./mvnw -B site
+      run: ./mvnw -B site -Djavadoc.skip=true
 
     - name: Upload site
       uses: actions/upload-pages-artifact@v2
