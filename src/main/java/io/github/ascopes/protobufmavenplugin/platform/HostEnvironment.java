@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collector;
@@ -104,7 +105,7 @@ public final class HostEnvironment {
    *
    * @return the path extensions for the system, or an empty set if unspecified or not applicable.
    */
-  public static SortedSet<String> systemPathExtensions() {
+  public static Set<String> systemPathExtensions() {
     var rawPathExtensions = environmentVariable("PATHEXT").orElse("");
     try (var scanner = new Scanner(rawPathExtensions).useDelimiter(File.pathSeparator)) {
       return scanner
