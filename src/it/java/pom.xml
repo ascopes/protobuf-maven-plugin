@@ -9,8 +9,18 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
+    <protobuf.version>3.25.0</protobuf.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -20,12 +30,11 @@
         <version>${plugin-version}</version>
 
         <configuration>
-          <version>3.25.0</version>
+          <version>${protobuf.version}</version>
         </configuration>
 
         <executions>
           <execution>
-            <id>protoc</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>generate-java</goal>

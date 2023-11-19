@@ -16,11 +16,17 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
-import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
+import static java.util.Optional.ofNullable;
+
+import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
+import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutor;
+import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutorBuilder;
 import io.github.ascopes.protobufmavenplugin.resolve.MavenProtocResolver;
 import io.github.ascopes.protobufmavenplugin.resolve.PathProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
 import io.github.ascopes.protobufmavenplugin.resolve.ProtocResolutionException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +37,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
 
 /**
@@ -129,6 +136,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     var protocPath = resolveProtocPath();
     var sources = resolveProtoSources();
+
+    // Protoc will not create the output directory if it does not exist already.
+    createOutputDirectory();
+    registerSource(mavenSession.getCurrentProject(), outputDirectory);
+
+    var versionExecutor = new ProtocExecutorBuilder(protocPath).buildVersion();
+    run(versionExecutor);
+
+    var compilerExecutor = new ProtocExecutorBuilder(protocPath)
+        .deterministicOutput(reproducibleBuilds)
+        .fatalWarnings(fatalWarnings)
+        .includeDirectories(sourceDirectories)
+        .outputDirectory(getSourceOutputType(), outputDirectory)
+        .buildCompilation(sources);
+
+    run(compilerExecutor);
   }
 
   /**
@@ -137,6 +160,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @return the source output type.
    */
   protected abstract String getSourceOutputType();
+
+  /**
+   * Register the given output path with the project for compilation.
+   *
+   * @param project the Maven project.
+   * @param path    the path to register.
+   */
+  protected abstract void registerSource(MavenProject project, Path path);
 
   private Path resolveProtocPath() throws MojoExecutionException, MojoFailureException {
     try {
@@ -153,7 +184,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
   }
 
-  private List<Path> resolveProtoSources() throws MojoExecutionException, MojoFailureException {
+  private List<Path> resolveProtoSources() throws MojoFailureException {
     try {
       return new ProtoSourceResolver().collectSources(sourceDirectories);
     } catch (IOException ex) {
@@ -161,15 +192,40 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
   }
 
+  private void createOutputDirectory() throws MojoFailureException {
+    try {
+      Files.createDirectories(outputDirectory);
+    } catch (IOException ex) {
+      throw failure("Failed to create output directory '" + outputDirectory + "'", ex);
+    }
+  }
+
+  private void run(ProtocExecutor executor) throws MojoExecutionException, MojoFailureException {
+    try {
+      var exitCode = executor.invoke();
+      if (exitCode != 0) {
+        throw error("protoc returned a non-zero exit code (" + exitCode + ")", null);
+      }
+    } catch (ProtocExecutionException ex) {
+      throw failure("Failed to execute protoc", ex);
+    }
+  }
+
   private MojoExecutionException error(String shortMessage, Exception ex) {
-    var newEx = new MojoExecutionException(this, shortMessage, ex.getMessage());
+    var newEx = new MojoExecutionException(this, shortMessage, getLongMessage(shortMessage, ex));
     newEx.initCause(ex);
     return newEx;
   }
 
   private MojoFailureException failure(String shortMessage, Exception ex) {
-    var newEx = new MojoFailureException(this, shortMessage, ex.getMessage());
+    var newEx = new MojoFailureException(this, shortMessage, getLongMessage(shortMessage, ex));
     newEx.initCause(ex);
     return newEx;
+  }
+
+  private String getLongMessage(String shortMessage, Exception ex) {
+    return ofNullable(ex)
+        .map(Exception::getMessage)
+        .orElse(shortMessage);
   }
 }

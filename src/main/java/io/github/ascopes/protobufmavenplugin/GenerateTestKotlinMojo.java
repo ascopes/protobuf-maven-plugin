@@ -21,17 +21,18 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Mojo to generate Kotlin code from protobuf sources.
+ * Mojo to generate Kotlin code from protobuf test sources.
  *
  * @author Ashley Scopes
  */
 @Mojo(
-    name = "generate-kotlin",
-    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    name = "generate-test-kotlin",
+    defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     requiresOnline = true,
     threadSafe = true
 )
-public final class GenerateKotlinMojo extends AbstractGenerateMojo {
+public final class GenerateTestKotlinMojo extends AbstractGenerateMojo {
+
   @Override
   protected String getSourceOutputType() {
     return "kotlin";
@@ -39,6 +40,6 @@ public final class GenerateKotlinMojo extends AbstractGenerateMojo {
 
   @Override
   protected void registerSource(MavenProject project, Path path) {
-    project.addCompileSourceRoot(path.toString());
+    project.addTestCompileSourceRoot(path.toString());
   }
 }

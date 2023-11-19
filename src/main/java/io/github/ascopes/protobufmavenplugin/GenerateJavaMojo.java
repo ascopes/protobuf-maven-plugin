@@ -15,8 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin;
 
+import java.nio.file.Path;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Mojo to generate Java code from protobuf sources.
@@ -34,5 +36,10 @@ public final class GenerateJavaMojo extends AbstractGenerateMojo {
   @Override
   protected String getSourceOutputType() {
     return "java";
+  }
+
+  @Override
+  protected void registerSource(MavenProject project, Path path) {
+    project.addCompileSourceRoot(path.toString());
   }
 }

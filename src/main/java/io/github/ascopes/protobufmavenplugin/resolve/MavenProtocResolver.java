@@ -16,7 +16,12 @@
 
 package io.github.ascopes.protobufmavenplugin.resolve;
 
+import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
@@ -53,6 +58,8 @@ public final class MavenProtocResolver implements ProtocResolver {
 
   @Override
   public Path resolveProtoc() throws ProtocResolutionException {
+    Path path;
+
     try {
       var coordinate = coordinateFactory.create(version);
       var request = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
@@ -60,17 +67,31 @@ public final class MavenProtocResolver implements ProtocResolver {
       LOGGER.info("Resolving protoc '{}' from local/remote repositories", identifier(coordinate));
 
       var result = artifactResolver.resolveArtifact(request, coordinate);
-      var path = result.getArtifact().getFile().toPath();
+      path = result.getArtifact().getFile().toPath();
 
-      LOGGER.info("Resolved protoc to local path '{}'", path);
-
-      return path;
     } catch (ArtifactResolverException ex) {
       throw new ProtocResolutionException(
           "Failed to resolve protoc artifact from remote repository",
           ex
       );
     }
+
+    LOGGER.info("Resolved protoc to local path '{}'", path);
+
+    if (!HostEnvironment.isWindows()) {
+      LOGGER.debug("Ensuring '{}' is marked as executable", path);
+
+      try {
+        // Copy so we can modify the set.
+        var permissions = new HashSet<>(Files.getPosixFilePermissions(path));
+        permissions.add(PosixFilePermission.OWNER_EXECUTE);
+        Files.setPosixFilePermissions(path, permissions);
+      } catch (IOException ex) {
+        throw new ProtocResolutionException("Setting executable bit for '" + path + "' failed", ex);
+      }
+    }
+
+    return path;
   }
 
   private String identifier(ArtifactCoordinate coordinate) {
