@@ -29,7 +29,7 @@ Basic Configuration
 -------------------
 
 A simple project that makes use of this plugin to generate Java sources would place their
-`protobuf` sources in `src/main/protobuf`, and use the following structure:
+`*.proto` protobuf sources in `src/main/protobuf`, and use the following structure:
 
 ```xml
 <project>

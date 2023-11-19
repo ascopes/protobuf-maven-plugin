@@ -3,13 +3,49 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="https://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd">
 
+  <bannerLeft>
+    <image src="images/banner.png" style="border-radius: 0.5em;"/>
+  </bannerLeft>
+
   <body>
+    <head>
+      <![CDATA[
+      <!-- Highlight.js -->
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/stackoverflow-light.min.css">
+      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+      <script>
+        "use strict";
+
+        function initSyntaxHighlighting() {
+          hljs.configure({languages: ["java"]});
+          hljs.highlightAll();
+        }
+
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+          setTimeout(initSyntaxHighlighting, 1);
+        } else {
+          document.addEventListener("DOMContentLoaded", initSyntaxHighlighting);
+        }
+      </script>
+      ]]>
+    </head>
+
     <menu name="Getting Started">
       <item name="Usage" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
     </menu>
     <menu ref="reports"/>
   </body>
+
+  <custom>
+    <fluidoSkin>
+      <gitHub>
+        <projectId>ascopes/protobuf-maven-plugin</projectId>
+        <ribbonOrientation>right</ribbonOrientation>
+        <ribbonColor>red</ribbonColor>
+      </gitHub>
+    </fluidoSkin>
+  </custom>
 
   <skin>
     <groupId>org.apache.maven.skins</groupId>
