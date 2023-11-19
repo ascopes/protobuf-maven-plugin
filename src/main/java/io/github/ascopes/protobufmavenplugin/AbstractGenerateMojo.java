@@ -141,9 +141,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     createOutputDirectory();
     registerSource(mavenSession.getCurrentProject(), outputDirectory);
 
-    var versionExecutor = new ProtocExecutorBuilder(protocPath).buildVersion();
-    run(versionExecutor);
-
     var compilerExecutor = new ProtocExecutorBuilder(protocPath)
         .deterministicOutput(reproducibleBuilds)
         .fatalWarnings(fatalWarnings)

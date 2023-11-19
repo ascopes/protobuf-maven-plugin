@@ -16,6 +16,10 @@
 package io.github.ascopes.protobufmavenplugin.execute;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.time.Duration;
 import java.util.List;
 import org.slf4j.Logger;
@@ -47,13 +51,13 @@ public final class ProtocExecutor {
       var start = System.nanoTime();
       var proc = new ProcessBuilder()
           .command(arguments)
-          .inheritIO()
+          .redirectErrorStream(true)
           .start();
 
       LOGGER.info(
           "Executing protoc (pid {}, arguments: {})",
           proc.pid(),
-          proc.info().commandLine().orElse("???")
+          String.join(" ", arguments)
       );
 
       try {
@@ -61,11 +65,10 @@ public final class ProtocExecutor {
         var elapsedTime = (System.nanoTime() - start) / 1_000_000;
 
         LOGGER.info(
-            "Protoc (pid {}) returned exit code {} after ~{}ms (CPU time: ~{}ms)",
+            "Protoc (pid {}) returned exit code {} after ~{}ms",
             proc.pid(),
             exitCode,
-            elapsedTime,
-            proc.info().totalCpuDuration().map(Duration::toMillis).orElse(0L)
+            elapsedTime
         );
         return exitCode;
 

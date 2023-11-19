@@ -297,11 +297,12 @@
         <version>${maven-invoker-plugin.version}</version>
 
         <configuration>
+          <addTestClassPath>true</addTestClassPath>
           <cloneClean>true</cloneClean>
           <cloneProjectsTo>${project.build.directory}/it/tests</cloneProjectsTo>
           <failIfNoProjects>true</failIfNoProjects>
           <localRepositoryPath>${project.build.directory}/it/m2</localRepositoryPath>
-          <postBuildHookScript>verify</postBuildHookScript>
+          <postBuildHookScript>test</postBuildHookScript>
           <settingsFile>src/it/settings.xml</settingsFile>
           <showErrors>true</showErrors>
           <showVersion>true</showVersion>
@@ -422,6 +423,7 @@
             <licenseSet>
               <header>.mvn/license/license-header.txt</header>
               <includes>
+                <include>src/**/*.groovy</include>
                 <include>src/**/*.java</include>
                 <include>src/**/*.proto</include>
               </includes>

@@ -64,18 +64,6 @@ public final class ProtocExecutorBuilder {
   }
 
   /**
-   * Generate an executor that outputs the {@code protoc} version info.
-   *
-   * <p>This object should not be used after this invocation.
-   *
-   * @return the executor.
-   */
-  public ProtocExecutor buildVersion() {
-    arguments.add("--version");
-    return new ProtocExecutor(arguments);
-  }
-
-  /**
    * Add the proto files to the flags and return the process executor.
    *
    * <p>This object should not be used after this invocation.
