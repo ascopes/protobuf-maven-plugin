@@ -4,15 +4,14 @@ Introduction
 The Protobuf Maven Plugin is a modern Maven plugin that attempts to reduce the hassle needed to
 integrate Protobuf compilation into your build process.
 
-Unlike existing Protobuf plugins, this plugin is able to pull the desired version of
-`protoc` directly from Maven Central without needing a new release every time Google create a new
-version. This means you can keep the version of `protoc` up-to-date with the version of
-`protobuf-java` without needing to update this plugin as well.
+Unlike existing Protobuf integrations, this plugin is able to pull the desired version of
+`protoc` directly from Google's releases on Maven Central. This means you do not need to update 
+the version of this plugin to be able to pull in a newer version of `protoc` when it is released.
 
 If your system is not directly supported by Google in the `protoc` releases they supply, you can
 instruct the plugin to instead invoke `protoc` from your system path directly.
 
-In addition to generating Java sources, this plugin supports generating Kotlin sources as well.
+In addition to generating Java sources, this plugin supports generating Kotlin sources as well!
 
 Bugs and feature requests
 =========================
