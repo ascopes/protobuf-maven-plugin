@@ -16,7 +16,11 @@
 
 package io.github.ascopes.protobufmavenplugin.platform;
 
+import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -25,9 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.stream.Collector;
 
 /**
  * Host environment inspection facilities.
@@ -69,7 +73,7 @@ public final class HostEnvironment {
    * @return the reported CPU architecture.
    */
   public static String cpuArchitecture() {
-    return Optional.ofNullable(System.getProperty("os.arch"))
+    return ofNullable(System.getProperty("os.arch"))
         .orElseThrow(() -> new IllegalStateException("No 'os.arch' system property is set"));
   }
 
@@ -86,9 +90,10 @@ public final class HostEnvironment {
     try (var scanner = new Scanner(rawPath).useDelimiter(File.pathSeparator)) {
       return scanner
           .tokens()
+          .filter(not(String::isBlank))
           .distinct()
           .map(Path::of)
-          .collect(Collectors.toUnmodifiableList());
+          .collect(toUnmodifiableList());
     }
   }
 
@@ -98,28 +103,31 @@ public final class HostEnvironment {
    *
    * @return the path extensions for the system, or an empty set if unspecified or not applicable.
    */
-  public static Set<String> systemPathExtensions() {
+  public static SortedSet<String> systemPathExtensions() {
     var rawPathExtensions = environmentVariable("PATHEXT").orElse("");
-    var result = new TreeSet<>(String::compareToIgnoreCase);
-
     try (var scanner = new Scanner(rawPathExtensions).useDelimiter(File.pathSeparator)) {
-      scanner
+      return scanner
           .tokens()
           .filter(not(String::isBlank))
-          .forEach(result::add);
+          .collect(toUnmodifiableSortedSet(String::compareToIgnoreCase));
     }
-
-    return Collections.unmodifiableSortedSet(result);
   }
 
   // Visible for testing purposes only.
   static Optional<String> environmentVariable(String name) {
-    return Optional.ofNullable(System.getenv(name));
+    return ofNullable(System.getenv(name));
   }
 
   private static String operatingSystem() {
-    return Optional.ofNullable(System.getProperty("os.name"))
+    return ofNullable(System.getProperty("os.name"))
         .orElseThrow(() -> new IllegalStateException("No 'os.name' system property is set"));
+  }
+
+  private static <T> Collector<T, ?, SortedSet<T>> toUnmodifiableSortedSet(Comparator<T> comparator) {
+    return collectingAndThen(
+        toCollection(() -> new TreeSet<>(comparator)),
+        Collections::unmodifiableSortedSet
+    );
   }
 
   private HostEnvironment() {
