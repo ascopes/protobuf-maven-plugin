@@ -12,6 +12,10 @@
   <description>Maven Plugin that generates source code from protobuf source files.</description>
   <packaging>maven-plugin</packaging>
 
+  <prerequisites>
+    <maven>3.8.0</maven>
+  </prerequisites>
+
   <inceptionYear>2023</inceptionYear>
 
   <licenses>
@@ -92,7 +96,9 @@
     <maven-invoker-plugin.version>3.6.0</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-plugin-plugin.version>3.10.1</maven-plugin-plugin.version>
+    <maven-plugin-report-plugin.version>3.10.2</maven-plugin-report-plugin.version>
     <maven-project-info-reports-plugin.version>3.4.5</maven-project-info-reports-plugin.version>
+    <maven-site-plugin.version>4.0.0-M11</maven-site-plugin.version>
     <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
 
     <!-- Plugin dependencies -->
@@ -369,6 +375,12 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven-site-plugin.version}</version>
+      </plugin>
+
+      <plugin>
         <!-- Unit testing config -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -455,8 +467,8 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>${maven-plugin-plugin.version}</version>
+        <artifactId>maven-plugin-report-plugin</artifactId>
+        <version>${maven-plugin-report-plugin.version}</version>
       </plugin>
     </plugins>
   </reporting>

@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="protobuf-maven-plugin" xmlns="http://maven.apache.org/DECORATION/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
+<site xmlns="https://maven.apache.org/SITE/2.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd">
+
   <body>
     <menu name="Getting Started">
       <item name="Usage" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
     </menu>
-    <menu ref="reports" />
+    <menu ref="reports"/>
   </body>
-</project>
+
+  <skin>
+    <groupId>org.apache.maven.skins</groupId>
+    <artifactId>maven-fluido-skin</artifactId>
+    <version>2.0.0-M8</version>
+  </skin>
+</site>

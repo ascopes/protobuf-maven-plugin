@@ -63,8 +63,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
    * Set the artifact resolver.
-   *
-   * @param artifactResolver the artifact resolver.
    */
   public void setArtifactResolver(ArtifactResolver artifactResolver) {
     this.artifactResolver = artifactResolver;
@@ -74,8 +72,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * The Maven session that is in use.
    *
    * <p>This is passed in by Maven automatically, so can be ignored.
-   *
-   * @param mavenSession the Maven session.
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
   public void setMavenSession(MavenSession mavenSession) {
@@ -92,8 +88,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
-   *
-   * @param version the version.
    */
   @Parameter(required = true, property = "protoc.version")
   public void setVersion(String version) {
@@ -113,8 +107,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
    * The directory to output generated sources to.
-   *
-   * @param outputDirectory the output directory.
    */
   @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc")
   public void setOutputDirectory(String outputDirectory) {
@@ -123,8 +115,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
    * Whether to treat {@code protoc} compiler warnings as errors.
-   *
-   * @param fatalWarnings whether to treat compiler warnings as errors.
    */
   @Parameter(defaultValue = "false")
   public void setFatalWarnings(boolean fatalWarnings) {
@@ -136,8 +126,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>When enabled, {@code protoc} may attempt to keep things like map ordering
    * consistent between builds as long as the same version of {@code protoc} is used each time.
-   *
-   * @param reproducibleBuilds whether to use reproducible builds.
    */
   @Parameter(defaultValue = "false")
   public void setReproducibleBuilds(boolean reproducibleBuilds) {
