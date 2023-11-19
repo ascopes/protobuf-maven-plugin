@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolver;
+package io.github.ascopes.protobufmavenplugin.resolve;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import java.io.IOException;

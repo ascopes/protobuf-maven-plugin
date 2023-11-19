@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.executor;
+package io.github.ascopes.protobufmavenplugin;
 
-import java.nio.file.Path;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Executor for {@code protoc} binaries.
+ * Mojo to generate Java code from protobuf sources.
  *
  * @author Ashley Scopes
  */
-public final class DefaultProtocExecutor {
+@Mojo(
+    name = "generate-java",
+    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresOnline = true,
+    threadSafe = true
+)
+public final class GenerateJavaMojo extends AbstractGenerateMojo {
 
-  private Path protocPath;
-
-  /**
-   * Initialise this executor.
-   *
-   * @param protocPath the path to the {@code protoc} binary to invoke.
-   */
-  public DefaultProtocExecutor(Path protocPath) {
-    this.protocPath = protocPath;
+  @Override
+  protected String getSourceOutputType() {
+    return "java";
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolver;
+package io.github.ascopes.protobufmavenplugin.resolve;
 
 import java.nio.file.Path;
 import org.apache.maven.execution.MavenSession;

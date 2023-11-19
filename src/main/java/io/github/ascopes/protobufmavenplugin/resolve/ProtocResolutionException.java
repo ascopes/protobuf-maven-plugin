@@ -14,22 +14,31 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolver;
-
-import java.nio.file.Path;
+package io.github.ascopes.protobufmavenplugin.resolve;
 
 /**
- * Base interface for a component that can resolve a {@code protoc} executable.
+ * Exception that is raised if resolution of {@code protoc} fails.
  *
  * @author Ashley Scopes
  */
-public interface ProtocResolver {
+public final class ProtocResolutionException extends Exception {
 
   /**
-   * Determine the path to the {@code protoc} executable.
+   * Initialise the exception.
    *
-   * @return the path to the {@code protoc} executable.
-   * @throws ProtocResolutionException if resolution fails for any reason.
+   * @param message the exception message.
    */
-  Path resolveProtoc() throws ProtocResolutionException;
+  public ProtocResolutionException(String message) {
+    super(message);
+  }
+
+  /**
+   * Initialise the exception.
+   *
+   * @param message the exception message.
+   * @param cause   the cause of the exception.
+   */
+  public ProtocResolutionException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

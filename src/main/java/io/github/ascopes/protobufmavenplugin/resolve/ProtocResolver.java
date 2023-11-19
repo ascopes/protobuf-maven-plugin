@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin;
 
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
+package io.github.ascopes.protobufmavenplugin.resolve;
+
+import java.nio.file.Path;
 
 /**
- * Mojo to generate Java code from protobuf sources.
+ * Base interface for a component that can resolve a {@code protoc} executable.
  *
  * @author Ashley Scopes
  */
-@Mojo(
-    name = "generate-java",
-    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-    requiresOnline = true,
-    threadSafe = true
-)
-public final class JavaCodegenMojo extends AbstractCodegenMojo {
+public interface ProtocResolver {
 
+  /**
+   * Determine the path to the {@code protoc} executable.
+   *
+   * @return the path to the {@code protoc} executable.
+   * @throws ProtocResolutionException if resolution fails for any reason.
+   */
+  Path resolveProtoc() throws ProtocResolutionException;
 }

@@ -13,32 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.ascopes.protobufmavenplugin;
 
-package io.github.ascopes.protobufmavenplugin.resolver;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Exception that is raised if resolution of {@code protoc} fails.
+ * Mojo to generate Kotlin code from protobuf sources.
  *
  * @author Ashley Scopes
  */
-public final class ProtocResolutionException extends Exception {
-
-  /**
-   * Initialise the exception.
-   *
-   * @param message the exception message.
-   */
-  public ProtocResolutionException(String message) {
-    super(message);
-  }
-
-  /**
-   * Initialise the exception.
-   *
-   * @param message the exception message.
-   * @param cause   the cause of the exception.
-   */
-  public ProtocResolutionException(String message, Throwable cause) {
-    super(message, cause);
+@Mojo(
+    name = "generate-kotlin",
+    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresOnline = true,
+    threadSafe = true
+)
+public final class GenerateKotlinMojo extends AbstractGenerateMojo {
+  @Override
+  protected String getSourceOutputType() {
+    return "kotlin";
   }
 }

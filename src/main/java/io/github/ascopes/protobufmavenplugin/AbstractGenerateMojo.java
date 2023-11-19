@@ -16,12 +16,15 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
-import io.github.ascopes.protobufmavenplugin.executor.DefaultProtocExecutor;
-import io.github.ascopes.protobufmavenplugin.resolver.MavenProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolver.PathProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolver.ProtocResolutionException;
+import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.MavenProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.PathProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.ProtocResolutionException;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -37,13 +40,26 @@ import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
  *
  * @author Ashley Scopes
  */
-public abstract class AbstractCodegenMojo extends AbstractMojo {
+public abstract class AbstractGenerateMojo extends AbstractMojo {
 
-  /**
-   * The artifact resolver.
-   */
+  // Injected components.
   @Component
   private ArtifactResolver artifactResolver;
+
+  // Injected parameters.
+  private MavenSession mavenSession;
+  private String version;
+  private Set<Path> sourceDirectories;
+  private Path outputDirectory;
+  private boolean fatalWarnings;
+  private boolean reproducibleBuilds;
+
+  /**
+   * Set the artifact resolver.
+   */
+  public void setArtifactResolver(ArtifactResolver artifactResolver) {
+    this.artifactResolver = artifactResolver;
+  }
 
   /**
    * The Maven session that is in use.
@@ -51,7 +67,9 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * <p>This is passed in by Maven automatically, so can be ignored.
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
-  private MavenSession session;
+  public void setMavenSession(MavenSession mavenSession) {
+    this.mavenSession = mavenSession;
+  }
 
   /**
    * The version of protoc to use.
@@ -65,54 +83,93 @@ public abstract class AbstractCodegenMojo extends AbstractMojo {
    * development version of {@code protoc}.
    */
   @Parameter(required = true, property = "protoc.version")
-  private String version;
+  public void setVersion(String version) {
+    this.version = version;
+  }
 
   /**
    * The root directories to look for protobuf sources in.
    */
   @Parameter(defaultValue = "${project.basedir}/src/main/protobuf")
-  private Set<String> sourceDirectories;
+  public void setSourceDirectories(Set<String> sourceDirectories) {
+    this.sourceDirectories = sourceDirectories
+        .stream()
+        .map(Path::of)
+        .collect(Collectors.toUnmodifiableSet());
+  }
 
   /**
    * The directory to output generated sources to.
    */
   @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc")
-  private String outputDirectory;
+  public void setOutputDirectory(String outputDirectory) {
+    this.outputDirectory = Path.of(outputDirectory);
+  }
 
   /**
    * Whether to treat {@code protoc} compiler warnings as errors.
    */
   @Parameter(defaultValue = "false")
-  private boolean fatalWarnings;
+  public void setFatalWarnings(boolean fatalWarnings) {
+    this.fatalWarnings = fatalWarnings;
+  }
 
   /**
    * Whether to attempt to force builds to be reproducible.
    *
    * <p>When enabled, {@code protoc} may attempt to keep things like map ordering
-   * consistent between builds as long as the same version of {@code protoc} is
-   * used each time.
+   * consistent between builds as long as the same version of {@code protoc} is used each time.
    */
   @Parameter(defaultValue = "false")
-  private boolean reproducibleBuilds;
+  public void setReproducibleBuilds(boolean reproducibleBuilds) {
+    this.reproducibleBuilds = reproducibleBuilds;
+  }
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     var protocPath = resolveProtocPath();
-    var executor = new DefaultProtocExecutor(protocPath);
+    var sources = resolveProtoSources();
   }
+
+  /**
+   * The source output type to use with {@code protoc} (e.g. {@code java} for {@code --java_out}).
+   *
+   * @return the source output type.
+   */
+  protected abstract String getSourceOutputType();
 
   private Path resolveProtocPath() throws MojoExecutionException, MojoFailureException {
     try {
       var resolver = version.trim().equalsIgnoreCase("PATH")
           ? new PathProtocResolver()
-          : new MavenProtocResolver(version, artifactResolver, session);
+          : new MavenProtocResolver(version, artifactResolver, mavenSession);
 
       return resolver.resolveProtoc();
 
     } catch (ProtocResolutionException ex) {
-      throw new MojoExecutionException(ex.getMessage(), ex);
+      throw error("Failed to resolve protoc executable", ex);
     } catch (Exception ex) {
-      throw new MojoFailureException(ex.getMessage(), ex);
+      throw failure("Failed to resolve protoc executable", ex);
     }
+  }
+
+  private List<Path> resolveProtoSources() throws MojoExecutionException, MojoFailureException {
+    try {
+      return new ProtoSourceResolver().collectSources(sourceDirectories);
+    } catch (IOException ex) {
+      throw failure("Failed to resolve proto sources", ex);
+    }
+  }
+
+  private MojoExecutionException error(String shortMessage, Exception ex) {
+    var newEx = new MojoExecutionException(this, shortMessage, ex.getMessage());
+    newEx.initCause(ex);
+    return newEx;
+  }
+
+  private MojoFailureException failure(String shortMessage, Exception ex) {
+    var newEx = new MojoFailureException(this, shortMessage, ex.getMessage());
+    newEx.initCause(ex);
+    return newEx;
   }
 }
