@@ -70,9 +70,11 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var notProtoc2 = givenFileExists("foo", "bar", "also-not-protoc");
       var notProtoc3 = givenFileExists("definitely", "not", "protoc-executable");
 
-      givenFileIsExecutable(notProtoc1);
-      givenFileIsExecutable(notProtoc2);
-      givenFileIsExecutable(notProtoc3);
+      if (!isWindows) {
+        givenFileIsExecutable(notProtoc1);
+        givenFileIsExecutable(notProtoc2);
+        givenFileIsExecutable(notProtoc3);
+      }
 
       envMock.when(HostEnvironment::isWindows)
           .thenReturn(isWindows);
@@ -200,7 +202,6 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       // Given
       var existentDirectory = givenDirectoryExists("foo", "bar", "existent");
       var notProtoc = givenFileExists("foo", "bar", name);
-      givenFileIsExecutable(notProtoc);
 
       envMock.when(HostEnvironment::isWindows)
           .thenReturn(true);
@@ -296,7 +297,10 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var nonExistentDirectory = givenDirectoryDoesNotExist("foo", "bar", "non-existent");
       var existentDirectory = givenDirectoryExists("foo", "bar", "existent");
       var protoc = givenFileExists("foo", "bar", "protoc");
-      givenFileIsExecutable(protoc);
+
+      if (!isWindows) {
+        givenFileIsExecutable(protoc);
+      }
 
       envMock.when(HostEnvironment::isWindows)
           .thenReturn(isWindows);
@@ -340,7 +344,6 @@ class PathProtocResolverTest extends FileSystemTestSupport {
   }
 
   @SuppressWarnings("varargs")
-  @SafeVarargs
   private static SortedSet<String> caseInsensitiveSetOf(String... items) {
     var ts = new TreeSet<>(String::compareToIgnoreCase);
     ts.addAll(Arrays.asList(items));
