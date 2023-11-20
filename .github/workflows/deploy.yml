@@ -55,6 +55,7 @@ jobs:
           release_version="$(./mvnw -B help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//g')"
         else
           release_version='${{ inputs.version }}'
+          ./mvnw -B -e versions:set -DnewVersion="${{ inputs.version }}"
         fi
         echo "release_version=${release_version}" >> "${GITHUB_ENV}"
 
@@ -97,7 +98,7 @@ jobs:
         path: target/site
 
     - name: Deploy site
-      if: ${{ !inputs.dry-run }}
+      if: ${{ ! inputs.dry-run }}
       id: site
       uses: actions/deploy-pages@v2
 
