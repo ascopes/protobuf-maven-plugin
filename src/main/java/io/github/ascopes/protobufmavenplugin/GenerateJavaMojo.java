@@ -33,6 +33,13 @@ import org.apache.maven.project.MavenProject;
 )
 public final class GenerateJavaMojo extends AbstractGenerateMojo {
 
+  /**
+   * Initialise this Mojo.
+   */
+  public GenerateJavaMojo() {
+    // Nothing to do.
+  }
+
   @Override
   protected String getSourceOutputType() {
     return "java";

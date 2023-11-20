@@ -32,6 +32,14 @@ import org.apache.maven.project.MavenProject;
     threadSafe = true
 )
 public final class GenerateKotlinMojo extends AbstractGenerateMojo {
+
+  /**
+   * Initialise this Mojo.
+   */
+  public GenerateKotlinMojo() {
+    // Nothing to do.
+  }
+
   @Override
   protected String getSourceOutputType() {
     return "kotlin";

@@ -46,6 +46,13 @@ public final class PathProtocResolver implements ProtocResolver {
   private static final String PROTOC = "protoc";
   private static final Logger LOGGER = LoggerFactory.getLogger(PathProtocResolver.class);
 
+  /**
+   * Initialise this resolver.
+   */
+  public PathProtocResolver() {
+    // Nothing to do.
+  }
+
   @Override
   public Path resolveProtoc() throws ProtocResolutionException {
     var predicate = HostEnvironment.isWindows()
@@ -90,6 +97,10 @@ public final class PathProtocResolver implements ProtocResolver {
   }
 
   private Predicate<Path> isProtocWindows() {
+    // On Windows, we have to ignore case sensitivity. For example, protoc.exe and
+    // PROTOC.EXE are the same thing. We have to look at the file name without the
+    // extension to determine the program name, and should match only if the file
+    // extension is listed in the $PATHEXT.
     var pathExt = HostEnvironment.systemPathExtensions();
 
     return path -> {

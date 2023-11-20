@@ -35,6 +35,11 @@ public final class ProtocExecutor {
 
   private final List<String> arguments;
 
+  /**
+   * Initialise this executor.
+   *
+   * @param argumments the command line arguments, starting with the executable.
+   */
   ProtocExecutor(List<String> arguments) {
     this.arguments = arguments;
   }

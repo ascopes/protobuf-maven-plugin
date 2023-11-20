@@ -21,7 +21,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Flag builder for the required {@code protoc} invocation.
+ * Builder for a {@code protoc} invocation.
+ *
+ * <p>Instances of this class should be single-use only and may produce
+ * undefined behaviour if used after being built into an executor.
  *
  * @author Ashley Scopes
  */
@@ -32,11 +35,22 @@ public final class ProtocExecutorBuilder {
 
   private final List<String> arguments;
 
+  /**
+   * Initialise this builder.
+   *
+   * @param executablePath the path to the {@code protoc} executable.
+   */
   public ProtocExecutorBuilder(Path executablePath) {
     arguments = new ArrayList<>();
     arguments.add(executablePath.toString());
   }
 
+  /**
+   * Add base directories to resolve imports in.
+   *
+   * @param directories the directories to include.
+   * @return this builder.
+   */
   public ProtocExecutorBuilder includeDirectories(Collection<Path> directories) {
     for (var directory : directories) {
       arguments.add("--proto_path=" + directory);
@@ -44,11 +58,26 @@ public final class ProtocExecutorBuilder {
     return this;
   }
 
+  /**
+   * Add an output directory.
+   *
+   * @param outputType the output type, e.g. {@code java} or {@code kotlin}.
+   * @param outputDirectory the directory to write outputs to.
+   * @return this builder.
+   */
   public ProtocExecutorBuilder outputDirectory(String outputType, Path outputDirectory) {
     arguments.add("--" + outputType + "_out=" + outputDirectory);
     return this;
   }
 
+  /**
+   * Enable/disable deterministic output.
+   *
+   * <p>Calling this more than once is undefined behaviour.
+   *
+   * @param deterministicOutput whether to enable deterministic output or not.
+   * @return this builder.
+   */
   public ProtocExecutorBuilder deterministicOutput(boolean deterministicOutput) {
     if (deterministicOutput) {
       arguments.add("--deterministic_output");
@@ -56,6 +85,14 @@ public final class ProtocExecutorBuilder {
     return this;
   }
 
+  /**
+   * Enable/disable fatal warnings.
+   *
+   * <p>Calling this more than once is undefined behaviour.
+   *
+   * @param fatalWarnings whether to enable fatal warnings or not.
+   * @return this builder.
+   */
   public ProtocExecutorBuilder fatalWarnings(boolean fatalWarnings) {
     if (fatalWarnings) {
       arguments.add("--fatal_warnings");

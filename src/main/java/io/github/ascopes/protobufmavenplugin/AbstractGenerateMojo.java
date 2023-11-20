@@ -46,6 +46,7 @@ import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
  * <p>Can be extended for each language that this plugin supports.
  *
  * @author Ashley Scopes
+ * @since 0.0.1
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
@@ -58,11 +59,26 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private String version;
   private Set<Path> sourceDirectories;
   private Path outputDirectory;
-  private boolean fatalWarnings;
-  private boolean reproducibleBuilds;
+  private Boolean fatalWarnings;
+  private Boolean reproducibleBuilds;
+
+  /**
+   * Initialise this Mojo.
+   */
+  protected AbstractGenerateMojo() {
+    artifactResolver = null;
+    mavenSession = null;
+    version = null;
+    sourceDirectories = null;
+    outputDirectory = null;
+    fatalWarnings = null;
+    reproducibleBuilds = null;
+  }
 
   /**
    * Set the artifact resolver.
+   *
+   * @param artifactResolver the artifact resolver.
    */
   public void setArtifactResolver(ArtifactResolver artifactResolver) {
     this.artifactResolver = artifactResolver;
@@ -73,6 +89,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>This is passed in by Maven automatically, so can be ignored.
    *
+   * @param mavenSession the Maven session.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
@@ -91,6 +108,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
+   * @param version the version of {@code protoc} to use.
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
@@ -101,6 +119,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The root directories to look for protobuf sources in.
    *
+   * @param sourceDirectories the source directories.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "${project.basedir}/src/main/protobuf")
@@ -114,6 +133,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The directory to output generated sources to.
    *
+   * @param outputDirectory the output directory.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc")
@@ -124,6 +144,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Whether to treat {@code protoc} compiler warnings as errors.
    *
+   * @param fatalWarnings whether to treat warnings as errors or not.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
@@ -135,6 +156,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Request that {@code protoc} should try to keep things like map ordering consistent between
    * builds while a consistent version of {@code protoc} is in use.
    *
+   * @param reproducibleBuilds whether to enable reproducible builds or not.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
@@ -142,6 +164,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     this.reproducibleBuilds = reproducibleBuilds;
   }
 
+  /**
+   * Execute this goal.
+   *
+   * @throws MojoExecutionException if a user/configuration error is encountered.
+   * @throws MojoFailureException if execution fails due to an internal error.
+   */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     var protocPath = resolveProtocPath();

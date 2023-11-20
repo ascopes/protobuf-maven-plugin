@@ -45,6 +45,13 @@ public final class MavenProtocResolver implements ProtocResolver {
   private final MavenSession session;
   private final MavenProtocCoordinateFactory coordinateFactory;
 
+  /**
+   * Initialise this resolver.
+   *
+   * @param version the version/version range to resolve.
+   * @param artifactResolver the Maven artifact reaolver to use.
+   * @param session the current Maven session.
+   */
   public MavenProtocResolver(
       String version,
       ArtifactResolver artifactResolver,

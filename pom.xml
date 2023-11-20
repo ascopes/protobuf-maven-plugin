@@ -93,12 +93,16 @@
     <license-maven-plugin.version>4.3</license-maven-plugin.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
     <maven-invoker-plugin.version>3.6.0</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.6.2</maven-javadoc-plugin.version>
     <maven-plugin-plugin.version>3.10.1</maven-plugin-plugin.version>
     <maven-plugin-report-plugin.version>3.10.2</maven-plugin-report-plugin.version>
     <maven-project-info-reports-plugin.version>3.4.5</maven-project-info-reports-plugin.version>
+    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <maven-site-plugin.version>4.0.0-M11</maven-site-plugin.version>
+    <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
 
     <!-- Plugin dependencies -->
@@ -221,40 +225,45 @@
   <build>
     <plugins>
       <plugin>
-        <!-- Coverage tracing -->
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
+        <!-- Enforces our license header and allows adding it automatically to code. -->
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>${license-maven-plugin.version}</version>
+
+        <configuration>
+          <!-- Useful flags: https://mycila.carbou.me/license-maven-plugin/ -->
+          <licenseSets>
+            <licenseSet>
+              <header>.mvn/license/license-header.txt</header>
+              <includes>
+                <include>src/**/*.groovy</include>
+                <include>src/**/*.java</include>
+                <include>src/**/*.proto</include>
+              </includes>
+            </licenseSet>
+          </licenseSets>
+          <mapping>
+            <java>SLASHSTAR_STYLE</java>
+          </mapping>
+          <properties>
+            <currentYear>2023</currentYear>
+          </properties>
+          <strictCheck>true</strictCheck>
+        </configuration>
 
         <executions>
           <execution>
-            <id>prepare-coverage-agent</id>
-            <phase>initialize</phase>
+            <id>validate-license-headers</id>
+            <phase>validate</phase>
             <goals>
-              <goal>prepare-agent</goal>
+              <goal>check</goal>
             </goals>
-
-            <configuration>
-              <destFile>${project.build.directory}/jacoco-unit.bin</destFile>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>report-test-coverage</id>
-            <phase>test</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <configuration>
-              <dataFile>${project.build.directory}/jacoco-unit.bin</dataFile>
-              <outputDirectory>${project.build.directory}/site/jacoco/unit</outputDirectory>
-            </configuration>
           </execution>
         </executions>
       </plugin>
 
       <plugin>
-        <!-- Checking style of code matches the Google code style -->
+        <!-- Checking style of code matches the Google code style. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${maven-checkstyle-plugin.version}</version>
@@ -280,7 +289,7 @@
       </plugin>
 
       <plugin>
-        <!-- Java compiler config -->
+        <!-- Java compiler config. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
@@ -296,7 +305,7 @@
       </plugin>
 
       <plugin>
-        <!-- Runs integration tests -->
+        <!-- Runs integration tests. -->
         <!-- See documentation at https://maven.apache.org/plugins/maven-invoker-plugin/integration-test-mojo.html -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
@@ -329,6 +338,7 @@
       </plugin>
 
       <plugin>
+        <!-- Add additional entries to the JAR's MANIFEST.MF. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>${maven-jar-plugin.version}</version>
@@ -350,13 +360,36 @@
       </plugin>
 
       <plugin>
+        <!-- Generate JavaDocs. Needed for Maven Central. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>generate-javadoc-jar</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <!-- Generated sources cannot be fixed to be valid. -->
+              <excludes>**/HelpMojo.java</excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Generate plugin descriptors. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>${maven-plugin-plugin.version}</version>
 
         <executions>
           <execution>
-            <id>help-mojo</id>
+            <!-- We already generate the main descriptor by default.
+                The help mojo is then generated for us by this
+                custom execution. -->
+            <id>generate-help-mojo</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>helpmojo</goal>
@@ -369,19 +402,49 @@
       </plugin>
 
       <plugin>
+        <!-- Create site info pages. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>${maven-project-info-reports-plugin.version}</version>
       </plugin>
 
       <plugin>
+        <!-- Deployments and version incrementing. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <!-- Overridden so we do not run site-deploy, as we manage
+              this through GitHub actions instead. -->
+          <goals>deploy</goals>
+          <releaseProfiles>gpg</releaseProfiles>
+        </configuration>
+      </plugin>
+
+
+      <plugin>
+        <!-- Generate the plugin site. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${maven-site-plugin.version}</version>
       </plugin>
 
       <plugin>
-        <!-- Unit testing config -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source-plugin.version}</version>
+        <executions>
+          <execution>
+            <!-- Required for Maven Central. -->
+            <id>generate-sources-jar</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Unit testing. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
@@ -424,39 +487,34 @@
       </plugin>
 
       <plugin>
-        <!-- Enforces our license header and allows adding it automatically to code. -->
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>${license-maven-plugin.version}</version>
-
-        <configuration>
-          <!-- Useful flags: https://mycila.carbou.me/license-maven-plugin/ -->
-          <licenseSets>
-            <licenseSet>
-              <header>.mvn/license/license-header.txt</header>
-              <includes>
-                <include>src/**/*.groovy</include>
-                <include>src/**/*.java</include>
-                <include>src/**/*.proto</include>
-              </includes>
-            </licenseSet>
-          </licenseSets>
-          <mapping>
-            <java>SLASHSTAR_STYLE</java>
-          </mapping>
-          <properties>
-            <currentYear>2023</currentYear>
-          </properties>
-          <strictCheck>true</strictCheck>
-        </configuration>
+        <!-- Code coverage. -->
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
 
         <executions>
           <execution>
-            <id>check-license-headers</id>
-            <phase>validate</phase>
+            <id>generate-coverage-argline</id>
+            <phase>initialize</phase>
             <goals>
-              <goal>check</goal>
+              <goal>prepare-agent</goal>
             </goals>
+
+            <configuration>
+              <destFile>${project.build.directory}/jacoco.bin</destFile>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>generate-coverage-report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <dataFile>${project.build.directory}/jacoco.bin</dataFile>
+              <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -466,10 +524,45 @@
   <reporting>
     <plugins>
       <plugin>
+        <!-- Compile src/main/site and generate the goals site pages. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-report-plugin</artifactId>
         <version>${maven-plugin-report-plugin.version}</version>
       </plugin>
     </plugins>
   </reporting>
+
+  <profiles>
+    <profile>
+      <id>gpg</id>
+      <build>
+        <plugins>
+          <plugin>
+            <!-- GPG signing of build artifacts, required by Maven
+                Central. We only enable this via a profile so that
+                forks do not have to register GPG keys to be able
+                to build. -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
