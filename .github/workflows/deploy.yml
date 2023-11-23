@@ -79,7 +79,7 @@ jobs:
       - name: Promote staging release
         if: ${{ ! inputs.dry-run }}
         run: |-
-          ./scripts/close-nexus-repository.sh \
+          ./scripts/close-nexus-repos.sh \
               -u "${OSSRH_USERNAME}" \
               -p "${OSSRH_TOKEN}" \
               -g "${group_id}" \
