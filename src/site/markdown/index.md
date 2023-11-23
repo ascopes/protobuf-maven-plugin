@@ -17,7 +17,7 @@ Bugs and feature requests
 =========================
 
 Please raise any bugs or feature requests on 
-[the GitHub project for this plugin](https://ascopes.github.io/protobuf-maven-plugin).
+[the GitHub project for this plugin](https://github.com/ascopes/protobuf-maven-plugin/issues).
 
 Usage
 =====
