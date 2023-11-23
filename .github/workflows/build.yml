@@ -32,7 +32,7 @@ jobs:
 
     - name: Build with Maven
       shell: bash
-      run: ./mvnw -B verify
+      run: ./mvnw -B verify site
 
     - name: Publish to codecov
       continue-on-error: true
@@ -48,3 +48,13 @@ jobs:
         shasum -a 256 -c codecov.SHA256SUM
         chmod -v +x codecov
         ./codecov -v
+
+    - name: Upload site
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: target/site
+
+    - name: Deploy site
+      if: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+      id: site
+      uses: actions/deploy-pages@v2
