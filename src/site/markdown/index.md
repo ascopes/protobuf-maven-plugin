@@ -71,6 +71,13 @@ A simple project that makes use of this plugin to generate Java sources would pl
 </project>
 ```
 
+This will output generated sources in `target/generated-sources/protoc` by default.
+
+Test sources can be generated with the `generate-test-java` goal.
+
+Kotlin
+------
+
 To generate Kotlin sources, use the `generate-kotlin` goal instead of the `generate-java` goal:
 
 ```xml
@@ -93,6 +100,10 @@ To generate Kotlin sources, use the `generate-kotlin` goal instead of the `gener
   </executions>
 </plugin>
 ```
+
+This will output generated sources in `target/generated-sources/protoc` by default.
+
+Test sources can be generated with the `generate-test-kotlin` goal.
 
 Overriding the input directories
 --------------------------------
