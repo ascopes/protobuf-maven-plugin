@@ -20,31 +20,31 @@ jobs:
         java-version: [11, 21]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up JDK ${{ matrix.java-version }}
-      uses: actions/setup-java@v3
-      with:
-        java-version: ${{ matrix.java-version }}
-        distribution: 'temurin'
-        cache: maven
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Build with Maven
-      shell: bash
-      run: ./mvnw -B verify site
+      - name: Build with Maven
+        shell: bash
+        run: ./mvnw -B verify
 
-    - name: Publish to codecov
-      continue-on-error: true
-      if: matrix.os-name == 'ubuntu-latest' && always()
-      shell: bash
-      run: |-
-        curl --fail https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring \
-            --keyring trustedkeys.gpg --import
-        curl --fail -Os https://uploader.codecov.io/latest/linux/codecov
-        curl --fail -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-        curl --fail -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-        gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-        shasum -a 256 -c codecov.SHA256SUM
-        chmod -v +x codecov
-        ./codecov -v
+      - name: Publish to codecov
+        continue-on-error: true
+        if: matrix.os-name == 'ubuntu-latest' && always()
+        shell: bash
+        run: |-
+          curl --fail https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring \
+              --keyring trustedkeys.gpg --import
+          curl --fail -Os https://uploader.codecov.io/latest/linux/codecov
+          curl --fail -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+          curl --fail -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          chmod -v +x codecov
+          ./codecov -v

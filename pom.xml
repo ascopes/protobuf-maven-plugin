@@ -436,7 +436,8 @@
         <configuration>
           <!-- Overridden so we do not run site-deploy, as we manage
               this through GitHub actions instead. -->
-          <goals>deploy</goals>
+          <preparationGoals>clean verify</preparationGoals>
+          <goals>deploy site</goals>
           <releaseProfiles>gpg</releaseProfiles>
         </configuration>
       </plugin>
