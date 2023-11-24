@@ -4,11 +4,7 @@
 
 # protobuf-maven-plugin
 
-**A work-in-progress** to build a modern Maven plugin for generating protobuf
-Java and Kotlin sources by automatically obtaining and invoking `protoc`.
-
-**This is not yet ready for consumption in a Maven project.** Please watch this space as development is
-ongoing!
+A simple and modern Maven plugin to generate Java/Kotlin sources from Protobuf definitions.
 
 ## Aims
 
