@@ -60,7 +60,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private Set<Path> sourceDirectories;
   private Path outputDirectory;
   private Boolean fatalWarnings;
-  private Boolean reproducibleBuilds;
 
   /**
    * Initialise this Mojo.
@@ -72,7 +71,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     sourceDirectories = null;
     outputDirectory = null;
     fatalWarnings = null;
-    reproducibleBuilds = null;
   }
 
   /**
@@ -145,18 +143,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   /**
-   * Request that {@code protoc} should try to keep things like map ordering consistent between
-   * builds while a consistent version of {@code protoc} is in use.
-   *
-   * @param reproducibleBuilds whether to enable reproducible builds or not.
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = "false")
-  public final void setReproducibleBuilds(boolean reproducibleBuilds) {
-    this.reproducibleBuilds = reproducibleBuilds;
-  }
-
-  /**
    * Execute this goal.
    *
    * @throws MojoExecutionException if a user/configuration error is encountered.
@@ -172,7 +158,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     registerSource(mavenSession.getCurrentProject(), outputDirectory);
 
     var compilerExecutor = new ProtocExecutorBuilder(protocPath)
-        .deterministicOutput(reproducibleBuilds)
         .fatalWarnings(fatalWarnings)
         .includeDirectories(sourceDirectories)
         .outputDirectory(getSourceOutputType(), outputDirectory)
