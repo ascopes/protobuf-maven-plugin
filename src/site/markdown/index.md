@@ -86,7 +86,7 @@ calls that can decorate the existing generated Java code.
 To opt in to also generating these sources, set the `generateKotlinWrappers` plugin property to
 `true`:
 
-```kotlin
+```xml
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
