@@ -391,7 +391,7 @@
             </goals>
             <configuration>
               <!-- Generated sources cannot be fixed to be valid. -->
-              <excludes>**/HelpMojo.java</excludes>
+              <sourceFileExcludes>**/HelpMojo.java</sourceFileExcludes>
             </configuration>
           </execution>
         </executions>
