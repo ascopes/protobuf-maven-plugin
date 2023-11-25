@@ -71,21 +71,6 @@ public final class ProtocExecutorBuilder {
   }
 
   /**
-   * Enable/disable deterministic output.
-   *
-   * <p>Calling this more than once is undefined behaviour.
-   *
-   * @param deterministicOutput whether to enable deterministic output or not.
-   * @return this builder.
-   */
-  public ProtocExecutorBuilder deterministicOutput(boolean deterministicOutput) {
-    if (deterministicOutput) {
-      arguments.add("--deterministic_output");
-    }
-    return this;
-  }
-
-  /**
    * Enable/disable fatal warnings.
    *
    * <p>Calling this more than once is undefined behaviour.
