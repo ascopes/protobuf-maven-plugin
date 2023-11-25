@@ -16,11 +16,6 @@
 package io.github.ascopes.protobufmavenplugin.execute;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.lang.ProcessBuilder.Redirect;
-import java.time.Duration;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +33,7 @@ public final class ProtocExecutor {
   /**
    * Initialise this executor.
    *
-   * @param argumments the command line arguments, starting with the executable.
+   * @param arguments the command line arguments, starting with the executable.
    */
   ProtocExecutor(List<String> arguments) {
     this.arguments = arguments;
