@@ -80,7 +80,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @param artifactResolver the artifact resolver.
    */
-  public void setArtifactResolver(ArtifactResolver artifactResolver) {
+  public final void setArtifactResolver(ArtifactResolver artifactResolver) {
     this.artifactResolver = artifactResolver;
   }
 
@@ -93,14 +93,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
-  public void setMavenSession(MavenSession mavenSession) {
+  public final void setMavenSession(MavenSession mavenSession) {
     this.mavenSession = mavenSession;
   }
 
   /**
    * The version of protoc to use.
    *
-   * <p>This can be a static version, or a valid Maven version range (such as
+   * <p>This should correspond to the version of {@code protobuf-java} or similar that is in
+   * use.
+   *
+   * <p>The value can be a static version, or a valid Maven version range (such as
    * "{@code [3.5.0,4.0.0)}"). It is recommended to use a static version to ensure your builds are
    * reproducible.
    *
@@ -112,7 +115,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
-  public void setVersion(String version) {
+  public final void setVersion(String version) {
     this.version = version;
   }
 
@@ -123,7 +126,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(defaultValue = "${project.basedir}/src/main/protobuf")
-  public void setSourceDirectories(Set<String> sourceDirectories) {
+  public final void setSourceDirectories(Set<String> sourceDirectories) {
     this.sourceDirectories = sourceDirectories
         .stream()
         .map(Path::of)
@@ -137,7 +140,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  public void setFatalWarnings(boolean fatalWarnings) {
+  public final void setFatalWarnings(boolean fatalWarnings) {
     this.fatalWarnings = fatalWarnings;
   }
 
@@ -149,7 +152,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  public void setReproducibleBuilds(boolean reproducibleBuilds) {
+  public final void setReproducibleBuilds(boolean reproducibleBuilds) {
     this.reproducibleBuilds = reproducibleBuilds;
   }
 
@@ -160,7 +163,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @throws MojoFailureException if execution fails due to an internal error.
    */
   @Override
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  public final void execute() throws MojoExecutionException, MojoFailureException {
     var protocPath = resolveProtocPath();
     var sources = resolveProtoSources();
 
@@ -196,9 +199,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Set the output directory.
    *
+   * <p>Implementations are expected to declare a parameter that is named "outputDirectory"
+   * and passes the input to this method as a {@link Path}. This is done to allow overriding
+   * the output directory per goal.
+   *
    * @param outputDirectory the output directory.
    */
-  protected void setOutputDirectory(Path outputDirectory) {
+  protected final void setOutputDirectory(Path outputDirectory) {
     this.outputDirectory = outputDirectory;
   }
 
