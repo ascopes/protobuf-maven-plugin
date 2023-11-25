@@ -15,71 +15,99 @@
  */
 package io.github.ascopes.protobufmavenplugin.execute;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper that invokes a built {@code protoc} invocation.
+ * Executor for commands.
  *
  * @author Ashley Scopes
  */
 public final class ProtocExecutor {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ProtocExecutor.class);
 
-  private final List<String> arguments;
-
   /**
-   * Initialise this executor.
-   *
-   * @param arguments the command line arguments, starting with the executable.
+   * Initialise the executor.
    */
-  ProtocExecutor(List<String> arguments) {
-    this.arguments = arguments;
+  public ProtocExecutor() {
   }
 
   /**
-   * Invoke {@code protoc}.
+   * Invoke the process with the given arguments.
    *
-   * @return the exit code.
+   * <p>All process output streams will be piped to the class logger.
    *
-   * @throws ProtocExecutionException if the invocation fails or is interrupted.
+   * @param arguments the arguments to invoke the process with.
+   * @throws ProtocExecutionException if the execution fails.
    */
-  public int invoke() throws ProtocExecutionException {
+  public void invoke(List<String> arguments) throws ProtocExecutionException {
     try {
+      LOGGER.info("Invoking {}", arguments);
+
       var start = System.nanoTime();
-      var proc = new ProcessBuilder()
-          .command(arguments)
+      long elapsed;
+
+      var proc = new ProcessBuilder(arguments)
           .redirectErrorStream(true)
           .start();
 
-      LOGGER.info(
-          "Executing protoc (pid {}, arguments: {})",
-          proc.pid(),
-          String.join(" ", arguments)
-      );
+      var loggingFuture = streamOutputAsLogs(proc.getInputStream());
 
       try {
         var exitCode = proc.waitFor();
-        var elapsedTime = (System.nanoTime() - start) / 1_000_000;
+        elapsed = System.nanoTime() - start;
 
-        LOGGER.info(
-            "Protoc (pid {}) returned exit code {} after ~{}ms",
-            proc.pid(),
-            exitCode,
-            elapsedTime
-        );
-        return exitCode;
-
-      } catch (InterruptedException ex) {
-        Thread.currentThread().interrupt();
+        if (exitCode != 0) {
+          // Dump all output in case it has some form of error message.
+          throw new ProtocExecutionException(proc.waitFor());
+        }
+      } finally {
+        loggingFuture.join();
         proc.destroy();
-        throw new ProtocExecutionException("Execution was interrupted", ex);
       }
 
+      LOGGER.info("Protoc completed after {}ms", elapsed / 1_000_000L);
     } catch (IOException ex) {
-      throw new ProtocExecutionException("Failed to invoke protoc process", ex);
+      LOGGER.debug("Execution failed due to an IO exception", ex);
+      throw ioExceptionCallingProcess(ex);
+    } catch (InterruptedException ex) {
+      LOGGER.debug("Execution interrupted", ex);
+      throw processInterrupted(ex);
     }
+  }
+
+  private ProtocExecutionException ioExceptionCallingProcess(IOException ex) {
+    return new ProtocExecutionException("An IO exception occurred while calling protoc", ex);
+  }
+
+  private ProtocExecutionException processInterrupted(InterruptedException ex) {
+    Thread.currentThread().interrupt();
+    return new ProtocExecutionException("Protoc execution was interrupted", ex);
+  }
+
+  private CompletableFuture<?> streamOutputAsLogs(InputStream inputStream) {
+    return CompletableFuture.runAsync(() -> {
+      try (var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8))) {
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+          LOGGER.info(">>> {}", line);
+        }
+      } catch (Throwable ex) {
+        // Nothing else we can do. This probably can never happen?
+        // Don't throw anything back to the caller as we want to ensure the process is destroyed
+        // safely after joining this future.
+        LOGGER.error("Critical error reading output of subprocess", ex);
+      }
+    });
   }
 }

@@ -38,6 +38,10 @@ public final class RandomData {
     return UUID.randomUUID().toString();
   }
 
+  public static int someNonZeroExitCode() {
+    return RANDOM.nextInt(127) + 1;
+  }
+
   private RandomData() {
     // Static-only class.
   }

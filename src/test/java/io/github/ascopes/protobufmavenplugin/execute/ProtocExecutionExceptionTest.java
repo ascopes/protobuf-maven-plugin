@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.execute;
 
+import static io.github.ascopes.protobufmavenplugin.fixture.RandomData.someNonZeroExitCode;
 import static io.github.ascopes.protobufmavenplugin.fixture.RandomData.someString;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,5 +40,28 @@ class ProtocExecutionExceptionTest {
         .hasMessage(message)
         .hasCause(cause)
         .hasNoSuppressedExceptions();
+
+    assertThat(ex.getExitCode())
+        .isEmpty();
+  }
+
+  @DisplayName("ProtocExecutionException can be constructed with an exit code")
+  @Test
+  void canBeConstructedWithExitCode() {
+    // Given
+    var exitCode = someNonZeroExitCode();
+
+    // When
+    var ex = new ProtocExecutionException(exitCode);
+
+    // Then
+    assertThat(ex)
+        .hasMessage("Protoc execution returned an exit code of %s", exitCode)
+        .hasNoCause()
+        .hasNoSuppressedExceptions();
+
+    assertThat(ex.getExitCode())
+        .hasValue(exitCode);
+
   }
 }

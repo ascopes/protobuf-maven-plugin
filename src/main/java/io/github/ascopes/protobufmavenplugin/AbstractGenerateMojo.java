@@ -19,8 +19,8 @@ package io.github.ascopes.protobufmavenplugin;
 import static java.util.Optional.ofNullable;
 
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
+import io.github.ascopes.protobufmavenplugin.execute.ProtocArgumentBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutor;
-import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutorBuilder;
 import io.github.ascopes.protobufmavenplugin.resolve.MavenProtocResolver;
 import io.github.ascopes.protobufmavenplugin.resolve.PathProtocResolver;
 import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
@@ -157,13 +157,25 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     createOutputDirectory();
     registerSource(mavenSession.getCurrentProject(), outputDirectory);
 
-    var compilerExecutor = new ProtocExecutorBuilder(protocPath)
-        .fatalWarnings(fatalWarnings)
-        .includeDirectories(sourceDirectories)
-        .outputDirectory(getSourceOutputType(), outputDirectory)
-        .buildCompilation(sources);
+    try {
+      var protocExecutor = new ProtocExecutor();
 
-    run(compilerExecutor);
+      // Log the version first.
+      var versionArgs = new ProtocArgumentBuilder(protocPath)
+          .version();
+      protocExecutor.invoke(versionArgs);
+
+      // Perform the compilation next.
+      var compilerArgs = new ProtocArgumentBuilder(protocPath)
+          .fatalWarnings(fatalWarnings)
+          .includeDirectories(sourceDirectories)
+          .outputDirectory(getSourceOutputType(), outputDirectory)
+          .build(sources);
+
+      protocExecutor.invoke(compilerArgs);
+    } catch (ProtocExecutionException ex) {
+      throw new MojoExecutionException("Failed to invoke protoc", ex);
+    }
   }
 
   /**
@@ -222,17 +234,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       Files.createDirectories(outputDirectory);
     } catch (IOException ex) {
       throw failure("Failed to create output directory '" + outputDirectory + "'", ex);
-    }
-  }
-
-  private void run(ProtocExecutor executor) throws MojoExecutionException, MojoFailureException {
-    try {
-      var exitCode = executor.invoke();
-      if (exitCode != 0) {
-        throw error("protoc returned a non-zero exit code (" + exitCode + ")", null);
-      }
-    } catch (ProtocExecutionException ex) {
-      throw failure("Failed to execute protoc", ex);
     }
   }
 

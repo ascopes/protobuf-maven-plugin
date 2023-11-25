@@ -16,12 +16,19 @@
 
 package io.github.ascopes.protobufmavenplugin.execute;
 
+import java.util.OptionalInt;
+
 /**
  * Exception that is raised if execution of {@code protoc} fails.
  *
  * @author Ashley Scopes
  */
 public final class ProtocExecutionException extends Exception {
+
+  /**
+   * The exit code, or {@code null} if no exit code exists in the given context.
+   */
+  private final Integer exitCode;
 
   /**
    * Initialise the exception.
@@ -31,5 +38,25 @@ public final class ProtocExecutionException extends Exception {
    */
   public ProtocExecutionException(String message, Throwable cause) {
     super(message, cause);
+    exitCode = null;
+  }
+
+  /**
+   * Initialise the exception.
+   *
+   * @param exitCode the exit code that the process invocation returned.
+   */
+  public ProtocExecutionException(int exitCode) {
+    super("Protoc execution returned an exit code of " + exitCode);
+    this.exitCode = exitCode;
+  }
+
+  /**
+   * Get the exit code if one was provided.
+   *
+   * @return the exit code or an empty optional if not set.
+   */
+  public OptionalInt getExitCode() {
+    return exitCode == null ? OptionalInt.empty() : OptionalInt.of(exitCode);
   }
 }
