@@ -22,12 +22,6 @@ option java_package = "org.example.helloworld";
 package org.example.helloworld;
 
 message GreetingRequest {
+  string name = 1;
 }
 
-message GreetingResponse {
-  string text = 1;
-}
-
-service Greeter {
-  rpc Greet(GreetingRequest) returns (stream GreetingResponse) {}
-}

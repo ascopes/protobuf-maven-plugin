@@ -16,6 +16,8 @@
 package io.github.ascopes.protobufmavenplugin;
 
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -47,9 +49,24 @@ public final class GenerateJavaMojo extends AbstractGenerateMojo {
    * @param outputDirectory the output directory.
    * @since 0.0.1
    */
-  @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc-java")
+  @Parameter(defaultValue = MAIN_OUTPUT + "/protoc-java")
   public void setOutputDirectory(String outputDirectory) {
     super.setOutputDirectory(Path.of(outputDirectory));
+  }
+
+  /**
+   * The root directories to look for protobuf sources in.
+   *
+   * @param sourceDirectories the source directories.
+   * @since 0.0.1
+   */
+  @Parameter(defaultValue = MAIN_SOURCE)
+  public void setSourceDirectories(Set<String> sourceDirectories) {
+    var parsedDirectories = sourceDirectories
+        .stream()
+        .map(Path::of)
+        .collect(Collectors.toUnmodifiableSet());
+    super.setSourceDirectoryPaths(parsedDirectories);
   }
 
   @Override

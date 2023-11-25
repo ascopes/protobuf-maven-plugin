@@ -23,8 +23,6 @@ def expectedGeneratedFiles = [
     "org/example/helloworld/Helloworld",
     "org/example/helloworld/GreetingRequest",
     "org/example/helloworld/GreetingRequestOrBuilder",
-    "org/example/helloworld/GreetingResponse",
-    "org/example/helloworld/GreetingResponseOrBuilder"
 ]
 
 assertThat(generatedSourcesPath).isDirectory()

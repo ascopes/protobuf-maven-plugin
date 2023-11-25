@@ -26,8 +26,12 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <junit.version>5.10.1</junit.version>
     <protobuf.version>3.25.0</protobuf.version>
+
+    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -38,6 +42,13 @@
       <version>${protobuf.version}</version>
       <scope>compile</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -45,11 +56,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version</version>
+        <version>${maven-compiler-plugin.version}</version>
 
         <configuration>
           <release>11</release>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
       </plugin>
 
       <plugin>
@@ -63,9 +80,9 @@
 
         <executions>
           <execution>
-            <phase>generate-sources</phase>
+            <phase>generate-test-sources</phase>
             <goals>
-              <goal>generate-java</goal>
+              <goal>generate-test-java</goal>
             </goals>
           </execution>
         </executions>

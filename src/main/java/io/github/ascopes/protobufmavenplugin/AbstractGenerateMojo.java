@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -49,6 +48,11 @@ import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
  * @since 0.0.1
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
+
+  protected static final String MAIN_SOURCE = "${project.basedir}/src/main/protobuf";
+  protected static final String TEST_SOURCE = "${project.basedir}/src/test/protobuf";
+  protected static final String MAIN_OUTPUT = "${project.build.directory}/generated-sources";
+  protected static final String TEST_OUTPUT = "${project.build.directory}/generated-test-sources";
 
   // Injected components.
   @Component
@@ -118,20 +122,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   /**
-   * The root directories to look for protobuf sources in.
-   *
-   * @param sourceDirectories the source directories.
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = "${project.basedir}/src/main/protobuf")
-  public final void setSourceDirectories(Set<String> sourceDirectories) {
-    this.sourceDirectories = sourceDirectories
-        .stream()
-        .map(Path::of)
-        .collect(Collectors.toUnmodifiableSet());
-  }
-
-  /**
    * Whether to treat {@code protoc} compiler warnings as errors.
    *
    * @param fatalWarnings whether to treat warnings as errors or not.
@@ -192,6 +182,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @param path    the path to register.
    */
   protected abstract void registerSource(MavenProject project, Path path);
+
+  /**
+   * The root directories to look for protobuf sources in.
+   *
+   * @param sourceDirectories the source directories.
+   */
+  protected final void setSourceDirectoryPaths(Set<Path> sourceDirectories) {
+    this.sourceDirectories = sourceDirectories;
+  }
 
   /**
    * Set the output directory.
