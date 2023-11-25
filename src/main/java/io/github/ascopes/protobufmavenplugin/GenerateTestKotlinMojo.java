@@ -18,8 +18,8 @@ package io.github.ascopes.protobufmavenplugin;
 import java.nio.file.Path;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Mojo to generate test Kotlin sources from Protobuf sources.
@@ -47,11 +47,9 @@ public final class GenerateTestKotlinMojo extends AbstractGenerateMojo {
    * @param outputDirectory the output directory.
    * @since 0.0.1
    */
-  @Override
-  @Parameter(defaultValue = "${project.build.directory}/generated-test-sources/protoc")
+  @Parameter(defaultValue = "${project.build.directory}/generated-test-sources/protoc-kotlin")
   public void setOutputDirectory(String outputDirectory) {
-    // We override this to enable changing the @Parameter annotation's default value.
-    super.setOutputDirectory(outputDirectory);
+    super.setOutputDirectory(Path.of(outputDirectory));
   }
 
   @Override

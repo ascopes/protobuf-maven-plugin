@@ -17,7 +17,7 @@ import java.nio.file.Path
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-def generatedSourcesPath = baseDirectory.resolve("target/generated-sources/protoc")
+def generatedSourcesPath = baseDirectory.resolve("target/generated-sources/protoc-java")
 def classesPath = baseDirectory.resolve("target/classes")
 def expectedGeneratedFiles = [
     "org/example/helloworld/Helloworld",

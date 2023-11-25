@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin;
 import java.nio.file.Path;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -38,6 +39,17 @@ public final class GenerateKotlinMojo extends AbstractGenerateMojo {
    */
   public GenerateKotlinMojo() {
     // Nothing to do.
+  }
+
+  /**
+   * The directory to output generated sources to.
+   *
+   * @param outputDirectory the output directory.
+   * @since 0.0.1
+   */
+  @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc-kotlin")
+  public void setOutputDirectory(String outputDirectory) {
+    super.setOutputDirectory(Path.of(outputDirectory));
   }
 
   @Override

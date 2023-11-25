@@ -131,17 +131,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   /**
-   * The directory to output generated sources to.
-   *
-   * @param outputDirectory the output directory.
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = "${project.build.directory}/generated-sources/protoc")
-  public void setOutputDirectory(String outputDirectory) {
-    this.outputDirectory = Path.of(outputDirectory);
-  }
-
-  /**
    * Whether to treat {@code protoc} compiler warnings as errors.
    *
    * @param fatalWarnings whether to treat warnings as errors or not.
@@ -203,6 +192,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @param path    the path to register.
    */
   protected abstract void registerSource(MavenProject project, Path path);
+
+  /**
+   * Set the output directory.
+   *
+   * @param outputDirectory the output directory.
+   */
+  protected void setOutputDirectory(Path outputDirectory) {
+    this.outputDirectory = outputDirectory;
+  }
 
   private Path resolveProtocPath() throws MojoExecutionException, MojoFailureException {
     try {
