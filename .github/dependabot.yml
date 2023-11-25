@@ -21,4 +21,5 @@ updates:
     target-branch: main
     assignees:
       - ascopes
-    labels: dependencies
+    labels: 
+      - dependencies
