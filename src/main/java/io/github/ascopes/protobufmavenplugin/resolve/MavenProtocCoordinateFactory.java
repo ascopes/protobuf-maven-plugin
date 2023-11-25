@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.resolve;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
@@ -43,6 +45,8 @@ public final class MavenProtocCoordinateFactory {
    * @throws ProtocResolutionException if the system is not supported.
    */
   public ArtifactCoordinate create(String versionRange) throws ProtocResolutionException {
+    emitPlatformWarnings();
+
     var coordinate = new DefaultArtifactCoordinate();
     coordinate.setGroupId(GROUP_ID);
     coordinate.setArtifactId(ARTIFACT_ID);
@@ -50,6 +54,17 @@ public final class MavenProtocCoordinateFactory {
     coordinate.setClassifier(determineClassifier());
     coordinate.setExtension(EXTENSION);
     return coordinate;
+  }
+
+  private void emitPlatformWarnings() {
+    if (HostEnvironment.workingDirectory().toString().startsWith("/data/data/com.termux")) {
+      LOGGER.warn(
+          "It appears you are running on Termux. You may have difficulties "
+              + "invoking the 'protoc' executable from Maven Central. If this "
+              + "is an issue, install protoc directly ('pkg in protoc'), and "
+              + "invoke Maven with '-Dprotoc.version=PATH' instead."
+      );
+    }
   }
 
   private String determineClassifier() throws ProtocResolutionException {

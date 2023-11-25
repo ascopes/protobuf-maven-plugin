@@ -349,4 +349,12 @@ class HostEnvironmentTest extends FileSystemTestSupport {
     assertThat(HostEnvironment.environmentVariable(unexpectedVariableName))
         .isEmpty();
   }
+
+  @DisplayName(".workingDirectory() returns the working directory")
+  @Test
+  void workingDirectoryReturnsTheWorkingDirectory() {
+    // Then
+    assertThat(HostEnvironment.workingDirectory())
+        .isEqualTo(Path.of("").toAbsolutePath());
+  }
 }

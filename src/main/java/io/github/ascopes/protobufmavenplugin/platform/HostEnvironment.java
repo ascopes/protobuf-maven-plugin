@@ -115,6 +115,15 @@ public final class HostEnvironment {
     }
   }
 
+  /**
+   * Get the current working directory.
+   *
+   * @return the current working directory.
+   */
+  public static Path workingDirectory() {
+    return Path.of("").toAbsolutePath();
+  }
+
   // Visible for testing purposes only.
   static Optional<String> environmentVariable(String name) {
     return ofNullable(System.getenv(name));
