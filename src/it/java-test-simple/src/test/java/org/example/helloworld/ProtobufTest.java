@@ -16,12 +16,29 @@
 package org.example.helloworld;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProtobufTest {
+
+  @Test
+  void generatedProtobufSourcesAreFullMessages() throws Throwable {
+    // When
+    var superClasses = new ArrayList<String>();
+    Class<?> superClass = GreetingRequest.class;
+
+    do {
+      superClasses.add(superClass.getName());
+      superClass = superClass.getSuperclass();
+    } while (superClass != null);
+
+    // Then
+    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessageV3"));
+  }
 
   @Test
   void generatedProtobufSourcesAreValid() throws Throwable {

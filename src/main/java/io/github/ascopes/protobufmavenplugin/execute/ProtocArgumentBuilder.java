@@ -74,10 +74,23 @@ public final class ProtocArgumentBuilder {
    *
    * @param outputType      the output type, e.g. {@code java} or {@code kotlin}.
    * @param outputDirectory the directory to write outputs to.
+   * @param lite            whether to generate "lite" outputs or not for this output directory.
    * @return this builder.
    */
-  public ProtocArgumentBuilder outputDirectory(String outputType, Path outputDirectory) {
-    arguments.add("--" + outputType + "_out=" + outputDirectory);
+  public ProtocArgumentBuilder outputDirectory(
+      String outputType,
+      Path outputDirectory,
+      boolean lite
+  ) {
+    var arg = new StringBuilder("--").append(outputType).append("_out=");
+
+    if (lite) {
+      arg.append("lite:");
+    }
+
+    arg.append(outputDirectory);
+
+    arguments.add(arg.toString());
     return this;
   }
 
