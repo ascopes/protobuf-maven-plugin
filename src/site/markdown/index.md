@@ -61,7 +61,7 @@ A simple project that makes use of this plugin to generate Java sources would pl
           <execution>
             <phase>generate-sources</phase>
             <goals>
-              <goal>generate-java</goal>
+              <goal>generate</goal>
             </goals>
           </execution>
         </executions>
@@ -71,41 +71,37 @@ A simple project that makes use of this plugin to generate Java sources would pl
 </project>
 ```
 
-This will output generated sources in `target/generated-sources/protoc-java` by default.
+This will output generated sources in `target/generated-sources/protobuf` by default.
 
-Test sources can be generated with the `generate-test-java` goal. Test sources will be output to
-the `target/generated-test-sources/protoc-java` directory.
+Test sources can be generated with the `generate-test` goal. Test sources will be output to
+the `target/generated-test-sources/protobuf` directory, and will be read from
+`src/test/protobuf` by default.
 
 Kotlin
 ------
 
-To generate Kotlin sources, use the `generate-kotlin` goal instead of the `generate-java` goal:
+Protoc support for Kotlin currently takes the shape of producing additional Kotlin API wrapper
+calls that can decorate the existing generated Java code.
 
-```xml
+To opt in to also generating these sources, set the `generateKotlinWrappers` plugin property to
+`true`:
+
+```kotlin
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
   <version>...</version>
   
   <configuration>
-    <version>${protobuf.version}</version>
+    <generateKotlinWrappers>true</generateKotlinWrappers>
+    ...
   </configuration>
-  
-  <executions>
-    <execution>
-      <phase>generate-sources</phase>
-      <goals>
-        <goal>generate-kotlin</goal>
-      </goals>
-    </execution>
-  </executions>
+    
+  ...
 </plugin>
 ```
 
-This will output generated sources in `target/generated-sources/protoc-kotlin` by default.
-
-Test sources can be generated with the `generate-test-kotlin` goal. Test sources will be output to
-the `target/generated-test-sources/protoc-kotlin` directory.
+Sources will be emitted in the same location as the Java sources.
 
 Overriding the input directories
 --------------------------------
@@ -145,7 +141,7 @@ as `PATH`.
   <version>...</version>
 
   <configuration>
-    <version>${protobuf.version}</version>
+    <version>PATH</version>
   </configuration>
 
   ...

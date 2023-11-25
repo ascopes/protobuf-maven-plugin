@@ -24,22 +24,22 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Mojo to generate test Kotlin sources from Protobuf sources.
+ * Mojo to generate test source code from Protobuf sources.
  *
  * @author Ashley Scopes
  */
 @Mojo(
-    name = "generate-test-kotlin",
+    name = "generate-test",
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     requiresOnline = true,
     threadSafe = true
 )
-public final class GenerateTestKotlinMojo extends AbstractGenerateMojo {
+public final class GenerateTestMojo extends AbstractGenerateMojo {
 
   /**
    * Initialise this Mojo.
    */
-  public GenerateTestKotlinMojo() {
+  public GenerateTestMojo() {
     // Nothing to do.
   }
 
@@ -49,7 +49,7 @@ public final class GenerateTestKotlinMojo extends AbstractGenerateMojo {
    * @param outputDirectory the output directory.
    * @since 0.0.1
    */
-  @Parameter(defaultValue = TEST_OUTPUT + "/protoc-kotlin")
+  @Parameter(defaultValue = TEST_OUTPUT + "/protobuf")
   public void setOutputDirectory(String outputDirectory) {
     super.setOutputDirectory(Path.of(outputDirectory));
   }
@@ -67,11 +67,6 @@ public final class GenerateTestKotlinMojo extends AbstractGenerateMojo {
         .map(Path::of)
         .collect(Collectors.toUnmodifiableSet());
     super.setSourceDirectoryPaths(parsedDirectories);
-  }
-
-  @Override
-  protected String getSourceOutputType() {
-    return "kotlin";
   }
 
   @Override

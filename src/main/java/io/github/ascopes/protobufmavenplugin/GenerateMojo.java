@@ -19,27 +19,27 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Mojo to generate test Java sources from Protobuf sources.
+ * Mojo to generate source code from protobuf sources.
  *
  * @author Ashley Scopes
  */
 @Mojo(
-    name = "generate-test-java",
-    defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
+    name = "generate",
+    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     requiresOnline = true,
     threadSafe = true
 )
-public final class GenerateTestJavaMojo extends AbstractGenerateMojo {
+public final class GenerateMojo extends AbstractGenerateMojo {
 
   /**
    * Initialise this Mojo.
    */
-  public GenerateTestJavaMojo() {
+  public GenerateMojo() {
     // Nothing to do.
   }
 
@@ -49,7 +49,7 @@ public final class GenerateTestJavaMojo extends AbstractGenerateMojo {
    * @param outputDirectory the output directory.
    * @since 0.0.1
    */
-  @Parameter(defaultValue = TEST_OUTPUT + "/protoc-java")
+  @Parameter(defaultValue = MAIN_OUTPUT + "/protobuf")
   public void setOutputDirectory(String outputDirectory) {
     super.setOutputDirectory(Path.of(outputDirectory));
   }
@@ -60,7 +60,7 @@ public final class GenerateTestJavaMojo extends AbstractGenerateMojo {
    * @param sourceDirectories the source directories.
    * @since 0.0.1
    */
-  @Parameter(defaultValue = TEST_SOURCE)
+  @Parameter(defaultValue = MAIN_SOURCE)
   public void setSourceDirectories(Set<String> sourceDirectories) {
     var parsedDirectories = sourceDirectories
         .stream()
@@ -70,12 +70,7 @@ public final class GenerateTestJavaMojo extends AbstractGenerateMojo {
   }
 
   @Override
-  protected String getSourceOutputType() {
-    return "java";
-  }
-
-  @Override
   protected void registerSource(MavenProject project, Path path) {
-    project.addTestCompileSourceRoot(path.toString());
+    project.addCompileSourceRoot(path.toString());
   }
 }

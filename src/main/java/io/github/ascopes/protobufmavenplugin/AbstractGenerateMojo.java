@@ -64,6 +64,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private Set<Path> sourceDirectories;
   private Path outputDirectory;
   private Boolean fatalWarnings;
+  private Boolean generateKotlinWrappers;
 
   /**
    * Initialise this Mojo.
@@ -75,6 +76,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     sourceDirectories = null;
     outputDirectory = null;
     fatalWarnings = null;
+    generateKotlinWrappers = null;
   }
 
   /**
@@ -133,6 +135,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   /**
+   * Whether to also generate Kotlin API wrapper code around the generated Java code.
+   *
+   * @param generateKotlinWrappers whether to generate Kotlin wrappers or not.
+   * @since 0.0.1
+   */
+  @Parameter(defaultValue = "false")
+  public final void setGenerateKotlinWrappers(boolean generateKotlinWrappers) {
+    this.generateKotlinWrappers = generateKotlinWrappers;
+  }
+
+  /**
    * Execute this goal.
    *
    * @throws MojoExecutionException if a user/configuration error is encountered.
@@ -156,24 +169,24 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       protocExecutor.invoke(versionArgs);
 
       // Perform the compilation next.
-      var compilerArgs = new ProtocArgumentBuilder(protocPath)
+      var compilerArgsBuilder = new ProtocArgumentBuilder(protocPath)
           .fatalWarnings(fatalWarnings)
           .includeDirectories(sourceDirectories)
-          .outputDirectory(getSourceOutputType(), outputDirectory)
-          .build(sources);
+          .outputDirectory("java", outputDirectory);
+
+      if (generateKotlinWrappers) {
+        // Will emit stubs that wrap the generated Java code only.
+        compilerArgsBuilder
+            .outputDirectory("kotlin", outputDirectory);
+      }
+
+      var compilerArgs = compilerArgsBuilder.build(sources);
 
       protocExecutor.invoke(compilerArgs);
     } catch (ProtocExecutionException ex) {
       throw new MojoExecutionException("Failed to invoke protoc", ex);
     }
   }
-
-  /**
-   * The source output type to use with {@code protoc} (e.g. {@code java} for {@code --java_out}).
-   *
-   * @return the source output type.
-   */
-  protected abstract String getSourceOutputType();
 
   /**
    * Register the given output path with the project for compilation.

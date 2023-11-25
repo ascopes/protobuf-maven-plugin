@@ -17,24 +17,35 @@ import java.nio.file.Path
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-def generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
-def classesDir = baseDirectory.resolve("target/classes")
-def expectedGeneratedFiles = [
+def generatedSourcesDir = baseDirectory.resolve("target/generated-test-sources/protobuf")
+def classesDir = baseDirectory.resolve("target/test-classes")
+def expectedGeneratedJavaFiles = [
     "org/example/helloworld/Helloworld",
     "org/example/helloworld/GreetingRequest",
     "org/example/helloworld/GreetingRequestOrBuilder",
+]
+def expectedGeneratedKotlinFiles = [
+    "org/example/helloworld/GreetingRequestKt",
 ]
 
 assertThat(generatedSourcesDir).isDirectory()
 
 assertThat(classesDir).isDirectory()
 
-expectedGeneratedFiles.forEach {
+expectedGeneratedJavaFiles.forEach {
   assertThat(generatedSourcesDir.resolve("${it}.java"))
       .exists()
       .isNotEmptyFile()
   assertThat(classesDir.resolve("${it}.class"))
       .exists()
       .isNotEmptyFile()
+}
 
+expectedGeneratedKotlinFiles.forEach {
+  assertThat(generatedSourcesDir.resolve("${it}.kt"))
+      .exists()
+      .isNotEmptyFile()
+  assertThat(classesDir.resolve("${it}.class"))
+      .exists()
+      .isNotEmptyFile()
 }

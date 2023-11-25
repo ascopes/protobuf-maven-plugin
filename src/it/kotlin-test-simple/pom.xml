@@ -27,9 +27,9 @@
 
   <properties>
     <junit.version>5.10.1</junit.version>
+    <kotlin.version>1.9.21</kotlin.version>
     <protobuf.version>3.25.0</protobuf.version>
 
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,9 +38,15 @@
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
+      <artifactId>protobuf-kotlin</artifactId>
       <version>${protobuf.version}</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${kotlin.version}</version>
     </dependency>
 
     <dependency>
@@ -52,21 +58,28 @@
   </dependencies>
 
   <build>
+    <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
-
-        <configuration>
-          <release>11</release>
-        </configuration>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+
+        <executions>
+          <execution>
+            <id>test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -75,14 +88,15 @@
         <version>${plugin-version}</version>
 
         <configuration>
+          <generateKotlinWrappers>true</generateKotlinWrappers>
           <version>${protobuf.version}</version>
         </configuration>
 
         <executions>
           <execution>
-            <phase>generate-sources</phase>
+            <phase>generate-test-sources</phase>
             <goals>
-              <goal>generate</goal>
+              <goal>generate-test</goal>
             </goals>
           </execution>
         </executions>
