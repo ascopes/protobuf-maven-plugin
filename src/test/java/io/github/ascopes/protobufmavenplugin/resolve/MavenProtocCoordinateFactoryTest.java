@@ -52,6 +52,7 @@ class MavenProtocCoordinateFactoryTest {
   ) throws ProtocResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenWindowsWithArch(hostEnvironment, architecture);
 
       // When
@@ -67,6 +68,7 @@ class MavenProtocCoordinateFactoryTest {
   void supportedWindowsArchitecturesResultInException() {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenWindowsWithArch(hostEnvironment, "x86_16");
 
       // Then
@@ -93,6 +95,7 @@ class MavenProtocCoordinateFactoryTest {
   ) throws ProtocResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenLinuxWithArch(hostEnvironment, architecture);
 
       // When
@@ -108,6 +111,7 @@ class MavenProtocCoordinateFactoryTest {
   void unsupportedLinuxArchitecturesResultInException() {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenLinuxWithArch(hostEnvironment, "IA_64");
 
       // Then
@@ -131,6 +135,7 @@ class MavenProtocCoordinateFactoryTest {
   ) throws ProtocResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenMacOsWithArch(hostEnvironment, architecture);
 
       // When
@@ -146,6 +151,7 @@ class MavenProtocCoordinateFactoryTest {
   void unsupportedMacOsArchitecturesResultInException() throws ProtocResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenMacOsWithArch(hostEnvironment, "something-crazy-unknown");
 
       // Then
@@ -161,6 +167,7 @@ class MavenProtocCoordinateFactoryTest {
   void unsupportedOperatingSystemsResultInAnExceptionBeingRaised() {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
+      givenValidWorkingDirectory(hostEnvironment);
       givenUnknownOs(hostEnvironment);
 
       // Then
@@ -174,6 +181,10 @@ class MavenProtocCoordinateFactoryTest {
   ///
   /// Helpers
   ///
+
+  private void givenValidWorkingDirectory(MockedStatic<HostEnvironment> hostEnvironment) {
+    hostEnvironment.when(HostEnvironment::workingDirectory).thenCallRealMethod();
+  }
 
   private void givenWindowsWithArch(MockedStatic<HostEnvironment> hostEnvironment, String arch) {
     hostEnvironment.when(HostEnvironment::isWindows).thenReturn(true);
