@@ -8,8 +8,23 @@ on:
         default: false
         type: boolean
 
-      skip-maven-central:
-        description: "Skip the Maven Central steps"
+      skip-maven-central-staging:
+        description: "Skip the Maven Central staging steps"
+        default: false
+        type: boolean
+
+      skip-maven-central-promotion:
+        description: "Skip the Maven Central promotion steps"
+        default: false
+        type: boolean
+
+      skip-site-publication:
+        description: "Skip the site publication steps"
+        default: false
+        type: boolean
+
+      skip-github-release:
+        description: "Skip the GitHub release creation steps"
         default: false
         type: boolean
 
@@ -63,13 +78,13 @@ jobs:
           echo "release_version=${release_version}" >> "${GITHUB_ENV}"
 
       - name: Configure Git
-        if: ${{ ! inputs.skip-maven-central }}
+        if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           git config user.name '${{ github.actor }}'
           git config user.email '${{ github.actor }}@users.noreply.github.com'
 
       - name: Create staging release
-        if: ${{ ! inputs.skip-maven-central }}
+        if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           ./mvnw -B -e \
               -DdryRun='${{ inputs.dry-run }}' \
@@ -84,9 +99,9 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Promote staging release
-        if: ${{ ! inputs.dry-run && ! inputs.skip-maven-central }}
+        if: ${{ ! inputs.dry-run && ! inputs.skip-maven-central-promotion }}
         run: |-
-          ./scripts/close-nexus-repository.sh \
+          ./scripts/close-nexus-repos.sh \
               -u "${OSSRH_USERNAME}" \
               -p "${OSSRH_TOKEN}" \
               -g "${group_id}" \
@@ -98,6 +113,7 @@ jobs:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Generate site
+        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
         run: |-
           git fetch --tags origin "v${release_version}"
           git checkout FETCH_HEAD
@@ -105,11 +121,12 @@ jobs:
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v2
+        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
         with:
           path: target/site
 
       - name: Create GitHub Release
-        if: ${{ ! inputs.dry-run && ! inputs.skip-maven-central }}
+        if: ${{ ! inputs.dry-run && ! inputs.skip-github-release }}
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ env.release_version }}
@@ -134,5 +151,5 @@ jobs:
       
     steps:
       - name: Deploy site
-        if: ${{ ! inputs.dry-run }}
+        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
         uses: actions/deploy-pages@v2
