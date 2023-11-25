@@ -156,6 +156,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>See the protobuf documentation for the pros and cons of this.
    *
    * @param liteOnly whether to only generate "lite" messages or not.
+   * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
   public final void setLiteOnly(boolean liteOnly) {
