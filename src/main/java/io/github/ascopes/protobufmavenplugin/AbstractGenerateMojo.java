@@ -65,6 +65,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private Path outputDirectory;
   private Boolean fatalWarnings;
   private Boolean generateKotlinWrappers;
+  private Boolean liteOnly;
 
   /**
    * Initialise this Mojo.
@@ -77,6 +78,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     outputDirectory = null;
     fatalWarnings = null;
     generateKotlinWrappers = null;
+    liteOnly = null;
   }
 
   /**
@@ -146,6 +148,21 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   /**
+   * Whether to only generate "lite" messages or not.
+   *
+   * <p>These are bare-bones sources that do not contain most of the metadata that regular
+   * Protobuf sources contain, and are designed for low-latency/low-overhead scenarios.
+   *
+   * <p>See the protobuf documentation for the pros and cons of this.
+   *
+   * @param liteOnly whether to only generate "lite" messages or not.
+   */
+  @Parameter(defaultValue = "false")
+  public final void setLiteOnly(boolean liteOnly) {
+    this.liteOnly = liteOnly;
+  }
+
+  /**
    * Execute this goal.
    *
    * @throws MojoExecutionException if a user/configuration error is encountered.
@@ -172,12 +189,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       var compilerArgsBuilder = new ProtocArgumentBuilder(protocPath)
           .fatalWarnings(fatalWarnings)
           .includeDirectories(sourceDirectories)
-          .outputDirectory("java", outputDirectory);
+          .outputDirectory("java", outputDirectory, liteOnly);
 
       if (generateKotlinWrappers) {
         // Will emit stubs that wrap the generated Java code only.
         compilerArgsBuilder
-            .outputDirectory("kotlin", outputDirectory);
+            .outputDirectory("kotlin", outputDirectory, liteOnly);
       }
 
       var compilerArgs = compilerArgsBuilder.build(sources);

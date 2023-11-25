@@ -128,6 +128,33 @@ plugin configuration:
 
 Multiple source directories can be specified if required.
 
+Lightweight 'lite' sources
+--------------------------
+
+If you are in a situation where you need lightweight and fast protobuf generated sources, you
+can opt in to generating "lite" sources only. These will omit all the metadata usually included
+within generated protobuf sources, at the cost of flexibility.
+
+Refer to the protobuf documentation for more details on the pros and cons of doing this.
+
+To enable this in the plugin, set the `liteOnly` parameter to `true`. By default this is disabled
+as you usually do not need to worry about this.
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    <liteOnly>true</liteOnly>
+    ...
+  </configuration>
+
+  ...
+</plugin>
+```
+
 Using `protoc` from the system path
 -----------------------------------
 

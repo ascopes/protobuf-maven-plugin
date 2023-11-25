@@ -20,12 +20,13 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProtobufTest {
+
   @Test
-  void generatedProtobufSourcesAreFullMessages() throws Throwable {
+  void generatedProtobufSourcesAreLiteMessages() throws Throwable {
     // When
     var superClasses = new ArrayList<String>();
     Class<?> superClass = GreetingRequest.class;
@@ -36,7 +37,7 @@ class ProtobufTest {
     } while (superClass != null);
 
     // Then
-    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessageV3"));
+    assertFalse(superClasses.contains("com.google.protobuf.GeneratedMessageV3"));
   }
 
   @Test
