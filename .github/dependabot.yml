@@ -9,6 +9,8 @@ updates:
     target-branch: main
     assignees:
       - ascopes
+    labels:
+      - ci
 
   - package-ecosystem: maven
     directory: /
@@ -19,3 +21,4 @@ updates:
     target-branch: main
     assignees:
       - ascopes
+    labels: dependencies
