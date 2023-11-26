@@ -15,13 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin;
 
+import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 
 /**
  * Mojo to generate test source code from Protobuf sources.
@@ -43,34 +40,19 @@ public final class GenerateTestMojo extends AbstractGenerateMojo {
     // Nothing to do.
   }
 
-  /**
-   * The directory to output generated sources to.
-   *
-   * @param outputDirectory the output directory.
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = TEST_OUTPUT + "/protobuf")
-  public void setOutputDirectory(String outputDirectory) {
-    super.setOutputDirectory(Path.of(outputDirectory));
-  }
 
-  /**
-   * The root directories to look for protobuf sources in.
-   *
-   * @param sourceDirectories the source directories.
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = TEST_SOURCE)
-  public void setSourceDirectories(Set<String> sourceDirectories) {
-    var parsedDirectories = sourceDirectories
-        .stream()
-        .map(Path::of)
-        .collect(Collectors.toUnmodifiableSet());
-    super.setSourceDirectoryPaths(parsedDirectories);
+  @Override
+  protected Path getDefaultSourceDirectory(Path baseDir) {
+    return baseDir.resolve("src").resolve("test").resolve("protobuf");
   }
 
   @Override
-  protected void registerSource(MavenProject project, Path path) {
-    project.addTestCompileSourceRoot(path.toString());
+  protected Path getDefaultOutputDirectory(Path targetDir) {
+    return targetDir.resolve("generated-test-sources").resolve("protobuf");
+  }
+
+  @Override
+  protected SourceRootRegistrar getSourceRootRegistrar() {
+    return SourceRootRegistrar.TEST;
   }
 }

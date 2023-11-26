@@ -29,13 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 @DisplayName("ProtoSourceResolver tests")
 class ProtoSourceResolverTest extends FileSystemTestSupport {
 
-  ProtoSourceResolver resolver;
-
-  @BeforeEach
-  void setUp() {
-    resolver = new ProtoSourceResolver();
-  }
-
   @DisplayName(".proto sources are detected and returned recursively")
   @Test
   void protoSourcesAreDetectedAndReturnedRecursively() throws IOException {
@@ -57,7 +50,7 @@ class ProtoSourceResolverTest extends FileSystemTestSupport {
     );
 
     // When
-    var actualProtoFiles = resolver.collectSources(sourceDirs);
+    var actualProtoFiles = ProtoSourceResolver.resolve(sourceDirs);
 
     // Then
     assertThat(actualProtoFiles).containsExactlyInAnyOrderElementsOf(expectedProtoFiles);
@@ -85,7 +78,7 @@ class ProtoSourceResolverTest extends FileSystemTestSupport {
     );
 
     // When
-    var actualProtoFiles = resolver.collectSources(sourceDirs);
+    var actualProtoFiles = ProtoSourceResolver.resolve(sourceDirs);
 
     // Then
     assertThat(actualProtoFiles)
@@ -101,7 +94,7 @@ class ProtoSourceResolverTest extends FileSystemTestSupport {
     var sourceDirs = List.of(givenDirectoryExists("protobufs"));
 
     // When
-    var actualProtoFiles = resolver.collectSources(sourceDirs);
+    var actualProtoFiles = ProtoSourceResolver.resolve(sourceDirs);
 
     // Then
     assertThat(actualProtoFiles).isEmpty();
@@ -118,7 +111,7 @@ class ProtoSourceResolverTest extends FileSystemTestSupport {
     );
 
     // When
-    var actualProtoFiles = resolver.collectSources(sourceDirs);
+    var actualProtoFiles = ProtoSourceResolver.resolve(sourceDirs);
 
     // Then
     assertThat(actualProtoFiles).isNotEmpty();

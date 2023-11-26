@@ -339,7 +339,7 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       // Then
       assertThatThrownBy(resolver::resolve)
           .isInstanceOf(ExecutableResolutionException.class)
-          .hasMessage("File system error")
+          .hasMessage("File system error while searching for protoc")
           .hasCauseInstanceOf(IOException.class);
     }
   }

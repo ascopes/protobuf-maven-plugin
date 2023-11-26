@@ -16,28 +16,17 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
-
-import io.github.ascopes.protobufmavenplugin.execute.ProtocArgumentBuilder;
-import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
-import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutor;
-import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
-import io.github.ascopes.protobufmavenplugin.resolve.protoc.MavenProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.protoc.PathProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.source.ProtoSourceResolver;
-import java.io.IOException;
-import java.nio.file.Files;
+import io.github.ascopes.protobufmavenplugin.generate.SourceGeneratorBuilder;
+import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
 import org.jspecify.annotations.Nullable;
 
@@ -52,66 +41,20 @@ import org.jspecify.annotations.Nullable;
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
-   * The default directory to look for protobuf sources in.
+   * The artifact resolver to use to resolve dependencies from Maven repositories.
+   *
+   * @since 0.0.1
    */
-  protected static final String MAIN_SOURCE = "${project.basedir}/src/main/protobuf";
-
-  /**
-   * The default directory to look for test protobuf sources in.
-   */
-  protected static final String TEST_SOURCE = "${project.basedir}/src/test/protobuf";
-
-  /**
-   * The default directory to output generated sources to.
-   */
-  protected static final String MAIN_OUTPUT = "${project.build.directory}/generated-sources";
-
-  /**
-   * The default directory to output generated test sources to.
-   */
-  protected static final String TEST_OUTPUT = "${project.build.directory}/generated-test-sources";
-
-  // Injected components.
   @Component
   private @Nullable ArtifactResolver artifactResolver;
-
-  // Injected parameters.
-  private @Nullable MavenSession mavenSession;
-  private @Nullable String version;
-  private @Nullable Set<Path> sourceDirectories;
-  private @Nullable Path outputDirectory;
-  private @Nullable Boolean fatalWarnings;
-  private @Nullable Boolean generateKotlinWrappers;
-  private @Nullable Boolean liteOnly;
-
-  /**
-   * Initialise this Mojo.
-   */
-  protected AbstractGenerateMojo() {
-    // Expect all fields to be initialised later by Plexus.
-  }
-
-  /**
-   * Set the artifact resolver.
-   *
-   * @param artifactResolver the artifact resolver.
-   */
-  public final void setArtifactResolver(ArtifactResolver artifactResolver) {
-    this.artifactResolver = artifactResolver;
-  }
 
   /**
    * The Maven session that is in use.
    *
-   * <p>This is passed in by Maven automatically, so can be ignored.
-   *
-   * @param mavenSession the Maven session.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "${session}", required = true, readonly = true)
-  public final void setMavenSession(MavenSession mavenSession) {
-    this.mavenSession = mavenSession;
-  }
+  private MavenSession mavenSession;
 
   /**
    * The version of protoc to use.
@@ -127,35 +70,42 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
-   * @param version the version of {@code protoc} to use.
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
-  public final void setVersion(String version) {
-    this.version = version;
-  }
+  private String version;
+
+  /**
+   * Override the source directories to compile from.
+   *
+   * @since 0.0.1
+   */
+  @Parameter
+  private @Nullable Set<String> sourceDirectories;
+
+  /**
+   * Override the directory to output generated sources to.
+   *
+   * @since 0.0.1
+   */
+  @Parameter
+  private @Nullable String outputDirectory;
 
   /**
    * Whether to treat {@code protoc} compiler warnings as errors.
    *
-   * @param fatalWarnings whether to treat warnings as errors or not.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  public final void setFatalWarnings(boolean fatalWarnings) {
-    this.fatalWarnings = fatalWarnings;
-  }
+  private boolean fatalWarnings;
 
   /**
    * Whether to also generate Kotlin API wrapper code around the generated Java code.
    *
-   * @param generateKotlinWrappers whether to generate Kotlin wrappers or not.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  public final void setGenerateKotlinWrappers(boolean generateKotlinWrappers) {
-    this.generateKotlinWrappers = generateKotlinWrappers;
-  }
+  private boolean generateKotlinWrappers;
 
   /**
    * Whether to only generate "lite" messages or not.
@@ -165,142 +115,81 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>See the protobuf documentation for the pros and cons of this.
    *
-   * @param liteOnly whether to only generate "lite" messages or not.
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  public final void setLiteOnly(boolean liteOnly) {
-    this.liteOnly = liteOnly;
+  private boolean liteOnly;
+
+  /**
+   * Initialise this Mojo.
+   */
+  protected AbstractGenerateMojo() {
+    // Expect all fields to be initialised later by Plexus.
   }
 
   /**
    * Execute this goal.
    *
    * @throws MojoExecutionException if a user/configuration error is encountered.
-   * @throws MojoFailureException if execution fails due to an internal error.
+   * @throws MojoFailureException   if execution fails due to an internal error.
    */
   @Override
   public final void execute() throws MojoExecutionException, MojoFailureException {
-    requireNonNull(artifactResolver);
-    requireNonNull(mavenSession);
-    requireNonNull(version);
-    requireNonNull(sourceDirectories);
-    requireNonNull(outputDirectory);
-    requireNonNull(fatalWarnings);
-    requireNonNull(generateKotlinWrappers);
-    requireNonNull(liteOnly);
-
-    var protocPath = resolveProtocPath();
-    var sources = resolveProtoSources();
-
-    // Protoc will not create the output directory if it does not exist already.
-    createOutputDirectory();
-    registerSource(mavenSession.getCurrentProject(), outputDirectory);
-
-    try {
-      var protocExecutor = new ProtocExecutor();
-
-      // Log the version first.
-      var versionArgs = new ProtocArgumentBuilder(protocPath)
-          .version();
-      protocExecutor.invoke(versionArgs);
-
-      // Perform the compilation next.
-      var compilerArgsBuilder = new ProtocArgumentBuilder(protocPath)
-          .fatalWarnings(fatalWarnings)
-          .includeDirectories(sourceDirectories)
-          .outputDirectory("java", outputDirectory, liteOnly);
-
-      if (generateKotlinWrappers) {
-        // Will emit stubs that wrap the generated Java code only.
-        compilerArgsBuilder
-            .outputDirectory("kotlin", outputDirectory, liteOnly);
-      }
-
-      var compilerArgs = compilerArgsBuilder.build(sources);
-
-      protocExecutor.invoke(compilerArgs);
-    } catch (ProtocExecutionException ex) {
-      throw new MojoExecutionException("Failed to invoke protoc", ex);
-    }
+    new SourceGeneratorBuilder()
+        .artifactResolver(artifactResolver)
+        .fatalWarnings(fatalWarnings)
+        .generateKotlinWrappers(generateKotlinWrappers)
+        .liteOnly(liteOnly)
+        .mavenSession(mavenSession)
+        .outputDirectory(getActualOutputDirectory())
+        .protocVersion(version)
+        .sourceDirectories(getActualSourceDirectories())
+        .sourceRootRegistrar(getSourceRootRegistrar())
+        .build()
+        .generate();
   }
 
   /**
-   * Register the given output path with the project for compilation.
+   * Get the default source directory to use if none are specified.
    *
-   * @param project the Maven project.
-   * @param path    the path to register.
+   * @param baseDir the project base directory.
+   * @return the default source directory.
    */
-  protected abstract void registerSource(MavenProject project, Path path);
+  protected abstract Path getDefaultSourceDirectory(Path baseDir);
 
   /**
-   * The root directories to look for protobuf sources in.
+   * Get the default output directory to use if none are specified.
    *
-   * @param sourceDirectories the source directories.
+   * @param targetDir the project target directory.
+   * @return the default source directory.
    */
-  protected final void setSourceDirectoryPaths(Set<Path> sourceDirectories) {
-    this.sourceDirectories = sourceDirectories;
-  }
+  protected abstract Path getDefaultOutputDirectory(Path targetDir);
 
   /**
-   * Set the output directory.
+   * Get the source root registrar to use.
    *
-   * <p>Implementations are expected to declare a parameter that is named "outputDirectory"
-   * and passes the input to this method as a {@link Path}. This is done to allow overriding
-   * the output directory per goal.
-   *
-   * @param outputDirectory the output directory.
+   * @return the source root registrar to use.
    */
-  protected final void setOutputDirectory(Path outputDirectory) {
-    this.outputDirectory = outputDirectory;
-  }
+  protected abstract SourceRootRegistrar getSourceRootRegistrar();
 
-  private Path resolveProtocPath() throws MojoExecutionException, MojoFailureException {
-    try {
-      var resolver = version.trim().equalsIgnoreCase("PATH")
-          ? new PathProtocResolver()
-          : new MavenProtocResolver(version, artifactResolver, mavenSession);
-
-      return resolver.resolve();
-
-    } catch (ExecutableResolutionException ex) {
-      throw error("Failed to resolve protoc executable", ex);
-    } catch (Exception ex) {
-      throw failure("Failed to resolve protoc executable", ex);
+  private Set<Path> getActualSourceDirectories() {
+    if (sourceDirectories == null || sourceDirectories.isEmpty()) {
+      var baseDir = mavenSession.getCurrentProject().getBasedir().toPath();
+      return Set.of(getDefaultSourceDirectory(baseDir));
     }
+
+    return sourceDirectories
+        .stream()
+        .map(Path::of)
+        .collect(Collectors.toSet());
   }
 
-  private List<Path> resolveProtoSources() throws MojoFailureException {
-    try {
-      return new ProtoSourceResolver().collectSources(sourceDirectories);
-    } catch (IOException ex) {
-      throw failure("Failed to resolve proto sources", ex);
+  private Path getActualOutputDirectory() {
+    if (outputDirectory == null || outputDirectory.isBlank()) {
+      var targetDir = Path.of(mavenSession.getCurrentProject().getBuild().getDirectory());
+      return getDefaultOutputDirectory(targetDir);
     }
-  }
 
-  private void createOutputDirectory() throws MojoFailureException {
-    try {
-      Files.createDirectories(outputDirectory);
-    } catch (IOException ex) {
-      throw failure("Failed to create output directory '" + outputDirectory + "'", ex);
-    }
-  }
-
-  private MojoExecutionException error(String shortMessage, Exception ex) {
-    var newEx = new MojoExecutionException(this, shortMessage, getLongMessage(shortMessage, ex));
-    newEx.initCause(ex);
-    return newEx;
-  }
-
-  private MojoFailureException failure(String shortMessage, Exception ex) {
-    var newEx = new MojoFailureException(this, shortMessage, getLongMessage(shortMessage, ex));
-    newEx.initCause(ex);
-    return newEx;
-  }
-
-  private String getLongMessage(String shortMessage, Exception ex) {
-    return ofNullable(ex)
-        .map(Exception::getMessage)
-        .orElse(shortMessage);
+    return Path.of(outputDirectory);
   }
 }

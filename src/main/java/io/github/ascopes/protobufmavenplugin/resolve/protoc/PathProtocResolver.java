@@ -16,15 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
-import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
-import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
-import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolver;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.function.Predicate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.ascopes.protobufmavenplugin.resolve.AbstractPathResolver;
 
 /**
  * Resolver for {@code protoc} that considers any executables in the {@code $PATH} environment
@@ -43,10 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
-public final class PathProtocResolver implements ExecutableResolver {
-
-  private static final String PROTOC = "protoc";
-  private static final Logger LOGGER = LoggerFactory.getLogger(PathProtocResolver.class);
+public final class PathProtocResolver extends AbstractPathResolver {
 
   /**
    * Initialise this resolver.
@@ -56,72 +45,7 @@ public final class PathProtocResolver implements ExecutableResolver {
   }
 
   @Override
-  public Path resolve() throws ExecutableResolutionException {
-    var predicate = HostEnvironment.isWindows()
-        ? isProtocWindows()
-        : isProtocPosix();
-
-    try {
-      for (var indexableDirectory : HostEnvironment.systemPath()) {
-        if (!Files.isDirectory(indexableDirectory)) {
-          LOGGER.warn("Ignoring non-existent directory '{}' within $PATH", indexableDirectory);
-          continue;
-        }
-
-        LOGGER.debug(
-            "Searching directory '{}' for protoc binary named '{}'",
-            indexableDirectory,
-            PROTOC
-        );
-
-        try (var fileStream = Files.list(indexableDirectory)) {
-          var result = fileStream
-              .peek(this::logFile)
-              .filter(predicate)
-              .findFirst()
-              .orElse(null);
-
-          if (result != null) {
-            LOGGER.info("Resolved protoc binary to '{}'", result);
-            return result;
-          }
-        }
-      }
-    } catch (IOException ex) {
-      throw new ExecutableResolutionException("File system error", ex);
-    }
-
-    throw new ExecutableResolutionException("No protoc binary was found in the $PATH");
-  }
-
-  private void logFile(Path file) {
-    LOGGER.trace("Checking if '{}' is a potential '{}' candidate", file, PROTOC);
-  }
-
-  private Predicate<Path> isProtocWindows() {
-    // On Windows, we have to ignore case sensitivity. For example, protoc.exe and
-    // PROTOC.EXE are the same thing. We have to look at the file name without the
-    // extension to determine the program name, and should match only if the file
-    // extension is listed in the $PATHEXT.
-    var pathExt = HostEnvironment.systemPathExtensions();
-
-    return path -> {
-      var fileName = path.getFileName().toString();
-      var fileExtensionIndex = fileName.lastIndexOf('.');
-      var fileExtension = fileExtensionIndex < 0
-          ? ""
-          : fileName.substring(fileExtensionIndex);
-      var baseFileName = fileExtensionIndex < 0
-          ? fileName
-          : fileName.substring(0, fileExtensionIndex);
-
-      return baseFileName.equalsIgnoreCase(PROTOC) && pathExt.contains(fileExtension);
-    };
-  }
-
-  private Predicate<Path> isProtocPosix() {
-    // On POSIX systems, we check if the file is named 'protoc' exactly. If it is, then we check
-    // that it has the executable bit set for the current user.
-    return path -> path.getFileName().toString().equals(PROTOC) && Files.isExecutable(path);
+  protected String binaryName() {
+    return "protoc";
   }
 }

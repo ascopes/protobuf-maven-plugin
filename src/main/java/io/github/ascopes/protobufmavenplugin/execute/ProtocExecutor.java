@@ -34,11 +34,8 @@ public final class ProtocExecutor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProtocExecutor.class);
 
-  /**
-   * Initialise the executor.
-   */
-  public ProtocExecutor() {
-    // Nothing to do here.
+  private ProtocExecutor() {
+    // Static-only class.
   }
 
   /**
@@ -49,8 +46,8 @@ public final class ProtocExecutor {
    * @param arguments the arguments to invoke the process with.
    * @throws ProtocExecutionException if the execution fails.
    */
-  public void invoke(List<String> arguments) throws ProtocExecutionException {
-    int exitCode = -1;
+  public static void invoke(List<String> arguments) throws ProtocExecutionException {
+    int exitCode;
 
     try {
       LOGGER.info("Invoking {}", arguments);
@@ -98,7 +95,7 @@ public final class ProtocExecutor {
     }
   }
 
-  private CompletableFuture<?> streamOutputAsLogs(InputStream inputStream) {
+  private static CompletableFuture<?> streamOutputAsLogs(InputStream inputStream) {
     // TODO: do we care that we're using the default fork-join pool?
     //  Probably not for now.
     return CompletableFuture.runAsync(() -> {
