@@ -89,7 +89,7 @@
 
         <configuration>
           <generateKotlinWrappers>true</generateKotlinWrappers>
-          <version>${protobuf.version}</version>
+          <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>

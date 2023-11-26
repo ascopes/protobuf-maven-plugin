@@ -75,7 +75,7 @@
         <version>${plugin-version}</version>
 
         <configuration>
-          <version>${protobuf.version}</version>
+          <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>

@@ -6,7 +6,7 @@
 
 A simple and modern Maven plugin to generate Java/Kotlin sources from Protobuf definitions.
 
-## Aims
+## Features
 
 - Support for downloading a specified version of `protoc` from Maven repositories.
   - Ability to resolve any desired version
@@ -15,7 +15,9 @@ A simple and modern Maven plugin to generate Java/Kotlin sources from Protobuf d
 - Support for invoking `protoc` from the `$PATH` if you have an obscure system that does not provide
   an official `protoc` binary release from Google.
 - Java 11+ support.
-- Support for generating Java and Kotlin sources.
+- Ability to generate sources for Protobuf message payloads.
+- Ability to optionally generate source stubs for GRPC services.
+- Option to also generate Kotlin stubs that wrap the Java sources.
 
 ## Usage
 
@@ -30,7 +32,7 @@ The proposed usage at the time of writing will be something along the lines of:
   <configuration>
     <!-- Version of protoc to use, as defined at
          https://mvnrepository.com/artifact/com.google.protobuf/protoc -->
-    <version>3.25.0</version>
+    <protocVersion>3.25.0</protocVersion>
     <!-- Fail if protoc raises any warnings -->
     <fatalWarnings>true</fatalWarnings>
   </configuration>

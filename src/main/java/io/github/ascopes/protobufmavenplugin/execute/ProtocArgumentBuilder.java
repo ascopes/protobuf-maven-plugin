@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin.execute;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,7 +33,6 @@ public final class ProtocArgumentBuilder {
   // See the following source code for all supported flags:
   // https://github.com/protocolbuffers/protobuf/blob/7f94235e552599141950d7a4a3eaf93bc87d1b22/src/google/protobuf/compiler/command_line_interface.cc#L2438
 
-  private final Path executablePath;
   private final List<String> arguments;
 
   /**
@@ -43,8 +41,8 @@ public final class ProtocArgumentBuilder {
    * @param executablePath the path to the {@code protoc} executable.
    */
   public ProtocArgumentBuilder(Path executablePath) {
-    this.executablePath = executablePath;
     arguments = new ArrayList<>();
+    arguments.add(executablePath.toString());
   }
 
   /**
@@ -53,7 +51,8 @@ public final class ProtocArgumentBuilder {
    * @return the arguments.
    */
   public List<String> version() {
-    return List.of(executablePath.toString(), "--version");
+    arguments.add("--version");
+    return List.copyOf(arguments);
   }
 
   /**
@@ -66,6 +65,19 @@ public final class ProtocArgumentBuilder {
     for (var directory : directories) {
       arguments.add("--proto_path=" + directory);
     }
+    return this;
+  }
+
+  /**
+   * Add a plugin.
+   *
+   * @param pluginName the plugin name to use.
+   * @param pluginPath the plugin path to use.
+   * @return this builder.
+   */
+  public ProtocArgumentBuilder plugin(String pluginName, Path pluginPath) {
+    var arg = "--plugin=" + pluginName + "=" + pluginPath;
+    arguments.add(arg);
     return this;
   }
 
@@ -118,12 +130,9 @@ public final class ProtocArgumentBuilder {
    * @return the arguments.
    */
   public List<String> build(Collection<Path> protoFiles) {
-    var finalArguments = new ArrayList<String>(1 + arguments.size() + protoFiles.size());
-    finalArguments.add(executablePath.toString());
-    finalArguments.addAll(arguments);
     for (var protoFile : protoFiles) {
-      finalArguments.add(protoFile.toString());
+      arguments.add(protoFile.toString());
     }
-    return Collections.unmodifiableList(finalArguments);
+    return List.copyOf(arguments);
   }
 }

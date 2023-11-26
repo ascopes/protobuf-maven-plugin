@@ -73,10 +73,34 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
-  private String version;
+  private String protocVersion;
+
+  /**
+   * The version of the GRPC plugin to use.
+   *
+   * <p>This should correspond to the version of {@code grpc-stubs} or similar that is in
+   * use.
+   *
+   * <p>The value can be a static version, or a valid Maven version range (such as
+   * "{@code [1.58.0,2.0.0)}"). It is recommended to use a static version to ensure your builds are
+   * reproducible.
+   *
+   * <p>If set to "{@code PATH}", then the codegen plugins are resolved from the system path
+   * rather than being downloaded. This is useful if you need to use an unsupported architecture/OS,
+   * or a development version of the plugins.
+   *
+   * <p>If you do not need GRPC support, leaving this value unspecified or explicitly null will
+   * disable the GRPC feature.
+   *
+   * @since 0.0.1
+   */
+  @Parameter(property = "grpc-plugin.version")
+  private @Nullable String grpcPluginVersion;
 
   /**
    * Override the source directories to compile from.
+   *
+   * <p>Leave unspecified or explicitly null/empty to use the defaults.
    *
    * @since 0.0.1
    */
@@ -84,12 +108,24 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Set<String> sourceDirectories;
 
   /**
-   * Override the directory to output generated sources to.
+   * Override the directory to output generated protobuf message sources to.
+   *
+   * <p>Leave unspecified or explicitly null to use the defaults.
    *
    * @since 0.0.1
    */
   @Parameter
-  private @Nullable String outputDirectory;
+  private @Nullable String protobufOutputDirectory;
+
+  /**
+   * Override the directory to output generated GRPC service sources to.
+   *
+   * <p>Leave unspecified or explicitly null to use the defaults.
+   *
+   * @since 0.0.1
+   */
+  @Parameter
+  private @Nullable String grpcOutputDirectory;
 
   /**
    * Whether to treat {@code protoc} compiler warnings as errors.
@@ -139,10 +175,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .artifactResolver(artifactResolver)
         .fatalWarnings(fatalWarnings)
         .generateKotlinWrappers(generateKotlinWrappers)
+        .grpcOutputDirectory(getActualGrpcOutputDirectory())
+        .grpcPluginVersion(grpcPluginVersion)
         .liteOnly(liteOnly)
         .mavenSession(mavenSession)
-        .outputDirectory(getActualOutputDirectory())
-        .protocVersion(version)
+        .protobufOutputDirectory(getActualProtobufOutputDirectory())
+        .protocVersion(protocVersion)
         .sourceDirectories(getActualSourceDirectories())
         .sourceRootRegistrar(getSourceRootRegistrar())
         .build()
@@ -158,12 +196,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   protected abstract Path getDefaultSourceDirectory(Path baseDir);
 
   /**
-   * Get the default output directory to use if none are specified.
+   * Get the default protobuf output directory to use if none are specified.
    *
    * @param targetDir the project target directory.
-   * @return the default source directory.
+   * @return the default protobuf output directory.
    */
-  protected abstract Path getDefaultOutputDirectory(Path targetDir);
+  protected abstract Path getDefaultProtobufOutputDirectory(Path targetDir);
+
+  /**
+   * Get the default GRPC output directory to use if none are specified.
+   *
+   * @param targetDir the project target directory.
+   * @return the default GRPC output directory.
+   */
+  protected abstract Path getDefaultGrpcOutputDirectory(Path targetDir);
 
   /**
    * Get the source root registrar to use.
@@ -184,12 +230,21 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .collect(Collectors.toSet());
   }
 
-  private Path getActualOutputDirectory() {
-    if (outputDirectory == null || outputDirectory.isBlank()) {
+  private Path getActualProtobufOutputDirectory() {
+    if (protobufOutputDirectory == null || protobufOutputDirectory.isBlank()) {
       var targetDir = Path.of(mavenSession.getCurrentProject().getBuild().getDirectory());
-      return getDefaultOutputDirectory(targetDir);
+      return getDefaultProtobufOutputDirectory(targetDir);
     }
 
-    return Path.of(outputDirectory);
+    return Path.of(protobufOutputDirectory);
+  }
+
+  private Path getActualGrpcOutputDirectory() {
+    if (grpcOutputDirectory == null || grpcOutputDirectory.isBlank()) {
+      var targetDir = Path.of(mavenSession.getCurrentProject().getBuild().getDirectory());
+      return getDefaultGrpcOutputDirectory(targetDir);
+    }
+
+    return Path.of(grpcOutputDirectory);
   }
 }
