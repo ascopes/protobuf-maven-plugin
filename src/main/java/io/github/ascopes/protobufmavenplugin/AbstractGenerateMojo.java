@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
@@ -38,6 +39,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base Mojo to generate protobuf sources.
@@ -56,29 +58,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   // Injected components.
   @Component
-  private ArtifactResolver artifactResolver;
+  private @Nullable ArtifactResolver artifactResolver;
 
   // Injected parameters.
-  private MavenSession mavenSession;
-  private String version;
-  private Set<Path> sourceDirectories;
-  private Path outputDirectory;
-  private Boolean fatalWarnings;
-  private Boolean generateKotlinWrappers;
-  private Boolean liteOnly;
+  private @Nullable MavenSession mavenSession;
+  private @Nullable String version;
+  private @Nullable Set<Path> sourceDirectories;
+  private @Nullable Path outputDirectory;
+  private @Nullable Boolean fatalWarnings;
+  private @Nullable Boolean generateKotlinWrappers;
+  private @Nullable Boolean liteOnly;
 
   /**
    * Initialise this Mojo.
    */
   protected AbstractGenerateMojo() {
-    artifactResolver = null;
-    mavenSession = null;
-    version = null;
-    sourceDirectories = null;
-    outputDirectory = null;
-    fatalWarnings = null;
-    generateKotlinWrappers = null;
-    liteOnly = null;
+    // Expect all fields to be initialised later by Plexus.
   }
 
   /**
@@ -171,6 +166,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Override
   public final void execute() throws MojoExecutionException, MojoFailureException {
+    requireNonNull(artifactResolver);
+    requireNonNull(mavenSession);
+    requireNonNull(version);
+    requireNonNull(sourceDirectories);
+    requireNonNull(outputDirectory);
+    requireNonNull(fatalWarnings);
+    requireNonNull(generateKotlinWrappers);
+    requireNonNull(liteOnly);
+
     var protocPath = resolveProtocPath();
     var sources = resolveProtoSources();
 

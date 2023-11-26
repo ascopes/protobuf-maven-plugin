@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.execute;
 
 import java.util.OptionalInt;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception that is raised if execution of {@code protoc} fails.
@@ -28,7 +29,7 @@ public final class ProtocExecutionException extends Exception {
   /**
    * The exit code, or {@code null} if no exit code exists in the given context.
    */
-  private final Integer exitCode;
+  private final @Nullable Integer exitCode;
 
   /**
    * Initialise the exception.
@@ -36,7 +37,7 @@ public final class ProtocExecutionException extends Exception {
    * @param message the exception message.
    * @param cause   the cause of the exception.
    */
-  public ProtocExecutionException(String message, Throwable cause) {
+  public ProtocExecutionException(String message, @Nullable Throwable cause) {
     super(message, cause);
     exitCode = null;
   }
