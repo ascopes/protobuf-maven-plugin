@@ -95,6 +95,7 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.24.2</assertj.version>
+    <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.1</junit.version>
     <maven-artifact-transfer.version>0.13.1</maven-artifact-transfer.version>
     <maven-core.version>3.9.5</maven-core.version>
@@ -199,6 +200,13 @@
           <artifactId>maven-model</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>${jspecify.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

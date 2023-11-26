@@ -16,6 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.resolve;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Exception that is raised if resolution of {@code protoc} fails.
  *
@@ -38,7 +40,7 @@ public final class ProtocResolutionException extends Exception {
    * @param message the exception message.
    * @param cause   the cause of the exception.
    */
-  public ProtocResolutionException(String message, Throwable cause) {
+  public ProtocResolutionException(String message, @Nullable Throwable cause) {
     super(message, cause);
   }
 }
