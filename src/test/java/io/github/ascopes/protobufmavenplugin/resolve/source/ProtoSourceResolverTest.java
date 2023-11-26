@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.ascopes.protobufmavenplugin.fixture.FileSystemTestSupport;
 import java.io.IOException;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import io.github.ascopes.protobufmavenplugin.resolve.AbstractMavenCoordinateFactory;
 import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
@@ -23,12 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Coordinate factory for determining the correct {@code protoc} artifact to use for the current
- * system.
+ * Coordinate factory for determining the correct coordinate for {@code protoc} to use for the
+ * current system.
  *
  * @author Ashley Scopes
  */
-public final class MavenProtocCoordinateFactory {
+public final class MavenProtocCoordinateFactory extends AbstractMavenCoordinateFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MavenProtocCoordinateFactory.class);
 
@@ -39,7 +40,7 @@ public final class MavenProtocCoordinateFactory {
   /**
    * Create the artifact coordinate for the current system.
    *
-   * @param versionRange the version or version range of {@code protoc} to use.
+   * @param versionRange the version or version range of the artifact to use.
    * @return the artifact to resolve.
    * @throws ExecutableResolutionException if the system is not supported.
    */
@@ -55,6 +56,11 @@ public final class MavenProtocCoordinateFactory {
     return coordinate;
   }
 
+  @Override
+  protected String name() {
+    return ARTIFACT_ID;
+  }
+
   private void emitPlatformWarnings() {
     if (HostEnvironment.workingDirectory().toString().startsWith("/data/data/com.termux")) {
       LOGGER.warn(
@@ -64,84 +70,5 @@ public final class MavenProtocCoordinateFactory {
               + "invoke Maven with '-Dprotoc.version=PATH' instead."
       );
     }
-  }
-
-  private String determineClassifier() throws ExecutableResolutionException {
-    String classifier;
-
-    if (HostEnvironment.isWindows()) {
-      classifier = "windows-" + determineArchitectureForWindows();
-    } else if (HostEnvironment.isLinux()) {
-      classifier = "linux-" + determineArchitectureForLinux();
-    } else if (HostEnvironment.isMacOs()) {
-      classifier = "osx-" + determineArchitectureForMacOs();
-    } else {
-      throw new ExecutableResolutionException("No resolvable protoc version for the current OS found");
-    }
-
-    LOGGER.debug("Will use {} as the protoc artifact classifier", classifier);
-    return classifier;
-  }
-
-  private String determineArchitectureForWindows() throws ExecutableResolutionException {
-    var arch = HostEnvironment.cpuArchitecture();
-
-    switch (arch) {
-      case "amd64":
-      case "x86_64":
-        return "x86_64";
-
-      case "x86":
-      case "x86_32":
-        return "x86_32";
-
-      default:
-        throw noResolvableProtocFor("Windows", arch);
-    }
-  }
-
-  private String determineArchitectureForLinux() throws ExecutableResolutionException {
-    var arch = HostEnvironment.cpuArchitecture();
-
-    switch (arch) {
-      // https://bugs.openjdk.org/browse/JDK-8073139
-      case "ppc64le":
-      case "ppc64":
-        return "ppcle_64";
-
-      case "s390":
-      case "zarch_64":
-        return "s390_64";
-
-      case "aarch64":
-        return "aarch_64";
-
-      case "amd64":
-        return "x86_64";
-
-      default:
-        throw noResolvableProtocFor("Linux", arch);
-    }
-  }
-
-  private String determineArchitectureForMacOs() throws ExecutableResolutionException {
-    var arch = HostEnvironment.cpuArchitecture();
-
-    switch (arch) {
-      case "aarch64":
-        return "aarch_64";
-
-      case "amd64":
-      case "x86_64":
-        return "x86_64";
-
-      default:
-        throw noResolvableProtocFor("Mac OS", arch);
-    }
-  }
-
-  private ExecutableResolutionException noResolvableProtocFor(String os, String arch) {
-    var message = "No resolvable protoc version for " + os + " '" + arch + "' systems found";
-    return new ExecutableResolutionException(message);
   }
 }

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve.protoc;
+package io.github.ascopes.protobufmavenplugin.resolve;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.mockStatic;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
-import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
+import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,14 +29,26 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 
-@DisplayName("MavenProtocCoordinateFactory tests")
-class MavenProtocCoordinateFactoryTest {
+@DisplayName("AbstractMavenCoordinateFactory tests")
+class AbstractMavenCoordinateFactoryTest {
 
-  private MavenProtocCoordinateFactory factory;
+  private AbstractMavenCoordinateFactory factory;
 
   @BeforeEach
   void setUp() {
-    factory = new MavenProtocCoordinateFactory();
+    factory = new AbstractMavenCoordinateFactory() {
+      @Override
+      public ArtifactCoordinate create(String versionRange) throws ExecutableResolutionException {
+        var coordinate = new DefaultArtifactCoordinate();
+        coordinate.setClassifier(determineClassifier());
+        return coordinate;
+      }
+
+      @Override
+      protected String name() {
+        return "protoc";
+      }
+    };
   }
 
   @DisplayName("Supported Windows architectures resolve correctly")
@@ -60,7 +72,7 @@ class MavenProtocCoordinateFactoryTest {
       var actualCoordinate = factory.create("1.2.3");
 
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, "1.2.3", expectedClassifier);
+      thenAssertCoordinateMatches(actualCoordinate, expectedClassifier);
     }
   }
 
@@ -103,7 +115,7 @@ class MavenProtocCoordinateFactoryTest {
       var actualCoordinate = factory.create("4.5.6");
 
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, "4.5.6", expectedClassifier);
+      thenAssertCoordinateMatches(actualCoordinate, expectedClassifier);
     }
   }
 
@@ -143,7 +155,7 @@ class MavenProtocCoordinateFactoryTest {
       var actualCoordinate = factory.create("7.8.9");
 
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, "7.8.9", expectedClassifier);
+      thenAssertCoordinateMatches(actualCoordinate, expectedClassifier);
     }
   }
 
@@ -158,7 +170,8 @@ class MavenProtocCoordinateFactoryTest {
       // Then
       assertThatThrownBy(() -> factory.create("7.8.9"))
           .isInstanceOf(ExecutableResolutionException.class)
-          .hasMessage("No resolvable protoc version for Mac OS 'something-crazy-unknown' systems found")
+          .hasMessage(
+              "No resolvable protoc version for Mac OS 'something-crazy-unknown' systems found")
           .hasNoCause();
     }
   }
@@ -174,7 +187,7 @@ class MavenProtocCoordinateFactoryTest {
       // Then
       assertThatThrownBy(() -> factory.create("9.8.7"))
           .isInstanceOf(ExecutableResolutionException.class)
-          .hasMessage("No resolvable protoc version for the current OS found")
+          .hasMessage("No resolvable version of protoc for the current OS found")
           .hasNoCause();
     }
   }
@@ -214,43 +227,9 @@ class MavenProtocCoordinateFactoryTest {
     hostEnvironment.when(HostEnvironment::isMacOs).thenReturn(false);
   }
 
-  private void thenAssertCoordinateMatches(
-      ArtifactCoordinate coordinate,
-      String version,
-      String classifier
-  ) {
-    assertSoftly(softly -> {
-      softly.assertThat(coordinate.getGroupId())
-          .as("Group ID")
-          .isEqualTo("com.google.protobuf");
-      softly.assertThat(coordinate.getArtifactId())
-          .as("Artifact ID")
-          .isEqualTo("protoc");
-      softly.assertThat(coordinate.getVersion())
-          .as("Version")
-          .isEqualTo(version);
-      softly.assertThat(coordinate.getClassifier())
-          .as("Classifier")
-          .isEqualTo(classifier);
-      softly.assertThat(coordinate.getExtension())
-          .as("Extension")
-          .isEqualTo("exe");
-
-      var estimatedFileName = coordinate.getGroupId().replace('.', '/')
-          + "/"
-          + coordinate.getArtifactId()
-          + "/"
-          + coordinate.getArtifactId()
-          + "-"
-          + coordinate.getVersion()
-          + "-"
-          + coordinate.getClassifier()
-          + "."
-          + coordinate.getExtension();
-
-      softly.assertThat(estimatedFileName)
-          .as("estimated file name")
-          .isEqualTo("com/google/protobuf/protoc/protoc-%s-%s.exe", version, classifier);
-    });
+  private void thenAssertCoordinateMatches(ArtifactCoordinate coordinate, String classifier) {
+    assertThat(coordinate.getClassifier())
+        .as("Classifier")
+        .isEqualTo(classifier);
   }
 }
