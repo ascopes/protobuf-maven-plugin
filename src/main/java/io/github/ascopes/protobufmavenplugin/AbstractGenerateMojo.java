@@ -49,9 +49,24 @@ import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
+  /**
+   * The default directory to look for protobuf sources in.
+   */
   protected static final String MAIN_SOURCE = "${project.basedir}/src/main/protobuf";
+
+  /**
+   * The default directory to look for test protobuf sources in.
+   */
   protected static final String TEST_SOURCE = "${project.basedir}/src/test/protobuf";
+
+  /**
+   * The default directory to output generated sources to.
+   */
   protected static final String MAIN_OUTPUT = "${project.build.directory}/generated-sources";
+
+  /**
+   * The default directory to output generated test sources to.
+   */
   protected static final String TEST_OUTPUT = "${project.build.directory}/generated-test-sources";
 
   // Injected components.
