@@ -39,6 +39,7 @@ public final class ProtocExecutor {
    * Initialise the executor.
    */
   public ProtocExecutor() {
+    // Nothing to do here.
   }
 
   /**
@@ -50,6 +51,8 @@ public final class ProtocExecutor {
    * @throws ProtocExecutionException if the execution fails.
    */
   public void invoke(List<String> arguments) throws ProtocExecutionException {
+    int exitCode = -1;
+
     try {
       LOGGER.info("Invoking {}", arguments);
 
@@ -63,38 +66,42 @@ public final class ProtocExecutor {
       var loggingFuture = streamOutputAsLogs(proc.getInputStream());
 
       try {
-        var exitCode = proc.waitFor();
+        exitCode = proc.waitFor();
         elapsed = System.nanoTime() - start;
-
-        if (exitCode != 0) {
-          // Dump all output in case it has some form of error message.
-          throw new ProtocExecutionException(proc.waitFor());
-        }
       } finally {
-        loggingFuture.join();
-        proc.destroy();
+        // The call to join should never throw anything unless something
+        // truely catastrophic has happened. Let's just be safe.
+        try {
+          loggingFuture.join();
+        } finally {
+          proc.destroy();
+        }
       }
 
-      LOGGER.info("Protoc completed after {}ms", elapsed / 1_000_000L);
-    } catch (IOException ex) {
-      LOGGER.debug("Execution failed due to an IO exception", ex);
-      throw ioExceptionCallingProcess(ex);
+      LOGGER.info(
+          "Protoc {} after {}ms with exit code {}",
+          exitCode == 0 ? "completed" : "terminated",
+          elapsed / 1_000_000L,
+          exitCode
+      );
+
     } catch (InterruptedException ex) {
-      LOGGER.debug("Execution interrupted", ex);
-      throw processInterrupted(ex);
+      Thread.currentThread().interrupt();
+      throw new ProtocExecutionException("Protoc execution was interrupted", ex);
+
+    } catch (Exception ex) {
+      LOGGER.debug("Execution failed due to an exception", ex);
+      throw new ProtocExecutionException("An exception occurred while calling protoc", ex);
+    }
+
+    if (exitCode != 0) {
+      throw new ProtocExecutionException(exitCode);
     }
   }
 
-  private ProtocExecutionException ioExceptionCallingProcess(IOException ex) {
-    return new ProtocExecutionException("An IO exception occurred while calling protoc", ex);
-  }
-
-  private ProtocExecutionException processInterrupted(InterruptedException ex) {
-    Thread.currentThread().interrupt();
-    return new ProtocExecutionException("Protoc execution was interrupted", ex);
-  }
-
   private CompletableFuture<?> streamOutputAsLogs(InputStream inputStream) {
+    // TODO: do we care that we're using the default fork-join pool?
+    //  Probably not for now.
     return CompletableFuture.runAsync(() -> {
       try (var reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8))) {
         String line;
@@ -103,10 +110,8 @@ public final class ProtocExecutor {
           LOGGER.info(">>> {}", line);
         }
       } catch (Throwable ex) {
-        // Nothing else we can do. This probably can never happen?
-        // Don't throw anything back to the caller as we want to ensure the process is destroyed
-        // safely after joining this future.
         LOGGER.error("Critical error reading output of subprocess", ex);
+        throw new IllegalStateException("Critical error while reading process output");
       }
     });
   }
