@@ -48,6 +48,12 @@ public abstract class AbstractMavenCoordinateFactory {
    */
   protected abstract String name();
 
+  /**
+   * Determine the correct classifier for the current system.
+   *
+   * @return the classifier string.
+   * @throws ExecutableResolutionException if the classifier could not be resolved.
+   */
   protected final String determineClassifier() throws ExecutableResolutionException {
     String classifier;
 

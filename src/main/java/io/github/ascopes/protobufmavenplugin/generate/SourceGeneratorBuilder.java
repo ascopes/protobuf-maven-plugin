@@ -37,8 +37,10 @@ public final class SourceGeneratorBuilder {
   @Nullable ArtifactResolver artifactResolver;
   @Nullable MavenSession mavenSession;
   @Nullable String protocVersion;
+  @Nullable String grpcPluginVersion;
   @Nullable Set<Path> sourceDirectories;
-  @Nullable Path outputDirectory;
+  @Nullable Path protobufOutputDirectory;
+  @Nullable Path grpcOutputDirectory;
   @Nullable Boolean fatalWarnings;
   @Nullable Boolean generateKotlinWrappers;
   @Nullable Boolean liteOnly;
@@ -85,6 +87,17 @@ public final class SourceGeneratorBuilder {
   }
 
   /**
+   * Set the GRPC plugin version.
+   *
+   * @param grpcPluginVersion the GRPC plugin version, or {@code null} to disable.
+   * @return this builder.
+   */
+  public SourceGeneratorBuilder grpcPluginVersion(@Nullable String grpcPluginVersion) {
+    this.grpcPluginVersion = grpcPluginVersion;
+    return this;
+  }
+
+  /**
    * Set the source directories to compile from.
    *
    * @param sourceDirectories the source directories to compile.
@@ -96,13 +109,24 @@ public final class SourceGeneratorBuilder {
   }
 
   /**
-   * Set the directory to output generated sources to.
+   * Set the directory to output generated protobuf message sources to.
    *
-   * @param outputDirectory the directory to output generated sources to.
+   * @param protobufOutputDirectory the directory to output generated protobuf message sources to.
    * @return this builder.
    */
-  public SourceGeneratorBuilder outputDirectory(Path outputDirectory) {
-    this.outputDirectory = outputDirectory;
+  public SourceGeneratorBuilder protobufOutputDirectory(Path protobufOutputDirectory) {
+    this.protobufOutputDirectory = protobufOutputDirectory;
+    return this;
+  }
+
+  /**
+   * Set the directory to output generated GRPC service sources to.
+   *
+   * @param grpcOutputDirectory the directory to output generated GRPC service sources to.
+   * @return this builder.
+   */
+  public SourceGeneratorBuilder grpcOutputDirectory(Path grpcOutputDirectory) {
+    this.grpcOutputDirectory = grpcOutputDirectory;
     return this;
   }
 

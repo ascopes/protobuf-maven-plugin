@@ -21,37 +21,42 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Mojo to generate source code from protobuf sources.
+ * Mojo to generate test source code from Protobuf sources.
  *
  * @author Ashley Scopes
  */
 @Mojo(
-    name = "generate",
-    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    name = "generate-test",
+    defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     requiresOnline = true,
     threadSafe = true
 )
-public final class GenerateMojo extends AbstractGenerateMojo {
+public final class GenerateProtobufTestMojo extends AbstractGenerateMojo {
 
   /**
    * Initialise this Mojo.
    */
-  public GenerateMojo() {
+  public GenerateProtobufTestMojo() {
     // Nothing to do.
   }
 
   @Override
   protected Path getDefaultSourceDirectory(Path baseDir) {
-    return baseDir.resolve("src").resolve("main").resolve("protobuf");
+    return baseDir.resolve("src").resolve("test").resolve("protobuf");
   }
 
   @Override
-  protected Path getDefaultOutputDirectory(Path targetDir) {
-    return targetDir.resolve("generated-sources").resolve("protobuf");
+  protected Path getDefaultProtobufOutputDirectory(Path targetDir) {
+    return targetDir.resolve("generated-test-sources").resolve("protobuf");
+  }
+
+  @Override
+  protected Path getDefaultGrpcOutputDirectory(Path targetDir) {
+    return targetDir.resolve("generated-test-sources").resolve("grpc");
   }
 
   @Override
   protected SourceRootRegistrar getSourceRootRegistrar() {
-    return SourceRootRegistrar.MAIN;
+    return SourceRootRegistrar.TEST;
   }
 }
