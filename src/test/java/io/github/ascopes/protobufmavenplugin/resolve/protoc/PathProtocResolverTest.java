@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.ascopes.protobufmavenplugin.fixture.FileSystemTestSupport;
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,8 +54,8 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -90,8 +91,8 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -123,8 +124,8 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -147,15 +148,15 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
 
   @DisplayName("The first protoc executable on POSIX is returned")
   @Test
-  void firstProtocExecutableOnPosixIsReturned() throws ProtocResolutionException {
+  void firstProtocExecutableOnPosixIsReturned() throws ExecutableResolutionException {
     try (var envMock = Mockito.mockStatic(HostEnvironment.class)) {
       // Given
       var existentDirectory = givenDirectoryExists("foo", "bar", "existent");
@@ -181,7 +182,7 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // When
-      var result = resolver.resolveProtoc();
+      var result = resolver.resolve();
 
       // Then
       assertThat(result)
@@ -212,8 +213,8 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -244,8 +245,8 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -259,7 +260,7 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       "PROTOC.EXE"
   })
   @ParameterizedTest(name = "for executable named \"{0}\"")
-  void firstProtocExecutableOnWindowsIsReturned(String name) throws ProtocResolutionException {
+  void firstProtocExecutableOnWindowsIsReturned(String name) throws ExecutableResolutionException {
     try (var envMock = Mockito.mockStatic(HostEnvironment.class)) {
       // Given
       var existentDirectory = givenDirectoryExists("foo", "bar", "existent");
@@ -283,7 +284,7 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThat(resolver.resolveProtoc())
+      assertThat(resolver.resolve())
           .isEqualTo(protoc);
     }
   }
@@ -312,7 +313,7 @@ class PathProtocResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatNoException()
-          .isThrownBy(resolver::resolveProtoc);
+          .isThrownBy(resolver::resolve);
     }
   }
 
@@ -336,8 +337,8 @@ class PathProtocResolverTest extends FileSystemTestSupport {
       var resolver = new PathProtocResolver();
 
       // Then
-      assertThatThrownBy(resolver::resolveProtoc)
-          .isInstanceOf(ProtocResolutionException.class)
+      assertThatThrownBy(resolver::resolve)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("File system error")
           .hasCauseInstanceOf(IOException.class);
     }

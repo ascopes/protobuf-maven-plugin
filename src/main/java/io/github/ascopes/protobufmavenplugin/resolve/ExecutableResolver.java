@@ -16,31 +16,20 @@
 
 package io.github.ascopes.protobufmavenplugin.resolve;
 
-import org.jspecify.annotations.Nullable;
+import java.nio.file.Path;
 
 /**
- * Exception that is raised if resolution of {@code protoc} fails.
+ * Base interface for a component that can resolve a {@code protoc} executable.
  *
  * @author Ashley Scopes
  */
-public final class ProtocResolutionException extends Exception {
+public interface ExecutableResolver {
 
   /**
-   * Initialise the exception.
+   * Determine the path to the executable.
    *
-   * @param message the exception message.
+   * @return the path to the executable.
+   * @throws ExecutableResolutionException if resolution fails for any reason.
    */
-  public ProtocResolutionException(String message) {
-    super(message);
-  }
-
-  /**
-   * Initialise the exception.
-   *
-   * @param message the exception message.
-   * @param cause   the cause of the exception.
-   */
-  public ProtocResolutionException(String message, @Nullable Throwable cause) {
-    super(message, cause);
-  }
+  Path resolve() throws ExecutableResolutionException;
 }

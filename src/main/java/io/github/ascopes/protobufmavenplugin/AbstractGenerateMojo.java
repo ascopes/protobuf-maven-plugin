@@ -19,13 +19,13 @@ package io.github.ascopes.protobufmavenplugin;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
-import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocArgumentBuilder;
+import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutor;
-import io.github.ascopes.protobufmavenplugin.resolve.MavenProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.PathProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.ProtocResolutionException;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
+import io.github.ascopes.protobufmavenplugin.resolve.protoc.MavenProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.protoc.PathProtocResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.source.ProtoSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -261,9 +261,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
           ? new PathProtocResolver()
           : new MavenProtocResolver(version, artifactResolver, mavenSession);
 
-      return resolver.resolveProtoc();
+      return resolver.resolve();
 
-    } catch (ProtocResolutionException ex) {
+    } catch (ExecutableResolutionException ex) {
       throw error("Failed to resolve protoc executable", ex);
     } catch (Exception ex) {
       throw failure("Failed to resolve protoc executable", ex);

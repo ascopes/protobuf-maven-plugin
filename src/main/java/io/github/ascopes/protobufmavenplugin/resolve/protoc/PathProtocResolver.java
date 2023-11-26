@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
-public final class PathProtocResolver implements ProtocResolver {
+public final class PathProtocResolver implements ExecutableResolver {
 
   private static final String PROTOC = "protoc";
   private static final Logger LOGGER = LoggerFactory.getLogger(PathProtocResolver.class);
@@ -54,7 +56,7 @@ public final class PathProtocResolver implements ProtocResolver {
   }
 
   @Override
-  public Path resolveProtoc() throws ProtocResolutionException {
+  public Path resolve() throws ExecutableResolutionException {
     var predicate = HostEnvironment.isWindows()
         ? isProtocWindows()
         : isProtocPosix();
@@ -86,10 +88,10 @@ public final class PathProtocResolver implements ProtocResolver {
         }
       }
     } catch (IOException ex) {
-      throw new ProtocResolutionException("File system error", ex);
+      throw new ExecutableResolutionException("File system error", ex);
     }
 
-    throw new ProtocResolutionException("No protoc binary was found in the $PATH");
+    throw new ExecutableResolutionException("No protoc binary was found in the $PATH");
   }
 
   private void logFile(Path file) {

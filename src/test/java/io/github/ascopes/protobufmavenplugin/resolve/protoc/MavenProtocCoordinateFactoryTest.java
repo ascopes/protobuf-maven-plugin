@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.mockStatic;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,7 @@ class MavenProtocCoordinateFactoryTest {
   void supportedWindowsArchitecturesResolveCorrectly(
       String architecture,
       String expectedClassifier
-  ) throws ProtocResolutionException {
+  ) throws ExecutableResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -73,7 +74,7 @@ class MavenProtocCoordinateFactoryTest {
 
       // Then
       assertThatThrownBy(() -> factory.create("1.2.3"))
-          .isInstanceOf(ProtocResolutionException.class)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable protoc version for Windows 'x86_16' systems found")
           .hasNoCause();
     }
@@ -92,7 +93,7 @@ class MavenProtocCoordinateFactoryTest {
   void supportedLinuxArchitecturesResolveCorrectly(
       String architecture,
       String expectedClassifier
-  ) throws ProtocResolutionException {
+  ) throws ExecutableResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -116,7 +117,7 @@ class MavenProtocCoordinateFactoryTest {
 
       // Then
       assertThatThrownBy(() -> factory.create("4.5.6"))
-          .isInstanceOf(ProtocResolutionException.class)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable protoc version for Linux 'IA_64' systems found")
           .hasNoCause();
     }
@@ -132,7 +133,7 @@ class MavenProtocCoordinateFactoryTest {
   void supportedMacOsArchitecturesResolveCorrectly(
       String architecture,
       String expectedClassifier
-  ) throws ProtocResolutionException {
+  ) throws ExecutableResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -148,7 +149,7 @@ class MavenProtocCoordinateFactoryTest {
 
   @DisplayName("Unsupported Mac OS architectures result in an exception")
   @Test
-  void unsupportedMacOsArchitecturesResultInException() throws ProtocResolutionException {
+  void unsupportedMacOsArchitecturesResultInException() throws ExecutableResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -156,7 +157,7 @@ class MavenProtocCoordinateFactoryTest {
 
       // Then
       assertThatThrownBy(() -> factory.create("7.8.9"))
-          .isInstanceOf(ProtocResolutionException.class)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable protoc version for Mac OS 'something-crazy-unknown' systems found")
           .hasNoCause();
     }
@@ -172,7 +173,7 @@ class MavenProtocCoordinateFactoryTest {
 
       // Then
       assertThatThrownBy(() -> factory.create("9.8.7"))
-          .isInstanceOf(ProtocResolutionException.class)
+          .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable protoc version for the current OS found")
           .hasNoCause();
     }

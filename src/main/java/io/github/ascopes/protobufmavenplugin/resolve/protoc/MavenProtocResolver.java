@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
-public final class MavenProtocResolver implements ProtocResolver {
+public final class MavenProtocResolver implements ExecutableResolver {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MavenProtocResolver.class);
 
@@ -64,7 +66,7 @@ public final class MavenProtocResolver implements ProtocResolver {
   }
 
   @Override
-  public Path resolveProtoc() throws ProtocResolutionException {
+  public Path resolve() throws ExecutableResolutionException {
     Path path;
 
     try {
@@ -77,7 +79,7 @@ public final class MavenProtocResolver implements ProtocResolver {
       path = result.getArtifact().getFile().toPath();
 
     } catch (ArtifactResolverException ex) {
-      throw new ProtocResolutionException(
+      throw new ExecutableResolutionException(
           "Failed to resolve protoc artifact from remote repository",
           ex
       );
@@ -94,7 +96,7 @@ public final class MavenProtocResolver implements ProtocResolver {
         permissions.add(PosixFilePermission.OWNER_EXECUTE);
         Files.setPosixFilePermissions(path, permissions);
       } catch (IOException ex) {
-        throw new ProtocResolutionException("Setting executable bit for '" + path + "' failed", ex);
+        throw new ExecutableResolutionException("Setting executable bit for '" + path + "' failed", ex);
       }
     }
 

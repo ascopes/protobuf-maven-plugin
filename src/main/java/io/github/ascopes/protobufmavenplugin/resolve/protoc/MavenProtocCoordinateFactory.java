@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.resolve.protoc;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
+import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.slf4j.Logger;
@@ -42,9 +41,9 @@ public final class MavenProtocCoordinateFactory {
    *
    * @param versionRange the version or version range of {@code protoc} to use.
    * @return the artifact to resolve.
-   * @throws ProtocResolutionException if the system is not supported.
+   * @throws ExecutableResolutionException if the system is not supported.
    */
-  public ArtifactCoordinate create(String versionRange) throws ProtocResolutionException {
+  public ArtifactCoordinate create(String versionRange) throws ExecutableResolutionException {
     emitPlatformWarnings();
 
     var coordinate = new DefaultArtifactCoordinate();
@@ -67,7 +66,7 @@ public final class MavenProtocCoordinateFactory {
     }
   }
 
-  private String determineClassifier() throws ProtocResolutionException {
+  private String determineClassifier() throws ExecutableResolutionException {
     String classifier;
 
     if (HostEnvironment.isWindows()) {
@@ -77,14 +76,14 @@ public final class MavenProtocCoordinateFactory {
     } else if (HostEnvironment.isMacOs()) {
       classifier = "osx-" + determineArchitectureForMacOs();
     } else {
-      throw new ProtocResolutionException("No resolvable protoc version for the current OS found");
+      throw new ExecutableResolutionException("No resolvable protoc version for the current OS found");
     }
 
     LOGGER.debug("Will use {} as the protoc artifact classifier", classifier);
     return classifier;
   }
 
-  private String determineArchitectureForWindows() throws ProtocResolutionException {
+  private String determineArchitectureForWindows() throws ExecutableResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -101,7 +100,7 @@ public final class MavenProtocCoordinateFactory {
     }
   }
 
-  private String determineArchitectureForLinux() throws ProtocResolutionException {
+  private String determineArchitectureForLinux() throws ExecutableResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -125,7 +124,7 @@ public final class MavenProtocCoordinateFactory {
     }
   }
 
-  private String determineArchitectureForMacOs() throws ProtocResolutionException {
+  private String determineArchitectureForMacOs() throws ExecutableResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -141,8 +140,8 @@ public final class MavenProtocCoordinateFactory {
     }
   }
 
-  private ProtocResolutionException noResolvableProtocFor(String os, String arch) {
+  private ExecutableResolutionException noResolvableProtocFor(String os, String arch) {
     var message = "No resolvable protoc version for " + os + " '" + arch + "' systems found";
-    return new ProtocResolutionException(message);
+    return new ExecutableResolutionException(message);
   }
 }

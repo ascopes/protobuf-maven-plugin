@@ -21,17 +21,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("ProtocResolutionException tests")
-class ProtocResolutionExceptionTest {
+@DisplayName("ExecutableResolutionException tests")
+class ExecutableResolutionExceptionTest {
 
-  @DisplayName("ProtocResolutionException can be constructed with a single message parameter")
+  @DisplayName("ExecutableResolutionException can be constructed with a single message parameter")
   @Test
-  void protocResolutionExceptionCanBeConstructedWithSingleMessageParameter() {
+  void canBeConstructedWithSingleMessageParameter() {
     // Given
     var message = someString();
 
     // When
-    var ex = new ProtocResolutionException(message);
+    var ex = new ExecutableResolutionException(message);
 
     // Then
     assertThat(ex)
@@ -40,15 +40,15 @@ class ProtocResolutionExceptionTest {
         .hasNoSuppressedExceptions();
   }
 
-  @DisplayName("ProtocResolutionException can be constructed with a message and cause parameter")
+  @DisplayName("ExecutableResolutionException can be constructed with a message and cause parameter")
   @Test
-  void protocResolutionExceptionCanBeConstructedWithMessageAndCauseParameter() {
+  void canBeConstructedWithMessageAndCauseParameter() {
     // Given
     var message = someString();
     var cause = new Throwable(someString());
 
     // When
-    var ex = new ProtocResolutionException(message, cause);
+    var ex = new ExecutableResolutionException(message, cause);
 
     // Then
     assertThat(ex)
