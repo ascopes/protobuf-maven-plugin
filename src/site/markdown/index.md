@@ -15,6 +15,10 @@ for you automatically.
 
 In addition to generating Java sources, this plugin can also generate Kotlin sources.
 
+# Contents
+
+<!-- MACRO{toc|section=2|fromDepth=2|toDepth=3} -->
+
 # Bugs and feature requests
 
 Please raise any bugs or feature requests on 
@@ -24,35 +28,73 @@ Please raise any bugs or feature requests on
 
 Detailed usage can be found on the [plugin info (goals) page](plugin-info.html).
 
-## Generating Protobuf Sources
+## The most basic configuration
 
-### Basic configuration
+At the core, this plugin is designed to be fairly simple to use, and will
+attempt to resolve everything that you need automatically. All you need to
+do is provide the version of `protoc` to use.
 
-A simple project that makes use of this plugin to generate Java sources would place their
-`*.proto` protobuf sources in `src/main/protobuf`, and use the following structure:
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>${protobuf-maven-plugin.version}</version>
+
+  <configuration>
+    <protocVersion>3.25.0</protocVersion>
+  </configuration>
+
+  <executions>
+    <execution>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+```
+
+To generate test sources, use the `generate-test` goal instead.
+
+Inputs will be read from `src/main/protobuf` (or `src/test/protobuf` for tests)
+and will be output to `target/generated-sources/protobuf`
+(or `target/generated-test-sources/protobuf` for tests). This can be overridden
+in the `configuration` block if needed.
+
+## Dependencies
+
+It is worth noting that you will need to include the `protobuf-java` dependency
+for the generated Java code to actually compile. 
+
+Ideally, you should use the same version for `protobuf-java` as you do for the 
+`protocVersion` parameter. Doing this with a shared property will also allow tools
+like Dependabot to keep the compiler version up-to-date automatically.
 
 ```xml
 <project>
+
   ...
 
   <properties>
     <protobuf.version>3.25.0</protobuf.version>
+    <protobuf-maven-plugin.version>...</protobuf-maven-plugin.version>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${protobuf.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
         <groupId>io.github.ascopes</groupId>
         <artifactId>protobuf-maven-plugin</artifactId>
-        <version>...</version>
+        <version>${protobuf-maven-plugin.version}</version>
 
         <configuration>
           <protocVersion>${protobuf.version}</protocVersion>
@@ -60,7 +102,6 @@ A simple project that makes use of this plugin to generate Java sources would pl
 
         <executions>
           <execution>
-            <phase>generate-sources</phase>
             <goals>
               <goal>generate</goal>
             </goals>
@@ -72,13 +113,78 @@ A simple project that makes use of this plugin to generate Java sources would pl
 </project>
 ```
 
-This will output generated sources in `target/generated-sources/protobuf` by default.
+If you are using other types of output, you'll need different dependencies.
+The following table documents the most common ones that you'll run across.
 
-Test sources can be generated with the `generate-test` goal. Test sources will be output to
-the `target/generated-test-sources/protobuf` directory, and will be read from
-`src/test/protobuf` by default.
+Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
+100% consistent, so be sure to use exactly what is written below.
 
-### Kotlin generation
+<table>
+  <thead>
+    <tr>
+      <th>Configuration type</th>
+      <th>Dependencies</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Java protobuf messages</td>
+      <td>
+        <ul>
+          <li><code>com.google.protobuf:protobuf-java</code></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Java "lite" protobuf messages</td>
+      <td>
+        <ul>
+          <li><code>com.google.protobuf:protobuf-javalite</code></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Kotlin protobuf messages</td>
+      <td>
+        <ul>
+          <li><code>com.google.protobuf:protobuf-kotlin</code></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Kotlin "lite" protobuf messages</td>
+      <td>
+        <ul>
+          <li><code>com.google.protobuf:protobuf-kotlin-lite</code></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Java GRPC services</td>
+      <td>
+        <ul>
+          <li><code>com.google.protobuf:protobuf-java</code></li>
+          <li><code>io.grpc:grpc-protobuf</code></li>
+          <li><code>io.grpc:grpc-stub</code></li>
+          <li><code>javax.annotation:javax.annotation-api</code></li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Kotlin GRPC services</td>
+      <td>
+        <ul>
+          <li><code>com.google.protobuf:protobuf-kotlin</code></li>
+          <li><code>io.grpc:grpc-protobuf-kotlin</code></li>
+          <li><code>io.grpc:grpc-stub</code></li>
+          <li><code>javax.annotation:javax.annotation-api</code></li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Kotlin generation
 
 Protoc support for Kotlin currently takes the shape of producing additional Kotlin API wrapper
 calls that can decorate the existing generated Java code.
@@ -103,7 +209,7 @@ To opt in to also generating these sources, set the `generateKotlinWrappers` plu
 
 Sources will be emitted in the same location as the Java sources.
 
-### Changing the input directories
+## Changing the input directories
 
 If you do not want to use the default directory for your sources, you can override it in the
 plugin configuration:
@@ -127,7 +233,7 @@ plugin configuration:
 
 Multiple source directories can be specified if required.
 
-### Generating lightweight sources
+## Generating lightweight sources
 
 If you are in a situation where you need lightweight and fast protobuf generated sources, you
 can opt in to generating "lite" sources only. These will omit all the metadata usually included
@@ -153,7 +259,7 @@ as you usually do not need to worry about this.
 </plugin>
 ```
 
-### Using protoc from your system path
+## Using protoc from your system path
 
 If you need to use the version of `protoc` that is installed on your system, specify the version
 as `PATH`.
@@ -180,78 +286,21 @@ protobuf sources.
 To enable this, specify a version for the `grpcPluginVersion` parameter in the configuration block:
 
 ```xml
-<project>
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    <grpcPluginVersion>${grpc.version}</grpcPluginVersion>
+    <protocVersion>${protobuf.version}</protocVersion>
+  </configuration>
+
   ...
-  
-  <properties>
-    <grpc.version>1.59.0</grpc.version>
-    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
-    <junit.version>5.10.1</junit.version>
-    <protobuf.version>3.25.0</protobuf.version>
-  </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
-      <scope>compile</scope>
-    </dependency>
-  
-    <dependency>
-      <groupId>io.grpc</groupId>
-      <artifactId>grpc-protobuf</artifactId>
-      <version>${grpc.version}</version>
-    </dependency>
-  
-    <dependency>
-      <groupId>io.grpc</groupId>
-      <artifactId>grpc-netty</artifactId>
-      <version>${grpc.version}</version>
-    </dependency>
-  
-    <dependency>
-      <groupId>io.grpc</groupId>
-      <artifactId>grpc-stub</artifactId>
-      <version>${grpc.version}</version>
-      <scope>compile</scope>
-    </dependency>
-  
-    <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <version>${javax-annotation-api.version}</version>
-    </dependency>
-  </dependencies>
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>io.github.ascopes</groupId>
-        <artifactId>protobuf-maven-plugin</artifactId>
-        <version>...</version>
-
-        <configuration>
-          <grpcPluginVersion>${grpc.version}</grpcPluginVersion>
-          <protocVersion>${protobuf.version}</protocVersion>
-        </configuration>
-
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 </project>
 ```
 
-GRPC stub sources will be output at `target/generated-sources/grpc`, or  
+GRPC stub sources will be output at `target/generated-sources/grpc`, or
 `target/generated-test-sources/grpc` by default unless overridden.
 
 Like the `protoc` version, you can request that the system path is used to discover the plugins
