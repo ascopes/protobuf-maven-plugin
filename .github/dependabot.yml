@@ -5,7 +5,7 @@ updates:
     open-pull-requests-limit: 99
     rebase-strategy: auto
     schedule:
-      interval: monthly
+      interval: weekly
     target-branch: main
     assignees:
       - ascopes
@@ -17,7 +17,7 @@ updates:
     open-pull-requests-limit: 99
     rebase-strategy: auto
     schedule:
-      interval: monthly
+      interval: weekly
     target-branch: main
     assignees:
       - ascopes
