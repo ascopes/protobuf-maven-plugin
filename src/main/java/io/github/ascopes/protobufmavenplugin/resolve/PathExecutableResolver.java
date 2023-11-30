@@ -25,23 +25,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract base for an executable resolver that searches the system {@code $PATH} for a match.
+ * An executable resolver that searches the system {@code $PATH} for a match.
  *
  * @author Ashley Scopes
  */
-public abstract class AbstractPathResolver implements ExecutableResolver {
+public final class PathExecutableResolver {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPathResolver.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PathExecutableResolver.class);
 
   /**
-   * {@inheritDoc}
-   *
-   * @return the executable.
-   * @throws ExecutableResolutionException if the executable cannot be resolved.
+   * Initialise this resolver.
    */
-  @Override
-  public Path resolve() throws ExecutableResolutionException {
-    var binaryName = binaryName();
+  public PathExecutableResolver() {
+    // Nothing to do here.
+  }
+
+  /**
+   * Determine the path to the executable.
+   *
+   * @param executable the executable to resolve.
+   * @return the executable path.
+   * @throws ExecutableResolutionException if resolution fails for any reason.
+   */
+  public Path resolve(Executable executable) throws ExecutableResolutionException {
+    var binaryName = executable.getExecutableName();
 
     var predicate = HostEnvironment.isWindows()
         ? windowsMatchPredicate(binaryName)
@@ -77,13 +84,6 @@ public abstract class AbstractPathResolver implements ExecutableResolver {
 
     throw new ExecutableResolutionException("No " + binaryName + " binary was found in the $PATH");
   }
-
-  /**
-   * Get the binary name to look for.
-   *
-   * @return the binary name.
-   */
-  protected abstract String binaryName();
 
   private Predicate<Path> windowsMatchPredicate(String binaryName) {
     // On Windows, we have to ignore case sensitivity. For example, protoc.exe and

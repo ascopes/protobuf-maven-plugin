@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve.source;
+package io.github.ascopes.protobufmavenplugin.resolve;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -29,26 +29,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 
-@DisplayName("AbstractMavenCoordinateFactory tests")
-class AbstractMavenCoordinateFactoryTest {
+@DisplayName("Executable tests")
+class ExecutableTest {
 
-  private AbstractMavenCoordinateFactory factory;
+  Executable executable;
 
   @BeforeEach
   void setUp() {
-    factory = new AbstractMavenCoordinateFactory() {
-      @Override
-      public ArtifactCoordinate create(String versionRange) throws ExecutableResolutionException {
-        var coordinate = new DefaultArtifactCoordinate();
-        coordinate.setClassifier(determineClassifier());
-        return coordinate;
-      }
-
-      @Override
-      protected String name() {
-        return "protoc";
-      }
-    };
+    executable = new Executable("org.example", "protoc");
   }
 
   @DisplayName("Supported Windows architectures resolve correctly")
@@ -69,10 +57,10 @@ class AbstractMavenCoordinateFactoryTest {
       givenWindowsWithArch(hostEnvironment, architecture);
 
       // When
-      var actualCoordinate = factory.create("1.2.3");
+      var actualCoordinate = executable.getMavenArtifactCoordinate("1.2.3");
 
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, expectedClassifier);
+      thenAssertCoordinateMatches(actualCoordinate, "1.2.3", expectedClassifier);
     }
   }
 
@@ -85,7 +73,7 @@ class AbstractMavenCoordinateFactoryTest {
       givenWindowsWithArch(hostEnvironment, "x86_16");
 
       // Then
-      assertThatThrownBy(() -> factory.create("1.2.3"))
+      assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("1.2.3"))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable protoc version for Windows 'x86_16' systems found")
           .hasNoCause();
@@ -112,10 +100,10 @@ class AbstractMavenCoordinateFactoryTest {
       givenLinuxWithArch(hostEnvironment, architecture);
 
       // When
-      var actualCoordinate = factory.create("4.5.6");
+      var actualCoordinate = executable.getMavenArtifactCoordinate("4.5.6");
 
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, expectedClassifier);
+      thenAssertCoordinateMatches(actualCoordinate, "4.5.6", expectedClassifier);
     }
   }
 
@@ -128,7 +116,7 @@ class AbstractMavenCoordinateFactoryTest {
       givenLinuxWithArch(hostEnvironment, "IA_64");
 
       // Then
-      assertThatThrownBy(() -> factory.create("4.5.6"))
+      assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("4.5.6"))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable protoc version for Linux 'IA_64' systems found")
           .hasNoCause();
@@ -152,10 +140,10 @@ class AbstractMavenCoordinateFactoryTest {
       givenMacOsWithArch(hostEnvironment, architecture);
 
       // When
-      var actualCoordinate = factory.create("7.8.9");
+      var actualCoordinate = executable.getMavenArtifactCoordinate("7.8.9");
 
       // Then
-      thenAssertCoordinateMatches(actualCoordinate, expectedClassifier);
+      thenAssertCoordinateMatches(actualCoordinate, "7.8.9", expectedClassifier);
     }
   }
 
@@ -168,7 +156,7 @@ class AbstractMavenCoordinateFactoryTest {
       givenMacOsWithArch(hostEnvironment, "something-crazy-unknown");
 
       // Then
-      assertThatThrownBy(() -> factory.create("7.8.9"))
+      assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("7.8.9"))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage(
               "No resolvable protoc version for Mac OS 'something-crazy-unknown' systems found")
@@ -185,7 +173,7 @@ class AbstractMavenCoordinateFactoryTest {
       givenUnknownOs(hostEnvironment);
 
       // Then
-      assertThatThrownBy(() -> factory.create("9.8.7"))
+      assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("9.8.7"))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No resolvable version of protoc for the current OS found")
           .hasNoCause();
@@ -227,9 +215,21 @@ class AbstractMavenCoordinateFactoryTest {
     hostEnvironment.when(HostEnvironment::isMacOs).thenReturn(false);
   }
 
-  private void thenAssertCoordinateMatches(ArtifactCoordinate coordinate, String classifier) {
+  private void thenAssertCoordinateMatches(ArtifactCoordinate coordinate, String version, String classifier) {
+    assertThat(coordinate.getGroupId())
+        .as("Group ID")
+        .isEqualTo("org.example");
+    assertThat(coordinate.getArtifactId())
+        .as("Artifact ID")
+        .isEqualTo("protoc");
+    assertThat(coordinate.getVersion())
+        .as("Version")
+        .isEqualTo(version);
     assertThat(coordinate.getClassifier())
         .as("Classifier")
         .isEqualTo(classifier);
+    assertThat(coordinate.getExtension())
+        .as("Extension")
+        .isEqualTo("exe");
   }
 }

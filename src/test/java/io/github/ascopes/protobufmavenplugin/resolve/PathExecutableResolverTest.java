@@ -36,19 +36,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
-@DisplayName("AbstractPathResolver tests")
-class AbstractPathResolverTest extends FileSystemTestSupport {
+@DisplayName("PathExecutableResolver tests")
+class PathExecutableResolverTest extends FileSystemTestSupport {
 
-  AbstractPathResolver resolver;
+  PathExecutableResolver resolver;
+  Executable executable;
 
   @BeforeEach
   void setUp() {
-    resolver = new AbstractPathResolver() {
-      @Override
-      protected String binaryName() {
-        return "protoc";
-      }
-    };
+    resolver = new PathExecutableResolver();
+    executable = new Executable("org.example", "protoc");
   }
 
   @DisplayName("An empty $PATH results in an exception being raised")
@@ -65,7 +62,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(Set.of(".exe"));
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
@@ -101,7 +98,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(Set.of(".exe", ".bang"));
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
@@ -133,7 +130,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(Set.of());
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
@@ -156,7 +153,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(Set.of());
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
@@ -189,7 +186,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(Set.of());
 
       // When
-      var result = resolver.resolve();
+      var result = resolver.resolve(executable);
 
       // Then
       assertThat(result)
@@ -219,7 +216,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(caseInsensitiveSetOf());
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
@@ -250,7 +247,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(caseInsensitiveSetOf(".aaa", ".bbb", ".ccc"));
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
@@ -288,7 +285,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(caseInsensitiveSetOf(".aaa", ".bbb", ".ccc", ".exe"));
 
       // Then
-      assertThat(resolver.resolve())
+      assertThat(resolver.resolve(executable))
           .isEqualTo(protoc);
     }
   }
@@ -316,7 +313,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatNoException()
-          .isThrownBy(resolver::resolve);
+          .isThrownBy(() -> resolver.resolve(executable));
     }
   }
 
@@ -339,7 +336,7 @@ class AbstractPathResolverTest extends FileSystemTestSupport {
           .thenReturn(Set.of(""));
 
       // Then
-      assertThatThrownBy(resolver::resolve)
+      assertThatThrownBy(() -> resolver.resolve(executable))
           .isInstanceOf(ExecutableResolutionException.class)
           .hasMessage("File system error while searching for protoc")
           .hasCauseInstanceOf(IOException.class);

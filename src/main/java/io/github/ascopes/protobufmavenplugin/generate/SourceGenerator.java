@@ -21,14 +21,11 @@ import static java.util.Optional.ofNullable;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocArgumentBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutor;
+import io.github.ascopes.protobufmavenplugin.resolve.Executable;
 import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
-import io.github.ascopes.protobufmavenplugin.resolve.grpc.MavenGrpcJavaPluginResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.grpc.MavenGrpcKotlinPluginResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.grpc.PathGrpcJavaPluginResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.grpc.PathGrpcKotlinPluginResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.protoc.MavenProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.protoc.PathProtocResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.source.ProtoSourceResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.MavenArtifactResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.PathExecutableResolver;
+import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +53,6 @@ public final class SourceGenerator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SourceGenerator.class);
 
-  private final ArtifactResolver artifactResolver;
   private final MavenSession mavenSession;
   private final String protocVersion;
   private final @Nullable String grpcPluginVersion;
@@ -68,8 +64,13 @@ public final class SourceGenerator {
   private final boolean liteOnly;
   private final SourceRootRegistrar sourceRootRegistrar;
 
+  // Internally managed components.
+  private final MavenArtifactResolver mavenArtifactResolver;
+  private final PathExecutableResolver pathExecutableResolver;
+
   SourceGenerator(SourceGeneratorBuilder builder) {
-    artifactResolver = requireNonNull(builder.artifactResolver);
+    var artifactResolver = requireNonNull(builder.artifactResolver);
+
     mavenSession = requireNonNull(builder.mavenSession);
     protocVersion = requireNonNull(builder.protocVersion);
     grpcPluginVersion = builder.grpcPluginVersion;
@@ -80,6 +81,9 @@ public final class SourceGenerator {
     generateKotlinWrappers = requireNonNull(builder.generateKotlinWrappers);
     liteOnly = requireNonNull(builder.liteOnly);
     sourceRootRegistrar = requireNonNull(builder.sourceRootRegistrar);
+
+    mavenArtifactResolver = new MavenArtifactResolver(artifactResolver, mavenSession);
+    pathExecutableResolver = new PathExecutableResolver();
   }
 
   /**
@@ -92,7 +96,7 @@ public final class SourceGenerator {
     LOGGER.debug("Beginning generation pass");
 
     // Step 1. Resolve everything we need to compile correctly.
-    var protocPath = resolveProtocPath();
+    var protocPath = resolvePath(Executable.PROTOC, protocVersion);
     var pluginPaths = resolvePlugins();
     var sources = resolveProtoSources();
 
@@ -106,13 +110,13 @@ public final class SourceGenerator {
     generateSources(protocPath, pluginPaths, sources);
   }
 
-  Path resolveProtocPath() throws MojoFailureException {
-    var resolver = protocVersion.trim().equalsIgnoreCase("PATH")
-        ? new PathProtocResolver()
-        : new MavenProtocResolver(protocVersion, artifactResolver, mavenSession);
-
+  Path resolvePath(Executable executable, String version) throws MojoFailureException {
     try {
-      return resolver.resolve();
+      if (version.trim().equalsIgnoreCase("PATH")) {
+        return pathExecutableResolver.resolve(executable);
+      } else {
+        return mavenArtifactResolver.resolve(executable, version);
+      }
     } catch (ExecutableResolutionException ex) {
       throw failure("Failed to resolve protoc executable", ex);
     }
@@ -123,33 +127,19 @@ public final class SourceGenerator {
       return List.of();
     }
 
-    var usePath = grpcPluginVersion.trim().equalsIgnoreCase("PATH");
-    var resolvedPluginPaths = new ArrayList<Plugin>();
-
-    try {
-      var javaResolver = usePath
-          ? new PathGrpcJavaPluginResolver()
-          : new MavenGrpcJavaPluginResolver(grpcPluginVersion, artifactResolver, mavenSession);
-
-      resolvedPluginPaths.add(new Plugin("protoc-gen-grpc-java", javaResolver.resolve()));
-    } catch (ExecutableResolutionException ex) {
-      throw failure("Failed to resolve Java GRPC plugin executable", ex);
-    }
-
+    var resolvedPlugins = new ArrayList<Plugin>();
+    resolvedPlugins.add(resolvePlugin(Executable.PROTOC_GEN_GRPC_JAVA, grpcPluginVersion));
+    
     if (generateKotlinWrappers) {
-      try {
-        var kotlinResolver = usePath
-            ? new PathGrpcKotlinPluginResolver()
-            : new MavenGrpcKotlinPluginResolver(grpcPluginVersion, artifactResolver,
-                mavenSession);
-
-        resolvedPluginPaths.add(new Plugin("protoc-gen-grpc-kotlin", kotlinResolver.resolve()));
-      } catch (ExecutableResolutionException ex) {
-        throw failure("Failed to resolve Kotlin GRPC plugin executables", ex);
-      }
+      resolvedPlugins.add(resolvePlugin(Executable.PROTOC_GEN_GRPC_KOTLIN, grpcPluginVersion));
     }
 
-    return resolvedPluginPaths;
+    return resolvedPlugins;
+  }
+
+  private Plugin resolvePlugin(Executable executable, String version) throws MojoFailureException {
+    var path = resolvePath(executable, version);
+    return new Plugin(executable.getExecutableName(), path);
   }
 
   private List<Path> resolveProtoSources() throws MojoFailureException {

@@ -29,44 +29,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract base for an artifact resolver that resolves the artifact from Maven repositories.
+ * Artifact resolver that can resolve an artifact from Maven repositories.
  *
  * @author Ashley Scopes
  */
-public abstract class AbstractMavenResolver implements ExecutableResolver {
+public final class MavenArtifactResolver {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMavenResolver.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MavenArtifactResolver.class);
 
-  private final String version;
   private final ArtifactResolver artifactResolver;
   private final MavenSession mavenSession;
-  private final AbstractMavenCoordinateFactory coordinateFactory;
 
   /**
    * Initialise the resolver.
    *
-   * @param version           the version range or version to resolve.
    * @param artifactResolver  the artifact resolver to use.
    * @param mavenSession      the Maven session to use.
-   * @param coordinateFactory the coordinate factory to use.
    */
-  protected AbstractMavenResolver(
-      String version,
-      ArtifactResolver artifactResolver,
-      MavenSession mavenSession,
-      AbstractMavenCoordinateFactory coordinateFactory
-  ) {
-    this.version = version;
+  public MavenArtifactResolver(ArtifactResolver artifactResolver, MavenSession mavenSession) {
     this.artifactResolver = artifactResolver;
     this.mavenSession = mavenSession;
-    this.coordinateFactory = coordinateFactory;
   }
 
-  @Override
-  public Path resolve() throws ExecutableResolutionException {
+  /**
+   * Determine the path to the executable.
+   *
+   * @param executable the executable to resolve.
+   * @param version the version of the executable.
+   * @return the executable path.
+   * @throws ExecutableResolutionException if resolution fails for any reason.
+   */
+  public Path resolve(Executable executable, String version) throws ExecutableResolutionException {
     Path path;
 
-    var coordinate = coordinateFactory.create(version);
+    var coordinate = executable.getMavenArtifactCoordinate(version);
 
     try {
       var request = new DefaultProjectBuildingRequest(mavenSession.getProjectBuildingRequest());
