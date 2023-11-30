@@ -440,6 +440,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
+          <!-- These are run in the prepare phase already so don't run them twice -->
+          <arguments>-Dmaven.test.skip -Dinvoker.skip</arguments>
           <goals>deploy</goals>
           <releaseProfiles>gpg</releaseProfiles>
         </configuration>
