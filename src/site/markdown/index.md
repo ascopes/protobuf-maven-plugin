@@ -15,10 +15,6 @@ for you automatically.
 
 In addition to generating Java sources, this plugin can also generate Kotlin sources.
 
-# Contents
-
-<!-- MACRO{toc|section=2|fromDepth=2|toDepth=3} -->
-
 # Bugs and feature requests
 
 Please raise any bugs or feature requests on 
