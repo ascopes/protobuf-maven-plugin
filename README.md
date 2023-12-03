@@ -21,7 +21,9 @@ A simple and modern Maven plugin to generate Java/Kotlin sources from Protobuf d
 
 ## Usage
 
-The proposed usage at the time of writing will be something along the lines of:
+Full documentation with usage examples can be found [on the plugin site](https://ascopes.github.io/protobuf-maven-plugin).
+
+To give a quick idea of what this looks like, see the following example:
 
 ```xml
 <plugin>
@@ -30,11 +32,15 @@ The proposed usage at the time of writing will be something along the lines of:
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <!-- Version of protoc to use, as defined at
-         https://mvnrepository.com/artifact/com.google.protobuf/protoc -->
     <protocVersion>3.25.0</protocVersion>
-    <!-- Fail if protoc raises any warnings -->
-    <fatalWarnings>true</fatalWarnings>
   </configuration>
+
+  <executions>
+    <execution>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+    </execution>
+  </executions>
 </plugin>
 ```
