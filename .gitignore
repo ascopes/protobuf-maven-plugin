@@ -7,3 +7,7 @@ target/
 
 # JVM agent descriptors
 .attach*
+
+# Stuff that I generate when I have lost all hope in the world
+/build.log
+
