@@ -20,22 +20,51 @@ import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 
+/**
+ * Representation of an executable that can be resolved from the
+ * {@code $PATH} or from a Maven Central repository.
+ *
+ * @author Ashley Scopes
+ */
 public final class Executable {
 
   // Common executables we care about
+
+  /**
+   * The Protobuf Compiler.
+   */
   public static final Executable PROTOC = new Executable("com.google.protobuf", "protoc");
+
+  /**
+   * The GRPC plugin for the Protobuf Compiler that can generate Java service code.
+   */
   public static final Executable PROTOC_GEN_GRPC_JAVA = new Executable("io.grpc", "protoc-gen-grpc-java");
+
+  /**
+   * The GRPC plugin for the Protobuf Compiler that can generate Kotlin service code.
+   */
   public static final Executable PROTOC_GEN_GRPC_KOTLIN = new Executable("io.grpc", "protoc-gen-grpc-kotlin");
 
   // Implementation details
   private final String groupId;
   private final String artifactId;
 
+  /**
+   * Initialise the executable.
+   *
+   * @param groupId the group ID.
+   * @param artifactId the artifact ID (also treated as the executable name).
+   */
   public Executable(String groupId, String artifactId) {
     this.groupId = groupId;
     this.artifactId = artifactId;
   }
 
+  /**
+   * Get the executable name.
+   *
+   * @return the executable name.
+   */
   public String getExecutableName() {
     return artifactId;
   }
@@ -59,7 +88,7 @@ public final class Executable {
     return coordinate;
   }
 
-  protected final String getMavenClassifier() throws ExecutableResolutionException {
+  private String getMavenClassifier() throws ExecutableResolutionException {
     String classifier;
 
     if (HostEnvironment.isWindows()) {
@@ -76,7 +105,7 @@ public final class Executable {
     return classifier;
   }
 
-  protected String determineArchitectureForWindows() throws ExecutableResolutionException {
+  private String determineArchitectureForWindows() throws ExecutableResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -93,7 +122,7 @@ public final class Executable {
     }
   }
 
-  protected String determineArchitectureForLinux() throws ExecutableResolutionException {
+  private String determineArchitectureForLinux() throws ExecutableResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -117,7 +146,7 @@ public final class Executable {
     }
   }
 
-  protected String determineArchitectureForMacOs() throws ExecutableResolutionException {
+  private String determineArchitectureForMacOs() throws ExecutableResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -133,7 +162,7 @@ public final class Executable {
     }
   }
 
-  protected ExecutableResolutionException noResolvableExecutableFor(String os, String arch) {
+  private ExecutableResolutionException noResolvableExecutableFor(String os, String arch) {
     var message = "No resolvable " + artifactId + " version for " + os
         + " '" + arch + "' systems found";
     return new ExecutableResolutionException(message);
