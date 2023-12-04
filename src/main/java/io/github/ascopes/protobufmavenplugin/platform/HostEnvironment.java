@@ -25,13 +25,11 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collector;
 
@@ -46,37 +44,40 @@ public final class HostEnvironment {
    * Determine if the host OS is running Windows.
    *
    * @return {@code true} if running Windows, or {@code false} otherwise.
+   * @throws IllegalStateException if the JVM is not configured to give this information.
    */
   public static boolean isWindows() {
-    return operatingSystem().toLowerCase(Locale.ROOT).startsWith("windows");
+    return operatingSystem().startsWith("windows");
   }
 
   /**
    * Determine if the host OS is running Mac OS X.
    *
    * @return {@code true} if running Mac OS X, or {@code false} otherwise.
+   * @throws IllegalStateException if the JVM is not configured to give this information.
    */
   public static boolean isMacOs() {
-    return operatingSystem().toLowerCase(Locale.ROOT).startsWith("mac os");
+    return operatingSystem().startsWith("mac os");
   }
 
   /**
    * Determine if the host OS is running Linux.
    *
    * @return {@code true} if running Linux, or {@code false} otherwise.
+   * @throws IllegalStateException if the JVM is not configured to give this information.
    */
   public static boolean isLinux() {
-    return operatingSystem().toLowerCase(Locale.ROOT).startsWith("linux");
+    return operatingSystem().startsWith("linux");
   }
 
   /**
    * Determine the reported CPU architecture.
    *
    * @return the reported CPU architecture.
+   * @throws IllegalStateException if the JVM is not configured to give this information.
    */
   public static String cpuArchitecture() {
-    return ofNullable(System.getProperty("os.arch"))
-        .orElseThrow(() -> new IllegalStateException("No 'os.arch' system property is set"));
+    return mandatoryProperty("os.arch");
   }
 
   /**
@@ -111,7 +112,10 @@ public final class HostEnvironment {
       return scanner
           .tokens()
           .filter(not(String::isBlank))
-          .collect(toUnmodifiableSortedSet(String::compareToIgnoreCase));
+          .collect(collectingAndThen(
+              toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
+              Collections::unmodifiableSortedSet
+          ));
     }
   }
 
@@ -121,6 +125,7 @@ public final class HostEnvironment {
    * @return the current working directory.
    */
   public static Path workingDirectory() {
+    // Path.of("") returns the current directory by default.
     return Path.of("").toAbsolutePath();
   }
 
@@ -130,15 +135,12 @@ public final class HostEnvironment {
   }
 
   private static String operatingSystem() {
-    return ofNullable(System.getProperty("os.name"))
-        .orElseThrow(() -> new IllegalStateException("No 'os.name' system property is set"));
+    return mandatoryProperty("os.name").toLowerCase(Locale.ROOT);
   }
 
-  private static <T> Collector<T, ?, SortedSet<T>> toUnmodifiableSortedSet(Comparator<T> comparator) {
-    return collectingAndThen(
-        toCollection(() -> new TreeSet<>(comparator)),
-        Collections::unmodifiableSortedSet
-    );
+  private static String mandatoryProperty(String property) {
+    return ofNullable(System.getProperty(property))
+        .orElseThrow(() -> new IllegalStateException("No '" + property + "' system property is set"));
   }
 
   private HostEnvironment() {
