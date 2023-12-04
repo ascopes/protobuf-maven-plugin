@@ -152,4 +152,4 @@ jobs:
     steps:
       - name: Deploy site
         if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v3
