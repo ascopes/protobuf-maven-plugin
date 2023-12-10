@@ -17,8 +17,6 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
-import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
-import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 
 /**
  * Representation of an executable that can be resolved from the
@@ -78,14 +76,14 @@ public final class Executable {
    * @throws DependencyResolutionException if the coordinate cannot be
    *     resolved for the current platform.
    */
-  public ArtifactCoordinate getMavenArtifactCoordinate(String version) throws DependencyResolutionException {
-    var coordinate = new DefaultArtifactCoordinate();
-    coordinate.setGroupId(groupId);
-    coordinate.setArtifactId(artifactId);
-    coordinate.setVersion(version);
-    coordinate.setClassifier(getMavenClassifier());
-    coordinate.setExtension("exe");
-    return coordinate;
+  public BasicMavenCoordinate getMavenArtifactCoordinate(String version) throws DependencyResolutionException {
+    return new BasicMavenCoordinate(
+        groupId,
+        artifactId,
+        version,
+        "exe",
+        getMavenClassifier()
+    );
   }
 
   private String getMavenClassifier() throws DependencyResolutionException {

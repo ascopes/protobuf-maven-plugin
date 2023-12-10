@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin;
 import io.github.ascopes.protobufmavenplugin.generate.SourceGeneratorBuilder;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
@@ -28,6 +29,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
+import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolver;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -41,12 +43,20 @@ import org.jspecify.annotations.Nullable;
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
-   * The artifact resolver to use to resolve dependencies from Maven repositories.
+   * The artifact resolver to use to resolve artifacts from Maven repositories.
    *
    * @since 0.0.1
    */
   @Component
-  private @Nullable ArtifactResolver artifactResolver;
+  private ArtifactResolver artifactResolver;
+
+  /**
+   * The dependency resolver to use to resolve dependencies from Maven repositories.
+   *
+   * @since 0.1.0
+   */
+  @Component
+  private DependencyResolver dependencyResolver;
 
   /**
    * The Maven session that is in use.
@@ -106,6 +116,21 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   private @Nullable Set<String> sourceDirectories;
+
+  /**
+   * Add additional locations to import code from. These can be file system paths or Maven
+   * dependencies (in the format {@code mvn:groupId:artifactId:version[:classifier]}).
+   *
+   * <p>Maven dependencies should be packages as JARs.
+   *
+   * <p>Dependencies specified here will NOT be compiled by {@code protoc}, so will also need
+   * to have a {@code compile}-scoped dependency available to the Java compiler via the usual means
+   * (dependency blocks in your project).
+   *
+   * @since 0.1.0
+   */
+  @Parameter
+  private @Nullable Set<String> additionalImports;
 
   /**
    * Override the directory to output generated protobuf message sources to.
@@ -172,7 +197,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Override
   public final void execute() throws MojoExecutionException, MojoFailureException {
     new SourceGeneratorBuilder()
+        .additionalImports(Objects.requireNonNullElseGet(additionalImports, Set::of))
         .artifactResolver(artifactResolver)
+        .dependencyResolver(dependencyResolver)
         .fatalWarnings(fatalWarnings)
         .generateKotlinWrappers(generateKotlinWrappers)
         .grpcOutputDirectory(getActualGrpcOutputDirectory())

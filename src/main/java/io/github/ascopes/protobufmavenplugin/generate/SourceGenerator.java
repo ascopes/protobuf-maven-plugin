@@ -18,8 +18,11 @@ package io.github.ascopes.protobufmavenplugin.generate;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.ArchiveExtractor;
+import io.github.ascopes.protobufmavenplugin.dependencies.BasicMavenCoordinate;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.Executable;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenExecutableResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PathExecutableResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.ProtoSourceResolver;
@@ -31,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
@@ -56,6 +60,7 @@ public final class SourceGenerator {
   private final String protocVersion;
   private final @Nullable String grpcPluginVersion;
   private final Set<Path> sourceDirectories;
+  private final Set<String> additionalImports;
   private final Path protobufOutputDirectory;
   private final Path grpcOutputDirectory;
   private final boolean fatalWarnings;
@@ -63,17 +68,20 @@ public final class SourceGenerator {
   private final boolean liteOnly;
   private final SourceRootRegistrar sourceRootRegistrar;
 
+  // Inferred components.
+  private final Path targetDir;
+
   // Internally managed components.
-  private final MavenExecutableResolver mavenArtifactResolver;
+  private final MavenArtifactResolver mavenArtifactResolver;
+  private final MavenExecutableResolver mavenExecutableResolver;
   private final PathExecutableResolver pathExecutableResolver;
 
   SourceGenerator(SourceGeneratorBuilder builder) {
-    var artifactResolver = requireNonNull(builder.artifactResolver);
-
     mavenSession = requireNonNull(builder.mavenSession);
     protocVersion = requireNonNull(builder.protocVersion);
     grpcPluginVersion = builder.grpcPluginVersion;
     sourceDirectories = requireNonNull(builder.sourceDirectories);
+    additionalImports = requireNonNull(builder.additionalImports);
     protobufOutputDirectory = requireNonNull(builder.protobufOutputDirectory);
     grpcOutputDirectory = requireNonNull(builder.grpcOutputDirectory);
     fatalWarnings = requireNonNull(builder.fatalWarnings);
@@ -81,7 +89,17 @@ public final class SourceGenerator {
     liteOnly = requireNonNull(builder.liteOnly);
     sourceRootRegistrar = requireNonNull(builder.sourceRootRegistrar);
 
-    mavenArtifactResolver = new MavenExecutableResolver(artifactResolver, mavenSession);
+    var targetDir = mavenSession.getCurrentProject().getBuild().getDirectory();
+    this.targetDir = Path.of(targetDir);
+
+    var artifactResolver = requireNonNull(builder.artifactResolver);
+    var dependencyResolver = requireNonNull(builder.dependencyResolver);
+    mavenArtifactResolver = new MavenArtifactResolver(
+        artifactResolver,
+        dependencyResolver,
+        mavenSession
+    );
+    mavenExecutableResolver = new MavenExecutableResolver(mavenArtifactResolver);
     pathExecutableResolver = new PathExecutableResolver();
   }
 
@@ -95,8 +113,9 @@ public final class SourceGenerator {
     LOGGER.debug("Beginning generation pass");
 
     // Step 1. Resolve everything we need to compile correctly.
-    var protocPath = resolvePath(Executable.PROTOC, protocVersion);
+    var protocPath = resolveExecutablePath(Executable.PROTOC, protocVersion);
     var pluginPaths = resolvePlugins();
+    var additionalImportPaths = resolveAdditionalImports();
     var sources = resolveProtoSources();
 
     // Step 2. Prepare the output environment.
@@ -106,15 +125,18 @@ public final class SourceGenerator {
     dumpProtocVersion(protocPath);
 
     // Step 4. Perform the compilation.
-    generateSources(protocPath, pluginPaths, sources);
+    generateSources(protocPath, pluginPaths, additionalImportPaths, sources);
   }
 
-  private Path resolvePath(Executable executable, String version) throws MojoFailureException {
+  private Path resolveExecutablePath(
+      Executable executable,
+      String version
+  ) throws MojoFailureException {
     try {
       if (version.trim().equalsIgnoreCase("PATH")) {
         return pathExecutableResolver.resolve(executable);
       } else {
-        return mavenArtifactResolver.resolve(executable, version);
+        return mavenExecutableResolver.resolve(executable, version);
       }
     } catch (DependencyResolutionException ex) {
       throw failure("Failed to resolve protoc executable", ex);
@@ -137,8 +159,31 @@ public final class SourceGenerator {
   }
 
   private Plugin resolvePlugin(Executable executable, String version) throws MojoFailureException {
-    var path = resolvePath(executable, version);
+    var path = resolveExecutablePath(executable, version);
     return new Plugin(executable.getExecutableName(), path);
+  }
+
+  private Set<Path> resolveAdditionalImports() throws MojoFailureException {
+    try {
+      var additionalImportPaths = new HashSet<Path>();
+      for (var additionalImport : additionalImports) {
+        if (additionalImport.startsWith("mvn:")) {
+          var coordinate = BasicMavenCoordinate.parse(additionalImport);
+          var archivePaths = mavenArtifactResolver
+              .resolveDependencies(coordinate, List.of("compile", "provided"));
+          var extractedPaths = ArchiveExtractor
+              .extractArchives(archivePaths, targetDir.resolve("protobuf-extracted"));
+          additionalImportPaths.addAll(extractedPaths);
+        } else {
+          additionalImportPaths.add(Path.of(additionalImport));
+        }
+      }
+
+      return additionalImportPaths;
+
+    } catch (DependencyResolutionException | IOException ex) {
+      throw failure("Failed to resolve additional imports: " + ex.getMessage(), ex);
+    }
   }
 
   private List<Path> resolveProtoSources() throws MojoFailureException {
@@ -180,10 +225,12 @@ public final class SourceGenerator {
   private void generateSources(
       Path protocPath,
       Collection<Plugin> plugins,
+      Collection<Path> additionalImportPaths,
       Collection<Path> sources
   ) throws MojoExecutionException {
     var argBuilder = new ProtocArgumentBuilder(protocPath)
-        .includeDirectories(sourceDirectories)
+        .protoPaths(additionalImportPaths)
+        .protoPaths(sourceDirectories)
         .fatalWarnings(fatalWarnings)
         .outputDirectory("java", protobufOutputDirectory, liteOnly);
 

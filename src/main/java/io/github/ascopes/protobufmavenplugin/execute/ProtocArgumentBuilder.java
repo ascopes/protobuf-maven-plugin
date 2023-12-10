@@ -61,7 +61,7 @@ public final class ProtocArgumentBuilder {
    * @param directories the directories to include.
    * @return this builder.
    */
-  public ProtocArgumentBuilder includeDirectories(Collection<Path> directories) {
+  public ProtocArgumentBuilder protoPaths(Collection<Path> directories) {
     for (var directory : directories) {
       arguments.add("--proto_path=" + directory);
     }
