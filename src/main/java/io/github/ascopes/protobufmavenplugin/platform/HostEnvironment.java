@@ -94,8 +94,9 @@ public final class HostEnvironment {
       return scanner
           .tokens()
           .filter(not(String::isBlank))
-          .distinct()
+          .map(String::trim)
           .map(HostEnvironment::parsePath)
+          .distinct()
           .collect(toUnmodifiableList());
     }
   }
@@ -112,6 +113,7 @@ public final class HostEnvironment {
       return scanner
           .tokens()
           .filter(not(String::isBlank))
+          .map(String::trim)
           .collect(collectingAndThen(
               toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
               Collections::unmodifiableSortedSet
