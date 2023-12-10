@@ -51,7 +51,7 @@ public final class ProtoSourceResolver {
     var protoSources = new ArrayList<Path>();
 
     for (var sourceDir : sourceDirs) {
-      if (!Files.exists(sourceDir)) {
+      if (!Files.isDirectory(sourceDir)) {
         LOGGER.info("Source directory {} does not exist", sourceDir);
         continue;
       }
