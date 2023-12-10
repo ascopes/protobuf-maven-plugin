@@ -109,7 +109,7 @@ public final class SourceGenerator {
     generateSources(protocPath, pluginPaths, sources);
   }
 
-  Path resolvePath(Executable executable, String version) throws MojoFailureException {
+  private Path resolvePath(Executable executable, String version) throws MojoFailureException {
     try {
       if (version.trim().equalsIgnoreCase("PATH")) {
         return pathExecutableResolver.resolve(executable);
@@ -121,7 +121,7 @@ public final class SourceGenerator {
     }
   }
 
-  Collection<Plugin> resolvePlugins() throws MojoFailureException {
+  private Collection<Plugin> resolvePlugins() throws MojoFailureException {
     if (grpcPluginVersion == null) {
       return List.of();
     }
@@ -149,7 +149,7 @@ public final class SourceGenerator {
     }
   }
 
-  void registerSourceOutputRoots() throws MojoFailureException {
+  private void registerSourceOutputRoots() throws MojoFailureException {
     try {
       // Create the root first if it does not yet exist.
       Files.createDirectories(protobufOutputDirectory);
@@ -169,7 +169,7 @@ public final class SourceGenerator {
     }
   }
 
-  void dumpProtocVersion(Path protocPath) throws MojoFailureException {
+  private void dumpProtocVersion(Path protocPath) throws MojoFailureException {
     try {
       ProtocExecutor.invoke(new ProtocArgumentBuilder(protocPath).version());
     } catch (ProtocExecutionException ex) {
@@ -177,7 +177,7 @@ public final class SourceGenerator {
     }
   }
 
-  void generateSources(
+  private void generateSources(
       Path protocPath,
       Collection<Plugin> plugins,
       Collection<Path> sources
