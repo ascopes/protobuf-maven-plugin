@@ -116,7 +116,7 @@ public final class SourceGenerator {
     var protocPath = resolveExecutablePath(Executable.PROTOC, protocVersion);
     var pluginPaths = resolvePlugins();
     var additionalImportPaths = resolveAdditionalImports();
-    var sources = resolveProtoSources();
+    var directorySources = resolveProtoDirectorySources();
 
     // Step 2. Prepare the output environment.
     registerSourceOutputRoots();
@@ -125,7 +125,7 @@ public final class SourceGenerator {
     dumpProtocVersion(protocPath);
 
     // Step 4. Perform the compilation.
-    generateSources(protocPath, pluginPaths, additionalImportPaths, sources);
+    generateSources(protocPath, pluginPaths, additionalImportPaths, directorySources);
   }
 
   private Path resolveExecutablePath(
@@ -166,14 +166,11 @@ public final class SourceGenerator {
   private Set<Path> resolveAdditionalImports() throws MojoFailureException {
     try {
       var additionalImportPaths = new HashSet<Path>();
+
       for (var additionalImport : additionalImports) {
         if (additionalImport.startsWith("mvn:")) {
           var coordinate = BasicMavenCoordinate.parse(additionalImport);
-          var archivePaths = mavenArtifactResolver
-              .resolveDependencies(coordinate, List.of("compile", "provided"));
-          var extractedPaths = ArchiveExtractor
-              .extractArchives(archivePaths, targetDir.resolve("protobuf-extracted"));
-          additionalImportPaths.addAll(extractedPaths);
+          additionalImportPaths.addAll(resolveAdditionalImport(coordinate));
         } else {
           additionalImportPaths.add(Path.of(additionalImport));
         }
@@ -186,7 +183,18 @@ public final class SourceGenerator {
     }
   }
 
-  private List<Path> resolveProtoSources() throws MojoFailureException {
+  private Collection<Path> resolveAdditionalImport(
+      BasicMavenCoordinate coordinate
+  ) throws DependencyResolutionException, IOException {
+    var processingDirectory = createProcessingDirectory("imports");
+
+    var archivePaths = mavenArtifactResolver
+        .resolveDependencies(coordinate, List.of("compile", "provided"));
+    return ArchiveExtractor
+        .extractArchives(archivePaths, processingDirectory);
+  }
+
+  private List<Path> resolveProtoDirectorySources() throws MojoFailureException {
     try {
       return ProtoSourceResolver.resolve(sourceDirectories);
     } catch (IOException ex) {
@@ -274,6 +282,14 @@ public final class SourceGenerator {
     return ofNullable(ex)
         .map(Exception::getMessage)
         .orElse(shortMessage);
+  }
+
+  private Path createProcessingDirectory(String... parts) throws IOException {
+    var base = targetDir.resolve("protobuf-plugin");
+    for (var part : parts) {
+      base = base.resolve(part);
+    }
+    return Files.createDirectories(base);
   }
 
   private static final class Plugin {
