@@ -21,10 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,18 +33,15 @@ public final class MavenExecutableResolver {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MavenExecutableResolver.class);
 
-  private final ArtifactResolver artifactResolver;
-  private final MavenSession mavenSession;
+  private final MavenArtifactResolver artifactResolver;
 
   /**
    * Initialise the resolver.
    *
    * @param artifactResolver  the artifact resolver to use.
-   * @param mavenSession      the Maven session to use.
    */
-  public MavenExecutableResolver(ArtifactResolver artifactResolver, MavenSession mavenSession) {
+  public MavenExecutableResolver(MavenArtifactResolver artifactResolver) {
     this.artifactResolver = artifactResolver;
-    this.mavenSession = mavenSession;
   }
 
   /**
@@ -60,24 +53,8 @@ public final class MavenExecutableResolver {
    * @throws DependencyResolutionException if resolution fails for any reason.
    */
   public Path resolve(Executable executable, String version) throws DependencyResolutionException {
-    Path path;
-
     var coordinate = executable.getMavenArtifactCoordinate(version);
-
-    try {
-      var request = new DefaultProjectBuildingRequest(mavenSession.getProjectBuildingRequest());
-
-      LOGGER.info("Resolving {} from Maven repositories", coordinate);
-
-      var result = artifactResolver.resolveArtifact(request, coordinate);
-      path = result.getArtifact().getFile().toPath();
-
-    } catch (ArtifactResolverException ex) {
-      throw new DependencyResolutionException(
-          "Failed to resolve " + coordinate + " from Maven repositories",
-          ex
-      );
-    }
+    var path = artifactResolver.resolveArtifact(coordinate);
 
     LOGGER.info("Resolved {} to local path '{}'", coordinate, path);
 

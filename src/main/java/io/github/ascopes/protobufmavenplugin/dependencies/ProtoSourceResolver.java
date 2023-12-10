@@ -74,7 +74,7 @@ public final class ProtoSourceResolver {
     if (!Files.isRegularFile(file)) {
       return false;
     }
-    
+
     var fileName = file.getFileName().toString();
     var periodIndex = fileName.lastIndexOf('.');
 

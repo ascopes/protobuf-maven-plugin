@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
+import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolver;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -35,10 +36,12 @@ import org.jspecify.annotations.Nullable;
 public final class SourceGeneratorBuilder {
 
   @Nullable ArtifactResolver artifactResolver;
+  @Nullable DependencyResolver dependencyResolver;
   @Nullable MavenSession mavenSession;
   @Nullable String protocVersion;
   @Nullable String grpcPluginVersion;
   @Nullable Set<Path> sourceDirectories;
+  @Nullable Set<String> additionalImports;
   @Nullable Path protobufOutputDirectory;
   @Nullable Path grpcOutputDirectory;
   @Nullable Boolean fatalWarnings;
@@ -61,6 +64,17 @@ public final class SourceGeneratorBuilder {
    */
   public SourceGeneratorBuilder artifactResolver(ArtifactResolver artifactResolver) {
     this.artifactResolver = artifactResolver;
+    return this;
+  }
+
+  /**
+   * Set the dependency resolver.
+   *
+   * @param dependencyResolver the dependency resolver.
+   * @return this builder.
+   */
+  public SourceGeneratorBuilder dependencyResolver(DependencyResolver dependencyResolver) {
+    this.dependencyResolver = dependencyResolver;
     return this;
   }
 
@@ -105,6 +119,20 @@ public final class SourceGeneratorBuilder {
    */
   public SourceGeneratorBuilder sourceDirectories(Set<Path> sourceDirectories) {
     this.sourceDirectories = sourceDirectories;
+    return this;
+  }
+
+  /**
+   * Set the imports to include.
+   *
+   * <p>These should be paths or Maven GAVs ({@code mvn:groupId:artifactId:version[:classifier]}
+   * that point to JAR artifacts.
+   *
+   * @param additionalImports the imports to include.
+   * @return this builder.
+   */
+  public SourceGeneratorBuilder additionalImports(Set<String> additionalImports) {
+    this.additionalImports = additionalImports;
     return this;
   }
 

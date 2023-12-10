@@ -23,7 +23,7 @@
 
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.1.0</version>
 
   <name>Protobuf Maven Plugin</name>
   <description>Maven Plugin that generates source code from protobuf source files.</description>
