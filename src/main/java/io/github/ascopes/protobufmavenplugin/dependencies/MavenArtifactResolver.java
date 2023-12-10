@@ -62,7 +62,7 @@ public final class MavenArtifactResolver {
    * @throws DependencyResolutionException if resolution fails for any reason.
    */
   public Path resolveArtifact(
-      BasicMavenCoordinate coordinate
+      MavenCoordinate coordinate
   ) throws DependencyResolutionException {
     try {
       LOGGER.info("Resolving {} from Maven repositories", coordinate);
@@ -89,7 +89,7 @@ public final class MavenArtifactResolver {
    * @throws DependencyResolutionException if resolution fails.
    */
   public Set<Path> resolveDependencies(
-      BasicMavenCoordinate coordinate,
+      MavenCoordinate coordinate,
       Collection<String> scopes
   ) throws DependencyResolutionException {
     try {

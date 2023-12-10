@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Ashley Scopes
  */
-public final class BasicMavenCoordinate implements ArtifactCoordinate, DependableCoordinate {
+public final class MavenCoordinate implements ArtifactCoordinate, DependableCoordinate {
 
   private static final Pattern COORDINATE_PATTERN = Pattern.compile(
       "mvn:(?<groupId>[^:]+)"
@@ -51,7 +51,7 @@ public final class BasicMavenCoordinate implements ArtifactCoordinate, Dependabl
    * @param type the artifact type, or {@code null} to use the default.
    * @param classifier the classifier, or {@code null} if not applicable.
    */
-  public BasicMavenCoordinate(
+  public MavenCoordinate(
       String groupId,
       String artifactId,
       String version,
@@ -158,13 +158,13 @@ public final class BasicMavenCoordinate implements ArtifactCoordinate, Dependabl
    * @throws DependencyResolutionException if the coordinate could not be parsed due to a syntax
    *                                       error.
    */
-  public static BasicMavenCoordinate parse(String id) throws DependencyResolutionException {
+  public static MavenCoordinate parse(String id) throws DependencyResolutionException {
     var matcher = COORDINATE_PATTERN.matcher(id);
     if (!matcher.matches()) {
       throw new DependencyResolutionException("Failed to parse artifact coordinate '" + id + "'");
     }
 
-    return new BasicMavenCoordinate(
+    return new MavenCoordinate(
         matcher.group("groupId"),
         matcher.group("artifactId"),
         matcher.group("version"),

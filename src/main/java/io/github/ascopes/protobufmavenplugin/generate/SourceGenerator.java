@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.ArchiveExtractor;
-import io.github.ascopes.protobufmavenplugin.dependencies.BasicMavenCoordinate;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenCoordinate;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.Executable;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactResolver;
@@ -169,7 +169,7 @@ public final class SourceGenerator {
 
       for (var additionalImport : additionalImports) {
         if (additionalImport.startsWith("mvn:")) {
-          var coordinate = BasicMavenCoordinate.parse(additionalImport);
+          var coordinate = MavenCoordinate.parse(additionalImport);
           additionalImportPaths.addAll(resolveAdditionalImport(coordinate));
         } else {
           additionalImportPaths.add(Path.of(additionalImport));
@@ -184,7 +184,7 @@ public final class SourceGenerator {
   }
 
   private Collection<Path> resolveAdditionalImport(
-      BasicMavenCoordinate coordinate
+      MavenCoordinate coordinate
   ) throws DependencyResolutionException, IOException {
     var processingDirectory = createProcessingDirectory("imports");
 
