@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -63,7 +63,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -99,7 +99,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -131,7 +131,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -154,14 +154,14 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
 
   @DisplayName("The first matching executable on POSIX is returned")
   @Test
-  void firstMatchingExecutableOnPosixIsReturned() throws ExecutableResolutionException {
+  void firstMatchingExecutableOnPosixIsReturned() throws DependencyResolutionException {
     try (var envMock = Mockito.mockStatic(HostEnvironment.class)) {
       // Given
       var existentDirectory = givenDirectoryExists("foo", "bar", "existent");
@@ -217,7 +217,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -248,7 +248,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No protoc binary was found in the $PATH");
     }
   }
@@ -262,7 +262,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
       "PROTOC.EXE"
   })
   @ParameterizedTest(name = "for executable named \"{0}\"")
-  void firstMatchingExecutableOnWindowsIsReturned(String name) throws ExecutableResolutionException {
+  void firstMatchingExecutableOnWindowsIsReturned(String name) throws DependencyResolutionException {
     try (var envMock = Mockito.mockStatic(HostEnvironment.class)) {
       // Given
       var existentDirectory = givenDirectoryExists("foo", "bar", "existent");
@@ -337,7 +337,7 @@ class PathExecutableResolverTest extends FileSystemTestSupport {
 
       // Then
       assertThatThrownBy(() -> resolver.resolve(executable))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("File system error while searching for protoc")
           .hasCauseInstanceOf(IOException.class);
     }

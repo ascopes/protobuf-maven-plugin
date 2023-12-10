@@ -31,7 +31,6 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collector;
 
 /**
  * Host environment inspection facilities.

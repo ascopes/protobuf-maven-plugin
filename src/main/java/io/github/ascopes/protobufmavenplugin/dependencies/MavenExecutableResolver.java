@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import java.io.IOException;
@@ -29,13 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Artifact resolver that can resolve an artifact from Maven repositories.
+ * Artifact resolver that can resolve an executable from Maven repositories.
  *
  * @author Ashley Scopes
  */
-public final class MavenArtifactResolver {
+public final class MavenExecutableResolver {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MavenArtifactResolver.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MavenExecutableResolver.class);
 
   private final ArtifactResolver artifactResolver;
   private final MavenSession mavenSession;
@@ -46,7 +46,7 @@ public final class MavenArtifactResolver {
    * @param artifactResolver  the artifact resolver to use.
    * @param mavenSession      the Maven session to use.
    */
-  public MavenArtifactResolver(ArtifactResolver artifactResolver, MavenSession mavenSession) {
+  public MavenExecutableResolver(ArtifactResolver artifactResolver, MavenSession mavenSession) {
     this.artifactResolver = artifactResolver;
     this.mavenSession = mavenSession;
   }
@@ -57,9 +57,9 @@ public final class MavenArtifactResolver {
    * @param executable the executable to resolve.
    * @param version the version of the executable.
    * @return the executable path.
-   * @throws ExecutableResolutionException if resolution fails for any reason.
+   * @throws DependencyResolutionException if resolution fails for any reason.
    */
-  public Path resolve(Executable executable, String version) throws ExecutableResolutionException {
+  public Path resolve(Executable executable, String version) throws DependencyResolutionException {
     Path path;
 
     var coordinate = executable.getMavenArtifactCoordinate(version);
@@ -73,7 +73,7 @@ public final class MavenArtifactResolver {
       path = result.getArtifact().getFile().toPath();
 
     } catch (ArtifactResolverException ex) {
-      throw new ExecutableResolutionException(
+      throw new DependencyResolutionException(
           "Failed to resolve " + coordinate + " from Maven repositories",
           ex
       );
@@ -90,7 +90,7 @@ public final class MavenArtifactResolver {
         permissions.add(PosixFilePermission.OWNER_EXECUTE);
         Files.setPosixFilePermissions(path, permissions);
       } catch (IOException ex) {
-        throw new ExecutableResolutionException(
+        throw new DependencyResolutionException(
             "Setting executable bit for '" + path + "' failed", ex
         );
       }

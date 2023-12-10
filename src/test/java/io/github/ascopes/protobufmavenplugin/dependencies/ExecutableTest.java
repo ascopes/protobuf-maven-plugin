@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mockStatic;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
-import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +49,7 @@ class ExecutableTest {
   void supportedWindowsArchitecturesResolveCorrectly(
       String architecture,
       String expectedClassifier
-  ) throws ExecutableResolutionException {
+  ) throws DependencyResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -74,7 +73,7 @@ class ExecutableTest {
 
       // Then
       assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("1.2.3"))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No resolvable protoc version for Windows 'x86_16' systems found")
           .hasNoCause();
     }
@@ -93,7 +92,7 @@ class ExecutableTest {
   void supportedLinuxArchitecturesResolveCorrectly(
       String architecture,
       String expectedClassifier
-  ) throws ExecutableResolutionException {
+  ) throws DependencyResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -117,7 +116,7 @@ class ExecutableTest {
 
       // Then
       assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("4.5.6"))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No resolvable protoc version for Linux 'IA_64' systems found")
           .hasNoCause();
     }
@@ -133,7 +132,7 @@ class ExecutableTest {
   void supportedMacOsArchitecturesResolveCorrectly(
       String architecture,
       String expectedClassifier
-  ) throws ExecutableResolutionException {
+  ) throws DependencyResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -149,7 +148,7 @@ class ExecutableTest {
 
   @DisplayName("Unsupported Mac OS architectures result in an exception")
   @Test
-  void unsupportedMacOsArchitecturesResultInException() throws ExecutableResolutionException {
+  void unsupportedMacOsArchitecturesResultInException() throws DependencyResolutionException {
     try (var hostEnvironment = mockStatic(HostEnvironment.class)) {
       // Given
       givenValidWorkingDirectory(hostEnvironment);
@@ -157,7 +156,7 @@ class ExecutableTest {
 
       // Then
       assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("7.8.9"))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage(
               "No resolvable protoc version for Mac OS 'something-crazy-unknown' systems found")
           .hasNoCause();
@@ -174,7 +173,7 @@ class ExecutableTest {
 
       // Then
       assertThatThrownBy(() -> executable.getMavenArtifactCoordinate("9.8.7"))
-          .isInstanceOf(ExecutableResolutionException.class)
+          .isInstanceOf(DependencyResolutionException.class)
           .hasMessage("No resolvable version of protoc for the current OS found")
           .hasNoCause();
     }

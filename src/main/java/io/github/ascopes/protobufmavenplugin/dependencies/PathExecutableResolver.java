@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import java.io.IOException;
@@ -45,9 +45,9 @@ public final class PathExecutableResolver {
    *
    * @param executable the executable to resolve.
    * @return the executable path.
-   * @throws ExecutableResolutionException if resolution fails for any reason.
+   * @throws DependencyResolutionException if resolution fails for any reason.
    */
-  public Path resolve(Executable executable) throws ExecutableResolutionException {
+  public Path resolve(Executable executable) throws DependencyResolutionException {
     var binaryName = executable.getExecutableName();
 
     var predicate = HostEnvironment.isWindows()
@@ -77,12 +77,12 @@ public final class PathExecutableResolver {
         }
       }
     } catch (IOException ex) {
-      throw new ExecutableResolutionException(
+      throw new DependencyResolutionException(
           "File system error while searching for " + binaryName, ex
       );
     }
 
-    throw new ExecutableResolutionException("No " + binaryName + " binary was found in the $PATH");
+    throw new DependencyResolutionException("No " + binaryName + " binary was found in the $PATH");
   }
 
   private Predicate<Path> windowsMatchPredicate(String binaryName) {

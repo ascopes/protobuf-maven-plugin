@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import static io.github.ascopes.protobufmavenplugin.fixture.RandomData.someString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,17 +21,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("ExecutableResolutionException tests")
-class ExecutableResolutionExceptionTest {
+@DisplayName("DependencyResolutionException tests")
+class DependencyResolutionExceptionTest {
 
-  @DisplayName("ExecutableResolutionException can be constructed with a single message parameter")
+  @DisplayName("DependencyResolutionException can be constructed with a single message parameter")
   @Test
   void canBeConstructedWithSingleMessageParameter() {
     // Given
     var message = someString();
 
     // When
-    var ex = new ExecutableResolutionException(message);
+    var ex = new DependencyResolutionException(message);
 
     // Then
     assertThat(ex)
@@ -40,7 +40,7 @@ class ExecutableResolutionExceptionTest {
         .hasNoSuppressedExceptions();
   }
 
-  @DisplayName("ExecutableResolutionException can be constructed with a message and cause parameter")
+  @DisplayName("DependencyResolutionException can be constructed with a message and cause parameter")
   @Test
   void canBeConstructedWithMessageAndCauseParameter() {
     // Given
@@ -48,7 +48,7 @@ class ExecutableResolutionExceptionTest {
     var cause = new Throwable(someString());
 
     // When
-    var ex = new ExecutableResolutionException(message, cause);
+    var ex = new DependencyResolutionException(message, cause);
 
     // Then
     assertThat(ex)

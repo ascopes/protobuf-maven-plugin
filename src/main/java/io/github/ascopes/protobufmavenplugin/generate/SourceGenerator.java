@@ -18,14 +18,14 @@ package io.github.ascopes.protobufmavenplugin.generate;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionException;
+import io.github.ascopes.protobufmavenplugin.dependencies.Executable;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenExecutableResolver;
+import io.github.ascopes.protobufmavenplugin.dependencies.PathExecutableResolver;
+import io.github.ascopes.protobufmavenplugin.dependencies.ProtoSourceResolver;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocArgumentBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutionException;
 import io.github.ascopes.protobufmavenplugin.execute.ProtocExecutor;
-import io.github.ascopes.protobufmavenplugin.resolve.Executable;
-import io.github.ascopes.protobufmavenplugin.resolve.ExecutableResolutionException;
-import io.github.ascopes.protobufmavenplugin.resolve.MavenArtifactResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.PathExecutableResolver;
-import io.github.ascopes.protobufmavenplugin.resolve.ProtoSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +36,6 @@ import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +64,7 @@ public final class SourceGenerator {
   private final SourceRootRegistrar sourceRootRegistrar;
 
   // Internally managed components.
-  private final MavenArtifactResolver mavenArtifactResolver;
+  private final MavenExecutableResolver mavenArtifactResolver;
   private final PathExecutableResolver pathExecutableResolver;
 
   SourceGenerator(SourceGeneratorBuilder builder) {
@@ -82,7 +81,7 @@ public final class SourceGenerator {
     liteOnly = requireNonNull(builder.liteOnly);
     sourceRootRegistrar = requireNonNull(builder.sourceRootRegistrar);
 
-    mavenArtifactResolver = new MavenArtifactResolver(artifactResolver, mavenSession);
+    mavenArtifactResolver = new MavenExecutableResolver(artifactResolver, mavenSession);
     pathExecutableResolver = new PathExecutableResolver();
   }
 
@@ -117,7 +116,7 @@ public final class SourceGenerator {
       } else {
         return mavenArtifactResolver.resolve(executable, version);
       }
-    } catch (ExecutableResolutionException ex) {
+    } catch (DependencyResolutionException ex) {
       throw failure("Failed to resolve protoc executable", ex);
     }
   }

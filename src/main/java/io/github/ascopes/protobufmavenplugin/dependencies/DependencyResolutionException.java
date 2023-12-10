@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import org.jspecify.annotations.Nullable;
 
 /**
- * Exception that is raised if resolution of executables fails.
+ * Exception that is raised if resolution of any dependencies fail.
  *
  * @author Ashley Scopes
  */
-public final class ExecutableResolutionException extends Exception {
+public final class DependencyResolutionException extends Exception {
 
   /**
    * Initialise the exception.
    *
    * @param message the exception message.
    */
-  public ExecutableResolutionException(String message) {
+  public DependencyResolutionException(String message) {
     super(message);
   }
 
@@ -40,7 +40,7 @@ public final class ExecutableResolutionException extends Exception {
    * @param message the exception message.
    * @param cause   the cause of the exception.
    */
-  public ExecutableResolutionException(String message, @Nullable Throwable cause) {
+  public DependencyResolutionException(String message, @Nullable Throwable cause) {
     super(message, cause);
   }
 }

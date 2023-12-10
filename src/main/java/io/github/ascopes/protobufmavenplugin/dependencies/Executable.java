@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.resolve;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.platform.HostEnvironment;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
@@ -75,10 +75,10 @@ public final class Executable {
    * 
    * @param version the artifact version.
    * @return the coordinate.
-   * @throws ExecutableResolutionException if the coordinate cannot be
+   * @throws DependencyResolutionException if the coordinate cannot be
    *     resolved for the current platform.
    */
-  public ArtifactCoordinate getMavenArtifactCoordinate(String version) throws ExecutableResolutionException {
+  public ArtifactCoordinate getMavenArtifactCoordinate(String version) throws DependencyResolutionException {
     var coordinate = new DefaultArtifactCoordinate();
     coordinate.setGroupId(groupId);
     coordinate.setArtifactId(artifactId);
@@ -88,7 +88,7 @@ public final class Executable {
     return coordinate;
   }
 
-  private String getMavenClassifier() throws ExecutableResolutionException {
+  private String getMavenClassifier() throws DependencyResolutionException {
     String classifier;
 
     if (HostEnvironment.isWindows()) {
@@ -98,14 +98,14 @@ public final class Executable {
     } else if (HostEnvironment.isMacOs()) {
       classifier = "osx-" + determineArchitectureForMacOs();
     } else {
-      throw new ExecutableResolutionException(
+      throw new DependencyResolutionException(
           "No resolvable version of " + artifactId + " for the current OS found");
     }
 
     return classifier;
   }
 
-  private String determineArchitectureForWindows() throws ExecutableResolutionException {
+  private String determineArchitectureForWindows() throws DependencyResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -122,7 +122,7 @@ public final class Executable {
     }
   }
 
-  private String determineArchitectureForLinux() throws ExecutableResolutionException {
+  private String determineArchitectureForLinux() throws DependencyResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -146,7 +146,7 @@ public final class Executable {
     }
   }
 
-  private String determineArchitectureForMacOs() throws ExecutableResolutionException {
+  private String determineArchitectureForMacOs() throws DependencyResolutionException {
     var arch = HostEnvironment.cpuArchitecture();
 
     switch (arch) {
@@ -162,9 +162,9 @@ public final class Executable {
     }
   }
 
-  private ExecutableResolutionException noResolvableExecutableFor(String os, String arch) {
+  private DependencyResolutionException noResolvableExecutableFor(String os, String arch) {
     var message = "No resolvable " + artifactId + " version for " + os
         + " '" + arch + "' systems found";
-    return new ExecutableResolutionException(message);
+    return new DependencyResolutionException(message);
   }
 }
