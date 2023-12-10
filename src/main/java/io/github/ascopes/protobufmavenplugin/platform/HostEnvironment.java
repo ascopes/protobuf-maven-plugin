@@ -95,7 +95,7 @@ public final class HostEnvironment {
           .tokens()
           .filter(not(String::isBlank))
           .distinct()
-          .map(Path::of)
+          .map(HostEnvironment::parsePath)
           .collect(toUnmodifiableList());
     }
   }
@@ -126,7 +126,7 @@ public final class HostEnvironment {
    */
   public static Path workingDirectory() {
     // Path.of("") returns the current directory by default.
-    return Path.of("").toAbsolutePath();
+    return parsePath("");
   }
 
   // Visible for testing purposes only.
@@ -141,6 +141,12 @@ public final class HostEnvironment {
   private static String mandatoryProperty(String property) {
     return ofNullable(System.getProperty(property))
         .orElseThrow(() -> new IllegalStateException("No '" + property + "' system property is set"));
+  }
+
+  private static Path parsePath(String path) {
+    return Path.of(path)
+        .toAbsolutePath()
+        .normalize();
   }
 
   private HostEnvironment() {
