@@ -76,8 +76,8 @@ public final class Executable {
    * @throws DependencyResolutionException if the coordinate cannot be
    *     resolved for the current platform.
    */
-  public BasicMavenCoordinate getMavenArtifactCoordinate(String version) throws DependencyResolutionException {
-    return new BasicMavenCoordinate(
+  public MavenCoordinate getMavenArtifactCoordinate(String version) throws DependencyResolutionException {
+    return new MavenCoordinate(
         groupId,
         artifactId,
         version,

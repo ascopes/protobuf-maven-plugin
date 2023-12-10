@@ -83,9 +83,7 @@
         <version>${plugin-version}</version>
 
         <configuration>
-          <additionalImports>
-            mvn:com.google.api.grpc:proto-google-common-protos:${proto-google-common-protos.version}
-          </additionalImports>
+          <additionalImports>mvn:com.google.api.grpc:proto-google-common-protos:${proto-google-common-protos.version}</additionalImports>
           <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
