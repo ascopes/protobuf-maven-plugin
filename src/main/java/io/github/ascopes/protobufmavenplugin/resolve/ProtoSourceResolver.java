@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,9 +60,8 @@ public final class ProtoSourceResolver {
 
       try (var stream = Files.walk(sourceDir)) {
         stream
-            .filter(Files::isRegularFile)
-            .filter(protoFileMatcher())
-            .peek(fileDiscoveryLogger())
+            .filter(ProtoSourceResolver::isProtoFile)
+            .peek(ProtoSourceResolver::logSourceFile)
             .forEach(protoSources::add);
       }
     }
@@ -73,23 +70,23 @@ public final class ProtoSourceResolver {
     return Collections.unmodifiableList(protoSources);
   }
 
-  private static Predicate<Path> protoFileMatcher() {
-    return file -> {
-      var fileName = file.getFileName().toString();
-      var periodIndex = fileName.lastIndexOf('.');
+  private static boolean isProtoFile(Path file) {
+    if (!Files.isRegularFile(file)) {
+      return false;
+    }
+    
+    var fileName = file.getFileName().toString();
+    var periodIndex = fileName.lastIndexOf('.');
 
-      if (periodIndex == -1) {
-        // No file extension, so not a proto file.
-        return false;
-      }
+    if (periodIndex == -1) {
+      // No file extension, so not a proto file.
+      return false;
+    }
 
-      // Enforce lowercase '.proto' file extension only. Even on Windows, users can ensure they
-      // follow standard lowercase naming conventions.
-      return fileName.substring(periodIndex).equals(".proto");
-    };
+    return fileName.substring(periodIndex).equals(".proto");
   }
 
-  private static Consumer<Path> fileDiscoveryLogger() {
-    return file -> LOGGER.debug("Discovered protobuf source file at {}", file);
+  private static void logSourceFile(Path file) {
+    LOGGER.debug("Discovered protobuf source file at {}", file);
   }
 }
