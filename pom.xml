@@ -343,7 +343,6 @@
         <configuration>
           <addTestClassPath>true</addTestClassPath>
           <failIfNoProjects>true</failIfNoProjects>
-          <parallelThreads>2C</parallelThreads>
           <invokerPropertiesFile></invokerPropertiesFile>
           <postBuildHookScript>test</postBuildHookScript>
           <showErrors>true</showErrors>
