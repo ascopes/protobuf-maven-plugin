@@ -76,6 +76,8 @@ public final class ArchiveExtractor {
 
       // We could support "releaseVersion" and "multi-release" attributes in the future.
       var env = Map.<String, String>of();
+
+      // TODO: run this in parallel per JAR.
       try (var fs = jarFsProvider.newFileSystem(archive, env)) {
         var archiveRoot = fs.getRootDirectories().iterator().next();
 
@@ -88,6 +90,9 @@ public final class ArchiveExtractor {
             var relativeFile = archiveRoot.relativize(sourceFile);
             var targetFile = resolveCrossFileSystem(outputDir, relativeFile);
             Files.createDirectories(targetFile.getParent());
+
+            LOGGER.debug("Copying {} to {}", sourceFile.toUri(), targetFile);
+
             Files.copy(
                 sourceFile,
                 targetFile,
