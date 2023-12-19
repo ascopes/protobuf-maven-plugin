@@ -38,7 +38,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>${project.url}/blob/main/LICENSE.txt</url>
+      <url>https://github.com/ascopes/protobuf-maven-plugin/blob/main/LICENSE.txt</url>
     </license>
   </licenses>
 
@@ -46,7 +46,7 @@
     <developer>
       <id>ascopes</id>
       <name>Ashley Scopes</name>
-      <email>ashleyscopes@outlook.com</email>
+      <email>73482956+ascopes@users.noreply.github.com</email>
       <url>https://github.com/ascopes</url>
       <organization>Ashley Scopes</organization>
       <organizationUrl>https://github.com/ascopes</organizationUrl>
@@ -71,26 +71,26 @@
     <site>
       <id>github-pages</id>
       <name>github-pages</name>
-      <url>${project-site-url}</url>
+      <url>https://ascopes.github.io/protobuf-maven-plugin</url>
     </site>
   </distributionManagement>
 
   <issueManagement>
     <system>GitHub Issues</system>
-    <url>${project-scm-url}/issues</url>
+    <url>https://github.com/ascopes/protobuf-maven-plugin/issues</url>
   </issueManagement>
 
   <organization>
     <name>Ashley Scopes (GitHub)</name>
-    <url>${project-organization-url}</url>
+    <url>https://github.com/ascopes</url>
   </organization>
 
-  <url>${project-site-url}</url>
+  <url>https://github.com/ascopes/protobuf-maven-plugin</url>
 
   <scm>
-    <url>scm:git:${project-scm-url}</url>
-    <connection>scm:git:${project-scm-url}</connection>
-    <developerConnection>scm:git:${project-scm-url}</developerConnection>
+    <url>scm:git:https://github.com/ascopes/protobuf-maven-plugin</url>
+    <connection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</connection>
+    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -133,9 +133,6 @@
       -Dorg.slf4j.simpleLogger.log.io.github.ascopes=TRACE
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project-organization-url>https://github.com/ascopes</project-organization-url>
-    <project-site-url>https://ascopes.github.io/protobuf-maven-plugin</project-site-url>
-    <project-scm-url>${project.organization.url}/protobuf-maven-plugin</project-scm-url>
   </properties>
 
   <dependencyManagement>
