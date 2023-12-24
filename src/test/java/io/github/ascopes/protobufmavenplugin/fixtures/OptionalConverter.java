@@ -13,7 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-package io.github.ascopes.protobufmavenplugin;
+package io.github.ascopes.protobufmavenplugin.fixtures;
 
-import org.jspecify.annotations.NullMarked;
+import java.util.Optional;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.params.converter.ArgumentConversionException;
+import org.junit.jupiter.params.converter.ArgumentConverter;
+
+public final class OptionalConverter implements ArgumentConverter {
+  @Override
+  public Object convert(Object o, ParameterContext ctx) throws ArgumentConversionException {
+    return Optional.ofNullable(o);
+  }
+}

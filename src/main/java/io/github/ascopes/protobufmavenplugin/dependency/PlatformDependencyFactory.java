@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2023, Ashley Scopes.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.ascopes.protobufmavenplugin.dependency;
+
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+/**
+ * Factory that can produce dependencies marked with platform-specific classifiers.
+ *
+ * @author Ashley Scopes
+ */
+@Named
+public final class PlatformDependencyFactory {
+  private final HostSystem hostSystem;
+
+  @Inject
+  public PlatformDependencyFactory(HostSystem hostSystem) {
+    this.hostSystem = hostSystem;
+  }
+
+  public Dependency createPlatformExecutable(String groupId, String artifactId, String version) {
+    var classifier = getPlatformExecutableClassifier(artifactId);
+    return new Dependency(groupId, artifactId, version, "exe", classifier);
+  }
+
+  private String getPlatformExecutableClassifier(String artifactId) {
+    var rawOs = hostSystem.getOperatingSystem();
+    var rawArch = hostSystem.getCpuArchitecture();
+
+    if (hostSystem.isProbablyLinux()) {
+      switch (rawArch) {
+        case "ppc64le":
+        case "ppc64":
+          return "linux-ppcle_64";
+
+        case "s390":
+        case "zarch_64":
+          return "linux-s390_64";
+
+        case "aarch64":
+          return "linux-aarch_64";
+
+        case "amd64":
+          return "linux-x86_64";
+      }
+
+    } else if (hostSystem.isProbablyMacOs()) {
+      switch (rawArch) {
+        case "aarch64":
+          return "osx-aarch_64";
+
+        case "amd64":
+        case "x86_64":
+          return "osx-x86_64";
+      }
+
+    } else if (hostSystem.isProbablyWindows()) {
+      switch (rawArch) {
+        case "amd64":
+        case "x86_64":
+          return "windows-x86_64";
+
+        case "x86":
+        case "x86_32":
+          return "windows-x86_32";
+      }
+    }
+
+    var message = String.format(
+        "No '%s' binary is available for reported OS '%s' and CPU architecture '%s'",
+        artifactId,
+        rawOs,
+        rawArch
+    );
+    throw new UnsupportedOperationException(message);
+  }
+}

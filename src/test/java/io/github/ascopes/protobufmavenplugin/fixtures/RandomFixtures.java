@@ -13,7 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-package io.github.ascopes.protobufmavenplugin;
+package io.github.ascopes.protobufmavenplugin.fixtures;
 
-import org.jspecify.annotations.NullMarked;
+import java.util.UUID;
+
+/**
+ * Random data fixtures.
+ */
+public final class RandomFixtures {
+
+  private RandomFixtures() {
+    // Static-only class.
+  }
+
+  public static String someText() {
+    return UUID.randomUUID().toString();
+  }
+
+  public static Object someObject() {
+    return new Object();
+  }
+}

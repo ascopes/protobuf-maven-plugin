@@ -13,58 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.ascopes.protobufmavenplugin;
 
-import io.github.ascopes.protobufmavenplugin.generate.SourceGeneratorBuilder;
-import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
-import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
-import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolver;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Base Mojo to generate protobuf sources.
- *
- * <p>Can be extended for each language that this plugin supports.
- *
- * @author Ashley Scopes
- * @since 0.0.1
- */
+
 public abstract class AbstractGenerateMojo extends AbstractMojo {
-
-  /**
-   * The artifact resolver to use to resolve artifacts from Maven repositories.
-   *
-   * @since 0.0.1
-   */
-  @Component
-  private ArtifactResolver artifactResolver;
-
-  /**
-   * The dependency resolver to use to resolve dependencies from Maven repositories.
-   *
-   * @since 0.1.0
-   */
-  @Component
-  private DependencyResolver dependencyResolver;
-
-  /**
-   * The Maven session that is in use.
-   *
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = "${session}", required = true, readonly = true)
-  private MavenSession mavenSession;
 
   /**
    * The version of protoc to use.
@@ -84,28 +43,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(required = true, property = "protoc.version")
   private String protocVersion;
-
-  /**
-   * The version of the GRPC plugin to use.
-   *
-   * <p>This should correspond to the version of {@code grpc-stubs} or similar that is in
-   * use.
-   *
-   * <p>The value can be a static version, or a valid Maven version range (such as
-   * "{@code [1.58.0,2.0.0)}"). It is recommended to use a static version to ensure your builds are
-   * reproducible.
-   *
-   * <p>If set to "{@code PATH}", then the codegen plugins are resolved from the system path
-   * rather than being downloaded. This is useful if you need to use an unsupported architecture/OS,
-   * or a development version of the plugins.
-   *
-   * <p>If you do not need GRPC support, leaving this value unspecified or explicitly null will
-   * disable the GRPC feature.
-   *
-   * @since 0.0.1
-   */
-  @Parameter(property = "grpc-plugin.version")
-  private @Nullable String grpcPluginVersion;
 
   /**
    * Override the source directories to compile from.
@@ -133,24 +70,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Set<String> additionalImports;
 
   /**
-   * Override the directory to output generated protobuf message sources to.
+   * Override the directory to output generated code to.
    *
    * <p>Leave unspecified or explicitly null to use the defaults.
    *
-   * @since 0.0.1
+   * @since 0.1.0
    */
   @Parameter
-  private @Nullable String protobufOutputDirectory;
-
-  /**
-   * Override the directory to output generated GRPC service sources to.
-   *
-   * <p>Leave unspecified or explicitly null to use the defaults.
-   *
-   * @since 0.0.1
-   */
-  @Parameter
-  private @Nullable String grpcOutputDirectory;
+  private @Nullable String outputDirectory;
 
   /**
    * Whether to treat {@code protoc} compiler warnings as errors.
@@ -181,97 +108,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter(defaultValue = "false")
   private boolean liteOnly;
 
-  /**
-   * Initialise this Mojo.
-   */
-  protected AbstractGenerateMojo() {
-    // Expect all fields to be initialised later by Plexus.
-  }
-
-  /**
-   * Execute this goal.
-   *
-   * @throws MojoExecutionException if a user/configuration error is encountered.
-   * @throws MojoFailureException   if execution fails due to an internal error.
-   */
   @Override
-  public final void execute() throws MojoExecutionException, MojoFailureException {
-    new SourceGeneratorBuilder()
-        .additionalImports(Objects.requireNonNullElseGet(additionalImports, Set::of))
-        .artifactResolver(artifactResolver)
-        .dependencyResolver(dependencyResolver)
-        .fatalWarnings(fatalWarnings)
-        .generateKotlinWrappers(generateKotlinWrappers)
-        .grpcOutputDirectory(getActualGrpcOutputDirectory())
-        .grpcPluginVersion(grpcPluginVersion)
-        .liteOnly(liteOnly)
-        .mavenSession(mavenSession)
-        .protobufOutputDirectory(getActualProtobufOutputDirectory())
-        .protocVersion(protocVersion)
-        .sourceDirectories(getActualSourceDirectories())
-        .sourceRootRegistrar(getSourceRootRegistrar())
-        .build()
-        .generate();
-  }
+  public void execute() throws MojoExecutionException, MojoFailureException {
 
-  /**
-   * Get the default source directory to use if none are specified.
-   *
-   * @param baseDir the project base directory.
-   * @return the default source directory.
-   */
-  protected abstract Path getDefaultSourceDirectory(Path baseDir);
-
-  /**
-   * Get the default protobuf output directory to use if none are specified.
-   *
-   * @param targetDir the project target directory.
-   * @return the default protobuf output directory.
-   */
-  protected abstract Path getDefaultProtobufOutputDirectory(Path targetDir);
-
-  /**
-   * Get the default GRPC output directory to use if none are specified.
-   *
-   * @param targetDir the project target directory.
-   * @return the default GRPC output directory.
-   */
-  protected abstract Path getDefaultGrpcOutputDirectory(Path targetDir);
-
-  /**
-   * Get the source root registrar to use.
-   *
-   * @return the source root registrar to use.
-   */
-  protected abstract SourceRootRegistrar getSourceRootRegistrar();
-
-  private Set<Path> getActualSourceDirectories() {
-    if (sourceDirectories == null || sourceDirectories.isEmpty()) {
-      var baseDir = mavenSession.getCurrentProject().getBasedir().toPath();
-      return Set.of(getDefaultSourceDirectory(baseDir));
-    }
-
-    return sourceDirectories
-        .stream()
-        .map(Path::of)
-        .collect(Collectors.toSet());
-  }
-
-  private Path getActualProtobufOutputDirectory() {
-    if (protobufOutputDirectory == null || protobufOutputDirectory.isBlank()) {
-      var targetDir = Path.of(mavenSession.getCurrentProject().getBuild().getDirectory());
-      return getDefaultProtobufOutputDirectory(targetDir);
-    }
-
-    return Path.of(protobufOutputDirectory);
-  }
-
-  private Path getActualGrpcOutputDirectory() {
-    if (grpcOutputDirectory == null || grpcOutputDirectory.isBlank()) {
-      var targetDir = Path.of(mavenSession.getCurrentProject().getBuild().getDirectory());
-      return getDefaultGrpcOutputDirectory(targetDir);
-    }
-
-    return Path.of(grpcOutputDirectory);
   }
 }
