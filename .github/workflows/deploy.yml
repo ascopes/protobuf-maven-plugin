@@ -120,7 +120,7 @@ jobs:
           ./mvnw site -DskipTests -Dinvoker.skip -Dcheckstyle.skip
 
       - name: Upload site
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
         with:
           path: target/site
