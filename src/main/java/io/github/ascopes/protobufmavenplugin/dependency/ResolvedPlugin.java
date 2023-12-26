@@ -13,37 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.generate;
+package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.dependency.PluginBean;
 import java.nio.file.Path;
-import java.util.Set;
-import org.apache.maven.execution.MavenSession;
 import org.immutables.value.Value.Immutable;
 
-/**
- * Base for a generation request with all the details of what to do during generation.
- *
- * @author Ashley Scopes
- */
 @Immutable
-public interface GenerationRequest {
+public interface ResolvedPlugin {
 
-  Set<Path> getAdditionalImportPaths();
+  Path getPath();
 
-  Set<PluginBean> getAdditionalPlugins();
-
-  MavenSession getMavenSession();
-
-  Path getOutputDirectory();
-
-  String getProtocVersion();
-
-  SourceRootRegistrar getSourceRootRegistrar();
-
-  boolean isFatalWarnings();
-
-  boolean isKotlinEnabled();
-
-  boolean isLiteEnabled();
+  PluginBean getBean();
 }

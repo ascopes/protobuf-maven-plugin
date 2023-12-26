@@ -15,9 +15,14 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
+import static java.util.Objects.requireNonNullElse;
+
 import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate;
+import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Factory that can produce dependencies marked with platform-specific classifiers.
@@ -33,9 +38,20 @@ public final class PlatformDependencyFactory {
     this.hostSystem = hostSystem;
   }
 
-  public Dependency createPlatformExecutable(String groupId, String artifactId, String version) {
+  public DependableCoordinate createPlatformExecutable(
+      String groupId,
+      String artifactId,
+      String version,
+      @Nullable String type
+  ) {
     var classifier = getPlatformExecutableClassifier(artifactId);
-    return new Dependency(groupId, artifactId, version, "exe", classifier);
+    var coordinate = new DefaultDependableCoordinate();
+    coordinate.setGroupId(groupId);
+    coordinate.setArtifactId(artifactId);
+    coordinate.setVersion(version);
+    coordinate.setType(requireNonNullElse(type, "exe"));
+    coordinate.setClassifier(classifier);
+    return coordinate;
   }
 
   private String getPlatformExecutableClassifier(String artifactId) {

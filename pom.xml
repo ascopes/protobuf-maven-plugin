@@ -97,6 +97,7 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.24.2</assertj.version>
+    <immutables.version>2.9.2</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.1</junit.version>
     <maven-artifact-transfer.version>0.13.1</maven-artifact-transfer.version>
@@ -225,6 +226,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <version>${immutables.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.assertj</groupId>
@@ -331,7 +339,7 @@
 
         <configuration>
           <compilerArgs>
-            <compilerArg>-Xlint:all,-processing,-serial</compilerArg>
+            <compilerArg>-Xlint:all,-classfile,-processing,-serial</compilerArg>
           </compilerArgs>
           <failOnWarning>true</failOnWarning>
           <showDeprecation>true</showDeprecation>

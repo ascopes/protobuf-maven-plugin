@@ -15,15 +15,38 @@
  */
 package io.github.ascopes.protobufmavenplugin;
 
+import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
+import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
+import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
+import io.github.ascopes.protobufmavenplugin.dependency.PluginBean;
+import java.nio.file.Path;
 import java.util.Set;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.jspecify.annotations.Nullable;
 
-
+/**
+ * Abstract base for a code-generation MOJO.
+ *
+ * @author Ashley Scopes
+ */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
+
+  /**
+   * The source code generator.
+   */
+  @Component
+  private SourceCodeGenerator sourceCodeGenerator;
+
+  /**
+   * The active Maven session.
+   */
+  @Parameter(required = true, readonly = true, property = "maven.session")
+  private MavenSession mavenSession;
 
   /**
    * The version of protoc to use.
@@ -55,19 +78,39 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Set<String> sourceDirectories;
 
   /**
-   * Add additional locations to import code from. These can be file system paths or Maven
-   * dependencies (in the format {@code mvn:groupId:artifactId:version[:classifier]}).
+   * Specify additional paths to import protobuf sources from on the local file system.
    *
-   * <p>Maven dependencies should be packages as JARs.
+   * <p>These will not be compiled into Java sources directly.
    *
-   * <p>Dependencies specified here will NOT be compiled by {@code protoc}, so will also need
-   * to have a {@code compile}-scoped dependency available to the Java compiler via the usual means
-   * (dependency blocks in your project).
+   * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
+   * with the {@code provided} scope instead.
    *
    * @since 0.1.0
    */
   @Parameter
-  private @Nullable Set<String> additionalImports;
+  private @Nullable Set<String> additionalImportPaths;
+
+  /**
+   * Additional plugins to use with the protobuf compiler.
+   *
+   * <p>Each plugin must have an {@code id}, which is used as the flag to pass to {@code protobuf}
+   * (e.g. {@code --reactor_out=path} would have an ID of "{@code reactor}").
+   *
+   * <p>Plugins must be specified with at least one of:
+   *
+   * <ul>
+   *   <li>A {@code dependency} block that points to a Maven artifact.</li>
+   *   <li>An {@code executableName} block that refers to an executable on the system path.</li>
+   * </ul>
+   *
+   * <p>If dependency blocks omit the {@code type} attribute, then they will default to
+   * "{@code exe}", likewise if a {@code classifier} attribute is omitted, then it will use a value
+   * appropriate to the operating system and architecture.
+   *
+   * @since 0.1.0
+   */
+  @Parameter
+  private @Nullable Set<PluginBean> additionalPlugins;
 
   /**
    * Override the directory to output generated code to.
@@ -90,10 +133,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Whether to also generate Kotlin API wrapper code around the generated Java code.
    *
-   * @since 0.0.1
+   * @since 0.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean generateKotlinWrappers;
+  private boolean kotlinEnabled;
 
   /**
    * Whether to only generate "lite" messages or not.
@@ -110,6 +153,21 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    var actualOutputDirectory = outputDirectory == null || outputDirectory.isBlank()
+        ? defaultOutputDirectory(mavenSession)
+        : Path.of(outputDirectory);
 
+    var request = ImmutableGenerationRequest.builder()
+        .isKotlinEnabled(kotlinEnabled)
+        .isLiteEnabled(liteOnly)
+        .outputDirectory(actualOutputDirectory)
+        .sourceRootRegistrar(sourceRootRegistrar())
+        .build();
+
+    sourceCodeGenerator.generate(request);
   }
+
+  protected abstract SourceRootRegistrar sourceRootRegistrar();
+
+  protected abstract Path defaultOutputDirectory(MavenSession session);
 }

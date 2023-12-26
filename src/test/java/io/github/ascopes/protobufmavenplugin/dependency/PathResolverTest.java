@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.system;
+package io.github.ascopes.protobufmavenplugin.dependency;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.hostSystem;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.otherOs;
@@ -23,6 +23,8 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.TestFileSystem;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.PathResolver;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;

@@ -15,35 +15,20 @@
  */
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.dependency.PluginBean;
 import java.nio.file.Path;
-import java.util.Set;
 import org.apache.maven.execution.MavenSession;
-import org.immutables.value.Value.Immutable;
 
 /**
- * Base for a generation request with all the details of what to do during generation.
+ * Registrar for source roots.
  *
  * @author Ashley Scopes
  */
-@Immutable
-public interface GenerationRequest {
+@FunctionalInterface
+public interface SourceRootRegistrar {
+  SourceRootRegistrar MAIN = (session, path) -> session.getCurrentProject()
+      .addCompileSourceRoot(path.toString());
+  SourceRootRegistrar TEST = (session, path) -> session.getCurrentProject()
+      .addTestCompileSourceRoot(path.toString());
 
-  Set<Path> getAdditionalImportPaths();
-
-  Set<PluginBean> getAdditionalPlugins();
-
-  MavenSession getMavenSession();
-
-  Path getOutputDirectory();
-
-  String getProtocVersion();
-
-  SourceRootRegistrar getSourceRootRegistrar();
-
-  boolean isFatalWarnings();
-
-  boolean isKotlinEnabled();
-
-  boolean isLiteEnabled();
+  void registerSourceRoot(MavenSession session, Path path);
 }

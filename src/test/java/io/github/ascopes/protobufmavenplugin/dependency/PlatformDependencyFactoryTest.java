@@ -52,7 +52,7 @@ class PlatformDependencyFactoryTest {
     var factory = new PlatformDependencyFactory(hostSystem);
 
     // When
-    var dependency = factory.createPlatformExecutable(groupId, artifactId, version);
+    var dependency = factory.createPlatformExecutable(groupId, artifactId, version, "exe");
 
     // Then
     assertSoftly(softly -> {
@@ -67,9 +67,6 @@ class PlatformDependencyFactoryTest {
           .isEqualTo(version);
       softly.assertThat(dependency.getType())
           .as("type")
-          .isEqualTo("exe");
-      softly.assertThat(dependency.getExtension())
-          .as("extension")
           .isEqualTo("exe");
       softly.assertThat(dependency.getClassifier())
           .as("type")
@@ -92,7 +89,7 @@ class PlatformDependencyFactoryTest {
     var factory = new PlatformDependencyFactory(hostSystem);
 
     // Then
-    assertThatThrownBy(() -> factory.createPlatformExecutable(groupId, artifactId, version))
+    assertThatThrownBy(() -> factory.createPlatformExecutable(groupId, artifactId, version, "boop"))
         .isInstanceOf(UnsupportedOperationException.class)
         .hasMessageMatching(
             "No '[^']+' binary is available for reported OS '[^']+' and CPU architecture '[^']+'"

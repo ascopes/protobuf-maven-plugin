@@ -15,35 +15,20 @@
  */
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.dependency.PluginBean;
-import java.nio.file.Path;
-import java.util.Set;
-import org.apache.maven.execution.MavenSession;
-import org.immutables.value.Value.Immutable;
+import javax.inject.Named;
 
 /**
- * Base for a generation request with all the details of what to do during generation.
+ * Generator for source code.
+ *
+ * <p>Orchestrates all other components.
  *
  * @author Ashley Scopes
  */
-@Immutable
-public interface GenerationRequest {
+@Named
+public final class SourceCodeGenerator {
 
-  Set<Path> getAdditionalImportPaths();
+  public void generate(GenerationRequest request) {
 
-  Set<PluginBean> getAdditionalPlugins();
+  }
 
-  MavenSession getMavenSession();
-
-  Path getOutputDirectory();
-
-  String getProtocVersion();
-
-  SourceRootRegistrar getSourceRootRegistrar();
-
-  boolean isFatalWarnings();
-
-  boolean isKotlinEnabled();
-
-  boolean isLiteEnabled();
 }
