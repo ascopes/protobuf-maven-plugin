@@ -336,3 +336,45 @@ executable name instead:
   ...
 </plugin>
 ```
+
+Multiple plugins can be provided if needed. For example, if you are using the 
+[Salesforce Reactor GRPC libraries](https://github.com/salesforce/reactive-grpc/tree/master),
+then you can provide the following:
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    ...
+    <additionalPlugins>
+      <additionalPlugin>
+        <artifact>
+          <groupId>io.grpc</groupId>
+          <artifactId>protoc-gen-grpc-java</artifactId>
+          <version>${grpc.version}</version>
+        </artifact>
+      </additionalPlugin>
+      <additionalPlugin>
+        <artifact>
+          <groupId>com.salesforce.servicelibs</groupId>
+          <artifactId>reactor-grpc</artifactId>
+          <version>${reactor-grpc.version}</version>
+        </artifact>
+      </additionalPlugin>
+    </additionalPlugins>
+  </configuration>
+
+  ...
+</plugin>
+```
+
+## Further examples
+
+All [integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it) in this 
+plugin take the shape of a working Maven project, so feel free to check them out for more examples.
+
+If you wish to contribute additional test cases to show integration with custom plugins or more
+complicated use cases, then this is always welcome.
