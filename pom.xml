@@ -133,7 +133,7 @@
     <!-- Other stuff -->
     <argLine>
       -Xshare:off
-      -Dorg.slf4j.simpleLogger.log.org=TRACE
+      -Dnet.bytebuddy.experimental=true
       -Dorg.slf4j.simpleLogger.log.io.github.ascopes=TRACE
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
