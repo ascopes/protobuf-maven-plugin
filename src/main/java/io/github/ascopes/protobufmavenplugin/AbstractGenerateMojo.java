@@ -100,19 +100,28 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Additional plugins to use with the protobuf compiler.
    *
-   * <p>Each plugin must have an {@code id}, which is used as the flag to pass to {@code protobuf}
-   * (e.g. {@code --reactor_out=path} would have an ID of "{@code reactor}").
-   *
-   * <p>Plugins must be specified with at least one of:
+   * <p>Each plugin must be specified with one of:
    *
    * <ul>
-   *   <li>A {@code dependency} block that points to a Maven artifact.</li>
+   *   <li>An {@code artifact} block that points to a Maven artifact.</li>
    *   <li>An {@code executableName} block that refers to an executable on the system path.</li>
    * </ul>
    *
-   * <p>If dependency blocks omit the {@code type} attribute, then they will default to
-   * "{@code exe}", likewise if a {@code classifier} attribute is omitted, then it will use a value
-   * appropriate to the operating system and architecture.
+   * <p>For example:
+   * <code><pre>
+   *   &lt;additionalArtifacts&gt;
+   *     &lt;additionalArtifact&gt;
+   *       &lt;executableName&gt;protoc-gen-grpc-java&lt;/executableName&gt;
+   *     &lt;/additionalArtifact&gt;
+   *     &lt;additionalArtifact&gt;
+   *       &lt;artifact&gt;
+   *         &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
+   *         &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
+   *         &lt;version&gt;1.2.4&lt;/version&gt;
+   *       &lt;/artifact&gt;
+   *     &lt;/additionalArtifact&gt;
+   *   &lt;/additionalArtifacts&gt;
+   * </pre></code>
    *
    * @since 0.1.0
    */
