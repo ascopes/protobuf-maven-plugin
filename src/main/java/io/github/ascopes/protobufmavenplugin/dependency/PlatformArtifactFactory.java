@@ -15,14 +15,11 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import static java.util.Objects.requireNonNullElse;
-
 import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate;
-import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
-import org.jspecify.annotations.Nullable;
+import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
+import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 
 /**
  * Factory that can produce dependencies marked with platform-specific classifiers.
@@ -30,28 +27,26 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  */
 @Named
-public final class PlatformDependencyFactory {
+public final class PlatformArtifactFactory {
   private final HostSystem hostSystem;
 
   @Inject
-  public PlatformDependencyFactory(HostSystem hostSystem) {
+  public PlatformArtifactFactory(HostSystem hostSystem) {
     this.hostSystem = hostSystem;
   }
 
-  public DependableCoordinate createPlatformExecutable(
+  public ArtifactCoordinate createPlatformArtifact(
       String groupId,
       String artifactId,
-      String version,
-      @Nullable String type
+      String version
   ) {
-    var classifier = getPlatformExecutableClassifier(artifactId);
-    var coordinate = new DefaultDependableCoordinate();
-    coordinate.setGroupId(groupId);
-    coordinate.setArtifactId(artifactId);
-    coordinate.setVersion(version);
-    coordinate.setType(requireNonNullElse(type, "exe"));
-    coordinate.setClassifier(classifier);
-    return coordinate;
+    var dependency = new DefaultArtifactCoordinate();
+    dependency.setGroupId(groupId);
+    dependency.setArtifactId(artifactId);
+    dependency.setVersion(version);
+    dependency.setExtension("exe");
+    dependency.setClassifier(getPlatformExecutableClassifier(artifactId));
+    return dependency;
   }
 
   private String getPlatformExecutableClassifier(String artifactId) {

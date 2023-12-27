@@ -15,83 +15,96 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.system.PathResolver;
-import java.io.FileNotFoundException;
+import io.github.ascopes.protobufmavenplugin.Plugin;
+import io.github.ascopes.protobufmavenplugin.system.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
-import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolverException;
+import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 
 /**
- * Resolver for plugins.
+ * Protoc plugin resolver.
+ *
+ * <p>This will either look the plugins up on the Maven repository (including any dependencies)
+ * if they are provided as Maven dependency coordinates, or will discover them from the host system
+ * PATH if an executable name is provided.
  *
  * @author Ashley Scopes
  */
 @Named
 public final class PluginResolver {
 
-  private final MavenDependencyPathResolver dependencyPathResolver;
-  private final PlatformDependencyFactory platformDependencyFactory;
+  private final MavenDependencyPathResolver mavenDependencyPathResolver;
+  private final PlatformArtifactFactory platformDependencyFactory;
   private final PathResolver systemPathResolver;
 
   @Inject
   public PluginResolver(
-      MavenDependencyPathResolver dependencyPathResolver,
-      PlatformDependencyFactory platformDependencyFactory,
+      MavenDependencyPathResolver mavenDependencyPathResolver,
+      PlatformArtifactFactory platformDependencyFactory,
       PathResolver systemPathResolver
   ) {
-    this.dependencyPathResolver = dependencyPathResolver;
+    this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.platformDependencyFactory = platformDependencyFactory;
     this.systemPathResolver = systemPathResolver;
   }
 
-  public ResolvedPlugin resolve(
+  public Collection<ResolvedPlugin> resolveAll(
       MavenSession session,
-      PluginBean pluginBean
-  ) throws IOException, DependencyResolverException {
-    var path = resolvePath(session, pluginBean);
-    return ImmutableResolvedPlugin
-        .builder()
-        .bean(pluginBean)
-        .path(path)
-        .build();
+      Collection<Plugin> pluginBeans
+  ) throws ResolutionException {
+    var resolvedPlugins = new ArrayList<ResolvedPlugin>();
+
+    for (var pluginBean : pluginBeans) {
+      var path = resolvePath(session, pluginBean);
+
+      var resolvedPlugin = ImmutableResolvedPlugin
+          .builder()
+          .id(path.getFileName().toString())
+          .path(path)
+          .build();
+
+      resolvedPlugins.add(resolvedPlugin);
+    }
+
+    return resolvedPlugins;
   }
 
   private Path resolvePath(
       MavenSession session,
-      PluginBean pluginBean
-  ) throws IOException, DependencyResolverException {
-    if (pluginBean.getDependableCoordinate().isPresent()) {
-      var coordinate = enrich(pluginBean.getDependableCoordinate().get());
-
-      // We only care about the first dependency in this case.
-      return dependencyPathResolver.resolveDependencyPaths(session, coordinate)
-          .iterator()
-          .next();
+      Plugin pluginBean
+  ) throws ResolutionException {
+    if (pluginBean.getArtifact().isPresent()) {
+      var coordinate = enrich(pluginBean.getArtifact().get());
+      try {
+        var path = mavenDependencyPathResolver.resolveArtifact(session, coordinate);
+        FileUtils.makeExecutable(path);
+        return path;
+      } catch (IOException ex) {
+        throw new ResolutionException("Failed to set executable bit on protoc plugin", ex);
+      }
     }
 
     if (pluginBean.getExecutableName().isPresent()) {
       var executableName = pluginBean.getExecutableName().get();
       return systemPathResolver.resolve(executableName)
-          .orElseThrow(() -> new FileNotFoundException("No executable '"
+          .orElseThrow(() -> new ResolutionException("No executable '"
               + executableName + "' was found on the system path"));
     }
 
-    throw new IllegalArgumentException(
-        "No dependency or executable name was provided for protoc plugin with ID '"
-            + pluginBean.getId() + "'");
+    throw new ResolutionException("Invalid protoc plugin definition");
   }
 
-  private DependableCoordinate enrich(DependableCoordinate coordinate) {
-    if (coordinate.getClassifier() == null) {
-      return platformDependencyFactory.createPlatformExecutable(
+  private ArtifactCoordinate enrich(ArtifactCoordinate coordinate) {
+    if (coordinate.getExtension() == null || coordinate.getClassifier() == null) {
+      return platformDependencyFactory.createPlatformArtifact(
           coordinate.getGroupId(),
           coordinate.getArtifactId(),
-          coordinate.getVersion(),
-          coordinate.getType()
+          coordinate.getVersion()
       );
     }
 

@@ -15,10 +15,16 @@
  */
 package io.github.ascopes.protobufmavenplugin.system;
 
+import java.io.IOException;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.HashSet;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common helper logic for file handling operations.
@@ -26,6 +32,8 @@ import java.util.Optional;
  * @author Ashley Scopes
  */
 public final class FileUtils {
+  private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
+
   private FileUtils() {
     // Static-only class
   }
@@ -65,5 +73,15 @@ public final class FileUtils {
         .orElseThrow(() -> new FileSystemNotFoundException(
             "No file system provider for " + scheme + " was found"
         ));
+  }
+
+  public static void makeExecutable(Path file) throws IOException {
+    try {
+      var perms = new HashSet<>(Files.getPosixFilePermissions(file));
+      perms.add(PosixFilePermission.OWNER_EXECUTE);
+      Files.setPosixFilePermissions(file, perms);
+    } catch (UnsupportedOperationException ex) {
+      log.debug("File system does not support setting POSIX file permissions");
+    }
   }
 }

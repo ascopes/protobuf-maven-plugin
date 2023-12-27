@@ -24,8 +24,6 @@ import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.TestFileSystem;
 import io.github.ascopes.protobufmavenplugin.system.HostSystem;
-import io.github.ascopes.protobufmavenplugin.system.PathResolver;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
@@ -72,7 +70,7 @@ class PathResolverTest {
 
     @DisplayName("The first matching executable is returned")
     @Test
-    void firstMatchingExecutableIsReturned() throws IOException {
+    void firstMatchingExecutableIsReturned() throws ResolutionException {
       // Given
       var directory1 = fs.givenDirectoryExists("foo", "emptydir");
       var file1 = fs.givenFileExists("foo", "bar", "baz.txt");
@@ -102,7 +100,7 @@ class PathResolverTest {
 
     @DisplayName("Any matching extension is acceptable")
     @Test
-    void anyMatchingExtensionIsAcceptable() throws IOException {
+    void anyMatchingExtensionIsAcceptable() throws ResolutionException {
       // Given
       var extensions = new String[]{".EXE", ".BIN", ".MSI"};
       givenPathExt(extensions);
@@ -134,7 +132,7 @@ class PathResolverTest {
 
     @DisplayName("Extension case sensitivity is ignored")
     @Test
-    void extensionCaseSensitivityIsIgnored() throws IOException {
+    void extensionCaseSensitivityIsIgnored() throws ResolutionException {
       // Given
       var extensions = new String[]{".EXE", ".BIN", ".MSI"};
       givenPathExt(extensions);
@@ -153,7 +151,7 @@ class PathResolverTest {
 
     @DisplayName("File name case sensitivity is ignored")
     @Test
-    void fileNameCaseSensitivityIsIgnored() throws IOException {
+    void fileNameCaseSensitivityIsIgnored() throws ResolutionException {
       // Given
       var extensions = new String[]{".EXE", ".BIN", ".MSI"};
       givenPathExt(extensions);
@@ -172,7 +170,7 @@ class PathResolverTest {
 
     @DisplayName("An empty optional is returned if no match is found")
     @Test
-    void emptyOptionalIsReturnedIfNoMatchIsFound() throws IOException {
+    void emptyOptionalIsReturnedIfNoMatchIsFound() throws ResolutionException {
       // Given
       var directory1 = fs.givenDirectoryExists("foo", "emptydir");
       var file1 = fs.givenFileExists("foo", "bar", "baz.txt");
@@ -218,7 +216,7 @@ class PathResolverTest {
 
     @DisplayName("The first matching executable is returned")
     @Test
-    void firstMatchingExecutableIsReturned() throws IOException {
+    void firstMatchingExecutableIsReturned() throws ResolutionException {
       // Given
       var directory1 = fs.givenDirectoryExists("foo", "emptydir");
       var file1 = fs.givenFileExists("foo", "bar", "thingy");
@@ -251,7 +249,7 @@ class PathResolverTest {
 
     @DisplayName("An empty optional is returned if no match is found")
     @Test
-    void emptyOptionalIsReturnedIfNoMatchIsFound() throws IOException {
+    void emptyOptionalIsReturnedIfNoMatchIsFound() throws ResolutionException {
       // Given
       var directory1 = fs.givenDirectoryExists("foo", "emptydir");
       var file1 = fs.givenFileExists("foo", "bar", "thingy");
@@ -282,7 +280,7 @@ class PathResolverTest {
 
     @DisplayName("Different file name case sensitivity does not match")
     @Test
-    void differentFileNameCaseSensitivityDoesNotMatch() throws IOException {
+    void differentFileNameCaseSensitivityDoesNotMatch() throws ResolutionException {
       // Given
       var expected = fs.givenFileExists("foo", "bar", "match");
       givenPath(expected.getParent());
@@ -296,7 +294,7 @@ class PathResolverTest {
 
     @DisplayName("File extensions are considered part of the file name to match")
     @Test
-    void fileExtensionsAreConsideredPartOfTheFileNameToMatch() throws IOException {
+    void fileExtensionsAreConsideredPartOfTheFileNameToMatch() throws ResolutionException {
       // Given
       var file1 = fs.givenFileExists("foo", "bar", "match.exe");
       var file2 = fs.givenFileExists("foo", "baz", "match.bin");
@@ -324,7 +322,7 @@ class PathResolverTest {
     @ParameterizedTest(name = "executable bit {0} does not make the file executable")
     void otherBitsNotMatchingOwnerExecuteDoNotResultInMatch(
         PosixFilePermission permission
-    ) throws IOException {
+    ) throws ResolutionException {
       var expected = fs.givenFileExists("foo", "bar", "match");
       fs.changePermissions(expected, perms -> {
         perms.clear();

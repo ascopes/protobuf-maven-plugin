@@ -16,6 +16,7 @@
 @NullMarked
 @Style(
     headerComments = true,
+    jdkOnly = true,
     optionalAcceptNullable = true,
     validationMethod = ValidationMethod.MANDATORY_ONLY
 )

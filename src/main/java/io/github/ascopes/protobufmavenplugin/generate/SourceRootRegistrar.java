@@ -25,10 +25,24 @@ import org.apache.maven.execution.MavenSession;
  */
 @FunctionalInterface
 public interface SourceRootRegistrar {
-  SourceRootRegistrar MAIN = (session, path) -> session.getCurrentProject()
-      .addCompileSourceRoot(path.toString());
-  SourceRootRegistrar TEST = (session, path) -> session.getCurrentProject()
-      .addTestCompileSourceRoot(path.toString());
+  SourceRootRegistrar MAIN = of("main", (session, path) -> session.getCurrentProject()
+      .addCompileSourceRoot(path.toString()));
+  SourceRootRegistrar TEST = of("test", (session, path) -> session.getCurrentProject()
+      .addTestCompileSourceRoot(path.toString()));
 
   void registerSourceRoot(MavenSession session, Path path);
+
+  static SourceRootRegistrar of(String name, SourceRootRegistrar registrar) {
+    return new SourceRootRegistrar() {
+      @Override
+      public void registerSourceRoot(MavenSession session, Path path) {
+        registrar.registerSourceRoot(session, path);
+      }
+
+      @Override
+      public String toString() {
+        return name;
+      }
+    };
+  }
 }

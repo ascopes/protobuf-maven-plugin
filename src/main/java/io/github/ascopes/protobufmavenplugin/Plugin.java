@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependency;
-
-import static java.util.Objects.requireNonNull;
+package io.github.ascopes.protobufmavenplugin;
 
 import java.util.Optional;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
+import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
+import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -27,41 +26,19 @@ import org.jspecify.annotations.Nullable;
  *
  * @author Ashley Scopes
  */
-public final class PluginBean {
-
-  /**
-   * The plugin ID that is passed to the {@code protoc} commandline.
-   */
-  @Parameter(readonly = true)
-  private @Nullable String id;
+public final class Plugin {
 
   @Parameter
-  private @Nullable DependableCoordinate dependableCoordinate;
+  private @Nullable DefaultArtifactCoordinate artifact;
 
   @Parameter
   private @Nullable String executableName;
 
-  public PluginBean() {
-    // Used by Maven reflectively only.
-    this(null, null, null);
+  public Plugin() {
   }
 
-  public PluginBean(
-      @Nullable String id,
-      @Nullable DependableCoordinate dependableCoordinate,
-      @Nullable String executableName
-  ) {
-    this.id = id;
-    this.dependableCoordinate = dependableCoordinate;
-    this.executableName = executableName;
-  }
-
-  public String getId() {
-    return requireNonNull(id, "id");
-  }
-
-  public Optional<DependableCoordinate> getDependableCoordinate() {
-    return Optional.ofNullable(dependableCoordinate);
+  public Optional<ArtifactCoordinate> getArtifact() {
+    return Optional.ofNullable(artifact);
   }
 
   public Optional<String> getExecutableName() {

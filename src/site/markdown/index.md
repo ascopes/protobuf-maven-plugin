@@ -180,12 +180,22 @@ Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
   </tbody>
 </table>
 
+## Importing protobuf definitions from other places
+
+By default, this plugin will index all JARs that are dependencies for the current Maven project,
+just like you would expect when using Java code. Any dependency that is marked with the `compile`,
+`provided`, or `system` scope (or `test` if the `generate-test` goal is used).
+
+If there are additional paths on the file system that you wish to add to the import path, then
+you can specify these using the `additionalImportPaths` parameter. Note that these will not be
+compiled, only made visible to the protobuf compiler.
+
 ## Kotlin generation
 
 Protoc support for Kotlin currently takes the shape of producing additional Kotlin API wrapper
 calls that can decorate the existing generated Java code.
 
-To opt in to also generating these sources, set the `generateKotlinWrappers` plugin property to
+To opt in to also generating these sources, set the `kotlinEnabled` plugin property to
 `true`:
 
 ```xml
@@ -195,7 +205,7 @@ To opt in to also generating these sources, set the `generateKotlinWrappers` plu
   <version>...</version>
   
   <configuration>
-    <generateKotlinWrappers>true</generateKotlinWrappers>
+    <kotlinEnabled>true</kotlinEnabled>
     ...
   </configuration>
     
@@ -274,12 +284,13 @@ as `PATH`.
 </plugin>
 ```
 
-## GRPC
+## Additional plugins
 
-This plugin supports generating Kotlin and Java GRPC service definitions to accompany the generated
-protobuf sources.
+If you wish to generate GRPC stubs, or outputs for other languages like Scala that are not already
+covered by the protoc executable, you can add custom plugins to your build.
 
-To enable this, specify a version for the `grpcPluginVersion` parameter in the configuration block:
+If the plugin you wish to use is on Maven Central or any other Maven repository, you can reference
+that plugin directly via the group ID, artifact ID, and version.
 
 ```xml
 <plugin>
@@ -288,21 +299,40 @@ To enable this, specify a version for the `grpcPluginVersion` parameter in the c
   <version>...</version>
 
   <configuration>
-    <grpcPluginVersion>${grpc.version}</grpcPluginVersion>
-    <protocVersion>${protobuf.version}</protocVersion>
+    ...
+    <additionalPlugins>
+      <additionalPlugin>
+        <artifact>
+          <groupId>io.grpc</groupId>
+          <artifactId>protoc-gen-grpc-java</artifactId>
+          <version>${grpc.version}</version>
+        </artifact>
+      </additionalPlugin>
+    </additionalPlugins>
   </configuration>
 
   ...
-</project>
+</plugin>
 ```
 
-GRPC stub sources will be output at `target/generated-sources/grpc`, or
-`target/generated-test-sources/grpc` by default unless overridden.
+If you instead wish to read the executable from the system `$PATH`, then you can specify an
+executable name instead:
 
-Like the `protoc` version, you can request that the system path is used to discover the plugins
-instead by setting the version to the string: "`PATH`". This will expect an executable named 
-`protoc-gen-grpc-java` (and `protoc-gen-grpc-kotlin` if Kotlin wrappers are enabled) to be on 
-the `$PATH`.
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
 
-Sources are kept separate to allow users to have custom logic that separates the two generated
-sources if they wish.
+  <configuration>
+    ...
+    <additionalPlugins>
+      <additionalPlugin>
+        <executableName>protoc-gen-grpc-java</executableName>
+      </additionalPlugin>
+    </additionalPlugins>
+  </configuration>
+
+  ...
+</plugin>
+```

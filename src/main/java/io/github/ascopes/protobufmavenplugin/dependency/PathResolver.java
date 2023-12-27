@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.system;
+package io.github.ascopes.protobufmavenplugin.dependency;
 
+import io.github.ascopes.protobufmavenplugin.system.FileUtils;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +44,7 @@ public final class PathResolver {
     this.hostSystem = hostSystem;
   }
 
-  public Optional<Path> resolve(String name) throws IOException {
+  public Optional<Path> resolve(String name) throws ResolutionException {
     log.debug("Looking for executable matching name '{}' on the path", name);
 
     var predicate = hostSystem.isProbablyWindows()
@@ -58,6 +60,8 @@ public final class PathResolver {
         if (result.isPresent()) {
           break;
         }
+      } catch (IOException ex) {
+        throw new ResolutionException("An exception occurred while scanning the system PATH", ex);
       }
     }
 

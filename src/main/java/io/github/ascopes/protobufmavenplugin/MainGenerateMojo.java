@@ -17,9 +17,12 @@ package io.github.ascopes.protobufmavenplugin;
 
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.session.scope.internal.SessionScope;
 
 /**
  * Plugin goal that generates code from protobuf sources.
@@ -39,9 +42,20 @@ public class MainGenerateMojo extends AbstractGenerateMojo {
   }
 
   @Override
+  protected Set<String> allowedScopes() {
+    return Set.of("compile", "provided", "system");
+  }
+
+  @Override
+  protected Path defaultSourceDirectory(MavenSession session) {
+    return session.getCurrentProject().getBasedir().toPath()
+        .resolve("src").resolve("main").resolve("protobuf");
+  }
+
+  @Override
   protected Path defaultOutputDirectory(MavenSession session) {
     return Path.of(session.getCurrentProject().getBuild().getDirectory())
         .resolve("generated-sources")
-        .resolve("protobuf-maven-plugin");
+        .resolve("protobuf");
   }
 }

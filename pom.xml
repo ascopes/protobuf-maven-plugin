@@ -133,6 +133,7 @@
     <!-- Other stuff -->
     <argLine>
       -Xshare:off
+      -Dorg.slf4j.simpleLogger.log.org=TRACE
       -Dorg.slf4j.simpleLogger.log.io.github.ascopes=TRACE
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -462,15 +463,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>${maven-source-plugin.version}</version>
-        <executions>
-          <execution>
-            <!-- Required for Maven Central. -->
-            <id>generate-sources-jar</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>

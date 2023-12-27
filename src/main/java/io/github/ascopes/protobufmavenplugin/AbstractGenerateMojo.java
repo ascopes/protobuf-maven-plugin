@@ -15,12 +15,19 @@
  */
 package io.github.ascopes.protobufmavenplugin;
 
+import static java.util.Objects.requireNonNullElse;
+
+import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.dependency.PluginBean;
+import io.github.ascopes.protobufmavenplugin.system.FileUtils;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -45,8 +52,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The active Maven session.
    */
-  @Parameter(required = true, readonly = true, property = "maven.session")
-  private MavenSession mavenSession;
+  @Parameter(required = true, readonly = true, defaultValue = "${session}")
+  private MavenSession session;
 
   /**
    * The version of protoc to use.
@@ -110,7 +117,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  private @Nullable Set<PluginBean> additionalPlugins;
+  private @Nullable Set<Plugin> additionalPlugins;
 
   /**
    * Override the directory to output generated code to.
@@ -154,20 +161,53 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     var actualOutputDirectory = outputDirectory == null || outputDirectory.isBlank()
-        ? defaultOutputDirectory(mavenSession)
+        ? defaultOutputDirectory(session)
         : Path.of(outputDirectory);
 
+    var actualSourceDirectories = sourceDirectories == null
+        ? List.of(defaultSourceDirectory(session))
+        : parsePaths(sourceDirectories);
+
     var request = ImmutableGenerationRequest.builder()
+        .addAllAdditionalImportPaths(parsePaths(additionalImportPaths))
+        .addAllAdditionalPlugins(requireNonNullElse(additionalPlugins, Set.of()))
+        .addAllAllowedDependencyScopes(allowedScopes())
+        .addAllSourceRoots(actualSourceDirectories)
+        .isFatalWarnings(fatalWarnings)
         .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
+        .mavenSession(session)
         .outputDirectory(actualOutputDirectory)
+        .protocVersion(protocVersion)
         .sourceRootRegistrar(sourceRootRegistrar())
         .build();
 
-    sourceCodeGenerator.generate(request);
+    try {
+      if (!sourceCodeGenerator.generate(request)) {
+        throw new MojoExecutionException("Protoc invocation failed");
+      }
+    } catch (ResolutionException | IOException ex) {
+      throw new MojoFailureException(this, ex.getMessage(), ex.getMessage());
+    }
   }
 
   protected abstract SourceRootRegistrar sourceRootRegistrar();
 
+  protected abstract Path defaultSourceDirectory(MavenSession session);
+
   protected abstract Path defaultOutputDirectory(MavenSession session);
+
+  protected abstract Set<String> allowedScopes();
+
+  private Collection<Path> parsePaths(@Nullable Collection<String> paths) {
+    if (paths == null) {
+      return List.of();
+    }
+
+    return paths
+        .stream()
+        .map(Path::of)
+        .map(FileUtils::normalize)
+        .collect(Collectors.toUnmodifiableList());
+  }
 }

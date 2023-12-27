@@ -15,13 +15,17 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import java.nio.file.Path;
-import org.immutables.value.Value.Immutable;
+/**
+ * Exception raised if resolution fails.
+ *
+ * @author Ashley Scopes
+ */
+public class ResolutionException extends Exception {
+  public ResolutionException(String message) {
+    super(message);
+  }
 
-@Immutable
-public interface ResolvedPlugin {
-
-  Path getPath();
-
-  String getId();
+  public ResolutionException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

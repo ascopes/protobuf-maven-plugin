@@ -33,13 +33,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@DisplayName("PlatformDependencyFactory tests")
-class PlatformDependencyFactoryTest {
+@DisplayName("PlatformArtifactFactory tests")
+class PlatformArtifactFactoryTest {
 
-  @DisplayName(".createPlatformDependency(...) returns the expected results on valid systems")
+  @DisplayName(".createPlatformArtifact(...) returns the expected results on valid systems")
   @MethodSource("validClassifierCases")
   @ParameterizedTest(name = "when {0}, then expect classifier \"{1}\"")
-  void createPlatformDependencyReturnsExpectedResultsOnValidSystems(
+  void createPlatformArtifactReturnsExpectedResultsOnValidSystems(
       HostSystemMockConfigurer configurer,
       String expectedClassifier
   ) {
@@ -49,10 +49,10 @@ class PlatformDependencyFactoryTest {
     var groupId = someText();
     var artifactId = someText();
     var version = someText();
-    var factory = new PlatformDependencyFactory(hostSystem);
+    var factory = new PlatformArtifactFactory(hostSystem);
 
     // When
-    var dependency = factory.createPlatformExecutable(groupId, artifactId, version, "exe");
+    var dependency = factory.createPlatformArtifact(groupId, artifactId, version);
 
     // Then
     assertSoftly(softly -> {
@@ -65,8 +65,8 @@ class PlatformDependencyFactoryTest {
       softly.assertThat(dependency.getVersion())
           .as("version")
           .isEqualTo(version);
-      softly.assertThat(dependency.getType())
-          .as("type")
+      softly.assertThat(dependency.getExtension())
+          .as("executable")
           .isEqualTo("exe");
       softly.assertThat(dependency.getClassifier())
           .as("type")
@@ -74,10 +74,10 @@ class PlatformDependencyFactoryTest {
     });
   }
 
-  @DisplayName(".createPlatformDependency(...) raises an exception for unknown systems")
+  @DisplayName(".createPlatformArtifact(...) raises an exception for unknown systems")
   @MethodSource("invalidClassifierCases")
   @ParameterizedTest(name = "when {0}, then expect an exception")
-  void createPlatformDependencyRaisesAnExceptionForUnknownSystems(
+  void createPlatformArtifactRaisesAnExceptionForUnknownSystems(
       HostSystemMockConfigurer configurer
   ) {
     // Given
@@ -86,10 +86,10 @@ class PlatformDependencyFactoryTest {
     var groupId = someText();
     var artifactId = someText();
     var version = someText();
-    var factory = new PlatformDependencyFactory(hostSystem);
+    var factory = new PlatformArtifactFactory(hostSystem);
 
     // Then
-    assertThatThrownBy(() -> factory.createPlatformExecutable(groupId, artifactId, version, "boop"))
+    assertThatThrownBy(() -> factory.createPlatformArtifact(groupId, artifactId, version))
         .isInstanceOf(UnsupportedOperationException.class)
         .hasMessageMatching(
             "No '[^']+' binary is available for reported OS '[^']+' and CPU architecture '[^']+'"

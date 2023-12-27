@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin;
 
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -35,13 +36,24 @@ public class TestGenerateMojo extends AbstractGenerateMojo {
 
   @Override
   protected SourceRootRegistrar sourceRootRegistrar() {
-    return SourceRootRegistrar.MAIN;
+    return SourceRootRegistrar.TEST;
+  }
+
+  @Override
+  protected Set<String> allowedScopes() {
+    return Set.of("compile", "provided", "system", "test");
+  }
+
+  @Override
+  protected Path defaultSourceDirectory(MavenSession session) {
+    return session.getCurrentProject().getBasedir().toPath()
+        .resolve("src").resolve("test").resolve("protobuf");
   }
 
   @Override
   protected Path defaultOutputDirectory(MavenSession session) {
     return Path.of(session.getCurrentProject().getBuild().getDirectory())
         .resolve("generated-test-sources")
-        .resolve("protobuf-maven-plugin");
+        .resolve("protobuf");
   }
 }

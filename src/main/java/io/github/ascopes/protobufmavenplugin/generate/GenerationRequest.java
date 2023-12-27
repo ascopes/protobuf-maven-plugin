@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.dependency.PluginBean;
+import io.github.ascopes.protobufmavenplugin.Plugin;
 import java.nio.file.Path;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
@@ -31,13 +31,17 @@ public interface GenerationRequest {
 
   Set<Path> getAdditionalImportPaths();
 
-  Set<PluginBean> getAdditionalPlugins();
+  Set<Plugin> getAdditionalPlugins();
+
+  Set<String> getAllowedDependencyScopes();
 
   MavenSession getMavenSession();
 
   Path getOutputDirectory();
 
   String getProtocVersion();
+
+  Set<Path> getSourceRoots();
 
   SourceRootRegistrar getSourceRootRegistrar();
 
