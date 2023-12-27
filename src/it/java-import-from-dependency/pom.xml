@@ -28,6 +28,7 @@
   <properties>
     <junit.version>5.10.1</junit.version>
     <protobuf.version>3.25.0</protobuf.version>
+    <proto-google-common-protos.version>2.29.0</proto-google-common-protos.version>
 
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
@@ -40,6 +41,13 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${protobuf.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.api.grpc</groupId>
+      <artifactId>proto-google-common-protos</artifactId>
+      <version>${proto-google-common-protos.version}</version>
       <scope>compile</scope>
     </dependency>
 

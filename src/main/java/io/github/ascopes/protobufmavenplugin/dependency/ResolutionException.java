@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-@Style(
-    headerComments = true,
-    jdkOnly = true,
-    optionalAcceptNullable = true,
-    validationMethod = ValidationMethod.MANDATORY_ONLY
-)
-package io.github.ascopes.protobufmavenplugin;
+package io.github.ascopes.protobufmavenplugin.dependency;
 
-import org.immutables.value.Value.Style;
-import org.immutables.value.Value.Style.ValidationMethod;
-import org.jspecify.annotations.NullMarked;
+/**
+ * Exception raised if resolution fails.
+ *
+ * @author Ashley Scopes
+ */
+public class ResolutionException extends Exception {
+  public ResolutionException(String message) {
+    super(message);
+  }
+
+  public ResolutionException(String message, Throwable cause) {
+    super(message, cause);
+  }
+}

@@ -23,7 +23,7 @@
 
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.0-SNAPSHOT</version>
 
   <name>Protobuf Maven Plugin</name>
   <description>Maven Plugin that generates source code from protobuf source files.</description>
@@ -97,12 +97,14 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.24.2</assertj.version>
+    <immutables.version>2.9.2</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.1</junit.version>
     <maven-artifact-transfer.version>0.13.1</maven-artifact-transfer.version>
     <maven-core.version>3.9.6</maven-core.version>
     <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
+    <memoryfilesystem.version>2.7.0</memoryfilesystem.version>
     <mockito.version>5.8.0</mockito.version>
     <slf4j.version>2.0.9</slf4j.version>
 
@@ -122,6 +124,7 @@
     <maven-site-plugin.version>4.0.0-M13</maven-site-plugin.version>
     <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
+    <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
 
     <!-- Plugin dependencies -->
     <checkstyle.version>10.12.6</checkstyle.version>
@@ -130,6 +133,7 @@
     <!-- Other stuff -->
     <argLine>
       -Xshare:off
+      -Dorg.slf4j.simpleLogger.log.org=TRACE
       -Dorg.slf4j.simpleLogger.log.io.github.ascopes=TRACE
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -156,6 +160,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>com.github.marschall</groupId>
+      <artifactId>memoryfilesystem</artifactId>
+      <version>${memoryfilesystem.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
@@ -213,6 +224,13 @@
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
       <!-- Provided by Maven at runtime, so don't bundle it. -->
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <version>${immutables.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -322,7 +340,7 @@
 
         <configuration>
           <compilerArgs>
-            <compilerArg>-Xlint:all,-processing,-serial</compilerArg>
+            <compilerArg>-Xlint:all,-classfile,-processing,-serial</compilerArg>
           </compilerArgs>
           <failOnWarning>true</failOnWarning>
           <showDeprecation>true</showDeprecation>
@@ -340,7 +358,6 @@
         <configuration>
           <addTestClassPath>true</addTestClassPath>
           <failIfNoProjects>true</failIfNoProjects>
-          <invokerPropertiesFile></invokerPropertiesFile>
           <postBuildHookScript>test</postBuildHookScript>
           <showErrors>true</showErrors>
           <showVersion>true</showVersion>
@@ -383,22 +400,13 @@
       </plugin>
 
       <plugin>
-        <!-- Generate JavaDocs. Needed for Maven Central. -->
+        <!-- We disable JavaDoc generation entirely as we do not need it. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${maven-javadoc-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>generate-javadoc-jar</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <!-- Generated sources cannot be fixed to be valid. -->
-              <sourceFileExcludes>**/HelpMojo.java</sourceFileExcludes>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -455,15 +463,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>${maven-source-plugin.version}</version>
-        <executions>
-          <execution>
-            <!-- Required for Maven Central. -->
-            <id>generate-sources-jar</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -507,6 +506,21 @@
             <version>${maven-surefire-junit5-tree-reporter.version}</version>
           </dependency>
         </dependencies>
+      </plugin>
+
+      <plugin>
+        <!-- Generates JSR-330 CDI configuration data to enable using dependency injection -->
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
+        <version>${sisu-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>generate-index</id>
+            <goals>
+              <goal>main-index</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>

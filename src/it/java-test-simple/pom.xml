@@ -80,7 +80,6 @@
 
         <executions>
           <execution>
-            <phase>generate-test-sources</phase>
             <goals>
               <goal>generate-test</goal>
             </goals>

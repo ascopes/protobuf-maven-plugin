@@ -16,38 +16,33 @@
 package io.github.ascopes.protobufmavenplugin.generate;
 
 import java.nio.file.Path;
-import java.util.function.BiConsumer;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.execution.MavenSession;
 
 /**
- * Registrars for generated source outputs.
+ * Registrar for source roots.
  *
  * @author Ashley Scopes
  */
-public enum SourceRootRegistrar {
-  /**
-   * Registrar for main source roots.
-   */
-  MAIN(MavenProject::addCompileSourceRoot),
+@FunctionalInterface
+public interface SourceRootRegistrar {
+  SourceRootRegistrar MAIN = of("main", (session, path) -> session.getCurrentProject()
+      .addCompileSourceRoot(path.toString()));
+  SourceRootRegistrar TEST = of("test", (session, path) -> session.getCurrentProject()
+      .addTestCompileSourceRoot(path.toString()));
 
-  /**
-   * Registrar for test source roots.
-   */
-  TEST(MavenProject::addTestCompileSourceRoot);
+  void registerSourceRoot(MavenSession session, Path path);
 
-  private final BiConsumer<MavenProject, String> sourceRegistrar;
+  static SourceRootRegistrar of(String name, SourceRootRegistrar registrar) {
+    return new SourceRootRegistrar() {
+      @Override
+      public void registerSourceRoot(MavenSession session, Path path) {
+        registrar.registerSourceRoot(session, path);
+      }
 
-  SourceRootRegistrar(BiConsumer<MavenProject, String> sourceRegistrar) {
-    this.sourceRegistrar = sourceRegistrar;
-  }
-
-  /**
-   * Register a given source output directory to the Maven project for further compilation.
-   *
-   * @param project         the project to register with.
-   * @param outputDirectory the output directory path.
-   */
-  public void register(MavenProject project, Path outputDirectory) {
-    sourceRegistrar.accept(project, outputDirectory.toString());
+      @Override
+      public String toString() {
+        return name;
+      }
+    };
   }
 }

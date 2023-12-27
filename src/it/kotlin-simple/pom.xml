@@ -95,13 +95,12 @@
         <version>${plugin-version}</version>
 
         <configuration>
-          <generateKotlinWrappers>true</generateKotlinWrappers>
+          <kotlinEnabled>true</kotlinEnabled>
           <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>
           <execution>
-            <phase>generate-sources</phase>
             <goals>
               <goal>generate</goal>
             </goals>

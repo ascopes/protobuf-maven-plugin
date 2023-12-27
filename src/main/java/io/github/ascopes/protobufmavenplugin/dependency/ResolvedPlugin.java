@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@NullMarked
-@Style(
-    headerComments = true,
-    jdkOnly = true,
-    optionalAcceptNullable = true,
-    validationMethod = ValidationMethod.MANDATORY_ONLY
-)
-package io.github.ascopes.protobufmavenplugin;
+package io.github.ascopes.protobufmavenplugin.dependency;
 
-import org.immutables.value.Value.Style;
-import org.immutables.value.Value.Style.ValidationMethod;
-import org.jspecify.annotations.NullMarked;
+import java.nio.file.Path;
+import org.immutables.value.Value.Immutable;
+
+@Immutable
+public interface ResolvedPlugin {
+
+  Path getPath();
+
+  String getId();
+}
