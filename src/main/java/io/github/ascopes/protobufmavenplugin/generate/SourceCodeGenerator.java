@@ -78,8 +78,11 @@ public final class SourceCodeGenerator {
         .fatalWarnings(request.isFatalWarnings())
         .importPaths(importPaths)
         .importPaths(request.getSourceRoots())
-        .plugins(plugins, request.getOutputDirectory())
-        .javaOut(request.getOutputDirectory(), request.isLiteEnabled());
+        .plugins(plugins, request.getOutputDirectory());
+
+    if (request.isJavaEnabled()) {
+      argLineBuilder.javaOut(request.getOutputDirectory(), request.isLiteEnabled());
+    }
 
     if (request.isKotlinEnabled()) {
       argLineBuilder.kotlinOut(request.getOutputDirectory(), request.isLiteEnabled());
