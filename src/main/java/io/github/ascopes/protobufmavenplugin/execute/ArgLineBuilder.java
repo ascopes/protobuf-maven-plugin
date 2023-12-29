@@ -28,13 +28,19 @@ import java.util.List;
  */
 public final class ArgLineBuilder {
   private final List<String> args;
+  private volatile int outputTargetCount;
 
   public ArgLineBuilder(Path protocPath) {
     args = new ArrayList<>();
     args.add(protocPath.toString());
+    outputTargetCount = 0;
   }
 
   public List<String> compile(Collection<Path> sourcesToCompile) {
+    if (outputTargetCount == 0) {
+      throw new IllegalStateException("No output targets were provided");
+    }
+
     for (var path : sourcesToCompile) {
       args.add(path.toString());
     }
@@ -56,6 +62,7 @@ public final class ArgLineBuilder {
   }
 
   public ArgLineBuilder javaOut(Path outputPath, boolean lite) {
+    ++outputTargetCount;
     var flag = lite
         ? "--java_out=lite:"
         : "--java_out=";
@@ -64,6 +71,7 @@ public final class ArgLineBuilder {
   }
 
   public ArgLineBuilder kotlinOut(Path outputPath, boolean lite) {
+    ++outputTargetCount;
     var flag = lite
         ? "--kotlin_out=lite:"
         : "--kotlin_out=";
@@ -75,6 +83,7 @@ public final class ArgLineBuilder {
     for (var plugin : plugins) {
       // protoc always maps a flag `--xxx_out` to a plugin named `protoc-gen-xxx`, so we have
       // to inject this flag to be consistent.
+      ++outputTargetCount;
       args.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
       args.add("--" + plugin.getId() + "_out=" + outputPath);
     }
