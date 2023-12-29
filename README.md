@@ -1,29 +1,12 @@
 ![Java 11+](https://img.shields.io/badge/Java-11+-blue?logo=openjdk&logoColor=white)
 [![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
-[![codecov](https://codecov.io/gh/ascopes/protobuf-maven-plugin/graph/badge.svg?token=bW37uc04cL)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
+[![Coverage](https://codecov.io/gh/ascopes/protobuf-maven-plugin/graph/badge.svg?token=bW37uc04cL)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin)](https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin)
+[![Documentation](https://img.shields.io/badge/Documentation-latest-blue?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
 
 # protobuf-maven-plugin
 
-A simple and modern Maven plugin to generate Java/Kotlin sources from Protobuf definitions.
-
-## Features
-
-- Support for downloading a specified version of `protoc` from Maven repositories.
-  - Ability to resolve any desired version
-  - Will work automatically with corporate proxies and self-hosted Maven repositories like Nexus,
-    Maven, GitLab, GitHub Packages.
-- Support for invoking `protoc` from the `$PATH` if you have an obscure system that does not provide
-  an official `protoc` binary release from Google.
-- Java 11+ support.
-- Ability to generate sources for Protobuf message payloads.
-- Ability to optionally generate source stubs for GRPC services.
-- Option to also generate Kotlin stubs that wrap the Java sources.
-
-## Usage
-
-Full documentation with usage examples can be found [on the plugin site](https://ascopes.github.io/protobuf-maven-plugin).
-
-To give a quick idea of what this looks like, see the following example:
+A simple and modern Maven plugin to generate source code from protobuf definitions.
 
 ```xml
 <plugin>
@@ -32,7 +15,7 @@ To give a quick idea of what this looks like, see the following example:
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>3.25.0</protocVersion>
+    <protocVersion>3.25.1</protocVersion>
   </configuration>
 
   <executions>
@@ -44,3 +27,24 @@ To give a quick idea of what this looks like, see the following example:
   </executions>
 </plugin>
 ```
+
+## Features
+
+- Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
+- Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
+- Supports Java and JVM Kotlin sources out of the box.
+- Custom plugin support. Need reactive support, Scala support, or GRPC? Just add the plugin and away you go.
+- Generation of main and test sources.
+- Importing of `*.proto` sources from classpath dependencies.
+- Ready to implement Maven 4 support once Maven 4 is stable, meaning your projects will not be blocked by unmaintained plugins using
+  unsupported Maven 2.x APIs.
+
+## Usage
+
+Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
+and  examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it).
+
+## Contributing
+
+Since this is a new project, any contributions are always welcome! This includes contributing integration test cases or reporting issues.
+Any input is greatly appreciated 😊.
