@@ -147,7 +147,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean fatalWarnings;
 
   /**
+   * Whether to generate default Java source code.
+   *
+   * <p>Defaults to true, although some users may wish to disable this if using
+   * an alternative plugin instead.
+   *
+   * @since 0.1.1
+   */
+  @Parameter(defaultValue = "true")
+  private boolean javaEnabled;
+
+  /**
    * Whether to also generate Kotlin API wrapper code around the generated Java code.
+   *
+   * <p>Note that this requires {@code javaEnabled} to also be {@code true}, otherwise compilation may fail.
    *
    * @since 0.1.0
    */
@@ -183,6 +196,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .addAllAllowedDependencyScopes(allowedScopes())
         .addAllSourceRoots(actualSourceDirectories)
         .isFatalWarnings(fatalWarnings)
+        .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
         .mavenSession(session)

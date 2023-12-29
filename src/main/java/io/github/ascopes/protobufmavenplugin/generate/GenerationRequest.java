@@ -47,6 +47,8 @@ public interface GenerationRequest {
 
   boolean isFatalWarnings();
 
+  boolean isJavaEnabled();
+
   boolean isKotlinEnabled();
 
   boolean isLiteEnabled();
