@@ -28,7 +28,7 @@ import java.util.List;
  */
 public final class ArgLineBuilder {
   private final List<String> args;
-  private volatile int outputTargetCount;
+  private int outputTargetCount;
 
   public ArgLineBuilder(Path protocPath) {
     args = new ArrayList<>();
