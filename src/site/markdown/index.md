@@ -183,8 +183,8 @@ Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
 ## Importing protobuf definitions from other places
 
 By default, this plugin will index all JARs that are dependencies for the current Maven project,
-just like you would expect when using Java code. Any dependency that is marked with the `compile`,
-`provided`, or `system` scope (or `test` if the `generate-test` goal is used).
+just like you would expect when using Java code. This plugin considers any dependency that is marked with the `compile`,
+`provided`, or `system` scope (or additionally `test` if the `generate-test` goal is used).
 
 If there are additional paths on the file system that you wish to add to the import path, then
 you can specify these using the `additionalImportPaths` parameter. Note that these will not be
