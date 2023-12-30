@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2023, Ashley Scopes.
+    Copyright (C) 2023 - 2024, Ashley Scopes.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -288,7 +288,8 @@
             <java>SLASHSTAR_STYLE</java>
           </mapping>
           <properties>
-            <currentYear>2023</currentYear>
+            <currentYear>2024</currentYear>
+            <inceptionYear>${project.inceptionYear}</inceptionYear>
           </properties>
           <strictCheck>true</strictCheck>
         </configuration>
