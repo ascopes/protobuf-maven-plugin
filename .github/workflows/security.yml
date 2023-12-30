@@ -1,0 +1,28 @@
+name: Security Analysis
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  submit-dependency-snapshot:
+    name: Submit Dependency Snapshot
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Initialize Java environment
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Submit Dependency Snapshot
+        uses: advanced-security/maven-dependency-submission-action@v3
+        with:
+          maven-args: -B
