@@ -1,0 +1,53 @@
+name: CodeQL analysis
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+  push:
+    branches:
+      - main
+  workflow_call: {}
+  workflow_dispatch: {}
+
+jobs:
+  codeql:
+    name: CodeQL analysis (${{ matrix.language }})
+    runs-on: ubuntu-22.04
+
+    concurrency:
+      group: codeql-codeql-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        # Do not freeze. Enables automatic updates to how CodeQL scans
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        # Do not freeze. Enables automatic updates to how CodeQL scans
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        # Do not freeze. Enables automatic updates to how CodeQL scans
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
