@@ -95,7 +95,7 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.24.2</assertj.version>
-    <immutables.version>2.9.2</immutables.version>
+    <immutables.version>2.10.0</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.1</junit.version>
     <maven-artifact-transfer.version>0.13.1</maven-artifact-transfer.version>
