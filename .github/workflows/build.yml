@@ -35,16 +35,6 @@ jobs:
         run: ./mvnw -B verify
 
       - name: Publish to codecov
+        uses: codecov/codecov-action@v3
         continue-on-error: true
-        if: matrix.os-name == 'ubuntu-latest' && always()
-        shell: bash
-        run: |-
-          curl --fail https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring \
-              --keyring trustedkeys.gpg --import
-          curl --fail -Os https://uploader.codecov.io/latest/linux/codecov
-          curl --fail -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-          curl --fail -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-          shasum -a 256 -c codecov.SHA256SUM
-          chmod -v +x codecov
-          ./codecov -v
+        if: always()
