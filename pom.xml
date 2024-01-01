@@ -94,7 +94,7 @@
 
   <properties>
     <!-- Dependencies -->
-    <assertj.version>3.24.2</assertj.version>
+    <assertj.version>3.25.0</assertj.version>
     <immutables.version>2.10.0</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.1</junit.version>
