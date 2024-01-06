@@ -46,23 +46,28 @@ public final class CommandLineExecutor {
     procBuilder.inheritIO();
 
     try {
-      var startTime = System.nanoTime();
+      var startTimeNs = System.nanoTime();
       var proc = procBuilder.start();
       var exitCode = proc.waitFor();
-      var elapsedTime = (System.nanoTime() - startTime) / 1_000_000;
+      var elapsedTimeMs = ms(System.nanoTime() - startTimeNs);
 
       if (exitCode == 0) {
-        log.info("Protoc completed after {}ms", elapsedTime);
+        log.info("Protoc completed after {}ms", elapsedTimeMs);
         return true;
       } else {
         log.error("Protoc returned exit code {} after {}ms", exitCode, elapsedTime);
         return false;
       }
+
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       var newEx = new InterruptedIOException("Compilation was interrupted");
       newEx.initCause(ex);
       throw newEx;
     }
+  }
+
+  private static long ms(long ns) {
+    return ns / 1_000_000L;
   }
 }
