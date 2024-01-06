@@ -55,7 +55,7 @@ public final class CommandLineExecutor {
         log.info("Protoc completed after {}ms", elapsedTimeMs);
         return true;
       } else {
-        log.error("Protoc returned exit code {} after {}ms", exitCode, elapsedTime);
+        log.error("Protoc returned exit code {} after {}ms", exitCode, elapsedTimeMs);
         return false;
       }
 
