@@ -159,13 +159,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.marschall</groupId>
-      <artifactId>memoryfilesystem</artifactId>
-      <version>${memoryfilesystem.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>${maven-plugin-api.version}</version>
@@ -233,6 +226,13 @@
     </dependency>
 
     <!-- Test dependencies -->
+    <dependency>
+      <groupId>com.github.marschall</groupId>
+      <artifactId>memoryfilesystem</artifactId>
+      <version>${memoryfilesystem.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
