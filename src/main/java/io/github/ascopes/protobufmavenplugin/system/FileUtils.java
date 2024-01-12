@@ -69,6 +69,7 @@ public final class FileUtils {
         .installedProviders()
         .stream()
         .filter(provider -> provider.getScheme().equalsIgnoreCase(scheme))
+        .peek(provider -> log.debug("Found {} file system provider {}", scheme, provider))
         .findFirst()
         .orElseThrow(() -> new FileSystemNotFoundException(
             "No file system provider for " + scheme + " was found"
@@ -77,6 +78,7 @@ public final class FileUtils {
 
   public static void makeExecutable(Path file) throws IOException {
     try {
+      log.debug("Ensuring {} is executable", file);
       var perms = new HashSet<>(Files.getPosixFilePermissions(file));
       perms.add(PosixFilePermission.OWNER_EXECUTE);
       Files.setPosixFilePermissions(file, perms);
