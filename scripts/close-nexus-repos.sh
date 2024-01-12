@@ -213,11 +213,15 @@ function close-staging-repository() {
   local repository_id="${1?Pass the repository ID}"
   local url="https://${server}/service/local/staging/bulk/close"
   local payload
+  
   payload="$(
     jq -cn '{ data: { description: $description, stagedRepositoryIds: [ $repository_id ] } }' \
       --arg description "" \
       --arg repository_id "${repository_id}"
   )"
+
+  echo "Waiting a few seconds to mitigate eventual consistency on Nexus" >&2
+  sleep 10
 
   echo -e "\e[1;33m[POST ${url} ${payload}]\e[0m Triggering the closure process" >&2
 
