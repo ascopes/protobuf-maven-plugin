@@ -72,6 +72,15 @@ public final class SourceCodeGenerator {
     var plugins = discoverPlugins(request);
     var importPaths = discoverImportPaths(request);
     var sources = discoverCompilableSources(request);
+
+    if (sources.isEmpty()) {
+      // We might want to add the ability to throw an error here in the future.
+      // For now, let's just avoid doing additional work. This also prevents protobuf
+      // failing because we provided no sources to it.
+      log.info("No protobuf sources found; nothing to do!");
+      return true;
+    }
+    
     createOutputDirectories(request);
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
