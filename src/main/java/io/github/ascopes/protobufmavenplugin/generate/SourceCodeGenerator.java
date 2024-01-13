@@ -23,7 +23,7 @@ import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
 import io.github.ascopes.protobufmavenplugin.execute.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.source.ProtoFileListing;
-import io.github.ascopes.protobufmavenplugin.source.ProtoListingResolver;
+import io.github.ascopes.protobufmavenplugin.source.ProtoSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public final class SourceCodeGenerator {
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final ProtocResolver protocResolver;
   private final PluginResolver pluginResolver;
-  private final ProtoListingResolver protoListingResolver;
+  private final ProtoSourceResolver protoListingResolver;
   private final CommandLineExecutor commandLineExecutor;
 
   @Inject
@@ -58,7 +58,7 @@ public final class SourceCodeGenerator {
       MavenDependencyPathResolver mavenDependencyPathResolver,
       ProtocResolver protocResolver,
       PluginResolver pluginResolver,
-      ProtoListingResolver protoListingResolver,
+      ProtoSourceResolver protoListingResolver,
       CommandLineExecutor commandLineExecutor
   ) {
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;

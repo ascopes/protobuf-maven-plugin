@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 @Named
-public final class ProtoListingResolver implements AutoCloseable {
+public final class ProtoSourceResolver implements AutoCloseable {
 
   private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
 
@@ -55,7 +55,7 @@ public final class ProtoListingResolver implements AutoCloseable {
   private final ExecutorService executorService;
 
   @Inject
-  public ProtoListingResolver(ProtoArchiveExtractor protoArchiveExtractor) {
+  public ProtoSourceResolver(ProtoArchiveExtractor protoArchiveExtractor) {
     var concurrency = Runtime.getRuntime().availableProcessors() * 4;
 
     this.protoArchiveExtractor = protoArchiveExtractor;
@@ -103,29 +103,15 @@ public final class ProtoListingResolver implements AutoCloseable {
     return results;
   }
 
-  public Optional<ProtoFileListing> createProtoFileListing(Path originalPath) throws IOException {
-    Path rootPath;
-
-    if (Files.isRegularFile(originalPath)) {
-      // Treat it as a ZIP archive. We might want to support other formats in the future but
-      // for now, let's leave it alone. If we get no result from this call then we already know
-      // that there are no proto files to extract, so we can skip the lookup.
-
-      var extractionResult = protoArchiveExtractor.tryExtractProtoFiles(originalPath);
-
-      if (extractionResult.isPresent()) {
-        rootPath = extractionResult.get();
-      } else {
-        return Optional.empty();
-      }
-    } else {
-      rootPath = originalPath;
+  public Optional<ProtoFileListing> createProtoFileListing(Path path) throws IOException {
+    if (Files.isRegularFile(path)) {
+      return protoArchiveExtractor.extractProtoFiles(path);
     }
 
-    try (var stream = Files.walk(rootPath)) {
+    try (var stream = Files.walk(path)) {
       var protoFiles = stream
           .filter(ProtoFilePredicates::isProtoFile)
-          .peek(protoFile -> log.trace("Found proto file in root {}: {}", rootPath, protoFile))
+          .peek(protoFile -> log.trace("Found proto file in root {}: {}", path, protoFile))
           .collect(Collectors.toUnmodifiableSet());
 
       if (protoFiles.isEmpty()) {
@@ -135,8 +121,8 @@ public final class ProtoListingResolver implements AutoCloseable {
       var listing = ImmutableProtoFileListing
           .builder()
           .addAllProtoFiles(protoFiles)
-          .protoFilesRoot(rootPath)
-          .originalRoot(originalPath)
+          .protoFilesRoot(path)
+          .originalRoot(path)
           .build();
 
       return Optional.of(listing);
