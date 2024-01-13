@@ -16,10 +16,10 @@
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.arch;
+import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.hostSystem;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.linux;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.macOs;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.otherOs;
-import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.hostSystem;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.windows;
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

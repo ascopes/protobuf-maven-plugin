@@ -15,15 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.system.FileUtils;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
