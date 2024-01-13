@@ -15,8 +15,9 @@
  */
 package io.github.ascopes.protobufmavenplugin.generate;
 
+import io.github.ascopes.protobufmavenplugin.dependency.JvmPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.PluginResolver;
+import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
@@ -49,7 +50,8 @@ public final class SourceCodeGenerator {
 
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final ProtocResolver protocResolver;
-  private final PluginResolver pluginResolver;
+  private final BinaryPluginResolver binaryPluginResolver;
+  private final JvmPluginResolver jvmPluginResolver;
   private final ProtoSourceResolver protoListingResolver;
   private final CommandLineExecutor commandLineExecutor;
 
@@ -57,13 +59,15 @@ public final class SourceCodeGenerator {
   public SourceCodeGenerator(
       MavenDependencyPathResolver mavenDependencyPathResolver,
       ProtocResolver protocResolver,
-      PluginResolver pluginResolver,
+      BinaryPluginResolver binaryPluginResolver,
+      JvmPluginResolver jvmPluginResolver,
       ProtoSourceResolver protoListingResolver,
       CommandLineExecutor commandLineExecutor
   ) {
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.protocResolver = protocResolver;
-    this.pluginResolver = pluginResolver;
+    this.binaryPluginResolver = binaryPluginResolver;
+    this.jvmPluginResolver = jvmPluginResolver;
     this.protoListingResolver = protoListingResolver;
     this.commandLineExecutor = commandLineExecutor;
   }
@@ -116,8 +120,15 @@ public final class SourceCodeGenerator {
 
   private Collection<ResolvedPlugin> discoverPlugins(
       GenerationRequest request
-  ) throws ResolutionException {
-    return pluginResolver.resolveAll(request.getMavenSession(), request.getBinaryPlugins());
+  ) throws IOException, ResolutionException {
+    var binaryPlugins = binaryPluginResolver
+        .resolveAll(request.getMavenSession(), request.getBinaryPlugins());
+    var jvmPlugins = jvmPluginResolver
+        .resolveAll(request.getMavenSession(), request.getJvmPlugins());
+
+    var plugins = new ArrayList<ResolvedPlugin>(binaryPlugins);
+    plugins.addAll(jvmPlugins);
+    return plugins;
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(

@@ -15,15 +15,12 @@
  */
 package io.github.ascopes.protobufmavenplugin.source;
 
-import io.github.ascopes.protobufmavenplugin.system.FileUtils;
+import io.github.ascopes.protobufmavenplugin.system.Digests;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -109,14 +106,7 @@ public final class ProtoArchiveExtractor {
   }
 
   private String generateUniqueName(Path archive) {
-    var archiveName = FileUtils.getFileNameWithoutExtension(archive);
-
-    try {
-      var digest = MessageDigest.getInstance("MD5").digest();
-      return Base64.getUrlEncoder().withoutPadding().encodeToString(digest) + "-" + archiveName;
-    } catch (NoSuchAlgorithmException ex) {
-      throw new IllegalStateException("Failed to perform hash operation", ex);
-    }
+    return Digests.sha1(archive.getFileName().toString());
   }
 
   private Path changeRelativePath(Path newRoot, Path existingRoot, Path existingPath) {

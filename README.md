@@ -33,7 +33,9 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
 - Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
 - Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
 - Supports Java and JVM Kotlin sources out of the box.
-- Custom plugin support. Need reactive support, Scala support, or GRPC? Just add the plugin and away you go.
+- Plugin support. Need reactive support, Scala support, or GRPC? Just add the plugin and away you go.
+  - Ability to use plugins implemented for the JVM (JAR plugins).
+  - Ability to use regular `protoc` plugins (native binaries).
 - Generation of main and test sources.
 - Importing of `*.proto` sources from classpath dependencies.
 - Ready to implement Maven 4 support once Maven 4 is stable, meaning your projects will not be blocked by unmaintained plugins using
