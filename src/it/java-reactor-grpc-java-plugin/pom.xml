@@ -115,22 +115,23 @@
         <version>${plugin-version}</version>
 
         <configuration>
-          <additionalPlugins>
-            <additionalPlugin>
+          <binaryPlugins>
+            <binaryPlugin>
               <artifact>
                 <groupId>io.grpc</groupId>
                 <artifactId>protoc-gen-grpc-java</artifactId>
                 <version>${grpc.version}</version>
               </artifact>
-            </additionalPlugin>
-            <additionalPlugin>
-              <artifact>
-                <groupId>com.salesforce.servicelibs</groupId>
-                <artifactId>reactor-grpc</artifactId>
-                <version>${reactor-grpc.version}</version>
-              </artifact>
-            </additionalPlugin>
-          </additionalPlugins>
+            </binaryPlugin>
+          </binaryPlugins>
+
+          <jvmPlugins>
+            <jvmPlugin>
+              <groupId>com.salesforce.servicelibs</groupId>
+              <artifactId>reactor-grpc</artifactId>
+              <version>${reactor-grpc.version}</version>
+            </jvmPlugin>
+          </jvmPlugins>
 
           <protocVersion>${protobuf.version}</protocVersion>
         </configuration>

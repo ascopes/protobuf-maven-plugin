@@ -117,7 +117,7 @@ public final class SourceCodeGenerator {
   private Collection<ResolvedPlugin> discoverPlugins(
       GenerationRequest request
   ) throws ResolutionException {
-    return pluginResolver.resolveAll(request.getMavenSession(), request.getAdditionalPlugins());
+    return pluginResolver.resolveAll(request.getMavenSession(), request.getBinaryPlugins());
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(
