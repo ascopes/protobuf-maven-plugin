@@ -289,6 +289,11 @@ as `PATH`.
 If you wish to generate GRPC stubs, or outputs for other languages like Scala that are not already
 covered by the protoc executable, you can add custom plugins to your build.
 
+### Binary plugins
+
+Binary plugins are OS-specific executables that are passed to `protoc` directly, and are the 
+standard way of handling plugins with `protoc`.
+
 If the plugin you wish to use is on Maven Central or any other Maven repository, you can reference
 that plugin directly via the group ID, artifact ID, and version.
 
@@ -300,15 +305,15 @@ that plugin directly via the group ID, artifact ID, and version.
 
   <configuration>
     ...
-    <additionalPlugins>
-      <additionalPlugin>
+    <binaryPlugins>
+      <binaryPlugin>
         <artifact>
           <groupId>io.grpc</groupId>
           <artifactId>protoc-gen-grpc-java</artifactId>
           <version>${grpc.version}</version>
         </artifact>
-      </additionalPlugin>
-    </additionalPlugins>
+      </binaryPlugin>
+    </binaryPlugins>
   </configuration>
 
   ...
@@ -326,16 +331,54 @@ executable name instead:
 
   <configuration>
     ...
-    <additionalPlugins>
-      <additionalPlugin>
+    <binaryPlugins>
+      <binaryPlugin>
         <executableName>protoc-gen-grpc-java</executableName>
-      </additionalPlugin>
-    </additionalPlugins>
+      </binaryPlugin>
+    </binaryPlugins>
   </configuration>
 
   ...
 </plugin>
 ```
+
+Binary plugin functionality is experimental and subject to change.
+
+### Pure-Java plugins
+
+If a `protoc` plugin is distributed as a platform-independent JAR archive rather than a native
+executable, you can instruct this Maven plugin to invoke the artifact as part of compilation. To
+do this, simply specify the `jvmPlugins` configuration property, passing in a list of dependencies
+to execute.
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    ...
+    <jvmPlugins>
+      <jvmPlugin>
+        <!-- Use the JAR that Salesforce distributes -->
+        <groupId>com.salesforce.servicelibs</groupId>
+        <artifactId>reactor-grpc</artifactId>
+        <version>${reactor-grpc.version}</version>
+      </jvmPlugin>
+    </jvmPlugins>
+  </configuration>
+
+  ...
+</plugin>
+```
+
+Currently, you are required to be able to execute `*.bat` files on Windows, or have 
+`sh` available on the system `$PATH` for any other platform.
+
+Java plugin functionality is experimental and subject to change.
+
+### Mixing plugins
 
 Multiple plugins can be provided if needed. For example, if you are using the 
 [Salesforce Reactor GRPC libraries](https://github.com/salesforce/reactive-grpc/tree/master),
@@ -349,22 +392,23 @@ then you can provide the following:
 
   <configuration>
     ...
-    <additionalPlugins>
-      <additionalPlugin>
+    <binaryPlugins>
+      <binaryPlugin>
         <artifact>
           <groupId>io.grpc</groupId>
           <artifactId>protoc-gen-grpc-java</artifactId>
           <version>${grpc.version}</version>
         </artifact>
-      </additionalPlugin>
-      <additionalPlugin>
+      </binaryPlugin>
+      <binaryPlugin>
         <artifact>
+          <!-- Use the native *.exe that Salesforce distributes -->
           <groupId>com.salesforce.servicelibs</groupId>
           <artifactId>reactor-grpc</artifactId>
           <version>${reactor-grpc.version}</version>
         </artifact>
-      </additionalPlugin>
-    </additionalPlugins>
+      </binaryPlugin>
+    </binaryPlugins>
   </configuration>
 
   ...

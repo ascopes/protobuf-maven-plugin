@@ -89,7 +89,7 @@ public final class MavenDependencyPathResolver {
     }
   }
 
-  private Collection<Path> resolveDependencyTreePaths(
+  public Collection<Path> resolveDependencyTreePaths(
       MavenSession session,
       Set<String> allowedScopes,
       DependableCoordinate dependency

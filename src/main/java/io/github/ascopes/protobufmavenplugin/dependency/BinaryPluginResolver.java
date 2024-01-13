@@ -36,14 +36,14 @@ import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
  * @author Ashley Scopes
  */
 @Named
-public final class PluginResolver {
+public final class BinaryPluginResolver {
 
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final PlatformArtifactFactory platformDependencyFactory;
   private final SystemPathBinaryResolver systemPathResolver;
 
   @Inject
-  public PluginResolver(
+  public BinaryPluginResolver(
       MavenDependencyPathResolver mavenDependencyPathResolver,
       PlatformArtifactFactory platformDependencyFactory,
       SystemPathBinaryResolver systemPathResolver

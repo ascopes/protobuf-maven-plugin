@@ -34,6 +34,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -126,7 +127,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  private @Nullable Set<Plugin> additionalPlugins;
+  private @Nullable Set<Plugin> binaryPlugins;
+
+  /**
+   * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
+   *
+   * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
+   * protoc compiler API, and will be executed separately.
+   *
+   * @since 0.2.0
+   */
+  @Parameter
+  private @Nullable Set<DefaultDependableCoordinate> jvmPlugins;
 
   /**
    * Override the directory to output generated code to.
@@ -192,7 +204,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
     var request = ImmutableGenerationRequest.builder()
         .addAllAdditionalImportPaths(parsePaths(additionalImportPaths))
-        .addAllAdditionalPlugins(requireNonNullElse(additionalPlugins, Set.of()))
+        .addAllBinaryPlugins(requireNonNullElse(binaryPlugins, Set.of()))
+        .addAllJvmPlugins(requireNonNullElse(jvmPlugins, Set.of()))
         .addAllAllowedDependencyScopes(allowedScopes())
         .addAllSourceRoots(actualSourceDirectories)
         .isFatalWarnings(fatalWarnings)

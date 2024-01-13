@@ -19,6 +19,7 @@ import io.github.ascopes.protobufmavenplugin.Plugin;
 import java.nio.file.Path;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -31,7 +32,9 @@ public interface GenerationRequest {
 
   Set<Path> getAdditionalImportPaths();
 
-  Set<Plugin> getAdditionalPlugins();
+  Set<Plugin> getBinaryPlugins();
+
+  Set<DependableCoordinate> getJvmPlugins();
 
   Set<String> getAllowedDependencyScopes();
 
