@@ -35,13 +35,13 @@ public final class ProtocResolver {
 
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final PlatformArtifactFactory platformArtifactFactory;
-  private final PathResolver systemPathResolver;
+  private final SystemPathBinaryResolver systemPathResolver;
 
   @Inject
   public ProtocResolver(
       MavenDependencyPathResolver mavenDependencyPathResolver,
       PlatformArtifactFactory platformArtifactFactory,
-      PathResolver systemPathResolver
+      SystemPathBinaryResolver systemPathResolver
   ) {
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.platformArtifactFactory = platformArtifactFactory;

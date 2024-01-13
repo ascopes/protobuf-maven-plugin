@@ -17,18 +17,19 @@ package io.github.ascopes.protobufmavenplugin.generate;
 
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.PluginResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.ProtoFileResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
 import io.github.ascopes.protobufmavenplugin.execute.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.CommandLineExecutor;
+import io.github.ascopes.protobufmavenplugin.source.ProtoFileListing;
+import io.github.ascopes.protobufmavenplugin.source.ProtoListingResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public final class SourceCodeGenerator {
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final ProtocResolver protocResolver;
   private final PluginResolver pluginResolver;
-  private final ProtoFileResolver protoFileResolver;
+  private final ProtoListingResolver protoListingResolver;
   private final CommandLineExecutor commandLineExecutor;
 
   @Inject
@@ -57,13 +58,13 @@ public final class SourceCodeGenerator {
       MavenDependencyPathResolver mavenDependencyPathResolver,
       ProtocResolver protocResolver,
       PluginResolver pluginResolver,
-      ProtoFileResolver protoFileResolver,
+      ProtoListingResolver protoListingResolver,
       CommandLineExecutor commandLineExecutor
   ) {
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.protocResolver = protocResolver;
     this.pluginResolver = pluginResolver;
-    this.protoFileResolver = protoFileResolver;
+    this.protoListingResolver = protoListingResolver;
     this.commandLineExecutor = commandLineExecutor;
   }
 
@@ -71,9 +72,9 @@ public final class SourceCodeGenerator {
     var protocPath = discoverProtocPath(request);
     var plugins = discoverPlugins(request);
     var importPaths = discoverImportPaths(request);
-    var sources = discoverCompilableSources(request);
+    var sourcePaths = discoverCompilableSources(request);
 
-    if (sources.isEmpty()) {
+    if (sourcePaths.isEmpty()) {
       // We might want to add the ability to throw an error here in the future.
       // For now, let's just avoid doing additional work. This also prevents protobuf
       // failing because we provided no sources to it.
@@ -85,7 +86,10 @@ public final class SourceCodeGenerator {
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
         .fatalWarnings(request.isFatalWarnings())
-        .importPaths(importPaths)
+        .importPaths(importPaths
+            .stream()
+            .map(ProtoFileListing::getProtoFilesRoot)
+            .collect(Collectors.toUnmodifiableSet()))
         .importPaths(request.getSourceRoots())
         .plugins(plugins, request.getOutputDirectory());
 
@@ -97,7 +101,13 @@ public final class SourceCodeGenerator {
       argLineBuilder.kotlinOut(request.getOutputDirectory(), request.isLiteEnabled());
     }
 
-    return commandLineExecutor.execute(argLineBuilder.compile(sources));
+    var sourceFiles = sourcePaths
+        .stream()
+        .map(ProtoFileListing::getProtoFiles)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toUnmodifiableSet());
+
+    return commandLineExecutor.execute(argLineBuilder.compile(sourceFiles));
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
@@ -110,30 +120,33 @@ public final class SourceCodeGenerator {
     return pluginResolver.resolveAll(request.getMavenSession(), request.getAdditionalPlugins());
   }
 
-  private Collection<Path> discoverImportPaths(
+  private Collection<ProtoFileListing> discoverImportPaths(
       GenerationRequest request
-  ) throws ResolutionException {
+  ) throws IOException, ResolutionException {
     var session = request.getMavenSession();
 
     log.debug("Finding importable protobuf sources from the classpath");
     var dependencyPaths = mavenDependencyPathResolver
         .resolveProjectDependencyPaths(session, request.getAllowedDependencyScopes());
 
-    var protoDependencyPaths = protoFileResolver.findProtoFileRoots(session, dependencyPaths);
+    var inheritedDependencies = protoListingResolver
+        .createProtoFileListings(dependencyPaths);
 
     // Always use all provided additional import paths, as we assume they are valid given the user
     // has explicitly included them in their configuration.
-    var additionalImportPaths = request.getAdditionalImportPaths();
+    var explicitDependencies = protoListingResolver
+        .createProtoFileListings(request.getAdditionalImportPaths());
 
-    return Stream.concat(protoDependencyPaths.stream(), additionalImportPaths.stream())
-        .collect(Collectors.toUnmodifiableList());
+    var allDependencies = new ArrayList<>(inheritedDependencies);
+    allDependencies.addAll(explicitDependencies);
+    return allDependencies;
   }
 
-  private Collection<Path> discoverCompilableSources(
+  private Collection<ProtoFileListing> discoverCompilableSources(
       GenerationRequest request
-  ) throws ResolutionException {
+  ) throws IOException {
     log.debug("Discovering all compilable protobuf source files");
-    var sources = protoFileResolver.findProtoFiles(request.getSourceRoots());
+    var sources = protoListingResolver.createProtoFileListings(request.getSourceRoots());
     log.info("Will generate source code for {} protobuf file(s)", sources.size());
     return sources;
   }

@@ -40,13 +40,13 @@ public final class PluginResolver {
 
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final PlatformArtifactFactory platformDependencyFactory;
-  private final PathResolver systemPathResolver;
+  private final SystemPathBinaryResolver systemPathResolver;
 
   @Inject
   public PluginResolver(
       MavenDependencyPathResolver mavenDependencyPathResolver,
       PlatformArtifactFactory platformDependencyFactory,
-      PathResolver systemPathResolver
+      SystemPathBinaryResolver systemPathResolver
   ) {
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.platformDependencyFactory = platformDependencyFactory;

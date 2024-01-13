@@ -34,13 +34,13 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 @Named
-public final class PathResolver {
-  private static final Logger log = LoggerFactory.getLogger(PathResolver.class);
+public final class SystemPathBinaryResolver {
+  private static final Logger log = LoggerFactory.getLogger(SystemPathBinaryResolver.class);
 
   private final HostSystem hostSystem;
 
   @Inject
-  public PathResolver(HostSystem hostSystem) {
+  public SystemPathBinaryResolver(HostSystem hostSystem) {
     this.hostSystem = hostSystem;
   }
 

@@ -43,12 +43,12 @@ import org.junit.jupiter.params.provider.EnumSource.Mode;
 class PathResolverTest {
 
   HostSystem hostSystem;
-  PathResolver pathResolver;
+  SystemPathBinaryResolver pathResolver;
 
   @BeforeEach
   void setUp() {
     hostSystem = hostSystem();
-    pathResolver = new PathResolver(hostSystem);
+    pathResolver = new SystemPathBinaryResolver(hostSystem);
   }
 
   @DisplayName("Windows tests")
