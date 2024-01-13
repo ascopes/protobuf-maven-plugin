@@ -99,7 +99,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Set<String> additionalImportPaths;
 
   /**
-   * Additional plugins to use with the protobuf compiler.
+   * Regular plugins to use with the protobuf compiler.
    *
    * <p>Each plugin must be specified with one of:
    *
@@ -108,20 +108,24 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>An {@code executableName} block that refers to an executable on the system path.</li>
    * </ul>
    *
+   * <p>Plugin artifacts must be a <strong>native binary</strong>. By default, the OS and CPU
+   * architecture is automatically generated and injected in the classifier if the classifier
+   * and type are not provided explicitly.
+   *
    * <p>For example:
    * <code><pre>
-   *   &lt;additionalArtifacts&gt;
-   *     &lt;additionalArtifact&gt;
+   *   &lt;binaryArtifacts&gt;
+   *     &lt;binaryArtifact&gt;
    *       &lt;executableName&gt;protoc-gen-grpc-java&lt;/executableName&gt;
-   *     &lt;/additionalArtifact&gt;
-   *     &lt;additionalArtifact&gt;
+   *     &lt;/binaryArtifact&gt;
+   *     &lt;binaryArtifact&gt;
    *       &lt;artifact&gt;
    *         &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
    *         &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
    *         &lt;version&gt;1.2.4&lt;/version&gt;
    *       &lt;/artifact&gt;
-   *     &lt;/additionalArtifact&gt;
-   *   &lt;/additionalArtifacts&gt;
+   *     &lt;/binaryArtifact&gt;
+   *   &lt;/binaryArtifacts&gt;
    * </pre></code>
    *
    * @since 0.1.0
@@ -133,7 +137,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
    *
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
-   * protoc compiler API, and will be executed separately.
+   * protoc compiler API, and will be provided to the compiler via generated scripts.
+   *
+   * <p>For example:
+   * <code><pre>
+   *   &lt;jvmPlugins&gt;
+   *     &lt;jvmPlugin&gt;
+   *       &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
+   *       &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
+   *       &lt;version&gt;1.2.4&lt;/version&gt;
+   *     &lt;/jvmPlugin&gt;
+   *   &lt;/jvmPlugins&gt;
+   * </pre></code>
    *
    * @since 0.2.0
    */
