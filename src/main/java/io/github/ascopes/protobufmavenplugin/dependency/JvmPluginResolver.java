@@ -128,12 +128,12 @@ public class JvmPluginResolver {
 
   private String pluginIdDigest(DependableCoordinate dependableCoordinate) {
     var digestableString = String.join(
-        "$",
-        requireNonNullElse(dependableCoordinate.getGroupId(), "@"),
-        requireNonNullElse(dependableCoordinate.getArtifactId(), "@"),
-        requireNonNullElse(dependableCoordinate.getVersion(), "@"),
-        requireNonNullElse(dependableCoordinate.getType(), "@"),
-        requireNonNullElse(dependableCoordinate.getClassifier(), "@")
+        ":",
+        requireNonNullElse(dependableCoordinate.getGroupId(), ""),
+        requireNonNullElse(dependableCoordinate.getArtifactId(), ""),
+        requireNonNullElse(dependableCoordinate.getVersion(), ""),
+        requireNonNullElse(dependableCoordinate.getType(), ""),
+        requireNonNullElse(dependableCoordinate.getClassifier(), "")
     );
     return Digests.sha1(digestableString);
   }
@@ -154,7 +154,8 @@ public class JvmPluginResolver {
     var script = new StringBuilder()
         .append("@echo off\r\n");
     for (var arg : argLine) {
-      script.append(quoteBatchArg(arg)).append(' ');
+      quoteBatchArg(script, arg);
+      script.append(' ');
     }
     script.append("\r\n");
 
@@ -162,8 +163,7 @@ public class JvmPluginResolver {
     return fullScriptPath;
   }
 
-  private String quoteBatchArg(String arg) {
-    var sb = new StringBuilder();
+  private void quoteBatchArg(StringBuilder sb, String arg) {
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       switch (c) {
@@ -183,8 +183,6 @@ public class JvmPluginResolver {
 
       sb.append(c);
     }
-
-    return sb.toString();
   }
 
   private Path writeShellScript(
@@ -197,7 +195,8 @@ public class JvmPluginResolver {
         .append("#!/usr/bin/env sh\n")
         .append("set -eux\n");
     for (var arg : argLine) {
-      script.append(quoteShellArg(arg)).append(' ');
+      quoteShellArg(script, arg);
+      script.append(' ');
     }
     script.append('\n');
 
@@ -206,8 +205,8 @@ public class JvmPluginResolver {
     return fullScriptPath;
   }
 
-  private String quoteShellArg(String arg) {
-    var sb = new StringBuilder("'");
+  private void quoteShellArg(StringBuilder sb, String arg) {
+    sb.append('\'');
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       if (c == '\'') {
@@ -216,6 +215,6 @@ public class JvmPluginResolver {
         sb.append(c);
       }
     }
-    return sb.append('\'').toString();
+    sb.append('\'');
   }
 }
