@@ -27,7 +27,7 @@ class ReactorGreetingServiceImplTest {
     // Given
     var service = new ReactorGreetingServiceImpl();
     var server = ServerBuilder
-        .forPort(8080)
+        .forPort(8081)
         .addService(service)
         .build();
     var channel = ManagedChannelBuilder.forAddress("localhost", 8080)
