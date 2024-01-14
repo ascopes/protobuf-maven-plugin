@@ -363,7 +363,6 @@
         <configuration>
           <addTestClassPath>true</addTestClassPath>
           <failIfNoProjects>true</failIfNoProjects>
-          <parallelThreads>1C</parallelThreads>
           <postBuildHookScript>test</postBuildHookScript>
           <showErrors>true</showErrors>
           <showVersion>true</showVersion>
