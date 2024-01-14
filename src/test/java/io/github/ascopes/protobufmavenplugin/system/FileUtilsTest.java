@@ -20,15 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.ascopes.protobufmavenplugin.fixtures.OptionalConverter;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
-import java.util.Optional;
+
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -100,7 +99,7 @@ class FileUtilsTest {
   @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "AssertBetweenInconvertibleTypes"})
   void getFileExtensionReturnsTheExpectedValue(
       String fileName,
-      @ConvertWith(OptionalConverter.class) Optional<String> expected,
+      @Nullable String expected,
       @TempDir Path tempDir
   ) {
     // Given
@@ -110,13 +109,8 @@ class FileUtilsTest {
     var actual = FileUtils.getFileExtension(someFile);
 
     // Then
-    if (expected.isEmpty()) {
-      assertThat(actual).isNotPresent();
-    } else {
-      assertThat(actual).isPresent()
-          .get()
-          .isEqualTo(expected.get());
-    }
+    assertThat(actual.orElse(null))
+        .isEqualTo(expected);
   }
 
   @DisplayName(".getFileSystemProvider(String) returns the file system provider")
