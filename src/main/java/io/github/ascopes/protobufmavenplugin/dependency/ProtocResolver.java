@@ -57,10 +57,12 @@ public final class ProtocResolver {
           .orElseThrow(() -> new ResolutionException("No protoc executable was found"));
     }
 
-    var coordinate = platformArtifactFactory.createPlatformArtifact(
+    var coordinate = platformArtifactFactory.createArtifact(
         GROUP_ID,
         ARTIFACT_ID,
-        version
+        version,
+        null,
+        null
     );
 
     // We only care about the first dependency in this case.

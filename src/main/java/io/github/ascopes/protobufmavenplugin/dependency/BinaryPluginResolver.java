@@ -100,14 +100,18 @@ public final class BinaryPluginResolver {
   }
 
   private ArtifactCoordinate enrich(ArtifactCoordinate coordinate) {
-    if (coordinate.getExtension() == null || coordinate.getClassifier() == null) {
-      return platformDependencyFactory.createPlatformArtifact(
-          coordinate.getGroupId(),
-          coordinate.getArtifactId(),
-          coordinate.getVersion()
-      );
-    }
+    // If the extension is null, then Maven treats this as a JAR by default, which is
+    // annoying and the opposite of what we actually want to happen. If we pass a JAR
+    // here, then explicitly swap it out with null as this is *never* what we want to
+    // happen here.
+    var extension = coordinate.getExtension().equals("jar") ? null : coordinate.getExtension();
 
-    return coordinate;
+    return platformDependencyFactory.createArtifact(
+        coordinate.getGroupId(),
+        coordinate.getArtifactId(),
+        coordinate.getVersion(),        
+        extension,
+        coordinate.getClassifier()
+    );
   }
 }

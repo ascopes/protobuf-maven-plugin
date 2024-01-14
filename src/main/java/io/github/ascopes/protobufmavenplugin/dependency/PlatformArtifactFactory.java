@@ -16,10 +16,15 @@
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import io.github.ascopes.protobufmavenplugin.system.HostSystem;
+
+import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Factory that can produce dependencies marked with platform-specific classifiers.
@@ -35,17 +40,22 @@ public final class PlatformArtifactFactory {
     this.hostSystem = hostSystem;
   }
 
-  public ArtifactCoordinate createPlatformArtifact(
+  public ArtifactCoordinate createArtifact(
       String groupId,
       String artifactId,
-      String version
+      String version,
+      @Nullable String extension,
+      @Nullable String classifier
   ) {
     var dependency = new DefaultArtifactCoordinate();
     dependency.setGroupId(groupId);
     dependency.setArtifactId(artifactId);
     dependency.setVersion(version);
-    dependency.setExtension("exe");
-    dependency.setClassifier(getPlatformExecutableClassifier(artifactId));
+    dependency.setExtension(requireNonNullElse(extension, "exe"));
+    dependency.setClassifier(requireNonNullElseGet(
+        classifier, 
+        () -> getPlatformExecutableClassifier(artifactId)
+    ));
     return dependency;
   }
 

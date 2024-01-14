@@ -27,7 +27,12 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.HostSystemMockConfigurer;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.stream.Stream;
+
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -36,11 +41,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 @DisplayName("PlatformArtifactFactory tests")
 class PlatformArtifactFactoryTest {
 
-  @DisplayName(".createPlatformArtifact(...) returns the expected results on valid systems")
+  @DisplayName(".createArtifact(...) returns the expected results on valid systems")
   @MethodSource("validClassifierCases")
-  @ParameterizedTest(name = "when {0}, then expect classifier \"{1}\"")
-  void createPlatformArtifactReturnsExpectedResultsOnValidSystems(
+  @ParameterizedTest(name = "for system {0}, extension {1}, classifier {3}, expect "
+      + "extension {2} and classifier {4}")
+  void createArtifactReturnsExpectedResultsOnValidSystems(
       HostSystemMockConfigurer configurer,
+      @Nullable String givenExtension,
+      String expectedExtension,
+      @Nullable String givenClassifier,
       String expectedClassifier
   ) {
     // Given
@@ -52,7 +61,13 @@ class PlatformArtifactFactoryTest {
     var factory = new PlatformArtifactFactory(hostSystem);
 
     // When
-    var dependency = factory.createPlatformArtifact(groupId, artifactId, version);
+    var dependency = factory.createArtifact(
+        groupId, 
+        artifactId, 
+        version, 
+        givenExtension, 
+        givenClassifier
+    );
 
     // Then
     assertSoftly(softly -> {
@@ -66,18 +81,18 @@ class PlatformArtifactFactoryTest {
           .as("version")
           .isEqualTo(version);
       softly.assertThat(dependency.getExtension())
-          .as("executable")
-          .isEqualTo("exe");
+          .as("extension")
+          .isEqualTo(expectedExtension);
       softly.assertThat(dependency.getClassifier())
           .as("type")
           .isEqualTo(expectedClassifier);
     });
   }
 
-  @DisplayName(".createPlatformArtifact(...) raises an exception for unknown systems")
+  @DisplayName(".createArtifact(...) raises an exception for unknown systems")
   @MethodSource("invalidClassifierCases")
   @ParameterizedTest(name = "when {0}, then expect an exception")
-  void createPlatformArtifactRaisesAnExceptionForUnknownSystems(
+  void createArtifactRaisesAnExceptionForUnknownSystems(
       HostSystemMockConfigurer configurer
   ) {
     // Given
@@ -89,7 +104,7 @@ class PlatformArtifactFactoryTest {
     var factory = new PlatformArtifactFactory(hostSystem);
 
     // Then
-    assertThatThrownBy(() -> factory.createPlatformArtifact(groupId, artifactId, version))
+    assertThatThrownBy(() -> factory.createArtifact(groupId, artifactId, version, null, null))
         .isInstanceOf(UnsupportedOperationException.class)
         .hasMessageMatching(
             "No '[^']+' binary is available for reported OS '[^']+' and CPU architecture '[^']+'"
@@ -97,23 +112,33 @@ class PlatformArtifactFactoryTest {
   }
 
   static Stream<Arguments> validClassifierCases() {
-    return Stream.of(
-        arguments(linux().and(arch("amd64")), "linux-x86_64"),
-        arguments(linux().and(arch("aarch64")), "linux-aarch_64"),
-        arguments(linux().and(arch("s390")), "linux-s390_64"),
-        arguments(linux().and(arch("zarch_64")), "linux-s390_64"),
-        arguments(linux().and(arch("ppc64le")), "linux-ppcle_64"),
-        arguments(linux().and(arch("ppc64")), "linux-ppcle_64"),
+    var systemToClassifiers = new HashMap<HostSystemMockConfigurer, String>();
+    systemToClassifiers.put(linux().and(arch("amd64")), "linux-x86_64");
+    systemToClassifiers.put(linux().and(arch("aarch64")), "linux-aarch_64");
+    systemToClassifiers.put(linux().and(arch("s390")), "linux-s390_64");
+    systemToClassifiers.put(linux().and(arch("zarch_64")), "linux-s390_64");
+    systemToClassifiers.put(linux().and(arch("ppc64le")), "linux-ppcle_64");
+    systemToClassifiers.put(linux().and(arch("ppc64")), "linux-ppcle_64");
+    systemToClassifiers.put(macOs().and(arch("amd64")), "osx-x86_64");
+    systemToClassifiers.put(macOs().and(arch("x86_64")), "osx-x86_64");
+    systemToClassifiers.put(macOs().and(arch("aarch64")), "osx-aarch_64");
+    systemToClassifiers.put(windows().and(arch("amd64")), "windows-x86_64");
+    systemToClassifiers.put(windows().and(arch("x86_64")), "windows-x86_64");
+    systemToClassifiers.put(windows().and(arch("x86")), "windows-x86_32");
+    systemToClassifiers.put(windows().and(arch("x86_32")), "windows-x86_32");
 
-        arguments(macOs().and(arch("amd64")), "osx-x86_64"),
-        arguments(macOs().and(arch("x86_64")), "osx-x86_64"),
-        arguments(macOs().and(arch("aarch64")), "osx-aarch_64"),
+    var cases = new ArrayList<Arguments>();
+    systemToClassifiers.forEach((system, expectedClassifier) -> {
+      cases.add(arguments(system, null, "exe", null, expectedClassifier));
+      cases.add(arguments(system, "foobar", "foobar", null, expectedClassifier));
+    });
 
-        arguments(windows().and(arch("amd64")), "windows-x86_64"),
-        arguments(windows().and(arch("x86_64")), "windows-x86_64"),
-        arguments(windows().and(arch("x86")), "windows-x86_32"),
-        arguments(windows().and(arch("x86_32")), "windows-x86_32")
-    );
+    systemToClassifiers.keySet().forEach(system -> {
+      cases.add(arguments(system, null, "exe", "bazbork", "bazbork"));
+      cases.add(arguments(system, "foobar", "foobar", "bazbork", "bazbork"));
+    });
+
+    return cases.stream();
   }
 
   static Stream<HostSystemMockConfigurer> invalidClassifierCases() {
