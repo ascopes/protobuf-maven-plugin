@@ -94,6 +94,11 @@ public final class HostSystem {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("windows");
   }
 
+  public boolean isProbablyAndroidTermux() {
+    return isProbablyLinux()
+        && getWorkingDirectory().toString().startsWith("/data/data/com.termux/");
+  }
+
   public Path getWorkingDirectory() {
     return workingDirectory;
   }
