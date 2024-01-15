@@ -23,7 +23,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Plugin goal that generates code from protobuf sources.
+ * Generate source code from protobuf files.
  *
  * @author Ashley Scopes
  */

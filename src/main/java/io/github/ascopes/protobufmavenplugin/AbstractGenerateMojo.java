@@ -114,18 +114,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>For example:
    * <code><pre>
-   *   &lt;binaryArtifacts&gt;
-   *     &lt;binaryArtifact&gt;
+   *   &lt;binaryPlugins&gt;
+   *     &lt;binaryPlugin&gt;
    *       &lt;executableName&gt;protoc-gen-grpc-java&lt;/executableName&gt;
-   *     &lt;/binaryArtifact&gt;
-   *     &lt;binaryArtifact&gt;
+   *     &lt;/binaryPlugin&gt;
+   *     &lt;binaryPlugin&gt;
    *       &lt;artifact&gt;
    *         &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
    *         &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
    *         &lt;version&gt;1.2.4&lt;/version&gt;
    *       &lt;/artifact&gt;
-   *     &lt;/binaryArtifact&gt;
-   *   &lt;/binaryArtifacts&gt;
+   *     &lt;/binaryPlugin&gt;
+   *   &lt;/binaryPlugins&gt;
    * </pre></code>
    *
    * @since 0.1.0
@@ -158,7 +158,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Override the directory to output generated code to.
    *
-   * <p>Leave unspecified or explicitly null to use the defaults.
+   * <p>Leave unspecified or explicitly null to use the default for the
+   * goal. This defaults to the Maven generated sources directory within
+   * {@code target/}.
    *
    * @since 0.1.0
    */
@@ -166,7 +168,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable String outputDirectory;
 
   /**
-   * Whether to treat {@code protoc} compiler warnings as errors.
+   * Specify that any warnings emitted by {@code protoc} should be treated
+   * as errors and fail the build.
+   *
+   * <p>Defaults to false.
    *
    * @since 0.0.1
    */
@@ -174,10 +179,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean fatalWarnings;
 
   /**
-   * Whether to generate default Java source code.
+   * Specify whether to generate default Java sources from the protobuf
+   * sources.
    *
    * <p>Defaults to true, although some users may wish to disable this if using
-   * an alternative plugin instead.
+   * an alternative plugin that covers this instead.
    *
    * @since 0.1.1
    */
@@ -207,6 +213,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter(defaultValue = "false")
   private boolean liteOnly;
 
+  /**
+   * Execute the plugin and generate sources.
+   *
+   * @throws MojoExecutionException if execution fails.
+   * @throws MojoFailureException if an error occurs.
+   */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     var actualOutputDirectory = outputDirectory == null || outputDirectory.isBlank()
@@ -242,12 +254,46 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
   }
 
+  /**
+   * Provides the source root registrar for this Mojo.
+   *
+   * <p>This specifies where to attach generated sources to in order for it
+   * to be included as part of the compilation for main or test sources.
+   *
+   * @return the registrar to use.
+   */
   protected abstract SourceRootRegistrar sourceRootRegistrar();
 
+  /**
+   * Provides the default source directory to read protobuf sources from.
+   *
+   * <p>This does not need to point to an existing directory, the plugin will
+   * handle this automatically.
+   *
+   * @param session the Maven session.
+   * @return the path to the directory.
+   */
   protected abstract Path defaultSourceDirectory(MavenSession session);
 
+  /**
+   * Provides the default output directory to write generated code to.
+   *
+   * <p>This does not need to point to an existing directory, the plugin will
+   * handle this automatically.
+   *
+   * @param session the Maven session.
+   * @return the path to the directory.
+   */
   protected abstract Path defaultOutputDirectory(MavenSession session);
 
+  /**
+   * Provides the scopes allowed for dependencies.
+   *
+   * <p>Dependencies matching one of these scopes will be indexed and made visible
+   * to the protoc compiler if proto files are discovered.
+   *
+   * @return a set of the scopes.
+   */
   protected abstract Set<String> allowedScopes();
 
   private Collection<Path> parsePaths(@Nullable Collection<String> paths) {

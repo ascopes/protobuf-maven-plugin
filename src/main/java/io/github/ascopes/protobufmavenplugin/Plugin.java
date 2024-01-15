@@ -28,19 +28,38 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Plugin {
 
+  /**
+   * The artifact to download.
+   */
   @Parameter
   private @Nullable DefaultArtifactCoordinate artifact;
 
+  /**
+   * The executable to search for on the system {@code $PATH}.
+   */
   @Parameter
   private @Nullable String executableName;
 
+  /**
+   * Initialize this plugin.
+   */
   public Plugin() {
   }
 
+  /**
+   * Get the artifact, if present.
+   *
+   * @return the artifact, or an empty optional if not present.
+   */
   public Optional<ArtifactCoordinate> getArtifact() {
     return Optional.ofNullable(artifact);
   }
 
+  /**
+   * Get the executable name, if present.
+   *
+   * @return the executable name, or an empty optional if not present.
+   */
   public Optional<String> getExecutableName() {
     return Optional.ofNullable(executableName);
   }

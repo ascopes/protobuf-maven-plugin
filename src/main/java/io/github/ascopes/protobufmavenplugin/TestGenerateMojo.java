@@ -23,7 +23,14 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Plugin goal that generates test code from protobuf sources.
+ * Generate source code from protobuf files for use in unit tests.
+ *
+ * <p>Unlike the {@code generate} goal, these sources will only be visible
+ * to tests, and will not be included in any final JAR of the project main
+ * sources.
+ *
+ * <p>Generally, you probably won't need to use this, but it may be useful
+ * for some edge cases.
  *
  * @author Ashley Scopes
  */
