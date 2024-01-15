@@ -89,14 +89,12 @@ public final class BinaryPluginResolver {
       }
     }
 
-    if (pluginBean.getExecutableName().isPresent()) {
-      var executableName = pluginBean.getExecutableName().get();
-      return systemPathResolver.resolve(executableName)
+    // At this point, we know this will be present, since we validated this
+    // earlier. Use orElseThrow to avoid a useless compiler warning.
+    var executableName = pluginBean.getExecutableName().orElseThrow();
+    return systemPathResolver.resolve(executableName)
           .orElseThrow(() -> new ResolutionException("No executable '"
               + executableName + "' was found on the system path"));
-    }
-
-    throw new ResolutionException("Invalid protoc plugin definition");
   }
 
   private ArtifactCoordinate enrich(ArtifactCoordinate coordinate) {
@@ -104,12 +102,14 @@ public final class BinaryPluginResolver {
     // annoying and the opposite of what we actually want to happen. If we pass a JAR
     // here, then explicitly swap it out with null as this is *never* what we want to
     // happen here.
-    var extension = coordinate.getExtension().equals("jar") ? null : coordinate.getExtension();
+    var extension = coordinate.getExtension().equals("jar")
+        ? null
+        : coordinate.getExtension();
 
     return platformDependencyFactory.createArtifact(
         coordinate.getGroupId(),
         coordinate.getArtifactId(),
-        coordinate.getVersion(),        
+        coordinate.getVersion(),
         extension,
         coordinate.getClassifier()
     );

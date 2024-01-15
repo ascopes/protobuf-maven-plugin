@@ -63,4 +63,25 @@ public final class Plugin {
   public Optional<String> getExecutableName() {
     return Optional.ofNullable(executableName);
   }
+
+  /**
+   * Ensure the model is valid.
+   *
+   * @throws IllegalArgumentException if the model is invalid.
+   */
+  public void validate() {
+    if (artifact == null && executableName == null) {
+      throw new IllegalArgumentException(
+          "You must provide one of `artifact' or `executableName' in a "
+              + "binary plugin declaration."
+      );
+    }
+
+    if (artifact != null && executableName != null) {
+      throw new IllegalArgumentException(
+          "You must not provide both `artifact' and `executableName' in "
+              + " a binary plugin declaration."
+      );
+    }
+  }
 }

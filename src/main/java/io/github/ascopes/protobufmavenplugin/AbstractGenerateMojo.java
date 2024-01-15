@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
@@ -221,6 +222,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    try {
+      validate();
+    } catch (IllegalArgumentException ex) {
+      var newEx = new MojoExecutionException(ex.getMessage());
+      newEx.initCause(ex);
+      throw newEx;
+    }
+
     var actualOutputDirectory = outputDirectory == null || outputDirectory.isBlank()
         ? defaultOutputDirectory(session)
         : Path.of(outputDirectory);
@@ -295,6 +304,39 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @return a set of the scopes.
    */
   protected abstract Set<String> allowedScopes();
+
+  /**
+   * Validate this Mojo's parameters.
+   *
+   * @throws InvalidArgumentException if any parameters are invalid.
+   */
+  protected void validate() {
+    if (protocVersion.equalsIgnoreCase("latest")) {
+      throw new IllegalArgumentException(
+         "Cannot use LATEST for the protoc version. "
+             + "Google has not released linear versions in the past, meaning that "
+             + "using LATEST will have unexpected behaviour."
+      );
+    }
+
+    if (binaryPlugins != null) {
+      binaryPlugins.forEach(Plugin::validate);
+    }
+
+    // Having .jar on the output directory makes protoc generate a JAR with a
+    // Manifest. This will break our logic because generated sources will be
+    // inaccessible for the compilation phase later. For now, just prevent this
+    // edge case entirely.
+    Optional.ofNullable(outputDirectory)
+        .map(Path::of)
+        .flatMap(FileUtils::getFileExtension)
+        .filter(".jar"::equalsIgnoreCase)
+        .ifPresent(ext -> {
+          throw new IllegalArgumentException(
+              "The output directory cannot be a path with a JAR file extension"
+          );
+        });
+  }
 
   private Collection<Path> parsePaths(@Nullable Collection<String> paths) {
     if (paths == null) {
