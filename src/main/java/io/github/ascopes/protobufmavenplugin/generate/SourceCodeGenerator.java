@@ -85,7 +85,7 @@ public final class SourceCodeGenerator {
       log.info("No protobuf sources found; nothing to do!");
       return true;
     }
-    
+
     createOutputDirectories(request);
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
