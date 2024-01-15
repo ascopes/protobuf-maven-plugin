@@ -103,7 +103,7 @@
     <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
     <memoryfilesystem.version>2.8.0</memoryfilesystem.version>
-    <mockito.version>5.8.0</mockito.version>
+    <mockito.version>5.9.0</mockito.version>
     <slf4j.version>2.0.11</slf4j.version>
 
     <!-- Plugins -->
