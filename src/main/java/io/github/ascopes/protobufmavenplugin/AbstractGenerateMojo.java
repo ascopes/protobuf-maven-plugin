@@ -311,6 +311,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @throws InvalidArgumentException if any parameters are invalid.
    */
   protected void validate() {
+    if (protocVersion.equalsIgnoreCase("latest")) {
+      throw new IllegalArgumentException(
+         "Cannot use LATEST for the protoc version. "
+             + "Google has not released linear versions in the past, meaning that "
+             + "using LATEST will have unexpected behaviour."
+      );
+    }
+
     if (binaryPlugins != null) {
       binaryPlugins.forEach(Plugin::validate);
     }
