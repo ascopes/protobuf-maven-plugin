@@ -311,7 +311,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @throws InvalidArgumentException if any parameters are invalid.
    */
   protected void validate() {
-    binaryPlugins.forEach(Plugin::validate);
+    if (binaryPlugins != null) {
+      binaryPlugins.forEach(Plugin::validate);
+    }
 
     // Having .jar on the output directory makes protoc generate a JAR with a
     // Manifest. This will break our logic because generated sources will be
