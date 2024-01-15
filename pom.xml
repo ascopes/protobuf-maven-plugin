@@ -100,7 +100,7 @@
     <junit.version>5.10.1</junit.version>
     <maven-artifact-transfer.version>0.13.1</maven-artifact-transfer.version>
     <maven-core.version>3.9.6</maven-core.version>
-    <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
+    <maven-plugin-annotations.version>3.11.0</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
     <memoryfilesystem.version>2.8.0</memoryfilesystem.version>
     <mockito.version>5.8.0</mockito.version>
