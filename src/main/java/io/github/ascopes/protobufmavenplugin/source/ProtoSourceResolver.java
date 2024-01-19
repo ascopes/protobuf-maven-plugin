@@ -111,7 +111,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
     try (var stream = Files.walk(path)) {
       var protoFiles = stream
           .filter(ProtoFilePredicates::isProtoFile)
-          .peek(protoFile -> log.trace("Found proto file in root {}: {}", path, protoFile))
+          .peek(protoFile -> log.debug("Found proto file in root {}: {}", path, protoFile))
           .collect(Collectors.toUnmodifiableSet());
 
       if (protoFiles.isEmpty()) {

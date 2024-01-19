@@ -73,7 +73,7 @@ public final class ProtoArchiveExtractor {
 
       for (var sourceFile : sourceFiles) {
         var targetFile = changeRelativePath(extractionRoot, vfsRoot, sourceFile);
-        log.trace("Copying {} to {}", sourceFile.toUri(), targetFile);
+        log.debug("Copying {} to {}", sourceFile.toUri(), targetFile);
 
         // We have to do this on each iteration to ensure the directory hierarchy exists.
         Files.createDirectories(targetFile.getParent());
@@ -96,7 +96,7 @@ public final class ProtoArchiveExtractor {
     try (var stream = Files.walk(archiveRootPath)) {
       return stream
           .filter(ProtoFilePredicates::isProtoFile)
-          .peek(protoFile -> log.trace(
+          .peek(protoFile -> log.debug(
               "Found proto file {} in archive {}",
               protoFile.toUri(),
               archiveRootPath

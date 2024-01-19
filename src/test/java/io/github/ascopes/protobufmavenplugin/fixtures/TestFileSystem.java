@@ -56,7 +56,7 @@ public final class TestFileSystem implements Closeable {
     return unchecked(() -> {
       var dir = reduce(root, bits);
       Files.createDirectories(dir);
-      log.trace("Created directory '{}'", dir.toUri());
+      log.debug("Created directory '{}'", dir.toUri());
       return dir;
     });
   }
@@ -70,14 +70,14 @@ public final class TestFileSystem implements Closeable {
       var file = reduce(root, bits);
       Files.createDirectories(file.getParent());
       Files.createFile(file);
-      log.trace("Created file '{}'", file.toUri());
+      log.debug("Created file '{}'", file.toUri());
 
       try {
         changePermissions(file, perms -> {
           perms.clear();
           perms.add(PosixFilePermission.OWNER_READ);
           perms.add(PosixFilePermission.OWNER_WRITE);
-          log.trace("Updated permissions for file '{}'", file.toUri());
+          log.debug("Updated permissions for file '{}'", file.toUri());
         });
       } catch (UnsupportedOperationException ex) {
         // Ignore.

@@ -70,7 +70,7 @@ public final class SystemPathBinaryResolver {
   }
 
   private Predicate<Path> isMatchWindows(String name) {
-    log.trace("Using Windows path matching strategy");
+    log.debug("Using Windows path matching strategy");
     return path -> {
       var matchesName = FileUtils.getFileNameWithoutExtension(path)
           .equalsIgnoreCase(name);
@@ -79,7 +79,7 @@ public final class SystemPathBinaryResolver {
           .filter(hostSystem.getSystemPathExtensions()::contains)
           .isPresent();
 
-      log.trace(
+      log.debug(
           "Matches name = {}, matches executable extension = {}",
           matchesName,
           matchesExtension
@@ -90,12 +90,12 @@ public final class SystemPathBinaryResolver {
   }
 
   private Predicate<Path> isMatchPosix(String name) {
-    log.trace("Using POSIX path matching strategy");
+    log.debug("Using POSIX path matching strategy");
     return path -> {
       var matchesName = path.getFileName().toString().equals(name);
       var matchesExecutableFlag = Files.isExecutable(path);
 
-      log.trace(
+      log.debug(
           "Matches name = {}, matches executable flag = {}",
           matchesName,
           matchesExecutableFlag
