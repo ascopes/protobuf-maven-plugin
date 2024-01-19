@@ -58,7 +58,11 @@ public final class ProtoArchiveExtractor {
   }
 
   public Optional<ProtoFileListing> extractProtoFiles(Path zipPath) throws IOException {
+    // Impl note: unlike other constructors, calling this multiple times on the same path
+    // will open multiple file system objects. Other constructors do not appear to do this,
+    // so would not be thread-safe for concurrent plugin executions.
     try (var vfs = jarFileSystemProvider.newFileSystem(zipPath, Map.of())) {
+
       var vfsRoot = vfs.getRootDirectories().iterator().next();
       var sourceFiles = findProtoFilesInArchive(vfsRoot);
 
