@@ -250,7 +250,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isLiteEnabled(liteOnly)
         .mavenSession(session)
         .outputDirectory(actualOutputDirectory)
-        .protocVersion(protocVersion)
+        .protocVersion(protocVersion())
         .sourceRootRegistrar(sourceRootRegistrar())
         .build();
 
@@ -336,6 +336,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
               "The output directory cannot be a path with a JAR file extension"
           );
         });
+  }
+
+  private String protocVersion() {
+    // Give precedence to overriding the protoc version via the command line
+    // in case the Maven binaries are incompatible with the current system.
+    var overriddenVersion = System.getProperty("protoc.version");
+    if (overriddenVersion != null) {
+      return overriddenVersion;
+    }
+    return protocVersion;
   }
 
   private Collection<Path> parsePaths(@Nullable Collection<String> paths) {
