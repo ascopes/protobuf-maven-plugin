@@ -47,7 +47,9 @@ public class MainGenerateMojo extends AbstractGenerateMojo {
   @Override
   protected Path defaultSourceDirectory(MavenSession session) {
     return session.getCurrentProject().getBasedir().toPath()
-        .resolve("src").resolve("main").resolve("protobuf");
+        .resolve("src")
+        .resolve("main")
+        .resolve("protobuf");
   }
 
   @Override
