@@ -17,6 +17,9 @@ package io.github.ascopes.protobufmavenplugin.system;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -92,7 +97,7 @@ class HostSystemTest {
       "         Windows 11, false",
       "Windows Server 2019, false",
   })
-  @ParameterizedTest(name = ".isProbablyLinux(\"{0}\") returns {1}")
+  @ParameterizedTest(name = "returns {1} on {0}")
   void isProbablyLinuxReturnsTrueIfTheOsIsProbablyLinux(String osName, boolean expectedResult) {
     // Given
     var properties = new Properties();
@@ -133,7 +138,7 @@ class HostSystemTest {
       "         Windows 11, false",
       "Windows Server 2019, false",
   })
-  @ParameterizedTest(name = ".isProbablyMacOs(\"{0}\") returns {1}")
+  @ParameterizedTest(name = "returns {1} on {0}")
   void isProbablyMacOsReturnsTrueIfTheOsIsProbablyMacOs(String osName, boolean expectedResult) {
     // Given
     var properties = new Properties();
@@ -174,7 +179,7 @@ class HostSystemTest {
       "         Windows 11,  true",
       "Windows Server 2019,  true",
   })
-  @ParameterizedTest(name = ".isProbablyWindows(\"{0}\") returns {1}")
+  @ParameterizedTest(name = "returns {1} on {0}")
   void isProbablyWindowsReturnsTrueIfTheOsIsProbablyWindows(String osName, boolean expectedResult) {
     // Given
     var properties = new Properties();
@@ -187,6 +192,31 @@ class HostSystemTest {
 
     // Then
     assertThat(actualResult).isEqualTo(expectedResult);
+  }
+
+  // Avoid non-UNIX path declarations as it messes up our test data.
+  @DisabledOnOs({OS.WINDOWS, OS.OTHER})
+  @DisplayName(".isProbablyAndroidTermux() returns true if running in Termux")
+  @CsvSource({
+      " true, /data/data/com.termux/home,  true",
+      "false, /data/data/com.termux/home, false",
+      " true,          /foo/bar/baz/bork, false",
+  })
+  @ParameterizedTest(name = "expect {2} when isProbablyLinux is {0} and the directory is {1}")
+  void isProbablyAndroidTermuxReturnsTrueIfRunningInTermux(
+      boolean isProbablyLinux,
+      String workingDirectory,
+      boolean expectedResult
+  ) {
+    // Given
+    var hostSystemBean = mock(HostSystem.class);
+    when(hostSystemBean.isProbablyLinux()).thenReturn(isProbablyLinux);
+    when(hostSystemBean.getWorkingDirectory()).thenReturn(Path.of(workingDirectory));
+    when(hostSystemBean.isProbablyAndroidTermux()).thenCallRealMethod();
+
+    // Then
+    assertThat(hostSystemBean.isProbablyAndroidTermux())
+        .isEqualTo(expectedResult);
   }
 
   @DisplayName(".getWorkingDirectory() returns the working directory")

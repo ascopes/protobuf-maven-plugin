@@ -16,11 +16,14 @@
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import io.github.ascopes.protobufmavenplugin.system.FileUtils;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import java.io.IOException;
 import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolver for the {@code protoc} executable.
@@ -29,20 +32,26 @@ import org.apache.maven.execution.MavenSession;
  */
 @Named
 public final class ProtocResolver {
+
   private static final String EXECUTABLE_NAME = "protoc";
   private static final String GROUP_ID = "com.google.protobuf";
   private static final String ARTIFACT_ID = "protoc";
 
+  private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
+
+  private final HostSystem hostSystem;
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final PlatformArtifactFactory platformArtifactFactory;
   private final SystemPathBinaryResolver systemPathResolver;
 
   @Inject
   public ProtocResolver(
+      HostSystem hostSystem,
       MavenDependencyPathResolver mavenDependencyPathResolver,
       PlatformArtifactFactory platformArtifactFactory,
       SystemPathBinaryResolver systemPathResolver
   ) {
+    this.hostSystem = hostSystem;
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.platformArtifactFactory = platformArtifactFactory;
     this.systemPathResolver = systemPathResolver;
@@ -55,6 +64,16 @@ public final class ProtocResolver {
     if (version.equalsIgnoreCase("PATH")) {
       return systemPathResolver.resolve(EXECUTABLE_NAME)
           .orElseThrow(() -> new ResolutionException("No protoc executable was found"));
+    }
+
+    if (hostSystem.isProbablyAndroidTermux()) {
+      log.warn(
+          "It looks like you are using Termux on Android. You may encounter issues "
+              + "running the detected protoc binary from Maven central. If this is "
+              + "an issue, install the protoc compiler manually from your package "
+              + "manager (apt update && apt install protobuf), and then invoke "
+              + "Maven with the -Dprotoc.version=PATH flag to avoid this."
+      );
     }
 
     var coordinate = platformArtifactFactory.createArtifact(
