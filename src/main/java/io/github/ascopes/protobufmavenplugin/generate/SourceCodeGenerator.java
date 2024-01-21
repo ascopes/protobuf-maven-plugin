@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -125,10 +126,7 @@ public final class SourceCodeGenerator {
         .resolveAll(request.getMavenSession(), request.getBinaryPlugins());
     var jvmPlugins = jvmPluginResolver
         .resolveAll(request.getMavenSession(), request.getJvmPlugins());
-
-    var plugins = new ArrayList<ResolvedPlugin>(binaryPlugins);
-    plugins.addAll(jvmPlugins);
-    return plugins;
+    return concat(binaryPlugins, jvmPlugins);
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(
@@ -148,9 +146,7 @@ public final class SourceCodeGenerator {
     var explicitDependencies = protoListingResolver
         .createProtoFileListings(request.getAdditionalImportPaths());
 
-    var allDependencies = new ArrayList<>(inheritedDependencies);
-    allDependencies.addAll(explicitDependencies);
-    return allDependencies;
+    return concat(inheritedDependencies, explicitDependencies);
   }
 
   private Collection<ProtoFileListing> discoverCompilableSources(
@@ -170,5 +166,14 @@ public final class SourceCodeGenerator {
 
     Files.createDirectories(directory);
     registrar.registerSourceRoot(request.getMavenSession(), directory);
+  }
+
+  @SafeVarargs
+  private static <T> List<T> concat(Collection<T>... collections) {
+    var list = new ArrayList<T>();
+    for (var collection : collections) {
+      list.addAll(collection);
+    }
+    return list;
   }
 }
