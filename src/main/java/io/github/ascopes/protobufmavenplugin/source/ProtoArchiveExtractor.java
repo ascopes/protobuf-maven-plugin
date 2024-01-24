@@ -63,8 +63,8 @@ public final class ProtoArchiveExtractor {
         return Optional.empty();
       }
 
-      var uniqueName = Digests.sha1(archive.getFileName().toString());
-      var extractionRoot = extractionBaseDir.resolve(generateUniqueName(uniqueName));
+      var uniqueName = Digests.sha1(zipPath.getFileName().toString());
+      var extractionRoot = extractionBaseDir.resolve(uniqueName);
       Files.createDirectories(extractionRoot);
 
       var targetFiles = new ArrayList<Path>();
