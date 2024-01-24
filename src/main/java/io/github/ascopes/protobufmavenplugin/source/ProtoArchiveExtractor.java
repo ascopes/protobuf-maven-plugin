@@ -16,10 +16,10 @@
 package io.github.ascopes.protobufmavenplugin.source;
 
 import io.github.ascopes.protobufmavenplugin.system.Digests;
+import io.github.ascopes.protobufmavenplugin.system.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -41,17 +41,10 @@ public final class ProtoArchiveExtractor {
 
   private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
 
-  private final FileSystemProvider jarFileSystemProvider;
   private final Path extractionBaseDir;
 
   @Inject
   public ProtoArchiveExtractor(MavenProject mavenProject) {
-    jarFileSystemProvider = FileSystemProvider.installedProviders()
-        .stream()
-        .filter(provider -> provider.getScheme().equalsIgnoreCase("jar"))
-        .findFirst()
-        .orElseThrow();
-
     extractionBaseDir = Path.of(mavenProject.getBuild().getDirectory())
         .resolve("protobuf-maven-plugin")
         .resolve("extracted");
@@ -61,7 +54,7 @@ public final class ProtoArchiveExtractor {
     // Impl note: unlike other constructors, calling this multiple times on the same path
     // will open multiple file system objects. Other constructors do not appear to do this,
     // so would not be thread-safe for concurrent plugin executions.
-    try (var vfs = jarFileSystemProvider.newFileSystem(zipPath, Map.of())) {
+    try (var vfs = FileUtils.getFileSystemProvider("jar").newFileSystem(zipPath, Map.of())) {
 
       var vfsRoot = vfs.getRootDirectories().iterator().next();
       var sourceFiles = findProtoFilesInArchive(vfsRoot);
@@ -70,7 +63,8 @@ public final class ProtoArchiveExtractor {
         return Optional.empty();
       }
 
-      var extractionRoot = extractionBaseDir.resolve(generateUniqueName(zipPath));
+      var uniqueName = Digests.sha1(archive.getFileName().toString());
+      var extractionRoot = extractionBaseDir.resolve(generateUniqueName(uniqueName));
       Files.createDirectories(extractionRoot);
 
       var targetFiles = new ArrayList<Path>();
@@ -107,10 +101,6 @@ public final class ProtoArchiveExtractor {
           ))
           .collect(Collectors.toUnmodifiableList());
     }
-  }
-
-  private String generateUniqueName(Path archive) {
-    return Digests.sha1(archive.getFileName().toString());
   }
 
   private Path changeRelativePath(Path newRoot, Path existingRoot, Path existingPath) {
