@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.execute;
 
+import io.github.ascopes.protobufmavenplugin.system.Shlex;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.List;
@@ -39,7 +40,7 @@ public final class CommandLineExecutor {
   }
 
   public boolean execute(List<String> args) throws IOException {
-    log.info("Calling protoc with the following command line: {}", args);
+    log.info("Calling protoc with the following command line: {}", Shlex.quoteShellArgs(args));
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
