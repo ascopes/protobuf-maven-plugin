@@ -46,7 +46,7 @@ import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
  * @author Ashley Scopes
  */
 @Named
-public class JvmPluginResolver {
+public final class JvmPluginResolver {
 
   private static final Set<String> SCOPES = Set.of("compile", "runtime", "system");
 
