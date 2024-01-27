@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNullElse;
 import io.github.ascopes.protobufmavenplugin.system.Digests;
 import io.github.ascopes.protobufmavenplugin.system.FileUtils;
 import io.github.ascopes.protobufmavenplugin.system.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.Shlex;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -151,38 +152,12 @@ public class JvmPluginResolver {
   ) throws IOException {
     var fullScriptPath = resolvePluginScriptPath().resolve(scriptNamePrefix + ".bat");
 
-    var script = new StringBuilder()
-        .append("@echo off\r\n");
-    for (var arg : argLine) {
-      quoteBatchArg(script, arg);
-      script.append(' ');
-    }
-    script.append("\r\n");
+    var script = "@echo off\r\n"
+        + Shlex.quoteBatchArgs(argLine)
+        + "\r\n";
 
     Files.writeString(fullScriptPath, script, Charset.defaultCharset());
     return fullScriptPath;
-  }
-
-  private void quoteBatchArg(StringBuilder sb, String arg) {
-    for (var i = 0; i < arg.length(); ++i) {
-      var c = arg.charAt(i);
-      switch (c) {
-        case '\\':
-        case '"':
-        case '\'':
-        case ' ':
-        case '\r':
-        case '\t':
-        case '^':
-        case '&':
-        case '<':
-        case '>':
-        case '|':
-          sb.append('^');
-      }
-
-      sb.append(c);
-    }
   }
 
   private Path writeShellScript(
@@ -191,30 +166,13 @@ public class JvmPluginResolver {
   ) throws IOException {
     var fullScriptPath = resolvePluginScriptPath().resolve(scriptNamePrefix + ".sh");
 
-    var script = new StringBuilder()
-        .append("#!/usr/bin/env sh\n")
-        .append("set -eux\n");
-    for (var arg : argLine) {
-      quoteShellArg(script, arg);
-      script.append(' ');
-    }
-    script.append('\n');
+    var script = "#!/usr/bin/env sh\n"
+        + "set -eu\n"
+        + Shlex.quoteShellArgs(argLine)
+        + "\n";
 
     Files.writeString(fullScriptPath, script, Charset.defaultCharset());
     FileUtils.makeExecutable(fullScriptPath);
     return fullScriptPath;
-  }
-
-  private void quoteShellArg(StringBuilder sb, String arg) {
-    sb.append('\'');
-    for (var i = 0; i < arg.length(); ++i) {
-      var c = arg.charAt(i);
-      if (c == '\'') {
-        sb.append("'\"'\"'");
-      } else {
-        sb.append(c);
-      }
-    }
-    sb.append('\'');
   }
 }
