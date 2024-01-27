@@ -86,4 +86,14 @@ public final class FileUtils {
       log.debug("File system does not support setting POSIX file permissions");
     }
   }
+
+  public static Path changeRelativePath(Path newRoot, Path existingRoot, Path existingPath) {
+    var path = newRoot;
+
+    for (var part : existingRoot.relativize(existingPath)) {
+      path = path.resolve(part.toString());
+    }
+
+    return path;
+  }
 }

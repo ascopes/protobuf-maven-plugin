@@ -70,7 +70,7 @@ public final class ProtoArchiveExtractor {
       var targetFiles = new ArrayList<Path>();
 
       for (var sourceFile : sourceFiles) {
-        var targetFile = changeRelativePath(extractionRoot, vfsRoot, sourceFile);
+        var targetFile = FileUtils.changeRelativePath(extractionRoot, vfsRoot, sourceFile);
         log.debug("Copying {} to {}", sourceFile.toUri(), targetFile);
 
         // We have to do this on each iteration to ensure the directory hierarchy exists.
@@ -101,15 +101,5 @@ public final class ProtoArchiveExtractor {
           ))
           .collect(Collectors.toUnmodifiableList());
     }
-  }
-
-  private Path changeRelativePath(Path newRoot, Path existingRoot, Path existingPath) {
-    var path = newRoot;
-
-    for (var part : existingRoot.relativize(existingPath)) {
-      path = path.resolve(part.toString());
-    }
-
-    return path;
   }
 }
