@@ -40,6 +40,11 @@ public final class Shlex {
 
   private static String quote(Iterable<String> args, BiConsumer<StringBuilder, String> quoter) {
     var iter = args.iterator();
+
+    if (!iter.hasNext()) {
+      return "";
+    }
+
     var sb = new StringBuilder();
     quoter.accept(sb, iter.next());
 
