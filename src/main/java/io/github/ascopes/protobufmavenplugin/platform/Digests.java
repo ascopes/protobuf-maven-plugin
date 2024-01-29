@@ -20,21 +20,23 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
+/**
+ * Hashing/digests.
+ *
+ * @author Ashley Scopes
+ */
 public final class Digests {
 
   private Digests() {
     // Static-only class
   }
 
-  public static String sha1(String data) {
-    var digest = createRawDigest("SHA-1", data.getBytes(StandardCharsets.UTF_8));
-    return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
-  }
-
-  private static byte[] createRawDigest(String algorithm, byte[] data) {
+  public static String sha1(String string) {
     try {
-      return MessageDigest.getInstance(algorithm).digest(data);
-    } catch (NoSuchAlgorithmException ex) {
+      var bytes = string.getBytes(StandardCharsets.UTF_8);
+      var digest = MessageDigest.getInstance("SHA-1").digest(bytes);
+      return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+    } catch (Exception ex) {
       throw new IllegalArgumentException(ex.getMessage(), ex);
     }
   }
