@@ -17,10 +17,10 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 
 import static java.util.Objects.requireNonNullElse;
 
-import io.github.ascopes.protobufmavenplugin.system.Digests;
-import io.github.ascopes.protobufmavenplugin.system.FileUtils;
-import io.github.ascopes.protobufmavenplugin.system.HostSystem;
-import io.github.ascopes.protobufmavenplugin.system.Shlex;
+import io.github.ascopes.protobufmavenplugin.platform.Digests;
+import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
+import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
+import io.github.ascopes.protobufmavenplugin.platform.Shlex;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

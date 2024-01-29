@@ -15,8 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.source;
 
-import io.github.ascopes.protobufmavenplugin.system.Digests;
-import io.github.ascopes.protobufmavenplugin.system.FileUtils;
+import io.github.ascopes.protobufmavenplugin.platform.Digests;
+import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

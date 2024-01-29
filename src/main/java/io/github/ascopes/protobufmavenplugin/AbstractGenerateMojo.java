@@ -21,7 +21,7 @@ import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.system.FileUtils;
+import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;

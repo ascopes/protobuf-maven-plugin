@@ -15,8 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.system.FileUtils;
-import io.github.ascopes.protobufmavenplugin.system.HostSystem;
+import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
+import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import java.io.IOException;
 import java.nio.file.Path;
 import javax.inject.Inject;

@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.execute;
 
-import io.github.ascopes.protobufmavenplugin.system.Shlex;
+import io.github.ascopes.protobufmavenplugin.platform.Shlex;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.List;
