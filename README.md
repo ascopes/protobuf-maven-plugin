@@ -63,7 +63,46 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
 Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
 and  examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it).
 
+## Why do we need _another_ plugin?
+
+At the time of starting this project, the two most-used Maven plugins had not seen regular 
+updates/releases for the best part of 3 years. This presented me with an issue in the team I work in,
+as Maven 4.x is slowly approaching, and the existing plugins are not Maven 4.0 compatible. Without
+the guarantee of work being done on the existing projects, there was a big risk that we'd be unable
+to use Maven 4.0 when it is finally released.
+
+Another issue was that some of the existing plugins did not handle Apple Silicon on Apple Macs
+correctly, leading to annoying issues when building.
+
+Finally, the plugin we made use of relied on regular updates to pull in new versions of 
+`protoc`. Since this was not happening, we were losing the benefits from any of the newer versions
+of `protoc` that were released. We were also seeing an increasing number of build warnings due to
+deprecated method calls being made by the older generated code.
+
+Unfortunately, Google appear to mostly use Gradle and Bazel. This means that Maven support has been
+l]eft behind in any innovations and improvements. Right now, the best bet is to use Maven Exec Plugin
+to generate these sources, but then you have to worry about `protoc` being available.
+
+Rather than allowing us to be blocked indefinitely by these issues, I decided to write a new plugin
+from scratch with a focus on simplicity and the ability to work across as many platforms and
+use-cases as possible. 
+
+This plugin can download the required version of `protoc` for your platform automatically from your
+Maven repository. Use Nexus or Artifactory rather than Maven Central? No problem. It will work
+automatically with any Maven proxy.
+
+If you are using an obscure architecture, or an environment like Termux on Android (yes, people do
+exist who do this), then you are able to make use of a user-installed version of `protoc` from your
+system PATH by passing a single flag to Maven. This means you can still build your application.
+
+Additionally, once Maven 4.0 is released, I will be able to update this to a
+Maven 4.0-compatible release as soon as possible.
+
 ## Contributing
 
-Since this is a new project, any contributions are always welcome! This includes contributing integration test cases or reporting issues.
-Any input is greatly appreciated 😊.
+Since this is a new project, any contributions are always welcome! This includes contributing 
+integration test cases or reporting issues. Any input is greatly appreciated.
+
+Additionally, if you use a PowerPC or a S390 IBM mainframe and are interested in helping, please 
+contact me or raise an issue. I am currently looking for people to help test the PPC and S390
+support in this plugin.
