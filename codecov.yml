@@ -1,0 +1,13 @@
+coverage:
+  round: up
+  precision: 2
+
+codecov:
+  require_ci_to_pass: true
+  strict_yaml_branch: main
+
+comment:
+  layout: "diff, flags, files"
+  behavior: default
+  require_changes: true
+
