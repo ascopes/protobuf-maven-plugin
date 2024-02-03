@@ -122,11 +122,13 @@ public final class SourceCodeGenerator {
   private Collection<ResolvedPlugin> discoverPlugins(
       GenerationRequest request
   ) throws IOException, ResolutionException {
-    var binaryPlugins = binaryPluginResolver
-        .resolveAll(request.getMavenSession(), request.getBinaryPlugins());
-    var jvmPlugins = jvmPluginResolver
-        .resolveAll(request.getMavenSession(), request.getJvmPlugins());
-    return concat(binaryPlugins, jvmPlugins);
+    var binaryMavenPlugins = binaryPluginResolver
+        .resolveMavenPlugins(request.getMavenSession(), request.getBinaryMavenPlugins());
+    var binaryPathPlugins = binaryPluginResolver
+        .resolvePathPlugins(request.getBinaryPathPlugins());
+    var jvmMavenPlugins = jvmPluginResolver
+        .resolveMavenPlugins(request.getMavenSession(), request.getJvmMavenPlugins());
+    return concat(binaryMavenPlugins, binaryPathPlugins, jvmMavenPlugins);
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(

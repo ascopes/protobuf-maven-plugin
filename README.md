@@ -9,6 +9,7 @@
 A simple and modern Maven plugin to generate source code from protobuf definitions.
 
 ```xml
+
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
@@ -16,6 +17,22 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
 
   <configuration>
     <protocVersion>3.25.1</protocVersion>
+
+    <binaryMavenPlugins>
+      <binaryMavenPlugin>
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-java</artifactId>
+        <version>${grpc.version}</version>
+      </binaryMavenPlugin>
+    </binaryMavenPlugins>
+
+    <jvmMavenPlugins>
+      <jvmMavenPlugin>
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-java</artifactId>
+        <version>${grpc.version}</version>
+      </jvmMavenPlugin>
+    </jvmMavenPlugins>
   </configuration>
 
   <executions>

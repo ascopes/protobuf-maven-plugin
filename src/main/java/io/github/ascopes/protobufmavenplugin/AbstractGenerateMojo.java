@@ -35,6 +35,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate;
 import org.jspecify.annotations.Nullable;
 
@@ -100,14 +101,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Set<String> additionalImportPaths;
 
   /**
-   * Regular plugins to use with the protobuf compiler.
-   *
-   * <p>Each plugin must be specified with one of:
-   *
-   * <ul>
-   *   <li>An {@code artifact} block that points to a Maven artifact.</li>
-   *   <li>An {@code executableName} block that refers to an executable on the system path.</li>
-   * </ul>
+   * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
    *
    * <p>Plugin artifacts must be a <strong>native binary</strong>. By default, the OS and CPU
    * architecture is automatically generated and injected in the classifier if the classifier
@@ -115,24 +109,34 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>For example:
    * <code><pre>
-   *   &lt;binaryPlugins&gt;
-   *     &lt;binaryPlugin&gt;
-   *       &lt;executableName&gt;protoc-gen-grpc-java&lt;/executableName&gt;
-   *     &lt;/binaryPlugin&gt;
-   *     &lt;binaryPlugin&gt;
-   *       &lt;artifact&gt;
-   *         &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
-   *         &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
-   *         &lt;version&gt;1.2.4&lt;/version&gt;
-   *       &lt;/artifact&gt;
-   *     &lt;/binaryPlugin&gt;
-   *   &lt;/binaryPlugins&gt;
+   *   &lt;binaryMavenPlugins&gt;
+   *     &lt;binaryMavenPlugin&gt;
+   *       &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
+   *       &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
+   *       &lt;version&gt;1.2.4&lt;/version&gt;
+   *     &lt;/binaryMavenPlugin&gt;
+   *   &lt;/binaryMavenPlugins&gt;
    * </pre></code>
    *
-   * @since 0.1.0
+   * @since 0.3.0
    */
   @Parameter
-  private @Nullable Set<Plugin> binaryPlugins;
+  private @Nullable Set<DefaultArtifactCoordinate> binaryMavenPlugins;
+
+  /**
+   * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
+   *
+   * <p>For example:
+   * <code><pre>
+   *   &lt;binaryPathPlugins&gt;
+   *     &lt;binaryPathPlugin&gt;protoc-gen-grpc-java&lt;binaryPathPlugin&gt;
+   *   &lt;/binaryPathPlugins&gt;
+   * </pre></code>
+   *
+   * @since 0.3.0
+   */
+  @Parameter
+  private @Nullable Set<String> binaryPathPlugins;
 
   /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
@@ -142,19 +146,19 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>For example:
    * <code><pre>
-   *   &lt;jvmPlugins&gt;
-   *     &lt;jvmPlugin&gt;
+   *   &lt;jvmMavenPlugins&gt;
+   *     &lt;jvmMavenPlugin&gt;
    *       &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
    *       &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
    *       &lt;version&gt;1.2.4&lt;/version&gt;
-   *     &lt;/jvmPlugin&gt;
-   *   &lt;/jvmPlugins&gt;
+   *     &lt;/jvmMavenPlugin&gt;
+   *   &lt;/jvmMavenPlugins&gt;
    * </pre></code>
    *
    * @since 0.2.0
    */
   @Parameter
-  private @Nullable Set<DefaultDependableCoordinate> jvmPlugins;
+  private @Nullable Set<DefaultDependableCoordinate> jvmMavenPlugins;
 
   /**
    * Override the directory to output generated code to.
@@ -240,8 +244,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
     var request = ImmutableGenerationRequest.builder()
         .addAllAdditionalImportPaths(parsePaths(additionalImportPaths))
-        .addAllBinaryPlugins(requireNonNullElse(binaryPlugins, Set.of()))
-        .addAllJvmPlugins(requireNonNullElse(jvmPlugins, Set.of()))
+        .addAllBinaryMavenPlugins(requireNonNullElse(binaryMavenPlugins, Set.of()))
+        .addAllBinaryPathPlugins(requireNonNullElse(binaryPathPlugins, Set.of()))
+        .addAllJvmMavenPlugins(requireNonNullElse(jvmMavenPlugins, Set.of()))
         .addAllAllowedDependencyScopes(allowedScopes())
         .addAllSourceRoots(actualSourceDirectories)
         .isFatalWarnings(fatalWarnings)
@@ -308,7 +313,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Validate this Mojo's parameters.
    *
-   * @throws InvalidArgumentException if any parameters are invalid.
+   * @throws IllegalArgumentException if any parameters are invalid.
    */
   protected void validate() {
     if (protocVersion.equalsIgnoreCase("latest")) {
@@ -317,10 +322,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
              + "Google has not released linear versions in the past, meaning that "
              + "using LATEST will have unexpected behaviour."
       );
-    }
-
-    if (binaryPlugins != null) {
-      binaryPlugins.forEach(Plugin::validate);
     }
 
     // Having .jar on the output directory makes protoc generate a JAR with a

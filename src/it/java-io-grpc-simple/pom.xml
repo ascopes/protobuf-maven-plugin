@@ -103,15 +103,13 @@
         <version>${plugin-version}</version>
 
         <configuration>
-          <binaryPlugins>
-            <binaryPlugin>
-              <artifact>
-                <groupId>io.grpc</groupId>
-                <artifactId>protoc-gen-grpc-java</artifactId>
-                <version>${grpc.version}</version>
-              </artifact>
-            </binaryPlugin>
-          </binaryPlugins>
+          <binaryMavenPlugins>
+            <binaryMavenPlugin>
+              <groupId>io.grpc</groupId>
+              <artifactId>protoc-gen-grpc-java</artifactId>
+              <version>${grpc.version}</version>
+            </binaryMavenPlugin>
+          </binaryMavenPlugins>
 
           <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
