@@ -302,7 +302,7 @@ Binary plugins are OS-specific executables that are passed to `protoc` directly,
 standard way of handling plugins with `protoc`.
 
 If the plugin you wish to use is on Maven Central or any other Maven repository, you can reference
-that plugin directly via the group ID, artifact ID, and version.
+that plugin directly via the group ID, artifact ID, and version (like any other Maven artifact).
 
 ```xml
 <plugin>
@@ -312,15 +312,13 @@ that plugin directly via the group ID, artifact ID, and version.
 
   <configuration>
     ...
-    <binaryPlugins>
-      <binaryPlugin>
-        <artifact>
-          <groupId>io.grpc</groupId>
-          <artifactId>protoc-gen-grpc-java</artifactId>
-          <version>${grpc.version}</version>
-        </artifact>
-      </binaryPlugin>
-    </binaryPlugins>
+    <binaryMavenPlugins>
+      <binaryMavenPlugin>
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-java</artifactId>
+        <version>${grpc.version}</version>
+      </binaryMavenPlugin>
+    </binaryMavenPlugins>
   </configuration>
 
   ...
@@ -338,25 +336,21 @@ executable name instead:
 
   <configuration>
     ...
-    <binaryPlugins>
-      <binaryPlugin>
-        <executableName>protoc-gen-grpc-java</executableName>
-      </binaryPlugin>
-    </binaryPlugins>
+    <binaryPathPlugins>
+      <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
+    </binaryPathPlugins>
   </configuration>
 
   ...
 </plugin>
 ```
 
-Binary plugin functionality is experimental and subject to change.
-
 ### Pure-Java plugins
 
 If a `protoc` plugin is distributed as a platform-independent JAR archive rather than a native
 executable, you can instruct this Maven plugin to invoke the artifact as part of compilation. To
-do this, simply specify the `jvmPlugins` configuration property, passing in a list of dependencies
-to execute.
+do this, simply specify the `jvmMavenPlugins` configuration property, passing in a list of
+dependencies to execute.
 
 ```xml
 <plugin>
@@ -366,14 +360,14 @@ to execute.
 
   <configuration>
     ...
-    <jvmPlugins>
-      <jvmPlugin>
+    <jvmMavenPlugins>
+      <jvmMavenPlugin>
         <!-- Use the JAR that Salesforce distributes -->
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
-      </jvmPlugin>
-    </jvmPlugins>
+      </jvmMavenPlugin>
+    </jvmMavenPlugins>
   </configuration>
 
   ...
@@ -399,23 +393,19 @@ then you can provide the following:
 
   <configuration>
     ...
-    <binaryPlugins>
-      <binaryPlugin>
-        <artifact>
-          <groupId>io.grpc</groupId>
-          <artifactId>protoc-gen-grpc-java</artifactId>
-          <version>${grpc.version}</version>
-        </artifact>
-      </binaryPlugin>
-      <binaryPlugin>
-        <artifact>
-          <!-- Use the native *.exe that Salesforce distributes -->
-          <groupId>com.salesforce.servicelibs</groupId>
-          <artifactId>reactor-grpc</artifactId>
-          <version>${reactor-grpc.version}</version>
-        </artifact>
-      </binaryPlugin>
-    </binaryPlugins>
+    <binaryMavenPlugins>
+      <binaryMavenPlugin>
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-java</artifactId>
+        <version>${grpc.version}</version>
+      </binaryMavenPlugin>
+      <binaryMavenPlugin>
+        <!-- Use the native *.exe that Salesforce distributes -->
+        <groupId>com.salesforce.servicelibs</groupId>
+        <artifactId>reactor-grpc</artifactId>
+        <version>${reactor-grpc.version}</version>
+      </binaryMavenPlugin>
+    </binaryMavenPlugins>
   </configuration>
 
   ...

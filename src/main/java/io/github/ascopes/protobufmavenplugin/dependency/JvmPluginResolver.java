@@ -65,7 +65,7 @@ public final class JvmPluginResolver {
     this.dependencyPathResolver = dependencyPathResolver;
   }
 
-  public Collection<ResolvedPlugin> resolveAll(
+  public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
       Collection<DependableCoordinate> plugins
   ) throws IOException, ResolutionException {

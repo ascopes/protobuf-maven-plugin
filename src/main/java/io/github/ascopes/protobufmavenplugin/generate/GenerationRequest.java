@@ -15,10 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.Plugin;
 import java.nio.file.Path;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
 import org.immutables.value.Value.Immutable;
 
@@ -32,9 +32,11 @@ public interface GenerationRequest {
 
   Set<Path> getAdditionalImportPaths();
 
-  Set<Plugin> getBinaryPlugins();
+  Set<ArtifactCoordinate> getBinaryMavenPlugins();
 
-  Set<DependableCoordinate> getJvmPlugins();
+  Set<String> getBinaryPathPlugins();
+
+  Set<DependableCoordinate> getJvmMavenPlugins();
 
   Set<String> getAllowedDependencyScopes();
 
