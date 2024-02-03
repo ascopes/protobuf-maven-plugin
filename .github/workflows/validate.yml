@@ -1,0 +1,22 @@
+name: Validate configuration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "**" ]
+  workflow_call: {}
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    name: Validate configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate codecov.yml
+        shell: bash
+        run: curl -vvv --fail --data-binary @- https://codecov.io/validate < codecov.yml

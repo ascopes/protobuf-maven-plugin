@@ -23,12 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate
-        shell: bash
-        run: |-
-          # Validate codecov.yml
-          curl -vvv --fail --data-binary @- https://codecov.io/validate < codecov.yml 
-
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
