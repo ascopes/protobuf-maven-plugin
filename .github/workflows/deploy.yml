@@ -50,10 +50,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install protoc
-        shell: bash
-        run: sudo apt update -q && sudo apt install protocol-buffers -qy
-
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
