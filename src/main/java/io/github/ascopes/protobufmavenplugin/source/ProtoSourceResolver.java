@@ -95,8 +95,10 @@ public final class ProtoSourceResolver implements AutoCloseable {
     }
 
     if (!exceptions.isEmpty()) {
+      var causeIterator = exceptions.iterator();
       var ex = new IOException("Failed to create listings asynchronously");
-      exceptions.forEach(ex::addSuppressed);
+      ex.initCause(causeIterator.next());
+      causeIterator.forEachRemaining(ex::addSuppressed);
       throw ex;
     }
 

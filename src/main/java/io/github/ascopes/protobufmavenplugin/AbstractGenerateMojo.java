@@ -264,7 +264,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         throw new MojoExecutionException("Protoc invocation failed");
       }
     } catch (ResolutionException | IOException ex) {
-      throw new MojoFailureException(this, ex.getMessage(), ex.getMessage());
+      var mojoFailureException = new MojoFailureException(this, ex.getMessage(), ex.getMessage());
+      mojoFailureException.initCause(ex);
+      throw mojoFailureException;
     }
   }
 
