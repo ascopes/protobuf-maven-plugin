@@ -106,6 +106,11 @@ public final class ProtoSourceResolver implements AutoCloseable {
   }
 
   public Optional<ProtoFileListing> createProtoFileListing(Path path) throws IOException {
+    if (!Files.exists(path)) {
+      log.debug("Skipping lookup in path {} as it does not exist", path);
+      return Optional.empty();
+    }
+
     if (Files.isRegularFile(path)) {
       return protoArchiveExtractor.extractProtoFiles(path);
     }
