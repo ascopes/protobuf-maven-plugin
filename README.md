@@ -28,9 +28,9 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
 
     <jvmMavenPlugins>
       <jvmMavenPlugin>
-        <groupId>io.grpc</groupId>
-        <artifactId>protoc-gen-grpc-java</artifactId>
-        <version>${grpc.version}</version>
+        <groupId>com.salesforce.servicelibs</groupId>
+        <artifactId>reactor-grpc</artifactId>
+        <version>${reactor-grpc.version}</version>
       </jvmMavenPlugin>
     </jvmMavenPlugins>
   </configuration>
