@@ -47,6 +47,6 @@ jobs:
         run: ./mvnw -B verify
 
       - name: Publish code coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         continue-on-error: true
         if: always()
