@@ -23,14 +23,23 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Generate source code from protobuf files for use in unit tests.
+ * Generate source code from protobuf files for use in tests.
  *
  * <p>Unlike the {@code generate} goal, these sources will only be visible
  * to tests, and will not be included in any final JAR of the project main
  * sources.
  *
- * <p>Generally, you probably won't need to use this, but it may be useful
- * for some edge cases.
+ * <p>Any project dependencies using the {@code compile}, {@code provided},
+ * {@code system}, or {@code testA} scopes will be made available to import
+ * from protobuf sources.
+ *
+ * <p>By default, sources will be read from {@code src/test/protobuf},
+ * and generated sources will be written to
+ * {@code target/generated-test-sources/protobuf}.
+ *
+ * <p>Generally, you won't need to use this. It can be useful in some more
+ * specific use cases where you are only using the protobuf definitions
+ * within the context of a test.
  *
  * @author Ashley Scopes
  */

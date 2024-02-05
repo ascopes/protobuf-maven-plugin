@@ -93,7 +93,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>These will not be compiled into Java sources directly.
    *
    * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
-   * with the {@code provided} scope instead.
+   * with the {@code provided} or {@code test} scope instead.
    *
    * @since 0.1.0
    */
@@ -103,11 +103,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
    *
-   * <p>Plugin artifacts must be a <strong>native binary</strong>. By default, the OS and CPU
+   * <p>Plugin artifacts must be a <strong>native executable</strong>. By default, the OS and CPU
    * architecture is automatically generated and injected in the classifier if the classifier
    * and type are not provided explicitly.
    *
-   * <p>For example:
+   * <p>For example: <br/>
+   *
    * <code><pre>
    *   &lt;binaryMavenPlugins&gt;
    *     &lt;binaryMavenPlugin&gt;
@@ -118,6 +119,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   &lt;/binaryMavenPlugins&gt;
    * </pre></code>
    *
+   * <p>If you have a Java-based plugin that does not distribute a native
+   * executable, or are using a more obscure system architecture, then using
+   * a {@code jvmMavenPlugin} may be more preferrable.
+   *
    * @since 0.3.0
    */
   @Parameter
@@ -126,7 +131,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
    *
-   * <p>For example:
+   * <p>For example: <br/>
+   *
    * <code><pre>
    *   &lt;binaryPathPlugins&gt;
    *     &lt;binaryPathPlugin&gt;protoc-gen-grpc-java&lt;binaryPathPlugin&gt;
@@ -144,7 +150,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
    * protoc compiler API, and will be provided to the compiler via generated scripts.
    *
-   * <p>For example:
+   * <p>For example: <br/>
+   *
    * <code><pre>
    *   &lt;jvmMavenPlugins&gt;
    *     &lt;jvmMavenPlugin&gt;
@@ -155,7 +162,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   &lt;/jvmMavenPlugins&gt;
    * </pre></code>
    *
-   * @since 0.2.0
+   * <p>This mechanism allows plugin vendors to implement their plugins in
+   * Java and just distribute platform-independent JAR instead.
+   *
+   * <p>Note that support for this is experimental due to the nature of
+   * how this integrates with {@code protoc} itself. If you encounter issues
+   * with executing plugins via this mechanism, please raise a bug report on
+   * <a href="https://github.com/ascopes/protobuf-maven-plugin/issues">GitHub</a>
+   * citing your CPU architecture, OS, and shell.
+   *
+   * @since 0.3.0
    */
   @Parameter
   private @Nullable Set<DefaultDependableCoordinate> jvmMavenPlugins;
@@ -176,7 +192,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Specify that any warnings emitted by {@code protoc} should be treated
    * as errors and fail the build.
    *
-   * <p>Defaults to false.
+   * <p>Defaults to {@code false}.
    *
    * @since 0.0.1
    */
@@ -187,8 +203,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Specify whether to generate default Java sources from the protobuf
    * sources.
    *
-   * <p>Defaults to true, although some users may wish to disable this if using
-   * an alternative plugin that covers this instead.
+   * <p>Defaults to {@code true}, although some users may wish to disable this
+   * if using an alternative plugin that covers generating the code for models instead.
    *
    * @since 0.1.1
    */

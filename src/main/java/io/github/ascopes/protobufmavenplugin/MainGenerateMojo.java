@@ -25,6 +25,17 @@ import org.apache.maven.plugins.annotations.Mojo;
 /**
  * Generate source code from protobuf files.
  *
+ * <p>This treats generated code as being part of the main source set.
+ * For test sources, use the {@code generate-test} goal instead.
+ *
+ * <p>Any project dependencies using the {@code compile}, {@code provided},
+ * or {@code system} scopes will be made available to import from protobuf
+ * sources.
+ *
+ * <p>By default, sources will be read from {@code src/main/protobuf},
+ * and generated sources will be written to
+ * {@code target/generated-sources/protobuf}.
+ *
  * @author Ashley Scopes
  */
 @Mojo(
