@@ -24,7 +24,7 @@
   <version>0.3.2-SNAPSHOT</version>
 
   <name>Protobuf Maven Plugin</name>
-  <description>Maven Plugin that generates source code from protobuf source files.</description>
+  <description>Generates compilable sources from Protobuf definitions.</description>
   <packaging>maven-plugin</packaging>
 
   <prerequisites>
