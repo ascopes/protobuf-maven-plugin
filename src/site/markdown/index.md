@@ -34,6 +34,10 @@ The following sections document basic usage of this plugin for several of the mo
 
 If you need the full reference for a parameters that are allowed, visit the [goals page](plugin-info.html).
 
+## Minimum requirements
+
+You will need to be using Maven 3.8.1 and Java 11 at a minimum.
+
 ## Basic configuration
 
 At the core, this plugin is designed to be fairly simple to use, and will
