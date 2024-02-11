@@ -20,11 +20,21 @@ In addition to generating Java sources, this plugin can also generate Kotlin sou
 Please raise any bugs or feature requests on 
 [the GitHub project for this plugin](https://github.com/ascopes/protobuf-maven-plugin/issues).
 
-# Usage
+# Detailed examples
 
-Detailed usage can be found on the [plugin info (goals) page](plugin-info.html).
+If you need detailed working examples to use as reference, then the [integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it)
+are a great place to start, since they are full working Maven projects.
 
-## The most basic configuration
+If you wish to contribute additional test cases to show integration with custom plugins or more
+complicated use cases, then this is always welcome.
+
+# Usage reference
+
+The following sections document basic usage of this plugin for several of the most popular use cases.
+
+If you need the full reference for a parameters that are allowed, visit the [goals page](plugin-info.html).
+
+## Basic configuration
 
 At the core, this plugin is designed to be fairly simple to use, and will
 attempt to resolve everything that you need automatically. All you need to
@@ -37,7 +47,7 @@ do is provide the version of `protoc` to use.
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>3.25.0</protocVersion>
+    <protocVersion>3.25.1</protocVersion>
   </configuration>
 
   <executions>
@@ -79,7 +89,7 @@ like Dependabot to keep the compiler version up-to-date automatically.
   ...
 
   <properties>
-    <protobuf.version>3.25.0</protobuf.version>
+    <protobuf.version>3.25.1</protobuf.version>
     <protobuf-maven-plugin.version>...</protobuf-maven-plugin.version>
   </properties>
 
@@ -411,11 +421,3 @@ then you can provide the following:
   ...
 </plugin>
 ```
-
-## Further examples
-
-All [integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it) in this 
-plugin take the shape of a working Maven project, so feel free to check them out for more examples.
-
-If you wish to contribute additional test cases to show integration with custom plugins or more
-complicated use cases, then this is always welcome.
