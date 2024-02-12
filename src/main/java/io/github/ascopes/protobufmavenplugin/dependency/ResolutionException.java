@@ -20,7 +20,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
  *
  * @author Ashley Scopes
  */
-public class ResolutionException extends Exception {
+public final class ResolutionException extends Exception {
   public ResolutionException(String message) {
     super(message);
   }

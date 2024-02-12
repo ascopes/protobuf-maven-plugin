@@ -48,7 +48,7 @@ import org.apache.maven.plugins.annotations.Mojo;
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     threadSafe = true
 )
-public class TestGenerateMojo extends AbstractGenerateMojo {
+public final class TestGenerateMojo extends AbstractGenerateMojo {
 
   @Override
   protected SourceRootRegistrar sourceRootRegistrar() {
