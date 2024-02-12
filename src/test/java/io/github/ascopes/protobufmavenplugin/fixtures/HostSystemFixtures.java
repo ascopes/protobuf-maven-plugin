@@ -24,6 +24,8 @@ import org.mockito.quality.Strictness;
 
 /**
  * Fixtures for configuring host system mocks consistently.
+ *
+ * @author Ashley Scopes
  */
 public final class HostSystemFixtures {
 

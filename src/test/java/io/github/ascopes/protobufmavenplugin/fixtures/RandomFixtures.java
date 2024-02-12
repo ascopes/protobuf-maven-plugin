@@ -19,6 +19,8 @@ import java.util.UUID;
 
 /**
  * Random data fixtures.
+ *
+ * @author Ashley Scopes
  */
 public final class RandomFixtures {
 

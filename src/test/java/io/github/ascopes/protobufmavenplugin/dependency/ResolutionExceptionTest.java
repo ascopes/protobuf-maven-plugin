@@ -21,6 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+
+/**
+ * @author Ashley Scopes
+ */
 @DisplayName("ResolutionException tests")
 class ResolutionExceptionTest {
   @DisplayName("I can initialize the exception with a message")
