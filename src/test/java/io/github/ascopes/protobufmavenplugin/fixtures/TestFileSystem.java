@@ -57,6 +57,7 @@ public final class TestFileSystem implements Closeable {
       var dir = reduce(root, bits);
       Files.createDirectories(dir);
       log.debug("Created directory '{}'", dir.toUri());
+      makeOwnerReadWrite(dir);
       return dir;
     });
   }
@@ -71,24 +72,28 @@ public final class TestFileSystem implements Closeable {
       Files.createDirectories(file.getParent());
       Files.createFile(file);
       log.debug("Created file '{}'", file.toUri());
-
-      try {
-        changePermissions(file, perms -> {
-          perms.clear();
-          perms.add(PosixFilePermission.OWNER_READ);
-          perms.add(PosixFilePermission.OWNER_WRITE);
-          log.debug("Updated permissions for file '{}'", file.toUri());
-        });
-      } catch (UnsupportedOperationException ex) {
-        // Ignore.
-      }
-
+      makeOwnerReadWrite(file);
       return file;
     });
   }
 
   public Path givenFileExists(String... bits) {
     return givenFileExists(getRoot(), bits);
+  }
+
+  public Path givenSymbolicLinkExists(Path target, String... bits) {
+    return givenSymbolicLinkExists(target, getRoot(), bits);
+  }
+
+  public Path givenSymbolicLinkExists(Path target, Path root, String... bits) {
+    return unchecked(() -> {
+      var source = reduce(root, bits);
+      Files.createDirectories(source.getParent());
+      Files.createSymbolicLink(source, target);
+      log.debug("Created symlink '{}' pointing to '{}'", source.toUri(), target.toUri());
+      makeOwnerReadWrite(source);
+      return source;
+    });
   }
 
   public void changePermissions(
@@ -103,7 +108,20 @@ public final class TestFileSystem implements Closeable {
     });
   }
 
-  private static Path reduce(Path root, String... bits) {
+  private void makeOwnerReadWrite(Path path) {
+    try {
+      changePermissions(path, perms -> {
+        perms.clear();
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        log.debug("Updated permissions for path '{}'", path.toUri());
+      });
+    } catch (UnsupportedOperationException ex) {
+      // Ignore.
+    }
+  }
+
+  private Path reduce(Path root, String... bits) {
     for (var bit : bits) {
       root = root.resolve(bit);
     }
