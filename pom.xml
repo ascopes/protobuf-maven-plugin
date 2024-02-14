@@ -21,7 +21,7 @@
 
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.3</version>
 
   <name>Protobuf Maven Plugin</name>
   <description>Generates compilable sources from Protobuf definitions.</description>
@@ -89,7 +89,7 @@
     <url>https://github.com/ascopes/protobuf-maven-plugin</url>
     <connection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</connection>
     <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v0.3.3</tag>
   </scm>
 
   <properties>
