@@ -20,6 +20,7 @@ import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -75,7 +76,7 @@ public final class ProtoArchiveExtractor {
 
         // We have to do this on each iteration to ensure the directory hierarchy exists.
         Files.createDirectories(targetFile.getParent());
-        Files.copy(sourceFile, targetFile);
+        Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
         targetFiles.add(targetFile);
       }
 
