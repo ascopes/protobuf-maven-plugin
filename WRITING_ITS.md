@@ -1,4 +1,4 @@
-# Integration Tests
+# Writing Integration Tests
 
 This directory contains Maven Invoker integration tests that will be executed as a nested Maven
 project for each directory within this one. JaCoCo will also be hooked up automatically for you
@@ -32,6 +32,14 @@ The `invoker.goals` can be changed to use any combination of Maven goals.
 
 The `invoker.properties` within this directory is inherited by all projects implicitly for global
 configuration.
+
+## Skipping tests conditionally
+
+If there are certain conditions where the test should not run, you can create a script within the test
+directory named `selector.groovy`. In this script, you can write logic and return `true` or `false`, where
+the former allows the test to run, and the latter results in it being skipped.
+
+Omitting this script will result in the test always being run.
 
 ## Assertions
 
