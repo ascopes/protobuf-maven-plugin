@@ -15,12 +15,19 @@
  */
 
 // Only execute this test if the user has protoc installed on their
-// PATH.
+// PATH and it is successfully executable.
 try {
-  def proc = "protoc --version".execute()
-  proc.waitFor()
-  return true
+  println("Checking if protoc is on the system path...")
+  int exitCode = "protoc --version".execute().waitFor()
+
+  if (exitCode == 0) {
+    println("Protoc is on the path and is executable, proceeding with the test.")
+    return true
+  } else {
+    println("Skipping this test: protoc system binary exited with code ${exitCode}")
+    return false
+  }
 } catch (IOException ex) {
-  println("Skipping this test: ${ex.getMessage()}")
+  println("Skipping this test. ${ex.getClass().getName()}: ${ex.getMessage()}")
   return false
 }
