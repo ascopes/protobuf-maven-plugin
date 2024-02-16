@@ -72,7 +72,7 @@ public final class ProtocResolver {
               + "running the detected protoc binary from Maven central. If this is "
               + "an issue, install the protoc compiler manually from your package "
               + "manager (apt update && apt install protobuf), and then invoke "
-              + "Maven with the -Dprotoc.version=PATH flag to avoid this."
+              + "Maven with the -Dprotoc.version=PATH flag."
       );
     }
 
