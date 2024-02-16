@@ -80,7 +80,8 @@ public final class SystemPathBinaryResolver {
           .isPresent();
 
       log.debug(
-          "Matches name = {}, matches executable extension = {}",
+          "Path '{}' (WINDOWS) matches name = {}, matches executable extension = {}",
+          path,
           matchesName,
           matchesExtension
       );
@@ -96,7 +97,8 @@ public final class SystemPathBinaryResolver {
       var matchesExecutableFlag = Files.isExecutable(path);
 
       log.debug(
-          "Matches name = {}, matches executable flag = {}",
+          "Path '{}' (POSIX) matches name = {}, matches executable flag = {}",
+          path,
           matchesName,
           matchesExecutableFlag
       );
