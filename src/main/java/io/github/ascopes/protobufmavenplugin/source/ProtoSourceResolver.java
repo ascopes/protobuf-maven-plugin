@@ -15,18 +15,24 @@
  */
 package io.github.ascopes.protobufmavenplugin.source;
 
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toSet;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,8 +62,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
 
   @Inject
   public ProtoSourceResolver(ProtoArchiveExtractor protoArchiveExtractor) {
-    var concurrency = Runtime.getRuntime().availableProcessors() * 4;
-
+    var concurrency = Runtime.getRuntime().availableProcessors() * 8;
     this.protoArchiveExtractor = protoArchiveExtractor;
     executorService = Executors.newWorkStealingPool(concurrency);
   }
@@ -70,39 +75,9 @@ public final class ProtoSourceResolver implements AutoCloseable {
     try {
       executorService.awaitTermination(10, TimeUnit.SECONDS);
     } catch (InterruptedException ex) {
+      log.warn("Shutdown was interrupted and will be aborted", ex);
       Thread.currentThread().interrupt();
     }
-  }
-
-  public Collection<ProtoFileListing> createProtoFileListings(
-      Collection<Path> originalPaths
-  ) throws IOException {
-    var futures = new ArrayList<CompletableFuture<Optional<ProtoFileListing>>>();
-
-    for (var originalPath : originalPaths) {
-      futures.add(createProtoFileListingAsync(originalPath));
-    }
-
-    var results = new ArrayList<ProtoFileListing>();
-    var exceptions = new ArrayList<Exception>();
-
-    for (var future : futures) {
-      try {
-        future.get().ifPresent(results::add);
-      } catch (ExecutionException | InterruptedException ex) {
-        exceptions.add(ex);
-      }
-    }
-
-    if (!exceptions.isEmpty()) {
-      var causeIterator = exceptions.iterator();
-      var ex = new IOException("Failed to create listings asynchronously");
-      ex.initCause(causeIterator.next());
-      causeIterator.forEachRemaining(ex::addSuppressed);
-      throw ex;
-    }
-
-    return results;
   }
 
   public Optional<ProtoFileListing> createProtoFileListing(Path path) throws IOException {
@@ -116,37 +91,66 @@ public final class ProtoSourceResolver implements AutoCloseable {
     }
 
     try (var stream = Files.walk(path)) {
-      var protoFiles = stream
+      return stream
           .filter(ProtoFilePredicates::isProtoFile)
           .peek(protoFile -> log.debug("Found proto file in root {}: {}", path, protoFile))
-          .collect(Collectors.toUnmodifiableSet());
-
-      if (protoFiles.isEmpty()) {
-        return Optional.empty();
-      }
-
-      var listing = ImmutableProtoFileListing
-          .builder()
-          .addAllProtoFiles(protoFiles)
-          .protoFilesRoot(path)
-          .originalRoot(path)
-          .build();
-
-      return Optional.of(listing);
+          .collect(collectingAndThen(toSet(), Optional::of))
+          .filter(not(Set::isEmpty))
+          .map(protoFiles -> ImmutableProtoFileListing
+              .builder()
+              .addAllProtoFiles(protoFiles)
+              .protoFilesRoot(path)
+              .originalRoot(path)
+              .build());
     }
   }
 
-  private CompletableFuture<Optional<ProtoFileListing>> createProtoFileListingAsync(
-      Path originalPath
+  public Collection<ProtoFileListing> createProtoFileListings(
+      Collection<Path> originalPaths
+  ) throws IOException {
+    var results = new ArrayList<Optional<ProtoFileListing>>();
+    var exceptions = new ArrayList<Exception>();
+
+    originalPaths
+        .stream()
+        .map(this::submitProtoFileListingTask)
+        .collect(toSet())  // terminal operation to ensure all are scheduled prior to joining.
+        .stream()
+        .forEach(task -> {
+          try {
+            results.add(task.get());
+          } catch (ExecutionException | InterruptedException ex) {
+            exceptions.add(ex);
+          }
+        });
+
+    if (!exceptions.isEmpty()) {
+      var causeIterator = exceptions.iterator();
+      var ex = new IOException("Failed to discover protobuf sources in some locations");
+      ex.initCause(causeIterator.next());
+      causeIterator.forEachRemaining(ex::addSuppressed);
+      throw ex;
+    }
+
+    return results
+        .stream()
+        .flatMap(Optional::stream)
+        .collect(toSet());
+  }
+
+  private FutureTask<Optional<ProtoFileListing>> submitProtoFileListingTask(Path path) {
+    log.debug("Searching for proto files in '{}' asynchronously...", path);
+    var task = new FutureTask<>(() -> createProtoFileListing(path));
+    executorService.submit(task);
+    return task;
+  }
+
+  // Generics are used to keep the signature sensible.
+  private <T> Consumer<FutureTask<T>> partitionResultsForTasks(
+      Collection<T> results,
+      Collection<Exception> exceptions
   ) {
-    var completableFuture = new CompletableFuture<Optional<ProtoFileListing>>();
-    executorService.submit(() -> {
-      try {
-        completableFuture.complete(createProtoFileListing(originalPath));
-      } catch (Exception ex) {
-        completableFuture.completeExceptionally(ex);
-      }
-    });
-    return completableFuture;
+    return task -> {
+    };
   }
 }
