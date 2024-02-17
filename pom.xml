@@ -364,6 +364,7 @@
           <addTestClassPath>true</addTestClassPath>
           <failIfNoProjects>true</failIfNoProjects>
           <postBuildHookScript>test</postBuildHookScript>
+          <settingsFile>src/it/settings.xml</settingsFile>
           <showErrors>true</showErrors>
           <showVersion>true</showVersion>
           <streamLogsOnFailures>true</streamLogsOnFailures>
