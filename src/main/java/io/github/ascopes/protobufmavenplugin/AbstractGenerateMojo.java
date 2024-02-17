@@ -23,6 +23,7 @@ import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -72,6 +73,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
+   * <p>As of v0.4.0, you can also specify a URL that points to:
+   *
+   * <ul>
+   *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
+   *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
+   *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
+   *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
+   * </ul>
+   *
+   * <p><strong>Note that URL support is highly experimental and subject to change or removal
+   * without notice.</strong>
+   *
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
@@ -104,8 +117,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
    *
    * <p>Plugin artifacts must be a <strong>native executable</strong>. By default, the OS and CPU
-   * architecture is automatically generated and injected in the classifier if the classifier
-   * and type are not provided explicitly.
+   * architecture is automatically generated and injected in the classifier if the classifier and
+   * type are not provided explicitly.
    *
    * <p>For example: <br/>
    *
@@ -120,8 +133,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </pre></code>
    *
    * <p>If you have a Java-based plugin that does not distribute a native
-   * executable, or are using a more obscure system architecture, then using
-   * a {@code jvmMavenPlugin} may be more preferrable.
+   * executable, or are using a more obscure system architecture, then using a
+   * {@code jvmMavenPlugin} may be more preferrable.
    *
    * @since 0.3.0
    */
@@ -145,6 +158,34 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Set<String> binaryPathPlugins;
 
   /**
+   * Binary plugins to use with the protobuf compiler, specified as a valid URL.
+   *
+   * <p>This includes support for:
+   *
+   * <ul>
+   *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
+   *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
+   *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
+   *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
+   * </ul>
+   *
+   * <p>For example: <br />
+   *
+   * <code><pre>
+   *   &lt;binaryUrlPlugins&gt;
+   *     &lt;binaryUrlPlugin&gt;ftp://myorganisation.org/protoc/plugins/myplugin.exe&lt;binaryUrlPlugin&gt;
+   *   &lt;/binaryUrlPlugins&gt;
+   * </pre></code>
+   *
+   * <p><strong>Note that this support is highly experimental and subject to change or removal
+   * without notice.</strong>
+   *
+   * @since 0.4.0
+   */
+  @Parameter
+  private @Nullable List<URL> binaryUrlPlugins;
+
+  /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
    *
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
@@ -166,8 +207,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Java and just distribute platform-independent JAR instead.
    *
    * <p>Note that support for this is experimental due to the nature of
-   * how this integrates with {@code protoc} itself. If you encounter issues
-   * with executing plugins via this mechanism, please raise a bug report on
+   * how this integrates with {@code protoc} itself. If you encounter issues with executing plugins
+   * via this mechanism, please raise a bug report on
    * <a href="https://github.com/ascopes/protobuf-maven-plugin/issues">GitHub</a>
    * citing your CPU architecture, OS, and shell.
    *
@@ -180,8 +221,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Override the directory to output generated code to.
    *
    * <p>Leave unspecified or explicitly null to use the default for the
-   * goal. This defaults to the Maven generated sources directory within
-   * {@code target/}.
+   * goal. This defaults to the Maven generated sources directory within {@code target/}.
    *
    * @since 0.1.0
    */
@@ -189,8 +229,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable String outputDirectory;
 
   /**
-   * Specify that any warnings emitted by {@code protoc} should be treated
-   * as errors and fail the build.
+   * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
+   * build.
    *
    * <p>Defaults to {@code false}.
    *
@@ -200,8 +240,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean fatalWarnings;
 
   /**
-   * Specify whether to generate default Java sources from the protobuf
-   * sources.
+   * Specify whether to generate default Java sources from the protobuf sources.
    *
    * <p>Defaults to {@code true}, although some users may wish to disable this
    * if using an alternative plugin that covers generating the code for models instead.
@@ -214,7 +253,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Whether to also generate Kotlin API wrapper code around the generated Java code.
    *
-   * <p>Note that this requires {@code javaEnabled} to also be {@code true}, otherwise compilation may fail.
+   * <p>Note that this requires {@code javaEnabled} to also be {@code true}, otherwise compilation
+   * may fail.
    *
    * @since 0.1.0
    */
@@ -238,16 +278,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Execute the plugin and generate sources.
    *
    * @throws MojoExecutionException if execution fails.
-   * @throws MojoFailureException if an error occurs.
+   * @throws MojoFailureException   if an error occurs.
    */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
       validate();
     } catch (IllegalArgumentException ex) {
-      var newEx = new MojoExecutionException(ex.getMessage());
-      newEx.initCause(ex);
-      throw newEx;
+      throw new MojoExecutionException(ex.getMessage(), ex);
     }
 
     var actualOutputDirectory = outputDirectory == null || outputDirectory.isBlank()
@@ -259,12 +297,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : parsePaths(sourceDirectories);
 
     var request = ImmutableGenerationRequest.builder()
-        .addAllAdditionalImportPaths(parsePaths(additionalImportPaths))
-        .addAllBinaryMavenPlugins(requireNonNullElse(binaryMavenPlugins, Set.of()))
-        .addAllBinaryPathPlugins(requireNonNullElse(binaryPathPlugins, Set.of()))
-        .addAllJvmMavenPlugins(requireNonNullElse(jvmMavenPlugins, Set.of()))
-        .addAllAllowedDependencyScopes(allowedScopes())
-        .addAllSourceRoots(actualSourceDirectories)
+        .additionalImportPaths(parsePaths(additionalImportPaths))
+        .binaryMavenPlugins(requireNonNullElse(binaryMavenPlugins, Set.of()))
+        .binaryPathPlugins(requireNonNullElse(binaryPathPlugins, Set.of()))
+        .binaryUrlPlugins(requireNonNullElse(binaryUrlPlugins, List.of()))
+        .jvmMavenPlugins(requireNonNullElse(jvmMavenPlugins, Set.of()))
+        .allowedDependencyScopes(allowedScopes())
         .isFatalWarnings(fatalWarnings)
         .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)
@@ -273,6 +311,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDirectory(actualOutputDirectory)
         .protocVersion(protocVersion())
         .sourceRootRegistrar(sourceRootRegistrar())
+        .sourceRoots(actualSourceDirectories)
         .build();
 
     try {
@@ -336,9 +375,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   protected void validate() {
     if (protocVersion.equalsIgnoreCase("latest")) {
       throw new IllegalArgumentException(
-         "Cannot use LATEST for the protoc version. "
-             + "Google has not released linear versions in the past, meaning that "
-             + "using LATEST will have unexpected behaviour."
+          "Cannot use LATEST for the protoc version. "
+              + "Google has not released linear versions in the past, meaning that "
+              + "using LATEST will have unexpected behaviour."
       );
     }
 

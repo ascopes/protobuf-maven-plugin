@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependency;
+package org.example.helloworld;
 
-import org.jspecify.annotations.Nullable;
+import io.grpc.stub.StreamObserver;
 
-/**
- * Exception raised if resolution fails.
- *
- * @author Ashley Scopes
- */
-public final class ResolutionException extends Exception {
-  public ResolutionException(String message) {
-    super(message);
-  }
+public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImplBase {
+  @Override
+  public void greet(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
+    var response = GreetingResponse.newBuilder()
+        .setText("Hello, " + request.getName() + "!")
+        .build();
 
-  public ResolutionException(String message, @Nullable Throwable cause) {
-    super(message, cause);
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
   }
 }

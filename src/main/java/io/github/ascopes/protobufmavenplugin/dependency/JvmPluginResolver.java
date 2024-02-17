@@ -67,7 +67,7 @@ public final class JvmPluginResolver {
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
-      Collection<DependableCoordinate> plugins
+      Collection<? extends DependableCoordinate> plugins
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedPlugin>();
     for (var plugin : plugins) {
@@ -139,7 +139,7 @@ public final class JvmPluginResolver {
     return Digests.sha1(digestableString);
   }
 
-  private Path resolvePluginScriptPath() throws IOException {
+  private Path resolvePluginScriptPath() {
     return temporarySpace.createTemporarySpace("plugins", "jvm");
   }
 

@@ -11,3 +11,6 @@ target/
 # Stuff that I generate when I have lost all hope in the world
 /build.log
 temp/
+
+# Version backups after running ./mvnw versions:set
+pom.xml.versionsBackup

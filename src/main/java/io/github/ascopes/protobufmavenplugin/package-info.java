@@ -15,8 +15,10 @@
  */
 @NullMarked
 @Style(
+    deferCollectionAllocation = true,
     headerComments = true,
     jdkOnly = true,
+    jdk9Collections = true,
     optionalAcceptNullable = true,
     validationMethod = ValidationMethod.MANDATORY_ONLY
 )

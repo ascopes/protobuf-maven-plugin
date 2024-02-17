@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.generate;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.inject.Inject;
@@ -42,7 +43,7 @@ public final class TemporarySpace {
     this.mavenProject = mavenProject;
   }
 
-  public Path createTemporarySpace(String... bits) throws IOException {
+  public Path createTemporarySpace(String... bits) {
     var baseDir = Path.of(mavenProject.getBuild().getDirectory()).resolve(FRAG);
 
     var dir = reduce(baseDir, bits);
@@ -50,7 +51,11 @@ public final class TemporarySpace {
 
     // This should be concurrent-safe as it will not break if the directory already exists unless
     // the directory is instead a regular file.
-    return Files.createDirectories(dir);
+    try {
+      return Files.createDirectories(dir);
+    } catch (IOException ex) {
+      throw new UncheckedIOException("Failed to create temporary directory!", ex);
+    }
   }
 
   private Path reduce(Path base, String... bits) {

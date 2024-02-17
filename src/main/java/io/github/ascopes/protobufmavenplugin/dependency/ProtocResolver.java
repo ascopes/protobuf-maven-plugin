@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,18 +44,21 @@ public final class ProtocResolver {
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final PlatformArtifactFactory platformArtifactFactory;
   private final SystemPathBinaryResolver systemPathResolver;
+  private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
   public ProtocResolver(
       HostSystem hostSystem,
       MavenDependencyPathResolver mavenDependencyPathResolver,
       PlatformArtifactFactory platformArtifactFactory,
-      SystemPathBinaryResolver systemPathResolver
+      SystemPathBinaryResolver systemPathResolver,
+      UrlResourceFetcher urlResourceFetcher
   ) {
     this.hostSystem = hostSystem;
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.platformArtifactFactory = platformArtifactFactory;
     this.systemPathResolver = systemPathResolver;
+    this.urlResourceFetcher = urlResourceFetcher;
   }
 
   public Path resolve(
@@ -66,6 +70,28 @@ public final class ProtocResolver {
           .orElseThrow(() -> new ResolutionException("No protoc executable was found"));
     }
 
+    var path = version.contains(":")
+        ? resolveFromUrl(version)
+        : resolveFromMavenRepositories(session, version);
+
+    try {
+      FileUtils.makeExecutable(path);
+    } catch (IOException ex) {
+      throw new ResolutionException("Failed to set executable bit on protoc binary", ex);
+    }
+
+    return path;
+  }
+
+  private Path resolveFromUrl(String url) throws ResolutionException {
+    try {
+      return urlResourceFetcher.fetchFileFromUrl(new URL(url), ".exe");
+    } catch (IOException ex) {
+      throw new ResolutionException(ex.getMessage(), ex);
+    }
+  }
+
+  private Path resolveFromMavenRepositories(MavenSession session, String version) throws ResolutionException {
     if (hostSystem.isProbablyAndroidTermux()) {
       log.warn(
           "It looks like you are using Termux on Android. You may encounter issues "
@@ -84,13 +110,6 @@ public final class ProtocResolver {
         null
     );
 
-    // We only care about the first dependency in this case.
-    try {
-      var path = mavenDependencyPathResolver.resolveArtifact(session, coordinate);
-      FileUtils.makeExecutable(path);
-      return path;
-    } catch (IOException ex) {
-      throw new ResolutionException("Failed to set executable bit on protoc binary", ex);
-    }
+    return mavenDependencyPathResolver.resolveArtifact(session, coordinate);
   }
 }
