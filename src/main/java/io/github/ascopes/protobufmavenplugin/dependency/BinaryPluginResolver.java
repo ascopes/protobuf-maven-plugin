@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,21 +39,24 @@ public final class BinaryPluginResolver {
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final PlatformArtifactFactory platformDependencyFactory;
   private final SystemPathBinaryResolver systemPathResolver;
+  private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
   public BinaryPluginResolver(
       MavenDependencyPathResolver mavenDependencyPathResolver,
       PlatformArtifactFactory platformDependencyFactory,
-      SystemPathBinaryResolver systemPathResolver
+      SystemPathBinaryResolver systemPathResolver,
+      UrlResourceFetcher urlResourceFetcher
   ) {
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.platformDependencyFactory = platformDependencyFactory;
     this.systemPathResolver = systemPathResolver;
+    this.urlResourceFetcher = urlResourceFetcher;
   }
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
-      Collection<ArtifactCoordinate> plugins
+      Collection<? extends ArtifactCoordinate> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, plugin -> resolveMavenPlugin(session, plugin));
   }
@@ -61,6 +65,12 @@ public final class BinaryPluginResolver {
       Collection<String> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolvePathPlugin);
+  }
+
+  public Collection<ResolvedPlugin> resolveUrlPlugins(
+      Collection<URL> plugins
+  ) throws ResolutionException {
+    return resolveAll(plugins, this::resolveUrlPlugin);
   }
 
   private ResolvedPlugin resolveMavenPlugin(
@@ -84,19 +94,21 @@ public final class BinaryPluginResolver {
         plugin.getClassifier()
     );
 
-    try {
-      var path = mavenDependencyPathResolver.resolveArtifact(session, plugin);
-      FileUtils.makeExecutable(path);
-      return createResolvedPlugin(path);
-    } catch (IOException ex) {
-      throw new ResolutionException("Failed to set executable bit on protoc plugin", ex);
-    }
+    var path = mavenDependencyPathResolver.resolveArtifact(session, plugin);
+    makeExecutable(path);
+    return createResolvedPlugin(path);
   }
 
   private ResolvedPlugin resolvePathPlugin(String binaryName) throws ResolutionException {
     var path = systemPathResolver.resolve(binaryName)
         .orElseThrow(() -> new ResolutionException("No executable '"
             + binaryName + "' was found on the system path"));
+    return createResolvedPlugin(path);
+  }
+
+  private ResolvedPlugin resolveUrlPlugin(URL url) throws ResolutionException {
+    var path = urlResourceFetcher.fetchFileFromUrl(url, ".exe");
+    makeExecutable(path);
     return createResolvedPlugin(path);
   }
 
@@ -117,6 +129,14 @@ public final class BinaryPluginResolver {
       resolvedPlugins.add(resolver.resolve(plugin));
     }
     return Collections.unmodifiableCollection(resolvedPlugins);
+  }
+
+  private void makeExecutable(Path path) throws ResolutionException {
+    try {
+      FileUtils.makeExecutable(path);
+    } catch (IOException ex) {
+      throw new ResolutionException("Failed to set executable bit on protoc plugin", ex);
+    }
   }
 
   @FunctionalInterface

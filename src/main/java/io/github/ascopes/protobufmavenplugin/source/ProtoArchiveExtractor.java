@@ -78,9 +78,9 @@ public final class ProtoArchiveExtractor {
 
       var listing = ImmutableProtoFileListing
           .builder()
+          .addAllProtoFiles(targetFiles)
           .originalRoot(zipPath)
           .protoFilesRoot(extractionRoot)
-          .protoFiles(targetFiles)
           .build();
 
       return Optional.of(listing);
@@ -100,7 +100,7 @@ public final class ProtoArchiveExtractor {
     }
   }
 
-  private Path getExtractionRoot() throws IOException {
+  private Path getExtractionRoot() {
     return temporarySpace.createTemporarySpace("dependencies");
   }
 

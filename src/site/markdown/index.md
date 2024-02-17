@@ -286,7 +286,9 @@ as you usually do not need to worry about this.
 </plugin>
 ```
 
-## Using protoc from your system path
+## Customising the source for `protoc`
+
+### Using protoc from your system path
 
 If you need to use the version of `protoc` that is installed on your system, specify the version
 as `PATH`.
@@ -305,6 +307,49 @@ as `PATH`.
 </plugin>
 ```
 
+### Using protoc from a specific path
+
+You may wish to run `protoc` from a specific path on your file system. If you need to do this,
+you can provide a URL with the `file` scheme to reference it:
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    <protocVersion>file:///opt/protoc/protoc.exe</protocVersion>
+  </configuration>
+</plugin>
+```
+
+### Using protoc from a remote server
+
+If you have a `protoc` binary on a remote FTP or HTTP(S) server, you can provide the URL to download
+directly:
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    <protocVersion>ftp://company-server.internal/protoc/protoc.exe</protocVersion>
+    <!-- or -->
+    <protocVersion>http://company-server.internal/protoc/protoc.exe</protocVersion>
+    <!-- or -->
+    <protocVersion>https://company-server.internal/protoc/protoc.exe</protocVersion>
+  </configuration>
+</plugin>
+```
+
+This is not recommended outside specific use cases, and care should be taken to ensure the
+legitimacy and security of any URLs being provided prior to adding them.
+
+Providing authentication details is not supported at this time.
+
 ## Additional plugins
 
 If you wish to generate GRPC stubs, or outputs for other languages like Scala that are not already
@@ -314,6 +359,8 @@ covered by the protoc executable, you can add custom plugins to your build.
 
 Binary plugins are OS-specific executables that are passed to `protoc` directly, and are the 
 standard way of handling plugins with `protoc`.
+
+#### Binary plugins from Maven Central
 
 If the plugin you wish to use is on Maven Central or any other Maven repository, you can reference
 that plugin directly via the group ID, artifact ID, and version (like any other Maven artifact).
@@ -339,6 +386,8 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
 </plugin>
 ```
 
+#### Binary plugins from the system path
+
 If you instead wish to read the executable from the system `$PATH`, then you can specify an
 executable name instead:
 
@@ -358,6 +407,35 @@ executable name instead:
   ...
 </plugin>
 ```
+
+#### Binary plugins from specific locations
+
+In some situations, you may wish to download plugins directly from a URL or run them from a 
+specific file system path:
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>...</version>
+
+  <configuration>
+    ...
+    <binaryUrlPlugins>
+      <binaryUrlPlugin>file:///opt/protoc/protoc-gen-grpc-java</binaryUrlPlugin>
+      <binaryUrlPlugin>ftp://company-server.internal/some-other-plugin.exe</binaryUrlPlugin>
+      <binaryUrlPlugin>https://some-website.net/downloads/my-cool-protoc-plugin.exe</binaryUrlPlugin>
+    </binaryUrlPlugins>
+  </configuration>
+
+  ...
+</plugin>
+```
+
+This is not recommended outside specific use cases, and care should be taken to ensure the
+legitimacy and security of any URLs being provided prior to adding them.
+
+Providing authentication details is not supported at this time.
 
 ### Pure-Java plugins
 

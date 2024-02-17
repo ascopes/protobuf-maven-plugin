@@ -15,7 +15,9 @@
  */
 package io.github.ascopes.protobufmavenplugin.generate;
 
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
@@ -30,13 +32,15 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface GenerationRequest {
 
-  Set<Path> getAdditionalImportPaths();
+  Collection<Path> getAdditionalImportPaths();
 
-  Set<ArtifactCoordinate> getBinaryMavenPlugins();
+  Collection<? extends ArtifactCoordinate> getBinaryMavenPlugins();
 
-  Set<String> getBinaryPathPlugins();
+  Collection<String> getBinaryPathPlugins();
 
-  Set<DependableCoordinate> getJvmMavenPlugins();
+  Collection<URL> getBinaryUrlPlugins();
+
+  Collection<? extends DependableCoordinate> getJvmMavenPlugins();
 
   Set<String> getAllowedDependencyScopes();
 
@@ -46,7 +50,7 @@ public interface GenerationRequest {
 
   String getProtocVersion();
 
-  Set<Path> getSourceRoots();
+  Collection<Path> getSourceRoots();
 
   SourceRootRegistrar getSourceRootRegistrar();
 

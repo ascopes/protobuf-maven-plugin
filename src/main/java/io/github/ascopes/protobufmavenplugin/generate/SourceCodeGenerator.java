@@ -38,7 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generator for source code.
+ * Orchestrates all moving parts in this plugin, collecting all relevant information and
+ * depenencies to pass to an invocation of {@code protoc}.
  *
  * <p>Orchestrates all other components.
  *
@@ -122,13 +123,16 @@ public final class SourceCodeGenerator {
   private Collection<ResolvedPlugin> discoverPlugins(
       GenerationRequest request
   ) throws IOException, ResolutionException {
-    var binaryMavenPlugins = binaryPluginResolver
-        .resolveMavenPlugins(request.getMavenSession(), request.getBinaryMavenPlugins());
-    var binaryPathPlugins = binaryPluginResolver
-        .resolvePathPlugins(request.getBinaryPathPlugins());
-    var jvmMavenPlugins = jvmPluginResolver
-        .resolveMavenPlugins(request.getMavenSession(), request.getJvmMavenPlugins());
-    return concat(binaryMavenPlugins, binaryPathPlugins, jvmMavenPlugins);
+    return concat(
+        binaryPluginResolver
+            .resolveMavenPlugins(request.getMavenSession(), request.getBinaryMavenPlugins()),
+        binaryPluginResolver
+            .resolvePathPlugins(request.getBinaryPathPlugins()),
+        binaryPluginResolver
+            .resolveUrlPlugins(request.getBinaryUrlPlugins()),
+        jvmPluginResolver
+            .resolveMavenPlugins(request.getMavenSession(), request.getJvmMavenPlugins())
+    );
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(

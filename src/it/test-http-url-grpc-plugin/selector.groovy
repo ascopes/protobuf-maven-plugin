@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependency;
 
-import org.jspecify.annotations.Nullable;
-
-/**
- * Exception raised if resolution fails.
- *
- * @author Ashley Scopes
- */
-public final class ResolutionException extends Exception {
-  public ResolutionException(String message) {
-    super(message);
+// Only execute on x86 Linux systems, as the URL we test against is CPU and OS specific.
+if (System.getProperty("os.name").equalsIgnoreCase("Linux")) {
+  if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) {
+    println("This system is Linux and x86_64, running this test case...")
+    return true
+  } else {
+    println("Skipping this test case as the system is not x86_64")
+    return false
   }
-
-  public ResolutionException(String message, @Nullable Throwable cause) {
-    super(message, cause);
-  }
+} else {
+  println("Not running this test as this is not a Linux system...")
+  return false
 }
