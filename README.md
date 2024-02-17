@@ -16,7 +16,7 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>3.25.1</protocVersion>
+    <protocVersion>3.25.3</protocVersion>
 
     <binaryMavenPlugins>
       <binaryMavenPlugin>
