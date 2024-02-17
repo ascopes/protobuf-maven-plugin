@@ -15,13 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependency;
 
+import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -103,7 +103,7 @@ public final class BinaryPluginResolver {
   private ResolvedPlugin createResolvedPlugin(Path path) {
     return ImmutableResolvedPlugin
         .builder()
-        .id(UUID.randomUUID().toString())
+        .id(Digests.sha1(path.toString()))
         .path(path)
         .build();
   }
@@ -113,11 +113,9 @@ public final class BinaryPluginResolver {
       Resolver<A> resolver
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedPlugin>();
-
     for (var plugin : plugins) {
       resolvedPlugins.add(resolver.resolve(plugin));
     }
-
     return Collections.unmodifiableCollection(resolvedPlugins);
   }
 
