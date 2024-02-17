@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.source;
 
+import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +41,11 @@ import org.slf4j.LoggerFactory;
 public final class ProtoArchiveExtractor {
 
   private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
-
-  private final Path extractionBaseDir;
+  private final TemporarySpace temporarySpace;
 
   @Inject
-  public ProtoArchiveExtractor(MavenProject mavenProject) {
-    extractionBaseDir = Path.of(mavenProject.getBuild().getDirectory())
-        .resolve("protobuf-maven-plugin")
-        .resolve("extracted");
+  public ProtoArchiveExtractor(TemporarySpace temporarySpace) {
+    this.temporarySpace = temporarySpace;
   }
 
   public Optional<ProtoFileListing> extractProtoFiles(Path zipPath) throws IOException {
@@ -64,8 +61,7 @@ public final class ProtoArchiveExtractor {
         return Optional.empty();
       }
 
-      var uniqueName = Digests.sha1(zipPath.getFileName().toString());
-      var extractionRoot = extractionBaseDir.resolve(uniqueName);
+      var extractionRoot = getExtractionRoot().resolve(generateUniqueName(zipPath));
       Files.createDirectories(extractionRoot);
 
       var targetFiles = new ArrayList<Path>();
@@ -102,5 +98,14 @@ public final class ProtoArchiveExtractor {
           ))
           .collect(Collectors.toUnmodifiableList());
     }
+  }
+
+  private Path getExtractionRoot() throws IOException {
+    return temporarySpace.createTemporarySpace("dependencies");
+  }
+
+  private String generateUniqueName(Path path) {
+    var digest = Digests.sha1(path.toAbsolutePath().toString());
+    return FileUtils.getFileNameWithoutExtension(path) + "-" + digest;
   }
 }

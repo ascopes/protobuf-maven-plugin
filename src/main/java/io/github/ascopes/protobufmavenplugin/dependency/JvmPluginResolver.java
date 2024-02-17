@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 
 import static java.util.Objects.requireNonNullElse;
 
+import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
@@ -33,7 +34,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
 
 /**
@@ -50,19 +50,19 @@ public final class JvmPluginResolver {
 
   private static final Set<String> SCOPES = Set.of("compile", "runtime", "system");
 
-  private final MavenProject mavenProject;
   private final HostSystem hostSystem;
   private final MavenDependencyPathResolver dependencyPathResolver;
+  private final TemporarySpace temporarySpace;
 
   @Inject
   public JvmPluginResolver(
-      MavenProject mavenProject,
       HostSystem hostSystem,
-      MavenDependencyPathResolver dependencyPathResolver
+      MavenDependencyPathResolver dependencyPathResolver,
+      TemporarySpace temporarySpace
   ) {
-    this.mavenProject = mavenProject;
     this.hostSystem = hostSystem;
     this.dependencyPathResolver = dependencyPathResolver;
+    this.temporarySpace = temporarySpace;
   }
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
@@ -140,10 +140,7 @@ public final class JvmPluginResolver {
   }
 
   private Path resolvePluginScriptPath() throws IOException {
-    var path = Path.of(mavenProject.getBuild().getDirectory())
-        .resolve("protobuf-maven-plugin")
-        .resolve("jvm-plugins");
-    return Files.createDirectories(path);
+    return temporarySpace.createTemporarySpace("plugins", "jvm");
   }
 
   private Path writeWindowsBatchScript(
