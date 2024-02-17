@@ -64,7 +64,7 @@ public final class UrlResourceFetcher {
   }
 
   public Path fetchFileFromUrl(URL url, String defaultExtension) throws ResolutionException {
-    switch (url.getAuthority().toLowerCase()) {
+    switch (url.getProtocol().toLowerCase()) {
       case "file":
         return handleFileSystemUrl(url);
       case "http":
