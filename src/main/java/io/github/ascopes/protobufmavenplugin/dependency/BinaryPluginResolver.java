@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -53,39 +54,43 @@ public final class BinaryPluginResolver {
       MavenSession session,
       Collection<ArtifactCoordinate> plugins
   ) throws ResolutionException {
-    var resolvedPlugins = new ArrayList<ResolvedPlugin>();
+    return resolveAll(plugins, plugin -> resolveMavenPlugin(session, plugin));
+  }
 
-    for (var plugin : plugins) {
-      resolvedPlugins.add(resolveMavenPlugin(session, plugin));
-    }
-
-    return resolvedPlugins;
+  public Collection<ResolvedPlugin> resolvePathPlugins(
+      Collection<String> plugins
+  ) throws ResolutionException {
+    return resolveAll(plugins, this::resolvePathPlugin);
   }
 
   private ResolvedPlugin resolveMavenPlugin(
       MavenSession session,
       ArtifactCoordinate plugin
   ) throws ResolutionException {
-    var coordinate = enrich(plugin);
+    // The ArtifactCoordinate API defaults to setting 'jar' on artifacts if unspecified or
+    // explicitly null. We do not want this behaviour. Instead, we want the default to be whatever
+    // the platform dependency factory thinks is most appropriate based on the platform, etc.
+    // Therefore, if we see we have a JAR, explicitly pass `null` into the factory to override this.
+    var extension = plugin.getExtension().equals("jar")
+        ? null
+        : plugin.getExtension();
+
+    // Fill out the missing fields.
+    plugin = platformDependencyFactory.createArtifact(
+        plugin.getGroupId(),
+        plugin.getArtifactId(),
+        plugin.getVersion(),
+        extension,
+        plugin.getClassifier()
+    );
+
     try {
-      var path = mavenDependencyPathResolver.resolveArtifact(session, coordinate);
+      var path = mavenDependencyPathResolver.resolveArtifact(session, plugin);
       FileUtils.makeExecutable(path);
       return createResolvedPlugin(path);
     } catch (IOException ex) {
       throw new ResolutionException("Failed to set executable bit on protoc plugin", ex);
     }
-  }
-
-  public Collection<ResolvedPlugin> resolvePathPlugins(
-      Collection<String> plugins
-  ) throws ResolutionException {
-    var resolvedPlugins = new ArrayList<ResolvedPlugin>();
-
-    for (var plugin : plugins) {
-      resolvedPlugins.add(resolvePathPlugin(plugin));
-    }
-
-    return resolvedPlugins;
   }
 
   private ResolvedPlugin resolvePathPlugin(String binaryName) throws ResolutionException {
@@ -103,21 +108,22 @@ public final class BinaryPluginResolver {
         .build();
   }
 
-  private ArtifactCoordinate enrich(ArtifactCoordinate coordinate) {
-    // If the extension is null, then Maven treats this as a JAR by default, which is
-    // annoying and the opposite of what we actually want to happen. If we pass a JAR
-    // here, then explicitly swap it out with null as this is *never* what we want to
-    // happen here.
-    var extension = coordinate.getExtension().equals("jar")
-        ? null
-        : coordinate.getExtension();
+  private <A> Collection<ResolvedPlugin> resolveAll(
+      Collection<A> plugins,
+      Resolver<A> resolver
+  ) throws ResolutionException {
+    var resolvedPlugins = new ArrayList<ResolvedPlugin>();
 
-    return platformDependencyFactory.createArtifact(
-        coordinate.getGroupId(),
-        coordinate.getArtifactId(),
-        coordinate.getVersion(),
-        extension,
-        coordinate.getClassifier()
-    );
+    for (var plugin : plugins) {
+      resolvedPlugins.add(resolver.resolve(plugin));
+    }
+
+    return Collections.unmodifiableCollection(resolvedPlugins);
+  }
+
+  @FunctionalInterface
+  private interface Resolver<A> {
+
+    ResolvedPlugin resolve(A arg) throws ResolutionException;
   }
 }
