@@ -28,10 +28,10 @@ import io.github.ascopes.protobufmavenplugin.source.ProtoSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public final class SourceCodeGenerator {
         .stream()
         .map(ProtoFileListing::getProtoFiles)
         .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableSet());
+        .collect(Collectors.toSet());
 
     return commandLineExecutor.execute(argLineBuilder.compile(sourceFiles));
   }
@@ -175,11 +175,10 @@ public final class SourceCodeGenerator {
   }
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   private static <T> List<T> concat(Collection<T>... collections) {
-    var list = new ArrayList<T>();
-    for (var collection : collections) {
-      list.addAll(collection);
-    }
-    return list;
+    return Stream.of(collections)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
   }
 }
