@@ -95,7 +95,7 @@ public final class SourceCodeGenerator {
         .importPaths(importPaths
             .stream()
             .map(ProtoFileListing::getProtoFilesRoot)
-            .collect(Collectors.toUnmodifiableSet()))
+            .collect(Collectors.toSet()))
         .importPaths(request.getSourceRoots())
         .plugins(plugins, request.getOutputDirectory());
 
