@@ -23,7 +23,7 @@ import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import io.github.ascopes.protobufmavenplugin.platform.Shlex;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -153,8 +153,7 @@ public final class JvmPluginResolver {
         + Shlex.quoteBatchArgs(argLine)
         + "\r\n";
 
-    // TODO: verify correct encoding to use here.
-    Files.writeString(fullScriptPath, script, Charset.defaultCharset());
+    Files.writeString(fullScriptPath, script, StandardCharsets.ISO_8859_1);
     return fullScriptPath;
   }
 
@@ -169,8 +168,7 @@ public final class JvmPluginResolver {
         + Shlex.quoteShellArgs(argLine)
         + "\n";
 
-    // TODO: verify correct encoding to use here.
-    Files.writeString(fullScriptPath, script, Charset.defaultCharset());
+    Files.writeString(fullScriptPath, script, StandardCharsets.UTF_8);
     FileUtils.makeExecutable(fullScriptPath);
     return fullScriptPath;
   }
