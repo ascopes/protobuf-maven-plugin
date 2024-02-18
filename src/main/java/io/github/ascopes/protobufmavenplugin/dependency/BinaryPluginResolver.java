@@ -22,7 +22,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -128,7 +127,7 @@ public final class BinaryPluginResolver {
     for (var plugin : plugins) {
       resolvedPlugins.add(resolver.resolve(plugin));
     }
-    return Collections.unmodifiableCollection(resolvedPlugins);
+    return resolvedPlugins;
   }
 
   private void makeExecutable(Path path) throws ResolutionException {

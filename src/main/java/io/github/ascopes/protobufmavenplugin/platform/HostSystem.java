@@ -64,14 +64,11 @@ public final class HostSystem {
             .map(FileUtils::normalize)
             .distinct()
             .filter(Files::isDirectory)
-            .collect(Collectors.toUnmodifiableList()));
+            .collect(Collectors.toList()));
     pathExt = tokenizeFilePath(
         environmentVariables.getOrDefault("PATHEXT", ""),
         extensions -> extensions
-            .collect(Collectors.collectingAndThen(
-                Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
-                Collections::unmodifiableSortedSet
-            )));
+            .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
   }
 
   public String getOperatingSystem() {
