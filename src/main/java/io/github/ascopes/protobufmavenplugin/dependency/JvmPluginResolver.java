@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -80,19 +79,19 @@ public final class JvmPluginResolver {
       MavenSession session,
       DependableCoordinate plugin
   ) throws IOException, ResolutionException {
-    var scriptNamePrefix = pluginIdDigest(plugin);
+    var pluginId = pluginIdDigest(plugin);
     var argLine = resolveAndBuildArgLine(session, plugin);
 
     Path scriptPath;
     if (hostSystem.isProbablyWindows()) {
-      scriptPath = writeWindowsBatchScript(scriptNamePrefix, argLine);
+      scriptPath = writeWindowsBatchScript(pluginId, argLine);
     } else {
-      scriptPath = writeShellScript(scriptNamePrefix, argLine);
+      scriptPath = writeShellScript(pluginId, argLine);
     }
 
     return ImmutableResolvedPlugin
         .builder()
-        .id(UUID.randomUUID().toString())
+        .id(pluginId)
         .path(scriptPath)
         .build();
   }
@@ -107,7 +106,8 @@ public final class JvmPluginResolver {
         .resolveDependencyTreePaths(session, SCOPES, pluginDependencyCoordinate)
         .iterator();
 
-    // First dependency is always the thing we actually want to execute.
+    // First dependency is always the thing we actually want to execute,
+    // so is guaranteed to be present.
     var args = new ArrayList<String>();
     args.add("java");
     args.add("-jar");
@@ -144,30 +144,32 @@ public final class JvmPluginResolver {
   }
 
   private Path writeWindowsBatchScript(
-      String scriptNamePrefix,
+      String pluginId,
       List<String> argLine
   ) throws IOException {
-    var fullScriptPath = resolvePluginScriptPath().resolve(scriptNamePrefix + ".bat");
+    var fullScriptPath = resolvePluginScriptPath().resolve(pluginId + ".bat");
 
     var script = "@echo off\r\n"
         + Shlex.quoteBatchArgs(argLine)
         + "\r\n";
 
+    // TODO: verify correct encoding to use here.
     Files.writeString(fullScriptPath, script, Charset.defaultCharset());
     return fullScriptPath;
   }
 
   private Path writeShellScript(
-      String scriptNamePrefix,
+      String pluginId,
       List<String> argLine
   ) throws IOException {
-    var fullScriptPath = resolvePluginScriptPath().resolve(scriptNamePrefix + ".sh");
+    var fullScriptPath = resolvePluginScriptPath().resolve(pluginId + ".sh");
 
     var script = "#!/usr/bin/env sh\n"
         + "set -eu\n"
         + Shlex.quoteShellArgs(argLine)
         + "\n";
 
+    // TODO: verify correct encoding to use here.
     Files.writeString(fullScriptPath, script, Charset.defaultCharset());
     FileUtils.makeExecutable(fullScriptPath);
     return fullScriptPath;
