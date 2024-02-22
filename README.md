@@ -80,8 +80,8 @@ of `protoc` that were released. We were also seeing an increasing number of buil
 deprecated method calls being made by the older generated code.
 
 Unfortunately, Google appear to mostly use Gradle and Bazel. This means that Maven support has been
-l]eft behind in any innovations and improvements. Right now, the best bet is to use Maven Exec Plugin
-to generate these sources, but then you have to worry about `protoc` being available.
+left behind in any innovations and improvements. Right now, the best bet is to use Maven Exec Plugin
+to generate these sources, but then you have to worry about how uou make the `protoc` binary available.
 
 Rather than allowing us to be blocked indefinitely by these issues, I decided to write a new plugin
 from scratch with a focus on simplicity and the ability to work across as many platforms and
