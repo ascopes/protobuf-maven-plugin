@@ -355,7 +355,6 @@
 
       <plugin>
         <!-- Runs integration tests. -->
-        <!-- See documentation at https://maven.apache.org/plugins/maven-invoker-plugin/integration-test-mojo.html -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
         <version>${maven-invoker-plugin.version}</version>
@@ -368,6 +367,7 @@
           <settingsFile>src/it/settings.xml</settingsFile>
           <showErrors>true</showErrors>
           <showVersion>true</showVersion>
+          <streamLogs>true</streamLogs>
           <streamLogsOnFailures>true</streamLogsOnFailures>
           <writeJunitReport>true</writeJunitReport>
         </configuration>
