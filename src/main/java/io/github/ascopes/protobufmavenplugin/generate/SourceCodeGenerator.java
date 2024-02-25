@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -95,7 +96,7 @@ public final class SourceCodeGenerator {
         .importPaths(importPaths
             .stream()
             .map(ProtoFileListing::getProtoFilesRoot)
-            .collect(Collectors.toSet()))
+            .collect(Collectors.toCollection(LinkedHashSet::new)))
         .importPaths(request.getSourceRoots())
         .plugins(plugins, request.getOutputDirectory());
 
@@ -111,7 +112,7 @@ public final class SourceCodeGenerator {
         .stream()
         .map(ProtoFileListing::getProtoFiles)
         .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
 
     return commandLineExecutor.execute(argLineBuilder.compile(sourceFiles));
   }

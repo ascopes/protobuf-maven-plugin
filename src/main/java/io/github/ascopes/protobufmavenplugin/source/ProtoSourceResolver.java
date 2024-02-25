@@ -16,14 +16,13 @@
 package io.github.ascopes.protobufmavenplugin.source;
 
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -33,6 +32,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -94,7 +94,10 @@ public final class ProtoSourceResolver implements AutoCloseable {
       return stream
           .filter(ProtoFilePredicates::isProtoFile)
           .peek(protoFile -> log.debug("Found proto file in root {}: {}", path, protoFile))
-          .collect(collectingAndThen(toSet(), Optional::of))
+          .collect(Collectors.collectingAndThen(
+              Collectors.toCollection(LinkedHashSet::new),
+              Optional::of
+          ))
           .filter(not(Set::isEmpty))
           .map(protoFiles -> ImmutableProtoFileListing
               .builder()
@@ -114,7 +117,8 @@ public final class ProtoSourceResolver implements AutoCloseable {
     originalPaths
         .stream()
         .map(this::submitProtoFileListingTask)
-        .collect(toSet())  // terminal operation to ensure all are scheduled prior to joining.
+        // terminal operation to ensure all are scheduled prior to joining.
+        .collect(Collectors.toList())
         .stream()
         .forEach(task -> {
           try {
@@ -135,7 +139,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
     return results
         .stream()
         .flatMap(Optional::stream)
-        .collect(toSet());
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private FutureTask<Optional<ProtoFileListing>> submitProtoFileListingTask(Path path) {
