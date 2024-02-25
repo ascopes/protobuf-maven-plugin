@@ -66,9 +66,9 @@
       </plugin>
 
       <plugin>
-        <groupId>${plugin-group-id}</groupId>
-        <artifactId>${plugin-artifact-id}</artifactId>
-        <version>${plugin-version}</version>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
 
         <configuration>
           <protocVersion>https://repo1.maven.org/maven2/com/google/protobuf/protoc/${protobuf.version}/protoc-${protobuf.version}-linux-x86_64.exe</protocVersion>

@@ -33,9 +33,9 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>${plugin-group-id}</groupId>
-        <artifactId>${plugin-artifact-id}</artifactId>
-        <version>${plugin-version}</version>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+        <version>@project.version@</version>
 
         <configuration>
           <protocVersion>${protobuf.version}</protocVersion>
