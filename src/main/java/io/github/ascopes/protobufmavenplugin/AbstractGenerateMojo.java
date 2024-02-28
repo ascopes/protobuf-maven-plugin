@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
 
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
@@ -29,7 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,7 +41,7 @@ import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate
 import org.jspecify.annotations.Nullable;
 
 /**
- * Abstract base for a code-generation MOJO.
+ * Abstract base for a code generation Mojo that calls {@code protoc}.
  *
  * @author Ashley Scopes
  */
@@ -98,7 +98,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter
-  private @Nullable Set<String> sourceDirectories;
+  private @Nullable List<Path> sourceDirectories;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -111,7 +111,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  private @Nullable Set<String> additionalImportPaths;
+  private @Nullable List<Path> additionalImportPaths;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -139,7 +139,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable Set<DefaultArtifactCoordinate> binaryMavenPlugins;
+  private @Nullable List<DefaultArtifactCoordinate> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -155,7 +155,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable Set<String> binaryPathPlugins;
+  private @Nullable List<String> binaryPathPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
@@ -215,7 +215,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable Set<DefaultDependableCoordinate> jvmMavenPlugins;
+  private @Nullable List<DefaultDependableCoordinate> jvmMavenPlugins;
 
   /**
    * Override the directory to output generated code to.
@@ -226,7 +226,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  private @Nullable String outputDirectory;
+  private @Nullable Path outputDirectory;
 
   /**
    * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
@@ -288,30 +288,26 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       throw new MojoExecutionException(ex.getMessage(), ex);
     }
 
-    var actualOutputDirectory = outputDirectory == null || outputDirectory.isBlank()
-        ? defaultOutputDirectory(session)
-        : Path.of(outputDirectory);
-
-    var actualSourceDirectories = sourceDirectories == null
-        ? List.of(defaultSourceDirectory(session))
-        : parsePaths(sourceDirectories);
-
     var request = ImmutableGenerationRequest.builder()
-        .additionalImportPaths(parsePaths(additionalImportPaths))
-        .binaryMavenPlugins(requireNonNullElse(binaryMavenPlugins, Set.of()))
-        .binaryPathPlugins(requireNonNullElse(binaryPathPlugins, Set.of()))
-        .binaryUrlPlugins(requireNonNullElse(binaryUrlPlugins, List.of()))
-        .jvmMavenPlugins(requireNonNullElse(jvmMavenPlugins, Set.of()))
+        .additionalImportPaths(nonNullList(additionalImportPaths))
+        .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
+        .binaryPathPlugins(nonNullList(binaryPathPlugins))
+        .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
+        .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
         .allowedDependencyScopes(allowedScopes())
         .isFatalWarnings(fatalWarnings)
         .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
         .mavenSession(session)
-        .outputDirectory(actualOutputDirectory)
+        .outputDirectory(requireNonNullElseGet(
+            outputDirectory, () -> defaultOutputDirectory(session)
+        ))
         .protocVersion(protocVersion())
         .sourceRootRegistrar(sourceRootRegistrar())
-        .sourceRoots(actualSourceDirectories)
+        .sourceRoots(requireNonNullElseGet(
+            sourceDirectories, () -> List.of(defaultSourceDirectory(session))
+        ))
         .build();
 
     try {
@@ -373,6 +369,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @throws IllegalArgumentException if any parameters are invalid.
    */
   protected void validate() {
+    // TODO: move this logic into the protoc resolver class.
     if (protocVersion.equalsIgnoreCase("latest")) {
       throw new IllegalArgumentException(
           "Cannot use LATEST for the protoc version. "
@@ -382,11 +379,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
 
     // Having .jar on the output directory makes protoc generate a JAR with a
-    // Manifest. This will break our logic because generated sources will be
+    // Manifest. This will break our logic because generated7 sources will be
     // inaccessible for the compilation phase later. For now, just prevent this
     // edge case entirely.
+    // TODO: move this logic into the source generator class.
     Optional.ofNullable(outputDirectory)
-        .map(Path::of)
         .flatMap(FileUtils::getFileExtension)
         .filter(".jar"::equalsIgnoreCase)
         .ifPresent(ext -> {
@@ -400,21 +397,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     // Give precedence to overriding the protoc version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty("protoc.version");
-    if (overriddenVersion != null) {
-      return overriddenVersion;
-    }
-    return protocVersion;
+    return requireNonNullElse(overriddenVersion, protocVersion);
   }
 
-  private Collection<Path> parsePaths(@Nullable Collection<String> paths) {
-    if (paths == null) {
-      return List.of();
-    }
-
-    return paths
-        .stream()
-        .map(Path::of)
-        .map(FileUtils::normalize)
-        .collect(Collectors.toUnmodifiableList());
+  private <T> List<T> nonNullList(@Nullable List<T> list) {
+    return requireNonNullElseGet(list, List::of);
   }
 }
