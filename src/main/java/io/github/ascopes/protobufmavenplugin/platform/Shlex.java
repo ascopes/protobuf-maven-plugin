@@ -46,6 +46,7 @@ public final class Shlex {
     var iter = args.iterator();
 
     if (!iter.hasNext()) {
+      // Probably won't ever happen.
       return "";
     }
 
@@ -102,7 +103,6 @@ public final class Shlex {
         case '%':
           sb.append("%%");
           break;
-
         case '\\':
         case '"':
         case '\'':
@@ -114,8 +114,8 @@ public final class Shlex {
         case '<':
         case '>':
         case '|':
-          sb.append('^');
-          // Fall through...
+          sb.append('^').append(c);
+          break;
         default:
           sb.append(c);
           break;
