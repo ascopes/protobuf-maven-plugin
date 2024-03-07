@@ -81,7 +81,10 @@ class ShlexTest {
         arguments(list("\\"), "'\\'"),
         arguments(list("\""), "'\"'"),
         arguments(list("po'tato"), "'po'\"'\"'tato'"),
-        arguments(list("'potato'"), "''\"'\"'potato'\"'\"''")
+        arguments(list("'potato'"), "''\"'\"'potato'\"'\"''"),
+        arguments(list("foo\nbar", "baz"), "'foo'$'\\n''bar' baz"),
+        arguments(list("foo\rbar", "baz"), "'foo'$'\\r''bar' baz"),
+        arguments(list("foo\tbar", "baz"), "'foo'$'\\t''bar' baz")
     );
   }
 
@@ -110,7 +113,8 @@ class ShlexTest {
         arguments(list("&"), "^&"),
         arguments(list("<"), "^<"),
         arguments(list(">"), "^>"),
-        arguments(list("|"), "^|")
+        arguments(list("|"), "^|"),
+        arguments(list("100% complete", "0% incomplete"), "100%%^ complete 0%%^ incomplete")
     );
   }
 
