@@ -22,6 +22,10 @@ import java.util.function.BiConsumer;
  *
  * <p>Losely based on Python's {@code shlex} module.
  *
+ * <p>This is far from perfect but should work in the majority of use cases
+ * to ensure scripts do not interpret special characters in paths in strange
+ * and unexpected ways.
+ *
  * @author Ashley Scopes
  */
 public final class Shlex {
@@ -65,10 +69,22 @@ public final class Shlex {
     sb.append('\'');
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
-      if (c == '\'') {
-        sb.append("'\"'\"'");
-      } else {
-        sb.append(c);
+      switch (c) {
+        case '\'':
+          sb.append("'\"'\"'");
+          break;
+        case '\n':
+          sb.append("'$'\\n''");
+          break;
+        case '\r':
+          sb.append("'$'\\r''");
+          break;
+        case '\t':
+          sb.append("'$'\\t''");
+          break;
+        default:
+          sb.append(c);
+          break;
       }
     }
     sb.append('\'');
@@ -83,6 +99,10 @@ public final class Shlex {
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       switch (c) {
+        case '%':
+          sb.append("%%");
+          break;
+
         case '\\':
         case '"':
         case '\'':
@@ -95,9 +115,11 @@ public final class Shlex {
         case '>':
         case '|':
           sb.append('^');
+          // Fall through...
+        default:
+          sb.append(c);
+          break;
       }
-
-      sb.append(c);
     }
   }
 
