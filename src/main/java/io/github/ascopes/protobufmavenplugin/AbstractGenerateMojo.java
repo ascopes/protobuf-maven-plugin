@@ -82,9 +82,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
    * </ul>
    *
-   * <p><strong>Note that URL support is highly experimental and subject to change or removal
-   * without notice.</strong>
-   *
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
@@ -177,9 +174,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   &lt;/binaryUrlPlugins&gt;
    * </pre></code>
    *
-   * <p><strong>Note that this support is highly experimental and subject to change or removal
-   * without notice.</strong>
-   *
    * @since 0.4.0
    */
   @Parameter
@@ -205,12 +199,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>This mechanism allows plugin vendors to implement their plugins in
    * Java and just distribute platform-independent JAR instead.
-   *
-   * <p>Note that support for this is experimental due to the nature of
-   * how this integrates with {@code protoc} itself. If you encounter issues with executing plugins
-   * via this mechanism, please raise a bug report on
-   * <a href="https://github.com/ascopes/protobuf-maven-plugin/issues">GitHub</a>
-   * citing your CPU architecture, OS, and shell.
    *
    * @since 0.3.0
    */
