@@ -117,17 +117,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * architecture is automatically generated and injected in the classifier if the classifier and
    * type are not provided explicitly.
    *
-   * <p>For example: <br/>
+   * <p>For example:
    *
-   * <code><pre>
-   *   &lt;binaryMavenPlugins&gt;
-   *     &lt;binaryMavenPlugin&gt;
-   *       &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
-   *       &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
-   *       &lt;version&gt;1.2.4&lt;/version&gt;
-   *     &lt;/binaryMavenPlugin&gt;
-   *   &lt;/binaryMavenPlugins&gt;
-   * </pre></code>
+   * <p><pre>{@code
+   *   <binaryMavenPlugins>
+   *     <binaryMavenPlugin>
+   *       <groupId>com.salesforce.servicelibs</groupId>
+   *       <artifactId>reactor-grpc</artifactId>
+   *       <version>1.2.4</version>
+   *     </binaryMavenPlugin>
+   *   </binaryMavenPlugins>
+   * }</pre>
    *
    * <p>If you have a Java-based plugin that does not distribute a native
    * executable, or are using a more obscure system architecture, then using a
@@ -141,13 +141,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
    *
-   * <p>For example: <br/>
+   * <p>For example:
    *
-   * <code><pre>
-   *   &lt;binaryPathPlugins&gt;
-   *     &lt;binaryPathPlugin&gt;protoc-gen-grpc-java&lt;binaryPathPlugin&gt;
-   *   &lt;/binaryPathPlugins&gt;
-   * </pre></code>
+   * <p><pre>{@code
+   *   <binaryPathPlugins>
+   *     <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
+   *   </binaryPathPlugins>
+   * }</pre>
    *
    * @since 0.3.0
    */
@@ -166,13 +166,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
    * </ul>
    *
-   * <p>For example: <br />
+   * <p>For example:
    *
-   * <code><pre>
-   *   &lt;binaryUrlPlugins&gt;
-   *     &lt;binaryUrlPlugin&gt;ftp://myorganisation.org/protoc/plugins/myplugin.exe&lt;binaryUrlPlugin&gt;
-   *   &lt;/binaryUrlPlugins&gt;
-   * </pre></code>
+   * <p><pre>{@code
+   *   <binaryUrlPlugins>
+   *     <binaryUrlPlugin>ftp://myorganisation.org/protoc/plugins/myplugin.exe</binaryUrlPlugin>
+   *   </binaryUrlPlugins>
+   * }</pre>
    *
    * @since 0.4.0
    */
@@ -185,17 +185,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
    * protoc compiler API, and will be provided to the compiler via generated scripts.
    *
-   * <p>For example: <br/>
+   * <p>For example:
    *
-   * <code><pre>
-   *   &lt;jvmMavenPlugins&gt;
-   *     &lt;jvmMavenPlugin&gt;
-   *       &lt;groupId&gt;com.salesforce.servicelibs&lt;/groupId&gt;
-   *       &lt;artifactId&gt;reactor-grpc&lt;/artifactId&gt;
-   *       &lt;version&gt;1.2.4&lt;/version&gt;
-   *     &lt;/jvmMavenPlugin&gt;
-   *   &lt;/jvmMavenPlugins&gt;
-   * </pre></code>
+   * <p><pre>{@code
+   *   <jvmMavenPlugins>
+   *     <jvmMavenPlugin>
+   *       <groupId>com.salesforce.servicelibs</groupId>
+   *       <artifactId>reactor-grpc</artifactId>
+   *       <version>1.2.4</version>
+   *     </jvmMavenPlugin>
+   *   </jvmMavenPlugins>
+   * }</pre>
    *
    * <p>This mechanism allows plugin vendors to implement their plugins in
    * Java and just distribute platform-independent JAR instead.
