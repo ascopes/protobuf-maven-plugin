@@ -19,6 +19,7 @@ import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,10 +42,13 @@ public final class ArgLineBuilder {
       throw new IllegalStateException("No output targets were provided");
     }
 
+    var finalArgs = new ArrayList<>(args);
+
     for (var path : sourcesToCompile) {
-      args.add(path.toString());
+      finalArgs.add(path.toString());
     }
-    return args;
+
+    return Collections.unmodifiableList(finalArgs);
   }
 
   public ArgLineBuilder fatalWarnings(boolean fatalWarnings) {
@@ -62,21 +66,11 @@ public final class ArgLineBuilder {
   }
 
   public ArgLineBuilder javaOut(Path outputPath, boolean lite) {
-    ++outputTargetCount;
-    var flag = lite
-        ? "--java_out=lite:"
-        : "--java_out=";
-    args.add(flag + outputPath);
-    return this;
+    return langOut("java", outputPath, lite);
   }
 
   public ArgLineBuilder kotlinOut(Path outputPath, boolean lite) {
-    ++outputTargetCount;
-    var flag = lite
-        ? "--kotlin_out=lite:"
-        : "--kotlin_out=";
-    args.add(flag + outputPath);
-    return this;
+    return langOut("kotlin", outputPath, lite);
   }
 
   public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath) {
@@ -87,6 +81,15 @@ public final class ArgLineBuilder {
       args.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
       args.add("--" + plugin.getId() + "_out=" + outputPath);
     }
+    return this;
+  }
+
+  private ArgLineBuilder langOut(String type, Path outputPath, boolean lite) {
+    ++outputTargetCount;
+    var flag = lite
+        ? "--" + type + "_out=lite:"
+        : "--" + type + "_out=";
+    args.add(flag + outputPath);
     return this;
   }
 }
