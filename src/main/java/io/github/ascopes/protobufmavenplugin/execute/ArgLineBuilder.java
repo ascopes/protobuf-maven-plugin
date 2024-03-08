@@ -84,6 +84,10 @@ public final class ArgLineBuilder {
     return this;
   }
 
+  public List<String> version() {
+    return List.of(args.get(0), "--version");
+  }
+
   private ArgLineBuilder langOut(String type, Path outputPath, boolean lite) {
     ++outputTargetCount;
     var flag = lite

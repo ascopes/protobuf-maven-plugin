@@ -77,6 +77,7 @@ public final class SourceCodeGenerator {
 
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
     var protocPath = discoverProtocPath(request);
+
     var plugins = discoverPlugins(request);
     var importPaths = discoverImportPaths(request);
     var sourcePaths = discoverCompilableSources(request);
@@ -114,11 +115,21 @@ public final class SourceCodeGenerator {
         .flatMap(Collection::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
-    return commandLineExecutor.execute(argLineBuilder.compile(sourceFiles));
+    if (!logProtocVersion(protocPath)) {
+      log.error("Unable to execute protoc. Ensure the binary is compatible for this platform!");
+      return false;
+    }
+
+    return commandLineExecutor.execute(false, argLineBuilder.compile(sourceFiles));
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
     return protocResolver.resolve(request.getMavenSession(), request.getProtocVersion());
+  }
+
+  private boolean logProtocVersion(Path protocPath) throws IOException {
+    var args = new ArgLineBuilder(protocPath).version();
+    return commandLineExecutor.execute(true, args);
   }
 
   private Collection<ResolvedPlugin> discoverPlugins(

@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Executor for commands.
+ * Executor for {@code protoc} commands.
  *
  * @author Ashley Scopes
  */
@@ -36,10 +36,10 @@ public final class CommandLineExecutor {
 
   @Inject
   public CommandLineExecutor() {
-    // Static-only class.
+    // Nothing to do here.
   }
 
-  public boolean execute(List<String> args) throws IOException {
+  public boolean execute(boolean silent, List<String> args) throws IOException {
     log.info("Calling protoc with the following command line: {}", Shlex.quoteShellArgs(args));
 
     var procBuilder = new ProcessBuilder(args);
@@ -47,19 +47,7 @@ public final class CommandLineExecutor {
     procBuilder.inheritIO();
 
     try {
-      var startTimeNs = System.nanoTime();
-      var proc = procBuilder.start();
-      var exitCode = proc.waitFor();
-      var elapsedTimeMs = ms(System.nanoTime() - startTimeNs);
-
-      if (exitCode == 0) {
-        log.info("Protoc completed after {}ms", elapsedTimeMs);
-        return true;
-      } else {
-        log.error("Protoc returned exit code {} after {}ms", exitCode, elapsedTimeMs);
-        return false;
-      }
-
+      return run(procBuilder);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       var newEx = new InterruptedIOException("Compilation was interrupted");
@@ -68,7 +56,18 @@ public final class CommandLineExecutor {
     }
   }
 
-  private static long ms(long ns) {
-    return ns / 1_000_000L;
+  private boolean run(ProcessBuilder procBuilder) throws InterruptedException, IOException {
+    var startTimeNs = System.nanoTime();
+    var proc = procBuilder.start();
+    var exitCode = proc.waitFor();
+    var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
+
+    if (exitCode == 0) {
+      log.info("Protoc returned exit code 0 (success) after {}ms", elapsedTimeMs);
+      return true;
+    } else {
+      log.error("Protoc returned exit code {} (error) after {}ms", exitCode, elapsedTimeMs);
+      return false;
+    }
   }
 }
