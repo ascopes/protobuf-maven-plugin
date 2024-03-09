@@ -217,6 +217,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable Path outputDirectory;
 
   /**
+   * Whether to fail on missing sources.
+   *
+   * <p>If no sources are detected, it is usually a sign that this plugin
+   * is misconfigured, or that you are including this plugin in a project
+   * that does not need it. For this reason, the plugin defaults this setting
+   * to being enabled. If you wish to not fail, you can explicitly set this
+   * to false instead.
+   *
+   * @since 0.5.0
+   */
+  @Parameter(defaultValue = "true")
+  private boolean failOnMissingSources;
+
+  /**
    * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
    * build.
    *
@@ -291,11 +305,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
     var request = ImmutableGenerationRequest.builder()
         .additionalImportPaths(nonNullList(additionalImportPaths))
+        .allowedDependencyScopes(allowedScopes())
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
-        .allowedDependencyScopes(allowedScopes())
+        .isFailOnMissingSources(failOnMissingSources)
         .isFatalWarnings(fatalWarnings)
         .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)

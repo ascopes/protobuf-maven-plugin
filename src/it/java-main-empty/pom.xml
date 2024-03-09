@@ -38,6 +38,7 @@
         <version>@project.version@</version>
 
         <configuration>
+          <failOnMissingSources>false</failOnMissingSources>
           <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 

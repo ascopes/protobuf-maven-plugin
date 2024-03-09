@@ -83,11 +83,14 @@ public final class SourceCodeGenerator {
     var sourcePaths = discoverCompilableSources(request);
 
     if (sourcePaths.isEmpty()) {
-      // We might want to add the ability to throw an error here in the future.
-      // For now, let's just avoid doing additional work. This also prevents protobuf
-      // failing because we provided no sources to it.
-      log.info("No protobuf sources found; nothing to do!");
-      return true;
+      if (request.isFailOnMissingSources()) {
+        log.error("No protobuf sources found. If this is unexpected, check your "
+            + "configuration and try again.");
+        return false;
+      } else {
+        log.info("No protobuf sources found; nothing to do!");
+        return true;
+      }
     }
 
     createOutputDirectories(request);
