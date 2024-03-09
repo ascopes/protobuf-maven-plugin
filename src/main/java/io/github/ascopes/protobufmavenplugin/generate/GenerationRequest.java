@@ -54,6 +54,8 @@ public interface GenerationRequest {
 
   SourceRootRegistrar getSourceRootRegistrar();
 
+  boolean isFailOnMissingSources();
+
   boolean isFatalWarnings();
 
   boolean isJavaEnabled();
