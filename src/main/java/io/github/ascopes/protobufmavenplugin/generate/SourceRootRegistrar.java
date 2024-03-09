@@ -16,7 +16,9 @@
 package io.github.ascopes.protobufmavenplugin.generate;
 
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Registrar for source roots.
@@ -25,24 +27,31 @@ import org.apache.maven.execution.MavenSession;
  */
 @FunctionalInterface
 public interface SourceRootRegistrar {
-  SourceRootRegistrar MAIN = of("main", (session, path) -> session.getCurrentProject()
-      .addCompileSourceRoot(path.toString()));
-  SourceRootRegistrar TEST = of("test", (session, path) -> session.getCurrentProject()
-      .addTestCompileSourceRoot(path.toString()));
+  MavenRegistrar MAIN = new MavenRegistrar("main", MavenProject::addCompileSourceRoot);
+  MavenRegistrar TEST = new MavenRegistrar("test", MavenProject::addTestCompileSourceRoot);
 
   void registerSourceRoot(MavenSession session, Path path);
 
-  static SourceRootRegistrar of(String name, SourceRootRegistrar registrar) {
-    return new SourceRootRegistrar() {
-      @Override
-      public void registerSourceRoot(MavenSession session, Path path) {
-        registrar.registerSourceRoot(session, path);
-      }
+  /**
+   * A basic registrar for {@link MavenProject} sources.
+   */
+  final class MavenRegistrar implements SourceRootRegistrar {
+    private final String name;
+    private final BiConsumer<MavenProject, String> delegate;
 
-      @Override
-      public String toString() {
-        return name;
-      }
-    };
+    private MavenRegistrar(String name, BiConsumer<MavenProject, String> delegate) {
+      this.name = name;
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void registerSourceRoot(MavenSession session, Path path) {
+      delegate.accept(session.getCurrentProject(), path.toString());
+    }
+
+    @Override
+    public String toString() {
+      return "Maven " + name;
+    }
   }
 }
