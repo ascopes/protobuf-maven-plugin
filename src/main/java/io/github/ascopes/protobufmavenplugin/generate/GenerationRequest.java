@@ -61,4 +61,6 @@ public interface GenerationRequest {
   boolean isKotlinEnabled();
 
   boolean isLiteEnabled();
+
+  boolean isRegisterAsCompilationRoot();
 }

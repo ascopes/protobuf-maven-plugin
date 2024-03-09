@@ -178,12 +178,16 @@ public final class SourceCodeGenerator {
 
   private void createOutputDirectories(GenerationRequest request) throws IOException {
     var directory = request.getOutputDirectory();
-    var registrar = request.getSourceRootRegistrar();
-
-    log.info("Creating {} and registering as a {} root", directory, registrar);
-
+    log.debug("Creating {}", directory);
     Files.createDirectories(directory);
-    registrar.registerSourceRoot(request.getMavenSession(), directory);
+
+    if (request.isRegisterAsCompilationRoot()) {
+      var registrar = request.getSourceRootRegistrar();
+      log.debug("Registering {} as {} compilation root", directory, registrar);
+      registrar.registerSourceRoot(request.getMavenSession(), directory);
+    } else {
+      log.debug("Not registering {} as a compilation root", directory);
+    }
   }
 
   @SafeVarargs
