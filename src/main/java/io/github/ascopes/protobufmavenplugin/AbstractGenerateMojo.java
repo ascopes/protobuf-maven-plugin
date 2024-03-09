@@ -263,6 +263,19 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean liteOnly;
 
   /**
+   * Whether to register the output directories as compilation roots with
+   * Maven.
+   *
+   * <p>Generally, you want to do this, but there may be edge cases where you
+   * wish to control this behaviour manually instead. In this case, set this
+   * parameter to be {@code false}.
+   *
+   * @since 0.5.0
+   */
+  @Parameter(defaultValue = "true")
+  private boolean registerAsCompilationRoot;
+
+  /**
    * Execute the plugin and generate sources.
    *
    * @throws MojoExecutionException if execution fails.
@@ -287,6 +300,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
+        .isRegisterAsCompilationRoot(registerAsCompilationRoot)
         .mavenSession(session)
         .outputDirectory(requireNonNullElseGet(
             outputDirectory, () -> defaultOutputDirectory(session)
