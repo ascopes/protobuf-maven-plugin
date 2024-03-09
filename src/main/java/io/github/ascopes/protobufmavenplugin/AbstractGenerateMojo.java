@@ -120,13 +120,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>For example:
    *
    * <p><pre>{@code
-   *   <binaryMavenPlugins>
-   *     <binaryMavenPlugin>
-   *       <groupId>com.salesforce.servicelibs</groupId>
-   *       <artifactId>reactor-grpc</artifactId>
-   *       <version>1.2.4</version>
-   *     </binaryMavenPlugin>
-   *   </binaryMavenPlugins>
+   * <binaryMavenPlugins>
+   *   <binaryMavenPlugin>
+   *     <groupId>com.salesforce.servicelibs</groupId>
+   *     <artifactId>reactor-grpc</artifactId>
+   *     <version>1.2.4</version>
+   *   </binaryMavenPlugin>
+   * </binaryMavenPlugins>
    * }</pre>
    *
    * <p>If you have a Java-based plugin that does not distribute a native
@@ -144,9 +144,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>For example:
    *
    * <p><pre>{@code
-   *   <binaryPathPlugins>
-   *     <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
-   *   </binaryPathPlugins>
+   * <binaryPathPlugins>
+   *   <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
+   * </binaryPathPlugins>
    * }</pre>
    *
    * @since 0.3.0
@@ -188,13 +188,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>For example:
    *
    * <p><pre>{@code
-   *   <jvmMavenPlugins>
-   *     <jvmMavenPlugin>
-   *       <groupId>com.salesforce.servicelibs</groupId>
-   *       <artifactId>reactor-grpc</artifactId>
-   *       <version>1.2.4</version>
-   *     </jvmMavenPlugin>
-   *   </jvmMavenPlugins>
+   * <jvmMavenPlugins>
+   *   <jvmMavenPlugin>
+   *     <groupId>com.salesforce.servicelibs</groupId>
+   *     <artifactId>reactor-grpc</artifactId>
+   *     <version>1.2.4</version>
+   *   </jvmMavenPlugin>
+   * </jvmMavenPlugins>
    * }</pre>
    *
    * <p>This mechanism allows plugin vendors to implement their plugins in
@@ -241,8 +241,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Whether to also generate Kotlin API wrapper code around the generated Java code.
    *
-   * <p>Note that this requires {@code javaEnabled} to also be {@code true}, otherwise compilation
-   * may fail.
+   * <p>Note that this may require {@code javaEnabled} to also be {@code true}, otherwise compilation
+   * may fail unless other sources are generated to replace the expected Java ones.
    *
    * @since 0.1.0
    */
