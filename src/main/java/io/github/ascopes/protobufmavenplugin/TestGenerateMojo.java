@@ -30,7 +30,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  * sources.
  *
  * <p>Any project dependencies using the {@code compile}, {@code provided},
- * {@code system}, or {@code testA} scopes will be made available to import
+ * {@code system}, or {@code test} scopes will be made available to import
  * from protobuf sources.
  *
  * <p>By default, sources will be read from {@code src/test/protobuf},
