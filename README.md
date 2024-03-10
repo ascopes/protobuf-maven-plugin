@@ -102,7 +102,3 @@ Maven 4.0-compatible release as soon as possible.
 
 Since this is a new project, any contributions are always welcome! This includes contributing 
 integration test cases or reporting issues. Any input is greatly appreciated.
-
-Additionally, if you use a PowerPC or a S390 IBM mainframe and are interested in helping, please 
-contact me or raise an issue. I am currently looking for people to help test the PPC and S390
-support in this plugin.
