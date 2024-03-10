@@ -119,7 +119,7 @@ class PlatformArtifactFactoryTest {
     var systemToClassifiers = new HashMap<HostSystemMockConfigurer, String>();
     systemToClassifiers.put(linux().and(arch("amd64")), "linux-x86_64");
     systemToClassifiers.put(linux().and(arch("aarch64")), "linux-aarch_64");
-    systemToClassifiers.put(linux().and(arch("s390")), "linux-s390_64");
+    systemToClassifiers.put(linux().and(arch("s390x")), "linux-s390_64");
     systemToClassifiers.put(linux().and(arch("zarch_64")), "linux-s390_64");
     systemToClassifiers.put(linux().and(arch("ppc64le")), "linux-ppcle_64");
     systemToClassifiers.put(linux().and(arch("ppc64")), "linux-ppcle_64");
