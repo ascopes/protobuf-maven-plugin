@@ -6,7 +6,7 @@
 
 # protobuf-maven-plugin
 
-A simple and modern Maven plugin to generate source code from protobuf definitions.
+A simple and modern Maven plugin to generate source code from protobuf definitions. Supports x86, aarch64, s390x, and ppc64 platforms out of the box.
 
 ```xml
 
