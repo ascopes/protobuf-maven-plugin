@@ -282,8 +282,9 @@
               <includes>
                 <include>src/**/*.groovy</include>
                 <include>src/**/*.java</include>
-                <include>src/**/*.proto</include>
                 <include>src/**/*.kt</include>
+                <include>src/**/*.properties</include>
+                <include>src/**/*.proto</include>
                 <include>**/*.xml</include>
               </includes>
               <excludes>
