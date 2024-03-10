@@ -69,7 +69,7 @@ public final class PlatformArtifactFactory {
         case "ppc64":
           return "linux-ppcle_64";
 
-        case "s390":
+        case "s390x":
         case "zarch_64":
           return "linux-s390_64";
 
