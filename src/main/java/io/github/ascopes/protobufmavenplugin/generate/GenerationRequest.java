@@ -54,6 +54,10 @@ public interface GenerationRequest {
 
   SourceRootRegistrar getSourceRootRegistrar();
 
+  boolean isCppEnabled();
+
+  boolean isCsharpEnabled();
+
   boolean isFailOnMissingSources();
 
   boolean isFatalWarnings();
@@ -64,5 +68,17 @@ public interface GenerationRequest {
 
   boolean isLiteEnabled();
 
+  boolean isObjcEnabled();
+
+  boolean isPhpEnabled();
+
+  boolean isPythonEnabled();
+
+  boolean isPythonStubsEnabled();
+
   boolean isRegisterAsCompilationRoot();
+
+  boolean isRubyEnabled();
+
+  boolean isRustEnabled();
 }

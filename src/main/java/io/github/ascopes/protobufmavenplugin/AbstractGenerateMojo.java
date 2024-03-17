@@ -242,7 +242,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean fatalWarnings;
 
   /**
-   * Specify whether to generate default Java sources from the protobuf sources.
+   * Enable generating Java sources from the protobuf sources.
    *
    * <p>Defaults to {@code true}, although some users may wish to disable this
    * if using an alternative plugin that covers generating the code for models instead.
@@ -253,15 +253,87 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean javaEnabled;
 
   /**
-   * Whether to also generate Kotlin API wrapper code around the generated Java code.
+   * Enable generating Kotlin API wrapper code around the generated Java code.
    *
-   * <p>Note that this may require {@code javaEnabled} to also be {@code true}, otherwise compilation
+   * <p>This may require {@code javaEnabled} to also be {@code true}, otherwise compilation
    * may fail unless other sources are generated to replace the expected Java ones.
    *
    * @since 0.1.0
    */
   @Parameter(defaultValue = "false")
   private boolean kotlinEnabled;
+
+  /**
+   * Enable generating Python sources from the protobuf sources.
+   *
+   * <p>If you enable this, you probably will also want to enable Python stubs
+   * to enable generating {@code *.pyi} files for static type checkers.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean pythonEnabled;
+
+  /**
+   * Enable generating Python stubs ({@code *.pyi} files) for static typechecking
+   * from the protobuf sources.
+   *
+   * <p>If you enable this, you probably will also want to enable Python itself
+   * to get actual source code
+   * to accompany the stubs.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean pythonStubsEnabled;
+
+  /**
+   * Enable generating Ruby sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean rubyEnabled;
+
+  /**
+   * Enable generating C++ sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean cppEnabled;
+
+  /**
+   * Enable generating C# sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean csharpEnabled;
+
+  /**
+   * Enable generating Rust sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean rustEnabled;
+
+  /**
+   * Enable generating Objective C sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean objcEnabled;
+
+  /**
+   * Enable generating PHP sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean phpEnabled;
 
   /**
    * Whether to only generate "lite" messages or not.
@@ -310,12 +382,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
+        .isCppEnabled(cppEnabled)
+        .isCsharpEnabled(csharpEnabled)
         .isFailOnMissingSources(failOnMissingSources)
         .isFatalWarnings(fatalWarnings)
         .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
+        .isObjcEnabled(objcEnabled)
+        .isPhpEnabled(phpEnabled)
+        .isPythonEnabled(pythonEnabled)
+        .isPythonStubsEnabled(pythonStubsEnabled)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
+        .isRubyEnabled(rubyEnabled)
+        .isRustEnabled(rustEnabled)
         .mavenSession(session)
         .outputDirectory(requireNonNullElseGet(
             outputDirectory, () -> defaultOutputDirectory(session)
