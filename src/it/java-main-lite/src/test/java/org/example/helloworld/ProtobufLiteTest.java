@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ProtobufTest {
+class ProtobufLiteTest {
 
   @Test
   void generatedProtobufSourcesAreLiteMessages() throws Throwable {
@@ -37,7 +37,9 @@ class ProtobufTest {
     } while (superClass != null);
 
     // Then
-    assertFalse(superClasses.contains("com.google.protobuf.GeneratedMessageV3"));
+    // GeneratedMessageV3 for protobuf-java 3.25.3 and older.
+    // GeneratedMessageLite for protobuf-java 4.26.0 and newer.
+    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessageLite"));
   }
 
   @Test
