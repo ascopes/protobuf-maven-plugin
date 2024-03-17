@@ -124,7 +124,7 @@
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
 
     <!-- Do not update this version. 3.2.0 appears to break pinentry mode -->
-    <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
+    <maven-gpg-plugin.version>3.2.0</maven-gpg-plugin.version>
 
 
     <!-- Plugin dependencies -->
