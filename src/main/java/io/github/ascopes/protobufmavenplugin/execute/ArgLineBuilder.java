@@ -37,6 +37,14 @@ public final class ArgLineBuilder {
     outputTargetCount = 0;
   }
 
+  public ArgLineBuilder cppOut(Path outputPath, boolean lite) {
+    return langOut("cpp", outputPath, lite);
+  }
+
+  public ArgLineBuilder csharpOut(Path outputPath, boolean lite) {
+    return langOut("csharp", outputPath, lite);
+  }
+
   public List<String> compile(Collection<Path> sourcesToCompile) {
     if (outputTargetCount == 0) {
       throw new IllegalStateException("No output targets were provided");
@@ -73,6 +81,14 @@ public final class ArgLineBuilder {
     return langOut("kotlin", outputPath, lite);
   }
 
+  public ArgLineBuilder objcOut(Path outputPath, boolean lite) {
+    return langOut("objc", outputPath, lite);
+  }
+
+  public ArgLineBuilder phpOut(Path outputPath, boolean lite) {
+    return langOut("php", outputPath, lite);
+  }
+
   public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath) {
     for (var plugin : plugins) {
       // protoc always maps a flag `--xxx_out` to a plugin named `protoc-gen-xxx`, so we have
@@ -82,6 +98,22 @@ public final class ArgLineBuilder {
       args.add("--" + plugin.getId() + "_out=" + outputPath);
     }
     return this;
+  }
+
+  public ArgLineBuilder pyiOut(Path outputPath, boolean lite) {
+    return langOut("pyi", outputPath, lite);
+  }
+
+  public ArgLineBuilder pythonOut(Path outputPath, boolean lite) {
+    return langOut("python", outputPath, lite);
+  }
+
+  public ArgLineBuilder rubyOut(Path outputPath, boolean lite) {
+    return langOut("ruby", outputPath, lite);
+  }
+
+  public ArgLineBuilder rustOut(Path outputPath, boolean lite) {
+    return langOut("rust", outputPath, lite);
   }
 
   public List<String> version() {

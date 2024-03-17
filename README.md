@@ -57,6 +57,8 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
 - Importing of `*.proto` sources from classpath dependencies.
 - Ready to implement Maven 4 support once Maven 4 is stable, meaning your projects will not be blocked by unmaintained plugins using
   unsupported Maven 2.x APIs.
+- Additional support for generating sources targeting C++, C#, Objective C, Python (with and without static typechecking stubs),
+  PHP, Ruby, and Rust.
 
 ## Usage
 
