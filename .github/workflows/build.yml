@@ -29,14 +29,16 @@ jobs:
         run: |-
           set -eux
           case "${{ matrix.os-name }}" in
-            macos-*) brew install protobuf ;;
+            # TODO: uncomment once protoc 4.26.0 is used globally.
+            #macos-*) brew install protobuf ;;
             ubuntu-*) sudo apt -q update && sudo apt -qy install protobuf-compiler ;;
-            windows-*) choco install protoc ;;
+            # TODO: uncomment once protoc 4.26.0 is used globally.
+            #windows-*) choco install protoc ;;
           esac
 
           java -version
           javac -version
-          protoc --version
+          protoc --version || true
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4

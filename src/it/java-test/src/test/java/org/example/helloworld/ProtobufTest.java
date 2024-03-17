@@ -37,7 +37,9 @@ class ProtobufTest {
     } while (superClass != null);
 
     // Then
-    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessageV3"));
+    // GeneratedMessageV3 for protobuf-java 3.25.3 and older.
+    // GeneratedMessage for protobuf-java 4.26.0 and newer.
+    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessage"));
   }
 
   @Test

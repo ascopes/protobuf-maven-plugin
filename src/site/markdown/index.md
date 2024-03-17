@@ -51,7 +51,7 @@ do is provide the version of `protoc` to use.
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>3.25.3</protocVersion>
+    <protocVersion>4.26.0</protocVersion>
   </configuration>
 
   <executions>
@@ -93,7 +93,7 @@ like Dependabot to keep the compiler version up-to-date automatically.
   ...
 
   <properties>
-    <protobuf.version>3.25.3</protobuf.version>
+    <protobuf.version>4.26.0</protobuf.version>
     <protobuf-maven-plugin.version>...</protobuf-maven-plugin.version>
   </properties>
 
@@ -200,6 +200,14 @@ Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
     </tr>
   </tbody>
 </table>
+
+### v4.x versus v3.x
+
+The v4.x versions of the protobuf libraries have breaking changes compared to the v3.x
+versions. This means that using the `protoc` binary corresponding to v4.x will not be
+compatible with libraries using v3.x of the protobuf libraries.
+
+Ensure you are using the correct version for your project and requirements!
 
 ## Importing protobuf definitions from other places
 
