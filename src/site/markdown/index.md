@@ -201,6 +201,14 @@ Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
   </tbody>
 </table>
 
+### v4.x versus v3.x
+
+The v4.x versions of the protobuf libraries have breaking changes compared to the v3.x
+versions. This means that using the `protoc` binary corresponding to v4.x will not be
+compatible with libraries using v3.x of the protobuf libraries.
+
+Ensure you are using the correct version for your project and requirements!
+
 ## Importing protobuf definitions from other places
 
 By default, this plugin will index all JARs that are dependencies for the current Maven project,
