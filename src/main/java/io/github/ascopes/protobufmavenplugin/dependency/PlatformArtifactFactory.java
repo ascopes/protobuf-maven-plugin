@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
+package io.github.ascopes.protobufmavenplugin.dependency;
 
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
+import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
@@ -78,6 +78,10 @@ public final class PlatformArtifactFactory {
 
         case "amd64":
           return "linux-x86_64";
+
+        default:
+          // Fall-over
+          break;
       }
 
     } else if (hostSystem.isProbablyMacOs()) {
@@ -88,6 +92,10 @@ public final class PlatformArtifactFactory {
         case "amd64":
         case "x86_64":
           return "osx-x86_64";
+
+        default:
+          // Fall-over
+          break;
       }
 
     } else if (hostSystem.isProbablyWindows()) {
@@ -99,6 +107,10 @@ public final class PlatformArtifactFactory {
         case "x86":
         case "x86_32":
           return "windows-x86_32";
+
+        default:
+          // Fall-over
+          break;
       }
     }
 

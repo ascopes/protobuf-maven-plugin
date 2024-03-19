@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.ascopes.protobufmavenplugin;
 
 import static java.util.Objects.requireNonNullElse;
@@ -32,7 +33,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -448,7 +448,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
   }
 
-    /**
+  /**
    * Provides the source root registrar for this Mojo.
    *
    * <p>This specifies where to attach generated sources to in order for it
@@ -515,7 +515,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .flatMap(FileUtils::getFileExtension)
         .filter(".jar"::equalsIgnoreCase)
         .ifPresent(ext -> {
-          throw new IllegalArgumentException("The output directory cannot be a path with a JAR file extension");
+          throw new IllegalArgumentException(
+              "The output directory cannot be a path with a JAR file extension");
         });
   }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.arch;
@@ -27,11 +28,9 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.HostSystemMockConfigurer;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Stream;
-
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;

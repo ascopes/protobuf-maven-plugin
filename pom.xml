@@ -329,6 +329,16 @@
           <violationSeverity>info</violationSeverity>
         </configuration>
 
+        <executions>
+          <execution>
+            <id>check-code-style</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+
         <dependencies>
           <dependency>
             <!-- Force the usage of checkstyle v10 rather than v8.28 -->

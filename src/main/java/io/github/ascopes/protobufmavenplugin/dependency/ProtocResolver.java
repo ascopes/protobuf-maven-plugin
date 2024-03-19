@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
@@ -91,7 +92,10 @@ public final class ProtocResolver {
     }
   }
 
-  private Path resolveFromMavenRepositories(MavenSession session, String version) throws ResolutionException {
+  private Path resolveFromMavenRepositories(
+      MavenSession session,
+      String version
+  ) throws ResolutionException {
     if (hostSystem.isProbablyAndroidTermux()) {
       log.warn(
           "It looks like you are using Termux on Android. You may encounter issues "

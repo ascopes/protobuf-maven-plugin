@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.ascopes.protobufmavenplugin.source;
 
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;

@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.example.helloworld;
 
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import org.junit.jupiter.api.Test;
+package org.example.helloworld;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import org.junit.jupiter.api.Test;
 
 class ProtobufLiteTest {
 

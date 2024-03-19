@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.github.ascopes.protobufmavenplugin.generate;
 
+import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.JvmPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Orchestrates all moving parts in this plugin, collecting all relevant information and
- * depenencies to pass to an invocation of {@code protoc}.
+ * dependencies to pass to an invocation of {@code protoc}.
  *
  * <p>Orchestrates all other components.
  *
