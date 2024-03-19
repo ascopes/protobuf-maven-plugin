@@ -15,9 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin;
 
-import static java.util.Objects.requireNonNullElse;
-import static java.util.Objects.requireNonNullElseGet;
-
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
@@ -376,12 +373,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
 
     var request = ImmutableGenerationRequest.builder()
-        .additionalImportPaths(nonNullList(additionalImportPaths))
+        .additionalImportPaths(nonNullOr(additionalImportPaths, List.of()))
         .allowedDependencyScopes(allowedScopes())
-        .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
-        .binaryPathPlugins(nonNullList(binaryPathPlugins))
-        .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
-        .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
+        .binaryMavenPlugins(nonNullOr(binaryMavenPlugins, List.of()))
+        .binaryPathPlugins(nonNullOr(binaryPathPlugins, List.of()))
+        .binaryUrlPlugins(nonNullOr(binaryUrlPlugins, List.of()))
         .isCppEnabled(cppEnabled)
         .isCsharpEnabled(csharpEnabled)
         .isFailOnMissingSources(failOnMissingSources)
@@ -396,15 +392,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
         .isRubyEnabled(rubyEnabled)
         .isRustEnabled(rustEnabled)
+        .jvmMavenPlugins(nonNullOr(jvmMavenPlugins, List.of()))
         .mavenSession(session)
-        .outputDirectory(requireNonNullElseGet(
-            outputDirectory, () -> defaultOutputDirectory(session)
-        ))
+        .outputDirectory(nonNullOr(outputDirectory, defaultOutputDirectory(session)))
         .protocVersion(protocVersion())
         .sourceRootRegistrar(sourceRootRegistrar())
-        .sourceRoots(requireNonNullElseGet(
-            sourceDirectories, () -> List.of(defaultSourceDirectory(session))
-        ))
+        .sourceRoots(nonNullOr(sourceDirectories, List.of(defaultSourceDirectory(session))))
         .build();
 
     try {
@@ -493,11 +486,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private String protocVersion() {
     // Give precedence to overriding the protoc version via the command line
     // in case the Maven binaries are incompatible with the current system.
-    var overriddenVersion = System.getProperty("protoc.version");
-    return requireNonNullElse(overriddenVersion, protocVersion);
+    return System.getProperty("protoc.version", protocVersion);
   }
 
-  private <T> List<T> nonNullList(@Nullable List<T> list) {
-    return requireNonNullElseGet(list, List::of);
+  private <T> T nonNullOr(@Nullable T item, T otherwise) {
+    return item == null ? otherwise : item;
   }
 }
