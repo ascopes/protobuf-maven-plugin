@@ -392,33 +392,36 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       throw new MojoExecutionException(ex.getMessage(), ex);
     }
 
-        var request = ImmutableGenerationRequest.builder()
-                .additionalImportPaths(nonNullList(additionalImportPaths).stream().map(File::toPath).collect(Collectors.toList()))
-                .allowedDependencyScopes(allowedScopes())
-                .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
-                .binaryPathPlugins(nonNullList(binaryPathPlugins))
-                .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
-                .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
-                .isCppEnabled(cppEnabled)
-                .isCsharpEnabled(csharpEnabled)
-                .isFailOnMissingSources(failOnMissingSources)
-                .isFatalWarnings(fatalWarnings)
-                .isJavaEnabled(javaEnabled)
-                .isKotlinEnabled(kotlinEnabled)
-                .isLiteEnabled(liteOnly)
-                .isObjcEnabled(objcEnabled)
-                .isPhpEnabled(phpEnabled)
-                .isPythonEnabled(pythonEnabled)
-                .isPythonStubsEnabled(pythonStubsEnabled)
-                .isRegisterAsCompilationRoot(registerAsCompilationRoot)
-                .isRubyEnabled(rubyEnabled)
-                .isRustEnabled(rustEnabled)
-                .mavenSession(session)
-                .outputDirectory(outputDirectory())
-                .protocVersion(protocVersion())
-                .sourceRootRegistrar(sourceRootRegistrar())
-                .sourceRoots(sourceDirectories())
-                .build();
+    var request = ImmutableGenerationRequest.builder()
+        .additionalImportPaths(nonNullList(additionalImportPaths)
+            .stream()
+            .map(File::toPath)
+            .collect(Collectors.toList()))
+        .allowedDependencyScopes(allowedScopes())
+        .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
+        .binaryPathPlugins(nonNullList(binaryPathPlugins))
+        .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
+        .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
+        .isCppEnabled(cppEnabled)
+        .isCsharpEnabled(csharpEnabled)
+        .isFailOnMissingSources(failOnMissingSources)
+        .isFatalWarnings(fatalWarnings)
+        .isJavaEnabled(javaEnabled)
+        .isKotlinEnabled(kotlinEnabled)
+        .isLiteEnabled(liteOnly)
+        .isObjcEnabled(objcEnabled)
+        .isPhpEnabled(phpEnabled)
+        .isPythonEnabled(pythonEnabled)
+        .isPythonStubsEnabled(pythonStubsEnabled)
+        .isRegisterAsCompilationRoot(registerAsCompilationRoot)
+        .isRubyEnabled(rubyEnabled)
+        .isRustEnabled(rustEnabled)
+        .mavenSession(session)
+        .outputDirectory(outputDirectory())
+        .protocVersion(protocVersion())
+        .sourceRootRegistrar(sourceRootRegistrar())
+        .sourceRoots(sourceDirectories())
+        .build();
 
     try {
       if (!sourceCodeGenerator.generate(request)) {
@@ -436,12 +439,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   private Collection<Path> sourceDirectories() {
-      if(sourceDirectories != null){
-          return sourceDirectories.stream().map(File::toPath).collect(Collectors.toList());
-      }else{
-        return List.of(defaultSourceDirectory(session));
-      }
+    if (sourceDirectories != null) {
+      return sourceDirectories.stream().map(File::toPath).collect(Collectors.toList());
+    } else {
+      return List.of(defaultSourceDirectory(session));
     }
+  }
 
     /**
    * Provides the source root registrar for this Mojo.
@@ -506,12 +509,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     // edge case entirely.
     // TODO: move this logic into the source generator class.
     Optional.ofNullable(outputDirectory)
-            .map(File::toPath)
-            .flatMap(FileUtils::getFileExtension)
-            .filter(".jar"::equalsIgnoreCase)
-            .ifPresent(ext -> {
-              throw new IllegalArgumentException("The output directory cannot be a path with a JAR file extension");
-            });
+        .map(File::toPath)
+        .flatMap(FileUtils::getFileExtension)
+        .filter(".jar"::equalsIgnoreCase)
+        .ifPresent(ext -> {
+          throw new IllegalArgumentException("The output directory cannot be a path with a JAR file extension");
+        });
   }
 
   private String protocVersion() {
