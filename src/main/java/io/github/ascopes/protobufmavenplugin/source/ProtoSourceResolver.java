@@ -30,8 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -119,7 +117,6 @@ public final class ProtoSourceResolver implements AutoCloseable {
         .map(this::submitProtoFileListingTask)
         // terminal operation to ensure all are scheduled prior to joining.
         .collect(Collectors.toList())
-        .stream()
         .forEach(task -> {
           try {
             results.add(task.get());
@@ -130,8 +127,9 @@ public final class ProtoSourceResolver implements AutoCloseable {
 
     if (!exceptions.isEmpty()) {
       var causeIterator = exceptions.iterator();
-      var ex = new IOException("Failed to discover protobuf sources in some locations");
-      ex.initCause(causeIterator.next());
+      var ex = new IOException(
+          "Failed to discover protobuf sources in some locations", causeIterator.next()
+      );
       causeIterator.forEachRemaining(ex::addSuppressed);
       throw ex;
     }
@@ -147,14 +145,5 @@ public final class ProtoSourceResolver implements AutoCloseable {
     var task = new FutureTask<>(() -> createProtoFileListing(path));
     executorService.submit(task);
     return task;
-  }
-
-  // Generics are used to keep the signature sensible.
-  private <T> Consumer<FutureTask<T>> partitionResultsForTasks(
-      Collection<T> results,
-      Collection<Exception> exceptions
-  ) {
-    return task -> {
-    };
   }
 }
