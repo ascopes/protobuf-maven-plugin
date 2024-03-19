@@ -9,7 +9,7 @@ target/
 .attach*
 
 # Stuff that I generate when I have lost all hope in the world
-/build.log
+/*.log
 temp/
 
 # Version backups after running ./mvnw versions:set

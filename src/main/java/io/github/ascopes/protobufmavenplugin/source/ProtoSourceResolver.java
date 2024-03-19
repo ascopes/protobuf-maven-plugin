@@ -18,6 +18,8 @@ package io.github.ascopes.protobufmavenplugin.source;
 
 import static java.util.function.Predicate.not;
 
+import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
+import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -115,6 +117,11 @@ public final class ProtoSourceResolver implements AutoCloseable {
 
     originalPaths
         .stream()
+        // GH-132: Normalize to ensure different paths to the same file do not
+        //   get duplicated across more than one extraction site.
+        .map(FileUtils::normalize)
+        // GH-132: Avoid running multiple times on the same location.
+        .distinct()
         .map(this::submitProtoFileListingTask)
         // terminal operation to ensure all are scheduled prior to joining.
         .collect(Collectors.toList())
