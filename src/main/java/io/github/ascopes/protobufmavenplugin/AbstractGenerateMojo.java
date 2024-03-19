@@ -435,7 +435,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   private Path outputDirectory() {
-    return Optional.ofNullable(outputDirectory).map(File::toPath).orElseGet(() -> defaultOutputDirectory(session));
+    return Optional.ofNullable(outputDirectory)
+        .map(File::toPath)
+        .orElseGet(() -> defaultOutputDirectory(session));
   }
 
   private Collection<Path> sourceDirectories() {
