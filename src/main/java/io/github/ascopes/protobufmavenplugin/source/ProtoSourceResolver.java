@@ -115,6 +115,8 @@ public final class ProtoSourceResolver implements AutoCloseable {
 
     originalPaths
         .stream()
+        // GH-132: Avoid running multiple times on the same location.
+        .distinct()
         .map(this::submitProtoFileListingTask)
         // terminal operation to ensure all are scheduled prior to joining.
         .collect(Collectors.toList())
