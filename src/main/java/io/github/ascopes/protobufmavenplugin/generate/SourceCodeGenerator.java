@@ -128,7 +128,7 @@ public final class SourceCodeGenerator {
       return false;
     }
 
-    return commandLineExecutor.execute(false, argLineBuilder.compile(sourceFiles));
+    return commandLineExecutor.execute(argLineBuilder.compile(sourceFiles));
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
@@ -147,7 +147,7 @@ public final class SourceCodeGenerator {
 
   private boolean logProtocVersion(Path protocPath) throws IOException {
     var args = new ArgLineBuilder(protocPath).version();
-    return commandLineExecutor.execute(true, args);
+    return commandLineExecutor.execute(args);
   }
 
   private Collection<ResolvedPlugin> discoverPlugins(
