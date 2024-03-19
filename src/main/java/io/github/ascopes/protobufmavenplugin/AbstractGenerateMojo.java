@@ -92,6 +92,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Leave unspecified or explicitly null/empty to use the defaults.
    *
+   * <p><strong>Default:</strong> {@code null}.
+   *
    * @since 0.0.1
    */
   @Parameter
@@ -104,6 +106,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
    * with the {@code provided} or {@code test} scope instead.
+   *
+   * <p><strong>Default:</strong> {@code null}.
    *
    * @since 0.1.0
    */
@@ -133,6 +137,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * executable, or are using a more obscure system architecture, then using a
    * {@code jvmMavenPlugin} may be more preferrable.
    *
+   * <p><strong>Default:</strong> {@code null}.
+   *
    * @since 0.3.0
    */
   @Parameter
@@ -148,6 +154,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
    * </binaryPathPlugins>
    * }</pre>
+   *
+   * <p><strong>Default:</strong> {@code null}.
    *
    * @since 0.3.0
    */
@@ -173,6 +181,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *     <binaryUrlPlugin>ftp://myorganisation.org/protoc/plugins/myplugin.exe</binaryUrlPlugin>
    *   </binaryUrlPlugins>
    * }</pre>
+   *
+   * <p><strong>Default:</strong> {@code null}.
    *
    * @since 0.4.0
    */
@@ -200,6 +210,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This mechanism allows plugin vendors to implement their plugins in
    * Java and just distribute platform-independent JAR instead.
    *
+   * <p><strong>Default:</strong> {@code null}.
+   *
    * @since 0.3.0
    */
   @Parameter
@@ -210,6 +222,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Leave unspecified or explicitly null to use the default for the
    * goal. This defaults to the Maven generated sources directory within {@code target/}.
+   *
+   * <p><strong>Default:</strong> {@code null}.
    *
    * @since 0.1.0
    */
