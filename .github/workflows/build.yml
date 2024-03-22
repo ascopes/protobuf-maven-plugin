@@ -17,25 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         os-name: [ubuntu-latest, macos-latest, windows-latest]
-        java-version: [11, 21]
+        java-version: [11, 22]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # Install protoc onto the PATH so that we can test PATH resolution.
-      - name: Install dependencies
-        shell: bash
-        run: |-
-          set -eux
-          if command -v apt; then
-            sudo apt -q update
-            sudo apt -qy install protobuf-compiler
-            protoc --version
-          esac
-
-          java -version
-          javac -version
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
