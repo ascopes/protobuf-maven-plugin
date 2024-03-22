@@ -106,7 +106,7 @@ public final class ProtocResolver {
       );
     }
 
-    var coordinate = platformArtifactFactory.createArtifact(
+    var artifact = platformArtifactFactory.createArtifact(
         GROUP_ID,
         ARTIFACT_ID,
         version,
@@ -114,6 +114,6 @@ public final class ProtocResolver {
         null
     );
 
-    return mavenDependencyPathResolver.resolveArtifact(session, coordinate);
+    return mavenDependencyPathResolver.resolveArtifact(session, artifact);
   }
 }

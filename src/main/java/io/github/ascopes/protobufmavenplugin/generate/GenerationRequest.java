@@ -16,13 +16,12 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
+import io.github.ascopes.protobufmavenplugin.dependency.MavenArtifact;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
-import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -35,13 +34,13 @@ public interface GenerationRequest {
 
   Collection<Path> getAdditionalImportPaths();
 
-  Collection<? extends ArtifactCoordinate> getBinaryMavenPlugins();
+  Collection<MavenArtifact> getBinaryMavenPlugins();
 
   Collection<String> getBinaryPathPlugins();
 
   Collection<URL> getBinaryUrlPlugins();
 
-  Collection<? extends DependableCoordinate> getJvmMavenPlugins();
+  Collection<MavenArtifact> getJvmMavenPlugins();
 
   Set<String> getAllowedDependencyScopes();
 

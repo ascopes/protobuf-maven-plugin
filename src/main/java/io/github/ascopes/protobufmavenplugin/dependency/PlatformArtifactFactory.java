@@ -22,8 +22,6 @@ import static java.util.Objects.requireNonNullElseGet;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
-import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -40,23 +38,23 @@ public final class PlatformArtifactFactory {
     this.hostSystem = hostSystem;
   }
 
-  public ArtifactCoordinate createArtifact(
+  public MavenArtifact createArtifact(
       String groupId,
       String artifactId,
       String version,
       @Nullable String extension,
       @Nullable String classifier
   ) {
-    var dependency = new DefaultArtifactCoordinate();
-    dependency.setGroupId(groupId);
-    dependency.setArtifactId(artifactId);
-    dependency.setVersion(version);
-    dependency.setExtension(requireNonNullElse(extension, "exe"));
-    dependency.setClassifier(requireNonNullElseGet(
+    var artifact = new MavenArtifact();
+    artifact.setGroupId(groupId);
+    artifact.setArtifactId(artifactId);
+    artifact.setVersion(version);
+    artifact.setType(requireNonNullElse(extension, "exe"));
+    artifact.setClassifier(requireNonNullElseGet(
         classifier, 
         () -> getPlatformExecutableClassifier(artifactId)
     ));
-    return dependency;
+    return artifact;
   }
 
   private String getPlatformExecutableClassifier(String artifactId) {

@@ -64,30 +64,30 @@ class PlatformArtifactFactoryTest {
     var factory = new PlatformArtifactFactory(hostSystem);
 
     // When
-    var dependency = factory.createArtifact(
-        groupId, 
-        artifactId, 
-        version, 
-        givenExtension, 
+    var artifact = factory.createArtifact(
+        groupId,
+        artifactId,
+        version,
+        givenExtension,
         givenClassifier
     );
 
     // Then
     assertSoftly(softly -> {
-      softly.assertThat(dependency.getGroupId())
+      softly.assertThat(artifact.getGroupId().orElse(null))
           .as("groupId")
           .isEqualTo(groupId);
-      softly.assertThat(dependency.getArtifactId())
+      softly.assertThat(artifact.getArtifactId().orElse(null))
           .as("artifactId")
           .isEqualTo(artifactId);
-      softly.assertThat(dependency.getVersion())
+      softly.assertThat(artifact.getVersion().orElse(null))
           .as("version")
           .isEqualTo(version);
-      softly.assertThat(dependency.getExtension())
-          .as("extension")
-          .isEqualTo(expectedExtension);
-      softly.assertThat(dependency.getClassifier())
+      softly.assertThat(artifact.getType().orElse(null))
           .as("type")
+          .isEqualTo(expectedExtension);
+      softly.assertThat(artifact.getClassifier().orElse(null))
+          .as("classifier")
           .isEqualTo(expectedClassifier);
     });
   }

@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
+import io.github.ascopes.protobufmavenplugin.dependency.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
@@ -39,8 +40,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
-import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -145,7 +144,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<DefaultArtifactCoordinate> binaryMavenPlugins;
+  private @Nullable List<MavenArtifact> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -218,7 +217,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<DefaultDependableCoordinate> jvmMavenPlugins;
+  private @Nullable List<MavenArtifact> jvmMavenPlugins;
 
   /**
    * Override the directory to output generated code to.

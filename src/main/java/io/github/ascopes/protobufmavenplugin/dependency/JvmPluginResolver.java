@@ -16,8 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import static java.util.Objects.requireNonNullElse;
-
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
@@ -34,7 +32,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
 
 /**
  * Wraps a JVM-based plugin invocation using an OS-native script that calls Java.
@@ -67,7 +64,7 @@ public final class JvmPluginResolver {
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
-      Collection<? extends DependableCoordinate> plugins
+      Collection<MavenArtifact> plugins
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedPlugin>();
     for (var plugin : plugins) {
@@ -78,7 +75,7 @@ public final class JvmPluginResolver {
 
   private ResolvedPlugin resolve(
       MavenSession session,
-      DependableCoordinate plugin
+      MavenArtifact plugin
   ) throws IOException, ResolutionException {
     var pluginId = pluginIdDigest(plugin);
     var argLine = resolveAndBuildArgLine(session, plugin);
@@ -99,12 +96,12 @@ public final class JvmPluginResolver {
 
   private List<String> resolveAndBuildArgLine(
       MavenSession session,
-      DependableCoordinate pluginDependencyCoordinate
+      MavenArtifact plugin
   ) throws ResolutionException {
 
     // Resolve dependencies first.
     var dependencyIterator = dependencyPathResolver
-        .resolveDependencyTreePaths(session, SCOPES, pluginDependencyCoordinate)
+        .resolveDependencyTreePaths(session, SCOPES, plugin)
         .iterator();
 
     // First dependency is always the thing we actually want to execute,
@@ -128,16 +125,8 @@ public final class JvmPluginResolver {
     return args;
   }
 
-  private String pluginIdDigest(DependableCoordinate dependableCoordinate) {
-    var digestableString = String.join(
-        ":",
-        requireNonNullElse(dependableCoordinate.getGroupId(), ""),
-        requireNonNullElse(dependableCoordinate.getArtifactId(), ""),
-        requireNonNullElse(dependableCoordinate.getVersion(), ""),
-        requireNonNullElse(dependableCoordinate.getType(), ""),
-        requireNonNullElse(dependableCoordinate.getClassifier(), "")
-    );
-    return Digests.sha1(digestableString);
+  private String pluginIdDigest(MavenArtifact plugin) {
+    return Digests.sha1(plugin.toString());
   }
 
   private Path resolvePluginScriptPath() {
