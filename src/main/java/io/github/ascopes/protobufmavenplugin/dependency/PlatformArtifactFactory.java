@@ -51,7 +51,7 @@ public final class PlatformArtifactFactory {
     artifact.setVersion(version);
     artifact.setType(requireNonNullElse(extension, "exe"));
     artifact.setClassifier(requireNonNullElseGet(
-        classifier, 
+        classifier,
         () -> getPlatformExecutableClassifier(artifactId)
     ));
     return artifact;
