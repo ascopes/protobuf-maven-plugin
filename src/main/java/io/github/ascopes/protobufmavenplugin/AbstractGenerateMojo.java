@@ -109,12 +109,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
    * with the {@code provided} or {@code test} scope instead.
    *
+   * <p>Prior to v1.2.0, this was called {@code additionalImportPaths}. This old name will
+   * be maintained as a valid alias until v2.0.0.
+   *
    * <p>This parameter is optional.
    *
    * @since 0.1.0
    */
-  @Parameter
-  private @Nullable List<File> additionalImportPaths;
+  @Parameter(alias = "additionalImportPaths")
+  private @Nullable List<File> importPaths;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -392,15 +395,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
 
     var request = ImmutableGenerationRequest.builder()
-        .additionalImportPaths(nonNullList(additionalImportPaths)
-            .stream()
-            .map(File::toPath)
-            .collect(Collectors.toList()))
         .allowedDependencyScopes(allowedScopes())
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
+        .importPaths(nonNullList(importPaths)
+            .stream()
+            .map(File::toPath)
+            .collect(Collectors.toList()))
         .isCppEnabled(cppEnabled)
         .isCsharpEnabled(csharpEnabled)
         .isFailOnMissingSources(failOnMissingSources)

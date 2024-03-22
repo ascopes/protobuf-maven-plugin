@@ -216,7 +216,7 @@ just like you would expect when using Java code. This plugin considers any depen
 `provided`, or `system` scope (or additionally `test` if the `generate-test` goal is used).
 
 If there are additional paths on the file system that you wish to add to the import path, then
-you can specify these using the `additionalImportPaths` parameter. Note that these will not be
+you can specify these using the `importPaths` parameter. Note that these will not be
 compiled, only made visible to the protobuf compiler.
 
 ## Kotlin generation

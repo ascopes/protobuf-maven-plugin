@@ -32,13 +32,13 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface GenerationRequest {
 
-  Collection<Path> getAdditionalImportPaths();
-
   Collection<MavenArtifact> getBinaryMavenPlugins();
 
   Collection<String> getBinaryPathPlugins();
 
   Collection<URL> getBinaryUrlPlugins();
+
+  Collection<Path> getImportPaths();
 
   Collection<MavenArtifact> getJvmMavenPlugins();
 
