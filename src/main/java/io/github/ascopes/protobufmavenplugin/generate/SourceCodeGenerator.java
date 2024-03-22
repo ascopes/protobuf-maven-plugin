@@ -181,7 +181,7 @@ public final class SourceCodeGenerator {
     // Always use all provided additional import paths, as we assume they are valid given the user
     // has explicitly included them in their configuration.
     var explicitDependencies = protoListingResolver
-        .createProtoFileListings(request.getAdditionalImportPaths());
+        .createProtoFileListings(request.getImportPaths());
 
     return concat(inheritedDependencies, explicitDependencies);
   }
