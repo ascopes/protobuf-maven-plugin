@@ -26,7 +26,6 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 
 /**
  * Protoc plugin resolver for native binaries on the system.
@@ -56,7 +55,7 @@ public final class BinaryPluginResolver {
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
-      Collection<? extends ArtifactCoordinate> plugins
+      Collection<MavenArtifact> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, plugin -> resolveMavenPlugin(session, plugin));
   }
@@ -75,23 +74,14 @@ public final class BinaryPluginResolver {
 
   private ResolvedPlugin resolveMavenPlugin(
       MavenSession session,
-      ArtifactCoordinate plugin
+      MavenArtifact plugin
   ) throws ResolutionException {
-    // The ArtifactCoordinate API defaults to setting 'jar' on artifacts if unspecified or
-    // explicitly null. We do not want this behaviour. Instead, we want the default to be whatever
-    // the platform dependency factory thinks is most appropriate based on the platform, etc.
-    // Therefore, if we see we have a JAR, explicitly pass `null` into the factory to override this.
-    var extension = plugin.getExtension().equals("jar")
-        ? null
-        : plugin.getExtension();
-
-    // Fill out the missing fields.
     plugin = platformDependencyFactory.createArtifact(
-        plugin.getGroupId(),
-        plugin.getArtifactId(),
-        plugin.getVersion(),
-        extension,
-        plugin.getClassifier()
+        plugin.getGroupId().orElse(null),
+        plugin.getArtifactId().orElse(null),
+        plugin.getVersion().orElse(null),
+        plugin.getType().orElse("exe"),
+        plugin.getClassifier().orElse(null)
     );
 
     var path = mavenDependencyPathResolver.resolveArtifact(session, plugin);
