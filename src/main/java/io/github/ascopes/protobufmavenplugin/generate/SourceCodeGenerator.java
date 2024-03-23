@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.generate;
 
 import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionScope;
+import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependency.JvmPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
@@ -174,13 +174,13 @@ public final class SourceCodeGenerator {
 
     log.debug(
         "Finding importable protobuf sources from the classpath ({})",
-        request.getDependencyResolutionScope()
+        request.getDependencyResolutionDepth()
     );
 
     var dependencyPaths = mavenDependencyPathResolver.resolveProjectDependencyPaths(
         session,
         request.getAllowedDependencyScopes(),
-        request.getDependencyResolutionScope()
+        request.getDependencyResolutionDepth()
     );
 
     var inheritedDependencies = protoListingResolver

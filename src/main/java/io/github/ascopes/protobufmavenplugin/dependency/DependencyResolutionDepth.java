@@ -22,7 +22,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
  * @author Ashley Scopes
  * @since 1.2.0
  */
-public enum DependencyResolutionScope {
+public enum DependencyResolutionDepth {
 
   /**
    * Resolve all transitive dependencies.
