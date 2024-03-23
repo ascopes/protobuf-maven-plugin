@@ -56,16 +56,54 @@ public final class MavenDependencyPathResolver {
 
   public Collection<Path> resolveProjectDependencyPaths(
       MavenSession session,
-      Set<String> allowedScopes
+      Set<String> allowedScopes,
+      DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
     var paths = new ArrayList<Path>();
 
     for (var dependency : session.getCurrentProject().getDependencies()) {
       var artifact = MavenArtifact.fromDependency(dependency);
-      paths.addAll(resolveDependencyTreePaths(session, allowedScopes, artifact));
+      paths.addAll(resolveDependencyTreePaths(
+          session,
+          allowedScopes,
+          dependencyResolutionDepth,
+          artifact
+      ));
     }
 
     return paths;
+  }
+
+  public Collection<Path> resolveDependencyTreePaths(
+      MavenSession session,
+      Set<String> allowedScopes,
+      DependencyResolutionDepth dependencyResolutionDepth,
+      MavenArtifact artifact
+  ) throws ResolutionException {
+    log.debug("Resolving dependency '{}'", artifact);
+
+    var allDependencyPaths = new ArrayList<Path>();
+    var artifactPath = resolveArtifact(session, artifact);
+    allDependencyPaths.add(artifactPath);
+
+    if (dependencyResolutionDepth == DependencyResolutionDepth.DIRECT) {
+      log.debug("Not resolving transitive dependencies of '{}'", artifact);
+      return allDependencyPaths;
+    }
+
+    var request = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
+    var scopes = ScopeFilter.including(allowedScopes);
+    var coordinate = artifact.toDependableCoordinate();
+
+    try {
+      for (var next : dependencyResolver.resolveDependencies(request, coordinate, scopes)) {
+        allDependencyPaths.add(next.getArtifact().getFile().toPath());
+      }
+    } catch (DependencyResolverException ex) {
+      throw new ResolutionException("Failed to resolve dependencies of '" + artifact + "'", ex);
+    }
+
+    return allDependencyPaths;
   }
 
   public Path resolveArtifact(
@@ -83,31 +121,5 @@ public final class MavenDependencyPathResolver {
     } catch (ArtifactResolverException ex) {
       throw new ResolutionException("Failed to resolve artifact '" + artifact + "'", ex);
     }
-  }
-
-  public Collection<Path> resolveDependencyTreePaths(
-      MavenSession session,
-      Set<String> allowedScopes,
-      MavenArtifact artifact
-  ) throws ResolutionException {
-    log.debug("Resolving dependency '{}'", artifact);
-
-    var allDependencyPaths = new ArrayList<Path>();
-    var artifactPath = resolveArtifact(session, artifact);
-    allDependencyPaths.add(artifactPath);
-
-    var request = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-    var scopes = ScopeFilter.including(allowedScopes);
-    var coordinate = artifact.toDependableCoordinate();
-
-    try {
-      for (var next : dependencyResolver.resolveDependencies(request, coordinate, scopes)) {
-        allDependencyPaths.add(next.getArtifact().getFile().toPath());
-      }
-    } catch (DependencyResolverException ex) {
-      throw new ResolutionException("Failed to resolve dependencies of '" + artifact + "'", ex);
-    }
-
-    return allDependencyPaths;
   }
 }

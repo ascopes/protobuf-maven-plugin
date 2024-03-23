@@ -101,7 +101,12 @@ public final class JvmPluginResolver {
 
     // Resolve dependencies first.
     var dependencyIterator = dependencyPathResolver
-        .resolveDependencyTreePaths(session, SCOPES, plugin)
+        .resolveDependencyTreePaths(
+            session,
+            SCOPES,
+            DependencyResolutionDepth.TRANSITIVE,
+            plugin
+        )
         .iterator();
 
     // First dependency is always the thing we actually want to execute,
