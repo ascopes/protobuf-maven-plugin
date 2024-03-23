@@ -19,7 +19,7 @@ package io.github.ascopes.protobufmavenplugin;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
-import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionScope;
+import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
@@ -115,7 +115,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter(defaultValue = "TRANSITIVE")
-  private DependencyResolutionScope dependencyResolutionScope;
+  private DependencyResolutionDepth dependencyResolutionDepth;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -415,7 +415,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
-        .dependencyResolutionScope(dependencyResolutionScope)
+        .dependencyResolutionDepth(dependencyResolutionDepth)
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
         .importPaths(nonNullList(importPaths)
             .stream()

@@ -104,7 +104,7 @@ public final class JvmPluginResolver {
         .resolveDependencyTreePaths(
             session,
             SCOPES,
-            DependencyResolutionScope.TRANSITIVE,
+            DependencyResolutionDepth.TRANSITIVE,
             plugin
         )
         .iterator();

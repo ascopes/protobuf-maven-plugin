@@ -57,7 +57,7 @@ public final class MavenDependencyPathResolver {
   public Collection<Path> resolveProjectDependencyPaths(
       MavenSession session,
       Set<String> allowedScopes,
-      DependencyResolutionScope dependencyResolutionScope
+      DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
     var paths = new ArrayList<Path>();
 
@@ -66,7 +66,7 @@ public final class MavenDependencyPathResolver {
       paths.addAll(resolveDependencyTreePaths(
           session,
           allowedScopes,
-          dependencyResolutionScope,
+          dependencyResolutionDepth,
           artifact
       ));
     }
@@ -77,7 +77,7 @@ public final class MavenDependencyPathResolver {
   public Collection<Path> resolveDependencyTreePaths(
       MavenSession session,
       Set<String> allowedScopes,
-      DependencyResolutionScope dependencyResolutionScope,
+      DependencyResolutionDepth dependencyResolutionDepth,
       MavenArtifact artifact
   ) throws ResolutionException {
     log.debug("Resolving dependency '{}'", artifact);
@@ -86,7 +86,7 @@ public final class MavenDependencyPathResolver {
     var artifactPath = resolveArtifact(session, artifact);
     allDependencyPaths.add(artifactPath);
 
-    if (dependencyResolutionScope == DependencyResolutionScope.DIRECT) {
+    if (dependencyResolutionDepth == DependencyResolutionDepth.DIRECT) {
       log.debug("Not resolving transitive dependencies of '{}'", artifact);
       return allDependencyPaths;
     }

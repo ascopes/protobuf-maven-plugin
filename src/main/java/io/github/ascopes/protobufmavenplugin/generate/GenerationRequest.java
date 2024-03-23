@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionScope;
+import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenArtifact;
 import java.net.URL;
 import java.nio.file.Path;
@@ -39,7 +39,7 @@ public interface GenerationRequest {
 
   Collection<URL> getBinaryUrlPlugins();
 
-  DependencyResolutionScope getDependencyResolutionScope();
+  DependencyResolutionDepth getDependencyResolutionDepth();
 
   Collection<Path> getImportPaths();
 
