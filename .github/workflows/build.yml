@@ -29,7 +29,8 @@ jobs:
         run: |-
           set -eux
           if command -v apt; then
-            sudo apt -q update && sudo apt -qy install protobuf-compiler ;;
+            sudo apt -q update
+            sudo apt -qy install protobuf-compiler
             protoc --version
           esac
 
