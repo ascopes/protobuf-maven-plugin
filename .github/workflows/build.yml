@@ -23,29 +23,37 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install protoc onto the PATH so that we can test PATH resolution.
-      - name: Install dependencies
-        shell: bash
-        run: |-
-          set -eux
-          case "${{ matrix.os-name }}" in
-            # TODO: uncomment once protoc 4.26.0 is used globally.
-            #macos-*) brew install protobuf ;;
-            ubuntu-*) sudo apt -q update && sudo apt -qy install protobuf-compiler ;;
-            # TODO: uncomment once protoc 4.26.0 is used globally.
-            #windows-*) choco install protoc ;;
-          esac
-
-          java -version
-          javac -version
-          protoc --version || true
-
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
           cache: maven
+
+      # Install protoc onto the PATH so that we can test PATH resolution.
+      - name: Install dependencies
+        shell: bash
+        run: |-
+          set -eux
+          case "${{ matrix.os-name }}" in
+            macos-*)
+              # Re-enable once brew updates to protoc 26.1 or newer.
+              #brew install protobuf
+              #protoc --version
+              ;;
+            ubuntu-*)
+              sudo apt update -q
+              sudo apt install protobuf-compiler -qy
+              ;;
+            windows-*)
+              #choco install protoc
+              #protoc --version
+              ;;
+          esac
+
+          java -version
+          javac -version
+          ./mvnw --version
 
       - name: Build and test
         shell: bash
@@ -55,9 +63,11 @@ jobs:
         uses: codecov/codecov-action@v3
         continue-on-error: true
         if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
-  build-x86_64-oldmaven:
-    name: mvn 3.8.1 jdk-11/ubuntu-latest/x86_64
+  build-x86_64-linux-oldmaven:
+    name: jdk-11/ubuntu-latest/x86_64 (oldest supported Maven)
     runs-on: ubuntu-latest
 
     steps:
@@ -87,8 +97,10 @@ jobs:
         uses: codecov/codecov-action@v3
         continue-on-error: true
         if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
-  build-crossarch-ubuntu:
+  build-crossarch-linux:
     name: jdk-11/ubuntu-latest/${{ matrix.arch }}
     runs-on: ubuntu-latest
 
