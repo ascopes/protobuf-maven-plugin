@@ -28,14 +28,22 @@ jobs:
         shell: bash
         run: |-
           set -eux
-          if command -v apt; then
-            sudo apt -q update
-            sudo apt -qy install protobuf-compiler
-            protoc --version
-          fi
+          case "${{ matrix.os-name }}" in
+            ubuntu*)
+              sudo apt -q update
+              sudo apt -qy install protobuf-compiler
+              ;;
+            mac*)
+              brew install protoc
+              ;;
+            win*)
+              choco install protobuf
+              ;;
+          esac
 
           java -version
           javac -version
+          protoc --version
 
       - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
