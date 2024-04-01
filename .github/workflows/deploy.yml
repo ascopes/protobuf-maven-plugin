@@ -148,7 +148,7 @@ jobs:
     environment:
       name: github-pages
       url: https://ascopes.github.io/protobuf-maven-plugin
-      
+
     steps:
       - name: Deploy site
         if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
