@@ -37,23 +37,27 @@ jobs:
           set -eux
           case "${{ matrix.os-name }}" in
             macos-*)
-              # Re-enable once brew updates to protoc 26.1 or newer.
-              #brew install protobuf
-              #protoc --version
+              brew up
+              brew install protobuf@26
               ;;
             ubuntu-*)
               sudo apt update -q
               sudo apt install protobuf-compiler -qy
               ;;
             windows-*)
-              #choco install protoc
-              #protoc --version
+              choco install protoc
+              ;;
+            *)
+              echo 'No steps configured in build.yml for ${{ matrix.os-name }}'
+              exit 2
               ;;
           esac
 
+          git --version
           java -version
           javac -version
           ./mvnw --version
+          which protoc && protoc --version
 
       - name: Build and test
         shell: bash
