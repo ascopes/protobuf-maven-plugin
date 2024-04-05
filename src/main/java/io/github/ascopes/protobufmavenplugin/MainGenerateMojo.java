@@ -22,6 +22,7 @@ import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Generate source code from protobuf files.
@@ -42,6 +43,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(
     name = "generate",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
     threadSafe = true
 )
 public final class MainGenerateMojo extends AbstractGenerateMojo {
@@ -49,11 +52,6 @@ public final class MainGenerateMojo extends AbstractGenerateMojo {
   @Override
   protected SourceRootRegistrar sourceRootRegistrar() {
     return SourceRootRegistrar.MAIN;
-  }
-
-  @Override
-  protected Set<String> allowedScopes() {
-    return Set.of("compile", "provided", "system");
   }
 
   @Override

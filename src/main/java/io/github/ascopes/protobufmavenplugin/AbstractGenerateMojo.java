@@ -33,7 +33,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -255,10 +254,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Whether to fail on missing sources.
    *
    * <p>If no sources are detected, it is usually a sign that this plugin
-   * is misconfigured, or that you are including this plugin in a project
-   * that does not need it. For this reason, the plugin defaults this setting
-   * to being enabled. If you wish to not fail, you can explicitly set this
-   * to false instead.
+   * is misconfigured, or that you are including this plugin in a project that does not need it. For
+   * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
+   * can explicitly set this to false instead.
    *
    * @since 0.5.0
    */
@@ -310,12 +308,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean pythonEnabled;
 
   /**
-   * Enable generating Python stubs ({@code *.pyi} files) for static typechecking
-   * from the protobuf sources.
+   * Enable generating Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
+   * sources.
    *
    * <p>If you enable this, you probably will also want to enable Python itself
-   * to get actual source code
-   * to accompany the stubs.
+   * to get actual source code to accompany the stubs.
    *
    * @since 1.1.0
    */
@@ -384,12 +381,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean liteOnly;
 
   /**
-   * Whether to register the output directories as compilation roots with
-   * Maven.
+   * Whether to register the output directories as compilation roots with Maven.
    *
    * <p>Generally, you want to do this, but there may be edge cases where you
-   * wish to control this behaviour manually instead. In this case, set this
-   * parameter to be {@code false}.
+   * wish to control this behaviour manually instead. In this case, set this parameter to be
+   * {@code false}.
    *
    * @since 0.5.0
    */
@@ -410,8 +406,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       throw new MojoExecutionException(ex.getMessage(), ex);
     }
 
+    //noinspection DataFlowIssue
     var request = ImmutableGenerationRequest.builder()
-        .allowedDependencyScopes(allowedScopes())
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
@@ -498,16 +494,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @return the path to the directory.
    */
   protected abstract Path defaultOutputDirectory(MavenSession session);
-
-  /**
-   * Provides the scopes allowed for dependencies.
-   *
-   * <p>Dependencies matching one of these scopes will be indexed and made visible
-   * to the protoc compiler if proto files are discovered.
-   *
-   * @return a set of the scopes.
-   */
-  protected abstract Set<String> allowedScopes();
 
   /**
    * Validate this Mojo's parameters.

@@ -22,6 +22,7 @@ import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Generate source code from protobuf files for use in tests.
@@ -47,6 +48,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(
     name = "generate-test",
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
+    requiresDependencyCollection = ResolutionScope.TEST,
+    requiresDependencyResolution = ResolutionScope.TEST,
     threadSafe = true
 )
 public final class TestGenerateMojo extends AbstractGenerateMojo {
@@ -54,11 +57,6 @@ public final class TestGenerateMojo extends AbstractGenerateMojo {
   @Override
   protected SourceRootRegistrar sourceRootRegistrar() {
     return SourceRootRegistrar.TEST;
-  }
-
-  @Override
-  protected Set<String> allowedScopes() {
-    return Set.of("compile", "provided", "system", "test");
   }
 
   @Override
