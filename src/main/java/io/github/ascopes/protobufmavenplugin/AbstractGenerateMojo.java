@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
 import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependency.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;

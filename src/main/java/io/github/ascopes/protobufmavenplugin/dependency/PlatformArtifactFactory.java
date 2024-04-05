@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
+import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
