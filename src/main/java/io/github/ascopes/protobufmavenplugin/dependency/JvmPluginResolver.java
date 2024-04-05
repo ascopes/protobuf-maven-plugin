@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -47,17 +46,17 @@ import org.apache.maven.execution.MavenSession;
 public final class JvmPluginResolver {
 
   private final HostSystem hostSystem;
-  private final MavenDependencyPathResolver dependencyPathResolver;
+  private final MavenDependencyPathResolver dependencyResolver;
   private final TemporarySpace temporarySpace;
 
   @Inject
   public JvmPluginResolver(
       HostSystem hostSystem,
-      MavenDependencyPathResolver dependencyPathResolver,
+      MavenDependencyPathResolver dependencyResolver,
       TemporarySpace temporarySpace
   ) {
     this.hostSystem = hostSystem;
-    this.dependencyPathResolver = dependencyPathResolver;
+    this.dependencyResolver = dependencyResolver;
     this.temporarySpace = temporarySpace;
   }
 
@@ -99,12 +98,8 @@ public final class JvmPluginResolver {
   ) throws ResolutionException {
 
     // Resolve dependencies first.
-    var dependencyIterator = dependencyPathResolver
-        .resolveDependencyTreePaths(
-            session,
-            DependencyResolutionDepth.TRANSITIVE,
-            plugin
-        )
+    var dependencyIterator = dependencyResolver
+        .resolveOne(session, plugin, DependencyResolutionDepth.TRANSITIVE)
         .iterator();
 
     // First dependency is always the thing we actually want to execute,

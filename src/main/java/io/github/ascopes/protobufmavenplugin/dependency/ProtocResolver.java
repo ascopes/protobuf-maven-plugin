@@ -42,7 +42,7 @@ public final class ProtocResolver {
   private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
   private final HostSystem hostSystem;
-  private final MavenDependencyPathResolver mavenDependencyPathResolver;
+  private final MavenDependencyPathResolver dependencyResolver;
   private final PlatformArtifactFactory platformArtifactFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
@@ -50,13 +50,13 @@ public final class ProtocResolver {
   @Inject
   public ProtocResolver(
       HostSystem hostSystem,
-      MavenDependencyPathResolver mavenDependencyPathResolver,
+      MavenDependencyPathResolver dependencyResolver,
       PlatformArtifactFactory platformArtifactFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
   ) {
     this.hostSystem = hostSystem;
-    this.mavenDependencyPathResolver = mavenDependencyPathResolver;
+    this.dependencyResolver = dependencyResolver;
     this.platformArtifactFactory = platformArtifactFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
@@ -114,6 +114,8 @@ public final class ProtocResolver {
         null
     );
 
-    return mavenDependencyPathResolver.resolveArtifact(session, artifact);
+    return dependencyResolver.resolveOne(session, artifact, DependencyResolutionDepth.DIRECT)
+        .iterator()
+        .next();
   }
 }

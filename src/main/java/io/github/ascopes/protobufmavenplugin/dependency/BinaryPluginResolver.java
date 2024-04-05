@@ -35,19 +35,19 @@ import org.apache.maven.execution.MavenSession;
 @Named
 public final class BinaryPluginResolver {
 
-  private final MavenDependencyPathResolver mavenDependencyPathResolver;
+  private final MavenDependencyPathResolver dependencyResolver;
   private final PlatformArtifactFactory platformDependencyFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
   public BinaryPluginResolver(
-      MavenDependencyPathResolver mavenDependencyPathResolver,
+      MavenDependencyPathResolver dependencyResolver,
       PlatformArtifactFactory platformDependencyFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
   ) {
-    this.mavenDependencyPathResolver = mavenDependencyPathResolver;
+    this.dependencyResolver = dependencyResolver;
     this.platformDependencyFactory = platformDependencyFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
@@ -84,7 +84,10 @@ public final class BinaryPluginResolver {
         plugin.getClassifier().orElse(null)
     );
 
-    var path = mavenDependencyPathResolver.resolveArtifact(session, plugin);
+    // Only one dependency should ever be returned here.
+    var path = dependencyResolver.resolveOne(session, plugin, DependencyResolutionDepth.DIRECT)
+        .iterator()
+        .next();
     makeExecutable(path);
     return createResolvedPlugin(path);
   }

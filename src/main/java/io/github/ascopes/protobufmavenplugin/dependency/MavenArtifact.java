@@ -20,24 +20,20 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
-import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
-import org.apache.maven.shared.transfer.dependencies.DefaultDependableCoordinate;
-import org.apache.maven.shared.transfer.dependencies.DependableCoordinate;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * Implementation independent deacriptor for an artifact or dependency that
- * can be used in a Maven Plugin parameter.
+ * Implementation independent descriptor for an artifact or dependency that can be used in a Maven
+ * Plugin parameter.
  *
  * @author Ashley Scopes
  * @since 1.2.0
  */
 public final class MavenArtifact {
+
   private static final Logger log = LoggerFactory.getLogger(MavenArtifact.class);
 
   private @Nullable String groupId;
@@ -93,7 +89,7 @@ public final class MavenArtifact {
   public void setExtension(@Nullable String extension) {
     log.warn("MavenArtifact.extension is deprecated for removal in v2.0.0. "
         + "Please use MavenArtifact.type instead for future compatibility.");
-    this.type = extension;
+    type = extension;
   }
 
   @Override
@@ -121,35 +117,5 @@ public final class MavenArtifact {
     return Stream.of(groupId, artifactId, version, classifier, type)
         .map(attr -> Objects.requireNonNullElse(attr, ""))
         .collect(Collectors.joining(":"));
-  }
-
-  public ArtifactCoordinate toArtifactCoordinate() {
-    var coordinate = new DefaultArtifactCoordinate();
-    coordinate.setGroupId(groupId);
-    coordinate.setArtifactId(artifactId);
-    coordinate.setVersion(version);
-    coordinate.setClassifier(classifier);
-    coordinate.setExtension(type);
-    return coordinate;
-  }
-
-  public DependableCoordinate toDependableCoordinate() {
-    var coordinate = new DefaultDependableCoordinate();
-    coordinate.setGroupId(groupId);
-    coordinate.setArtifactId(artifactId);
-    coordinate.setVersion(version);
-    coordinate.setClassifier(classifier);
-    coordinate.setType(type);
-    return coordinate;
-  }
-
-  public static MavenArtifact fromDependency(Dependency dependency) {
-    var mavenArtifact = new MavenArtifact();
-    mavenArtifact.setGroupId(dependency.getGroupId());
-    mavenArtifact.setArtifactId(dependency.getArtifactId());
-    mavenArtifact.setVersion(dependency.getVersion());
-    mavenArtifact.setClassifier(dependency.getClassifier());
-    mavenArtifact.setType(dependency.getType());
-    return mavenArtifact;
   }
 }

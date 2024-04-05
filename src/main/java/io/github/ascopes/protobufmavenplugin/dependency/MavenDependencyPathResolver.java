@@ -20,16 +20,25 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.artifact.Artifact;
+import org.apache.maven.RepositoryUtils;
+import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
-import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolverException;
-import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolver;
-import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolverException;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,88 +51,122 @@ import org.slf4j.LoggerFactory;
 public final class MavenDependencyPathResolver {
 
   private static final Logger log = LoggerFactory.getLogger(MavenDependencyPathResolver.class);
-
-  private final ArtifactResolver artifactResolver;
-  private final DependencyResolver dependencyResolver;
+  private final RepositorySystem repositorySystem;
+  private final ArtifactHandler artifactHandler;
 
   @Inject
   public MavenDependencyPathResolver(
-      ArtifactResolver artifactResolver,
-      DependencyResolver dependencyResolver
+      RepositorySystem repositorySystem,
+      ArtifactHandler artifactHandler
   ) {
-    this.artifactResolver = artifactResolver;
-    this.dependencyResolver = dependencyResolver;
+    this.repositorySystem = repositorySystem;
+    this.artifactHandler = artifactHandler;
   }
 
-  public Collection<Path> resolveProjectDependencyPaths(
+  public Collection<Path> resolveOne(
       MavenSession session,
+      MavenArtifact mavenArtifact,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
-    if (dependencyResolutionDepth == DependencyResolutionDepth.DIRECT) {
-      var artifacts = session.getCurrentProject().getDependencies()
-          .stream()
-          .map(MavenArtifact::fromDependency)
-          .collect(Collectors.toList());
+    return resolveAll(session, List.of(mavenArtifact), dependencyResolutionDepth);
+  }
 
-      var paths = new ArrayList<Path>();
-      for (var artifact : artifacts) {
-        paths.add(resolveArtifact(session, artifact));
-      }
-      return paths;
-    }
+  public Collection<Path> resolveAll(
+      MavenSession session,
+      Collection<MavenArtifact> mavenArtifacts,
+      DependencyResolutionDepth dependencyResolutionDepth
+  ) throws ResolutionException {
+    var artifacts = dependencyResolutionDepth == DependencyResolutionDepth.DIRECT
+        ? resolveDirect(session, mavenArtifacts)
+        : resolveTransitive(session, mavenArtifacts);
 
-    return session.getCurrentProject().getArtifacts()
+    return artifacts
         .stream()
         .map(Artifact::getFile)
         .map(File::toPath)
-        .distinct()
         .collect(Collectors.toList());
   }
 
-  public Collection<Path> resolveDependencyTreePaths(
+  private List<Artifact> resolveDirect(
       MavenSession session,
-      DependencyResolutionDepth dependencyResolutionDepth,
-      MavenArtifact artifact
+      Collection<MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
-    log.debug("Resolving dependency '{}'", artifact);
+    log.debug("Resolving direct artifacts {}", mavenArtifacts);
 
-    var allDependencyPaths = new ArrayList<Path>();
-    var artifactPath = resolveArtifact(session, artifact);
-    allDependencyPaths.add(artifactPath);
+    var artifactRequests = new ArrayList<ArtifactRequest>();
 
-    if (dependencyResolutionDepth == DependencyResolutionDepth.DIRECT) {
-      log.debug("Not resolving transitive dependencies of '{}'", artifact);
-      return allDependencyPaths;
+    for (var mavenArtifact : mavenArtifacts) {
+      artifactRequests.add(getArtifactRequest(session, mavenArtifact));
     }
-
-    var request = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-    var coordinate = artifact.toDependableCoordinate();
 
     try {
-      for (var next : dependencyResolver.resolveDependencies(request, coordinate, null)) {
-        allDependencyPaths.add(next.getArtifact().getFile().toPath());
-      }
-    } catch (DependencyResolverException ex) {
-      throw new ResolutionException("Failed to resolve dependencies of '" + artifact + "'", ex);
-    }
+      return repositorySystem
+          .resolveArtifacts(session.getRepositorySession(), artifactRequests)
+          .stream()
+          .map(ArtifactResult::getArtifact)
+          .collect(Collectors.toList());
 
-    return allDependencyPaths;
+    } catch (ArtifactResolutionException ex) {
+      throw new ResolutionException("Failed to resolve one or more artifacts", ex);
+    }
   }
 
-  public Path resolveArtifact(
+  private ArtifactRequest getArtifactRequest(
       MavenSession session,
-      MavenArtifact artifact
+      MavenArtifact mavenArtifact
   ) throws ResolutionException {
-    var request = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
+    var artifact = new DefaultArtifact(
+        mavenArtifact.getGroupId().orElseThrow(requiredField(mavenArtifact, "groupId")),
+        mavenArtifact.getArtifactId().orElseThrow(requiredField(mavenArtifact, "artifactId")),
+        mavenArtifact.getClassifier().orElseGet(artifactHandler::getClassifier),
+        mavenArtifact.getType().orElse("jar"),
+        mavenArtifact.getVersion().orElseThrow(requiredField(mavenArtifact, "version"))
+    );
+    return new ArtifactRequest(artifact, remoteRepositories(session), null);
+  }
+
+  private List<Artifact> resolveTransitive(
+      MavenSession session,
+      Collection<MavenArtifact> mavenArtifacts
+  ) throws ResolutionException {
+    var resolvedArtifacts = resolveDirect(session, mavenArtifacts);
+    var dependenciesToResolve = resolvedArtifacts.stream()
+        .map(artifact -> new Dependency(artifact, null, false))
+        .collect(Collectors.toList());
+
+    log.debug("Resolving transitive dependencies for {}", dependenciesToResolve);
+
+    var collectRequest = new CollectRequest(
+        dependenciesToResolve,
+        null,
+        remoteRepositories(session)
+    );
+
+    var dependencyRequest = new DependencyRequest(collectRequest, null);
 
     try {
-      var artifactCoordinate = artifact.toArtifactCoordinate();
-      return artifactResolver.resolveArtifact(request, artifactCoordinate)
-          .getArtifact()
-          .getFile()
-          .toPath();
-    } catch (ArtifactResolverException ex) {
-      throw new ResolutionException("Failed to resolve artifact '" + artifact + "'", ex);
+      // XXX: do I need to check the CollectResult exception list here as well? It isn't overly
+      // clear to whether I care about this or whether it gets propagated in the
+      // DependencyResolutionException anyway...
+      return repositorySystem.resolveDependencies(session.getRepositorySession(), dependencyRequest)
+          .getArtifactResults()
+          .stream()
+          .map(ArtifactResult::getArtifact)
+          .collect(Collectors.toList());
+
+    } catch (DependencyResolutionException ex) {
+      throw new ResolutionException("Failed to resolve one or more dependencies", ex);
     }
+  }
+
+  private List<RemoteRepository> remoteRepositories(MavenSession session) {
+    return RepositoryUtils.toRepos(session.getProjectBuildingRequest().getRemoteRepositories());
+  }
+
+  private Supplier<ResolutionException> requiredField(
+      MavenArtifact mavenArtifact, String fieldName
+  ) {
+    return () -> new ResolutionException(
+        "Failed to resolve required field '" + fieldName + "' for artifact " + mavenArtifact);
   }
 }
