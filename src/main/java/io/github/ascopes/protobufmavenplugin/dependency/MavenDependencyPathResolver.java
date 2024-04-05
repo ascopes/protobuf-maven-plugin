@@ -16,11 +16,14 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
@@ -56,18 +59,25 @@ public final class MavenDependencyPathResolver {
       MavenSession session,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
-    var paths = new ArrayList<Path>();
+    if (dependencyResolutionDepth == DependencyResolutionDepth.DIRECT) {
+      var artifacts = session.getCurrentProject().getDependencies()
+          .stream()
+          .map(MavenArtifact::fromDependency)
+          .collect(Collectors.toList());
 
-    for (var dependency : session.getCurrentProject().getDependencies()) {
-      var artifact = MavenArtifact.fromDependency(dependency);
-      paths.addAll(resolveDependencyTreePaths(
-          session,
-          dependencyResolutionDepth,
-          artifact
-      ));
+      var paths = new ArrayList<Path>();
+      for (var artifact : artifacts) {
+        paths.add(resolveArtifact(session, artifact));
+      }
+      return paths;
     }
 
-    return paths;
+    return session.getCurrentProject().getArtifacts()
+        .stream()
+        .map(Artifact::getFile)
+        .map(File::toPath)
+        .distinct()
+        .collect(Collectors.toList());
   }
 
   public Collection<Path> resolveDependencyTreePaths(
