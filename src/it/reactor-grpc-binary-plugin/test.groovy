@@ -17,10 +17,10 @@ import java.nio.file.Path
 
 import static org.assertj.core.api.Assertions.assertThat
 
-Path baseDirectory = basedir.toPath().toAbsolutePath()
-def generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
-def classesDir = baseDirectory.resolve("target/classes")
-def expectedGeneratedFiles = [
+Path  baseDirectory = basedir.toPath().toAbsolutePath()
+Path generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
+Path classesDir = baseDirectory.resolve("target/classes")
+List<String> expectedGeneratedFiles = [
     "org/example/helloworld/Helloworld",
     "org/example/helloworld/GreetingRequest",
     "org/example/helloworld/GreetingRequestOrBuilder",

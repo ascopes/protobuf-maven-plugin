@@ -38,3 +38,5 @@ expectedGeneratedFiles.forEach {
       .exists()
       .isNotEmptyFile()
 }
+
+return true
