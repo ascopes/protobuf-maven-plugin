@@ -19,12 +19,10 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.shared.artifact.filter.resolve.ScopeFilter;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
 import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolverException;
 import org.apache.maven.shared.transfer.dependencies.resolve.DependencyResolver;
@@ -56,7 +54,6 @@ public final class MavenDependencyPathResolver {
 
   public Collection<Path> resolveProjectDependencyPaths(
       MavenSession session,
-      Set<String> allowedScopes,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
     var paths = new ArrayList<Path>();
@@ -65,7 +62,6 @@ public final class MavenDependencyPathResolver {
       var artifact = MavenArtifact.fromDependency(dependency);
       paths.addAll(resolveDependencyTreePaths(
           session,
-          allowedScopes,
           dependencyResolutionDepth,
           artifact
       ));
@@ -76,7 +72,6 @@ public final class MavenDependencyPathResolver {
 
   public Collection<Path> resolveDependencyTreePaths(
       MavenSession session,
-      Set<String> allowedScopes,
       DependencyResolutionDepth dependencyResolutionDepth,
       MavenArtifact artifact
   ) throws ResolutionException {
@@ -92,11 +87,10 @@ public final class MavenDependencyPathResolver {
     }
 
     var request = new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-    var scopes = ScopeFilter.including(allowedScopes);
     var coordinate = artifact.toDependableCoordinate();
 
     try {
-      for (var next : dependencyResolver.resolveDependencies(request, coordinate, scopes)) {
+      for (var next : dependencyResolver.resolveDependencies(request, coordinate, null)) {
         allDependencyPaths.add(next.getArtifact().getFile().toPath());
       }
     } catch (DependencyResolverException ex) {

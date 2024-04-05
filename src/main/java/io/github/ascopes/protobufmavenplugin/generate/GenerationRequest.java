@@ -21,7 +21,6 @@ import io.github.ascopes.protobufmavenplugin.dependency.MavenArtifact;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.immutables.value.Value.Immutable;
 
@@ -44,8 +43,6 @@ public interface GenerationRequest {
   Collection<Path> getImportPaths();
 
   Collection<MavenArtifact> getJvmMavenPlugins();
-
-  Set<String> getAllowedDependencyScopes();
 
   MavenSession getMavenSession();
 

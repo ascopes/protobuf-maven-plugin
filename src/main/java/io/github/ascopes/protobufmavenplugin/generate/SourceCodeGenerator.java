@@ -17,7 +17,6 @@
 package io.github.ascopes.protobufmavenplugin.generate;
 
 import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependency.JvmPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
@@ -179,7 +178,6 @@ public final class SourceCodeGenerator {
 
     var dependencyPaths = mavenDependencyPathResolver.resolveProjectDependencyPaths(
         session,
-        request.getAllowedDependencyScopes(),
         request.getDependencyResolutionDepth()
     );
 

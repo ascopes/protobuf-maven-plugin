@@ -46,8 +46,6 @@ import org.apache.maven.execution.MavenSession;
 @Named
 public final class JvmPluginResolver {
 
-  private static final Set<String> SCOPES = Set.of("compile", "runtime", "system");
-
   private final HostSystem hostSystem;
   private final MavenDependencyPathResolver dependencyPathResolver;
   private final TemporarySpace temporarySpace;
@@ -104,7 +102,6 @@ public final class JvmPluginResolver {
     var dependencyIterator = dependencyPathResolver
         .resolveDependencyTreePaths(
             session,
-            SCOPES,
             DependencyResolutionDepth.TRANSITIVE,
             plugin
         )
