@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
@@ -110,24 +111,31 @@ public final class JvmPluginResolver {
         .iterator();
 
     // First dependency is always the thing we actually want to execute,
-    // so is guaranteed to be present.
+    // so is guaranteed to be present. Marked as final to avoid checkstyle complaining
+    // about the distance between declaration and usage.
+    final var pluginPath = dependencyIterator.next();
     var args = new ArrayList<String>();
     args.add("java");
-    args.add("-jar");
-    args.add(dependencyIterator.next().toString());
 
     if (dependencyIterator.hasNext()) {
-      var sb = new StringBuilder().append(dependencyIterator.next());
-
-      while (dependencyIterator.hasNext()) {
-        sb.append(":").append(dependencyIterator.next());
-      }
-
       args.add("-classpath");
-      args.add(sb.toString());
+      args.add(buildClasspath(dependencyIterator));
     }
 
+    args.add("-jar");
+    args.add(pluginPath.toString());
+
     return args;
+  }
+
+  private String buildClasspath(Iterator<Path> paths) {
+    var sb = new StringBuilder().append(paths.next());
+
+    while (paths.hasNext()) {
+      sb.append(":").append(paths.next());
+    }
+
+    return sb.toString();
   }
 
   private String pluginIdDigest(MavenArtifact plugin) {
