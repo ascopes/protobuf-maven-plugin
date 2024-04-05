@@ -50,3 +50,5 @@ expectedGeneratedKotlinFiles.forEach {
       .exists()
       .isNotEmptyFile()
 }
+
+return true

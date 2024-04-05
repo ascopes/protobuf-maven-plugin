@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import java.nio.file.Files
 import java.nio.file.Path
+import java.util.stream.Collectors
+import java.util.stream.Stream
 
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-def generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
-def classesDir = baseDirectory.resolve("target/classes")
-def expectedGeneratedFiles = [
-    "org/example/helloworld/Helloworld",
-    "org/example/helloworld/GreetingRequest",
-    "org/example/helloworld/GreetingRequestOrBuilder",
-]
+Path dependencyDirectory = baseDirectory
+    .resolve("some-project")
+    .resolve("target")
+    .resolve("protobuf-maven-plugin")
+    .resolve("dependencies")
 
-assertThat(generatedSourcesDir).isDirectory()
+assertThat(dependencyDirectory).isDirectory()
 
-assertThat(classesDir).isDirectory()
-
-expectedGeneratedFiles.forEach {
-  assertThat(generatedSourcesDir.resolve("${it}.java"))
-      .exists()
-      .isNotEmptyFile()
-  assertThat(classesDir.resolve("${it}.class"))
-      .exists()
-      .isNotEmptyFile()
+try (Stream<Path> listing = Files.list(dependencyDirectory)) {
+  List<Path> directories = listing.collect(Collectors.toList())
+  assertThat(directories).hasSize(1)
 }
 
 return true
