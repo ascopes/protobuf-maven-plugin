@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.generate;
 
 import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.JvmPluginResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
+import io.github.ascopes.protobufmavenplugin.dependency.MavenProjectDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
@@ -54,7 +54,7 @@ public final class SourceCodeGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(SourceCodeGenerator.class);
 
-  private final MavenDependencyPathResolver mavenDependencyPathResolver;
+  private final MavenProjectDependencyPathResolver mavenProjectDependencyPathResolver;
   private final ProtocResolver protocResolver;
   private final BinaryPluginResolver binaryPluginResolver;
   private final JvmPluginResolver jvmPluginResolver;
@@ -63,14 +63,14 @@ public final class SourceCodeGenerator {
 
   @Inject
   public SourceCodeGenerator(
-      MavenDependencyPathResolver mavenDependencyPathResolver,
+      MavenProjectDependencyPathResolver mavenProjectDependencyPathResolver,
       ProtocResolver protocResolver,
       BinaryPluginResolver binaryPluginResolver,
       JvmPluginResolver jvmPluginResolver,
       ProtoSourceResolver protoListingResolver,
       CommandLineExecutor commandLineExecutor
   ) {
-    this.mavenDependencyPathResolver = mavenDependencyPathResolver;
+    this.mavenProjectDependencyPathResolver = mavenProjectDependencyPathResolver;
     this.protocResolver = protocResolver;
     this.binaryPluginResolver = binaryPluginResolver;
     this.jvmPluginResolver = jvmPluginResolver;
@@ -176,7 +176,7 @@ public final class SourceCodeGenerator {
         request.getDependencyResolutionDepth()
     );
 
-    var dependencyPaths = mavenDependencyPathResolver.resolveProjectDependencyPaths(
+    var dependencyPaths = mavenProjectDependencyPathResolver.resolveProjectDependencies(
         session,
         request.getDependencyResolutionDepth()
     );

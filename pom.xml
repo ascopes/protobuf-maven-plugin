@@ -98,10 +98,10 @@
     <immutables.version>2.10.1</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.2</junit.version>
-    <maven-artifact-transfer.version>0.13.1</maven-artifact-transfer.version>
     <maven-core.version>3.9.6</maven-core.version>
     <maven-plugin-annotations.version>3.11.0</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
+    <maven-resolver-api.version>1.9.18</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.0</memoryfilesystem.version>
     <mockito.version>5.11.0</mockito.version>
     <slf4j.version>2.0.12</slf4j.version>
@@ -175,32 +175,19 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${maven-core.version}</version>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-api</artifactId>
+      <version>${maven-resolver-api.version}</version>
       <!-- Provided by Maven at runtime -->
       <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-artifact-transfer</artifactId>
-      <version>${maven-artifact-transfer.version}</version>
-      <scope>compile</scope>
-
-      <exclusions>
-        <!-- These are pulled in with provided scope by other dependencies,
-            so do not depend on them with compile scope as this will raise
-            build warnings. -->
-        <exclusion>
-          <groupId>org.apache.maven</groupId>
-          <artifactId>maven-artifact</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.maven</groupId>
-          <artifactId>maven-model</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven-core.version}</version>
+      <!-- Provided by Maven at runtime -->
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
