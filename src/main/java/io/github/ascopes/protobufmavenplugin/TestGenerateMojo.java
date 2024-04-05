@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin;
 
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
-import java.util.Set;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;

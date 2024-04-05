@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependency;
+package io.github.ascopes.protobufmavenplugin;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,8 +32,6 @@ import org.slf4j.LoggerFactory;
  * @since 1.2.0
  */
 public final class MavenArtifact {
-
-  private static final Logger log = LoggerFactory.getLogger(MavenArtifact.class);
 
   private @Nullable String groupId;
   private @Nullable String artifactId;
@@ -78,18 +75,9 @@ public final class MavenArtifact {
     return Optional.ofNullable(type);
   }
 
+  @Parameter(alias = "extension")
   public void setType(@Nullable String type) {
     this.type = type;
-  }
-
-  // Alias to enable compatibility with Dependency objects. This avoids a breaking
-  // change in v1.x.
-  // This should be totally removed in v2.0 to avoid ambiguity.
-  @Deprecated(forRemoval = true, since = "1.2.0")
-  public void setExtension(@Nullable String extension) {
-    log.warn("MavenArtifact.extension is deprecated for removal in v2.0.0. "
-        + "Please use MavenArtifact.type instead for future compatibility.");
-    type = extension;
   }
 
   @Override
