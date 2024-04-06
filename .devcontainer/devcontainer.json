@@ -4,7 +4,7 @@
     "ghcr.io/devcontainers/features/java:1": {
       "version": "22",
       "jdkDistro": "tem",
-      "installMaven": false
+      "installMaven": true
     },
     "ghcr.io/devcontainers-contrib/features/protoc:1": {
       "version": "latest"
