@@ -66,10 +66,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This should correspond to the version of {@code protobuf-java} or similar that is in
    * use.
    *
-   * <p>The value can be a static version, or a valid Maven version range (such as
-   * "{@code [3.5.0,4.0.0)}"). It is recommended to use a static version to ensure your builds are
-   * reproducible.
-   *
    * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
