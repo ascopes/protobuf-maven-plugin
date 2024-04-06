@@ -5,6 +5,9 @@
       "version": "22",
       "jdkDistro": "tem",
       "installMaven": false
+    },
+    "ghcr.io/devcontainers-contrib/features/protoc:1": {
+      "version": "latest"
     }
   }
 }
