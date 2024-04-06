@@ -38,19 +38,19 @@ import org.apache.maven.execution.MavenSession;
 public final class BinaryPluginResolver {
 
   private final MavenDependencyPathResolver dependencyResolver;
-  private final PlatformArtifactFactory platformDependencyFactory;
+  private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
   public BinaryPluginResolver(
       MavenDependencyPathResolver dependencyResolver,
-      PlatformArtifactFactory platformDependencyFactory,
+      PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
   ) {
     this.dependencyResolver = dependencyResolver;
-    this.platformDependencyFactory = platformDependencyFactory;
+    this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
   }
@@ -78,13 +78,15 @@ public final class BinaryPluginResolver {
       MavenSession session,
       MavenArtifact plugin
   ) throws ResolutionException {
-    plugin = platformDependencyFactory.createArtifact(
-        plugin.getGroupId().orElse(null),
-        plugin.getArtifactId().orElse(null),
-        plugin.getVersion().orElse(null),
-        plugin.getType().orElse("exe"),
-        plugin.getClassifier().orElse(null)
-    );
+    var artifactId = plugin.getArtifactId().orElse(null);
+
+    if (plugin.getClassifier().isEmpty()) {
+      plugin.setClassifier(platformClassifierFactory.getClassifier(artifactId));
+    }
+
+    if (plugin.getType().isEmpty()) {
+      plugin.setType("exe");
+    }
 
     // Only one dependency should ever be returned here.
     var path = dependencyResolver.resolveOne(session, plugin, DependencyResolutionDepth.DIRECT)

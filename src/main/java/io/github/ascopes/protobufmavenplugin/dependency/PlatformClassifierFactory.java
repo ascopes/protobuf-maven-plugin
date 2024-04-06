@@ -16,49 +16,26 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import static java.util.Objects.requireNonNullElse;
-import static java.util.Objects.requireNonNullElseGet;
-
-import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.jspecify.annotations.Nullable;
 
 /**
- * Factory that can produce dependencies marked with platform-specific classifiers.
+ * Factory that can produce classifiers for dependencies based on the current platform.
  *
  * @author Ashley Scopes
  */
 @Named
-public final class PlatformArtifactFactory {
+public final class PlatformClassifierFactory {
+
   private final HostSystem hostSystem;
 
   @Inject
-  public PlatformArtifactFactory(HostSystem hostSystem) {
+  public PlatformClassifierFactory(HostSystem hostSystem) {
     this.hostSystem = hostSystem;
   }
 
-  public MavenArtifact createArtifact(
-      String groupId,
-      String artifactId,
-      String version,
-      @Nullable String extension,
-      @Nullable String classifier
-  ) {
-    var artifact = new MavenArtifact();
-    artifact.setGroupId(groupId);
-    artifact.setArtifactId(artifactId);
-    artifact.setVersion(version);
-    artifact.setType(requireNonNullElse(extension, "exe"));
-    artifact.setClassifier(requireNonNullElseGet(
-        classifier,
-        () -> getPlatformExecutableClassifier(artifactId)
-    ));
-    return artifact;
-  }
-
-  private String getPlatformExecutableClassifier(String artifactId) {
+  public String getClassifier(String artifactId) {
     var rawOs = hostSystem.getOperatingSystem();
     var rawArch = hostSystem.getCpuArchitecture();
 

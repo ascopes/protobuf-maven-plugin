@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
 import java.io.IOException;
@@ -44,7 +45,7 @@ public final class ProtocResolver {
 
   private final HostSystem hostSystem;
   private final MavenDependencyPathResolver dependencyResolver;
-  private final PlatformArtifactFactory platformArtifactFactory;
+  private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
 
@@ -52,13 +53,13 @@ public final class ProtocResolver {
   public ProtocResolver(
       HostSystem hostSystem,
       MavenDependencyPathResolver dependencyResolver,
-      PlatformArtifactFactory platformArtifactFactory,
+      PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
   ) {
     this.hostSystem = hostSystem;
     this.dependencyResolver = dependencyResolver;
-    this.platformArtifactFactory = platformArtifactFactory;
+    this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
   }
@@ -107,13 +108,12 @@ public final class ProtocResolver {
       );
     }
 
-    var artifact = platformArtifactFactory.createArtifact(
-        GROUP_ID,
-        ARTIFACT_ID,
-        version,
-        null,
-        null
-    );
+    var artifact = new MavenArtifact();
+    artifact.setGroupId(GROUP_ID);
+    artifact.setArtifactId(ARTIFACT_ID);
+    artifact.setVersion(version);
+    artifact.setType("exe");
+    artifact.setClassifier(platformClassifierFactory.getClassifier(ARTIFACT_ID));
 
     return dependencyResolver.resolveOne(session, artifact, DependencyResolutionDepth.DIRECT)
         .iterator()
