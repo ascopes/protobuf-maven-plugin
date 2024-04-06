@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependency;
+package io.github.ascopes.protobufmavenplugin;
 
 /**
  * User parameter to configure how to resolve dependencies.

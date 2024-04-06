@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
+import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;

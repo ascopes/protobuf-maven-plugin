@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
+import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
