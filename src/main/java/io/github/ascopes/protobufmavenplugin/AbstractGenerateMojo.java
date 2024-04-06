@@ -61,10 +61,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private MavenSession session;
 
   /**
-   * The version of protoc to use.
+   * Specifies where to find {@code protoc} or which version to download.
    *
-   * <p>This should correspond to the version of {@code protobuf-java} or similar that is in
-   * use.
+   * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
+   * is in use.
    *
    * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
@@ -78,6 +78,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
    *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
    * </ul>
+   *
+   * <p>Note that specifying {@code -Dprotoc.version} in the {@code MAVEN_OPTS} or on the
+   * command line overrides the version specified in the POM. This enables users to easily
+   * override the version of {@code protoc} in use if their system is unable to support the
+   * version specified in the POM. Termux users in particular will find
+   * {@code -Dprotoc.version=PATH} to be useful, due to platform limitations with
+   * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
    *
    * @since 0.0.1
    */
