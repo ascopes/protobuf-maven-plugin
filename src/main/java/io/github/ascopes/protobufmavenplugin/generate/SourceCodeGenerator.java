@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
+import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenProjectDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -172,7 +173,7 @@ public final class SourceCodeGenerator {
 
   private Collection<ProtoFileListing> discoverImportPaths(
       GenerationRequest request
-  ) throws IOException {
+  ) throws IOException, ResolutionException {
     var session = request.getMavenSession();
 
     log.debug(
@@ -180,20 +181,34 @@ public final class SourceCodeGenerator {
         request.getDependencyResolutionDepth()
     );
 
-    var dependencyPaths = mavenProjectDependencyPathResolver.resolveProjectDependencies(
+    var sourceDependencyPaths = mavenDependencyPathResolver.resolveAll(
+        session,
+        request.getSourceDependencies(),
+        request.getDependencyResolutionDepth()
+    );
+
+    var sourceDependencyPathListings = protoListingResolver.createProtoFileListings(
+        sourceDependencyPaths
+    );
+
+    var projectDependencyPaths = mavenProjectDependencyPathResolver.resolveProjectDependencies(
         session,
         request.getDependencyResolutionDepth()
     );
 
     var inheritedDependencies = protoListingResolver
-        .createProtoFileListings(dependencyPaths);
+        .createProtoFileListings(projectDependencyPaths);
 
     // Always use all provided additional import paths, as we assume they are valid given the user
     // has explicitly included them in their configuration.
     var explicitDependencies = protoListingResolver
         .createProtoFileListings(request.getImportPaths());
 
-    return concat(inheritedDependencies, explicitDependencies);
+    return concat(
+        inheritedDependencies,
+        explicitDependencies,
+        sourceDependencyPathListings
+    );
   }
 
   private Collection<ProtoFileListing> discoverCompilableSources(
@@ -205,7 +220,7 @@ public final class SourceCodeGenerator {
     var sourceDependencies = mavenDependencyPathResolver.resolveAll(
         request.getMavenSession(),
         request.getSourceDependencies(),
-        request.getDependencyResolutionDepth()
+        DependencyResolutionDepth.DIRECT
     );
     var sourceDependencyListings = protoListingResolver
         .createProtoFileListings(sourceDependencies);
