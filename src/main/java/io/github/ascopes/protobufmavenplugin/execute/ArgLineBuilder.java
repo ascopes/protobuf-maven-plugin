@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.execute;
 
-import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
+import io.github.ascopes.protobufmavenplugin.plugin.ResolvedPlugin;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;

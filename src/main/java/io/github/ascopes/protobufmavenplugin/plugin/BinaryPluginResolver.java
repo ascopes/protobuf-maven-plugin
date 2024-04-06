@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependency;
+package io.github.ascopes.protobufmavenplugin.plugin;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
+import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactory;
+import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.dependency.SystemPathBinaryResolver;
+import io.github.ascopes.protobufmavenplugin.dependency.UrlResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
 import java.io.IOException;

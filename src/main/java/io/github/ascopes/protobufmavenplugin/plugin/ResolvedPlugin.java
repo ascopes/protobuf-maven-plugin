@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependency;
+package io.github.ascopes.protobufmavenplugin.plugin;
 
 import java.nio.file.Path;
 import org.immutables.value.Value.Immutable;

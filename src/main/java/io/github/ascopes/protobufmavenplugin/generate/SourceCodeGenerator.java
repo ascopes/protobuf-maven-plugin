@@ -16,14 +16,14 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.dependency.BinaryPluginResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.JvmPluginResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenProjectDependencyPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.dependency.ResolvedPlugin;
 import io.github.ascopes.protobufmavenplugin.execute.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.CommandLineExecutor;
+import io.github.ascopes.protobufmavenplugin.plugin.BinaryPluginResolver;
+import io.github.ascopes.protobufmavenplugin.plugin.JvmPluginResolver;
+import io.github.ascopes.protobufmavenplugin.plugin.ResolvedPlugin;
+import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.source.ProtoFileListing;
 import io.github.ascopes.protobufmavenplugin.source.ProtoSourceResolver;
 import java.io.IOException;

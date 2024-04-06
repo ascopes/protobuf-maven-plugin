@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependency;
+package io.github.ascopes.protobufmavenplugin.plugin;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
+import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.platform.Digests;
 import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
@@ -39,8 +41,8 @@ import org.apache.maven.execution.MavenSession;
  * Wraps a JVM-based plugin invocation using an OS-native script that calls Java.
  *
  * <p>This script can be marked as executable and passed to the {@code protoc} invocation
- * as a path to ensure the script gets called correctly. By doing this, we avoid the need to
- * build OS-native executables during the protobuf compilation process.
+ * as a path to ensure the script gets called correctly. By doing this, we avoid the need to build
+ * OS-native executables during the protobuf compilation process.
  *
  * @author Ashley Scopes
  */
