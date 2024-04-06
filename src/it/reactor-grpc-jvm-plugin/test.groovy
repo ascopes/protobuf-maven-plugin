@@ -37,5 +37,4 @@ expectedGeneratedFiles.forEach {
   assertThat(classesDir.resolve("${it}.class"))
       .exists()
       .isNotEmptyFile()
-
 }

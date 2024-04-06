@@ -20,7 +20,6 @@ import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.some
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import java.io.File;
 import java.io.IOException;
