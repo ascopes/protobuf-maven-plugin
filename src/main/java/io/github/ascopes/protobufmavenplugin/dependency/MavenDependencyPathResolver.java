@@ -76,7 +76,7 @@ public final class MavenDependencyPathResolver {
 
   public Collection<Path> resolveAll(
       MavenSession session,
-      Collection<MavenArtifact> mavenArtifacts,
+      Collection<? extends MavenArtifact> mavenArtifacts,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
     var artifacts = dependencyResolutionDepth == DependencyResolutionDepth.DIRECT
@@ -92,7 +92,7 @@ public final class MavenDependencyPathResolver {
 
   private List<Artifact> resolveDirect(
       MavenSession session,
-      Collection<MavenArtifact> mavenArtifacts
+      Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
     log.debug("Resolving direct artifacts {}", mavenArtifacts);
 
@@ -127,7 +127,7 @@ public final class MavenDependencyPathResolver {
 
   private List<Artifact> resolveTransitive(
       MavenSession session,
-      Collection<MavenArtifact> mavenArtifacts
+      Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
     var resolvedArtifacts = resolveDirect(session, mavenArtifacts);
     var dependenciesToResolve = resolvedArtifacts.stream()

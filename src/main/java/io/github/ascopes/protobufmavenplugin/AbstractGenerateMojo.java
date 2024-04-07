@@ -109,7 +109,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  private @Nullable List<MavenArtifact> sourceDependencies;
+  private @Nullable List<MavenArtifactBean> sourceDependencies;
 
   /**
    * The scope to resolve dependencies with.
