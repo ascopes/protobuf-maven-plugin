@@ -32,41 +32,54 @@ import org.jspecify.annotations.Nullable;
  * @since 1.2.0
  */
 public final class MavenArtifact {
+  private static final String UNKNOWN = "unknown";
 
-  private @Nullable String groupId;
-  private @Nullable String artifactId;
-  private @Nullable String version;
+  private String groupId;
+  private String artifactId;
+  private String version;
   private @Nullable String classifier;
   private @Nullable String type;
 
-  public Optional<String> getGroupId() {
-    return Optional.ofNullable(groupId);
+  public MavenArtifact() {
+    groupId = UNKNOWN;
+    artifactId = UNKNOWN;
+    version = UNKNOWN;
+    classifier = null;
+    type = null;
   }
 
-  public void setGroupId(@Nullable String groupId) {
-    this.groupId = groupId;
+  public String getGroupId() {
+    return groupId;
   }
 
-  public Optional<String> getArtifactId() {
-    return Optional.ofNullable(artifactId);
+  @Parameter(required = true)
+  public void setGroupId(String groupId) {
+    this.groupId = Objects.requireNonNull(groupId);
   }
 
-  public void setArtifactId(@Nullable String artifactId) {
-    this.artifactId = artifactId;
+  public String getArtifactId() {
+    return artifactId;
   }
 
-  public Optional<String> getVersion() {
-    return Optional.ofNullable(version);
+  @Parameter(required = true)
+  public void setArtifactId(String artifactId) {
+    this.artifactId = Objects.requireNonNull(artifactId);
   }
 
-  public void setVersion(@Nullable String version) {
-    this.version = version;
+  public String getVersion() {
+    return version;
+  }
+
+  @Parameter(required = true)
+  public void setVersion(String version) {
+    this.version = Objects.requireNonNull(version);
   }
 
   public Optional<String> getClassifier() {
     return Optional.ofNullable(classifier);
   }
 
+  @Parameter
   public void setClassifier(@Nullable String classifier) {
     this.classifier = classifier;
   }

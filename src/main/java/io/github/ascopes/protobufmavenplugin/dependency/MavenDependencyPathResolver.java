@@ -118,11 +118,11 @@ public final class MavenDependencyPathResolver {
       MavenArtifact mavenArtifact
   ) throws ResolutionException {
     var artifact = new DefaultArtifact(
-        mavenArtifact.getGroupId().orElseThrow(requiredField(mavenArtifact, "groupId")),
-        mavenArtifact.getArtifactId().orElseThrow(requiredField(mavenArtifact, "artifactId")),
+        mavenArtifact.getGroupId(),
+        mavenArtifact.getArtifactId(),
         mavenArtifact.getClassifier().orElseGet(artifactHandler::getClassifier),
         mavenArtifact.getType().orElse("jar"),
-        mavenArtifact.getVersion().orElseThrow(requiredField(mavenArtifact, "version"))
+        mavenArtifact.getVersion()
     );
     return new ArtifactRequest(artifact, remoteRepositories(session), null);
   }
@@ -163,12 +163,5 @@ public final class MavenDependencyPathResolver {
 
   private List<RemoteRepository> remoteRepositories(MavenSession session) {
     return RepositoryUtils.toRepos(session.getProjectBuildingRequest().getRemoteRepositories());
-  }
-
-  private Supplier<ResolutionException> requiredField(
-      MavenArtifact mavenArtifact, String fieldName
-  ) {
-    return () -> new ResolutionException(
-        "Failed to resolve required field '" + fieldName + "' for artifact " + mavenArtifact);
   }
 }

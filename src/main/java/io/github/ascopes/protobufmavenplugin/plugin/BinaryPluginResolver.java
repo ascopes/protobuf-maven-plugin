@@ -83,10 +83,9 @@ public final class BinaryPluginResolver {
       MavenSession session,
       MavenArtifact plugin
   ) throws ResolutionException {
-    var artifactId = plugin.getArtifactId().orElse(null);
-
     if (plugin.getClassifier().isEmpty()) {
-      plugin.setClassifier(platformClassifierFactory.getClassifier(artifactId));
+      var classifier = platformClassifierFactory.getClassifier(plugin.getArtifactId());
+      plugin.setClassifier(classifier);
     }
 
     if (plugin.getType().isEmpty()) {
