@@ -30,6 +30,7 @@ import io.github.ascopes.protobufmavenplugin.source.ProtoSourceResolver;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -174,40 +175,39 @@ public final class SourceCodeGenerator {
       GenerationRequest request
   ) throws IOException, ResolutionException {
     var session = request.getMavenSession();
+    var importPaths = new ArrayList<ProtoFileListing>();
 
-    log.debug(
-        "Finding importable protobuf sources from the classpath ({})",
-        request.getDependencyResolutionDepth()
-    );
+    if (!request.getImportPaths().isEmpty()) {
+      log.debug(
+          "Finding importable protobuf sources from explicitly provided import paths ({})",
+          request.getDependencyResolutionDepth()
+      );
+      importPaths.addAll(protoListingResolver.createProtoFileListings(request.getImportPaths()));
+    }
 
-    var sourceDependencyPaths = mavenDependencyPathResolver.resolveAll(
-        session,
-        request.getSourceDependencies(),
-        request.getDependencyResolutionDepth()
-    );
+    if (!request.getSourceDependencies().isEmpty()) {
+      log.debug(
+          "Finding importable protobuf sources from explicitly provided source dependencies ({})",
+          request.getSourceDependencies()
+      );
+      var sourceDependencyPaths = mavenDependencyPathResolver.resolveAll(
+          session,
+          request.getSourceDependencies(),
+          request.getDependencyResolutionDepth()
+      );
+      importPaths.addAll(protoListingResolver.createProtoFileListings(sourceDependencyPaths));
+    }
 
-    var sourceDependencyPathListings = protoListingResolver.createProtoFileListings(
-        sourceDependencyPaths
-    );
+    if (!request.isIgnoreProjectDependencies()) {
+      log.debug("Finding importable protobuf sources from project dependencies");
+      var projectDependencyPaths = mavenProjectDependencyPathResolver.resolveProjectDependencies(
+          session,
+          request.getDependencyResolutionDepth()
+      );
+      importPaths.addAll(protoListingResolver.createProtoFileListings(projectDependencyPaths));
+    }
 
-    var projectDependencyPaths = mavenProjectDependencyPathResolver.resolveProjectDependencies(
-        session,
-        request.getDependencyResolutionDepth()
-    );
-
-    var inheritedDependencies = protoListingResolver
-        .createProtoFileListings(projectDependencyPaths);
-
-    // Always use all provided additional import paths, as we assume they are valid given the user
-    // has explicitly included them in their configuration.
-    var explicitDependencies = protoListingResolver
-        .createProtoFileListings(request.getImportPaths());
-
-    return concat(
-        inheritedDependencies,
-        explicitDependencies,
-        sourceDependencyPathListings
-    );
+    return importPaths;
   }
 
   private Collection<ProtoFileListing> discoverCompilableSources(

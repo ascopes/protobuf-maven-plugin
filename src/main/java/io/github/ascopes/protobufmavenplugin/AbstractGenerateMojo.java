@@ -398,6 +398,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean registerAsCompilationRoot;
 
   /**
+   * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
+   * {@code *.proto} files to add to the import paths.
+   *
+   * <p>Generally you will want to leave this enabled unless you have a very specific case where
+   * you wish to take control of how dependency resolution works.
+   *
+   * @since 1.2.0
+   */
+  @Parameter(defaultValue = "false")
+  private boolean ignoreProjectDependencies;
+
+  /**
    * Execute the plugin and generate sources.
    *
    * @throws MojoExecutionException if execution fails.
@@ -426,6 +438,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isCsharpEnabled(csharpEnabled)
         .isFailOnMissingSources(failOnMissingSources)
         .isFatalWarnings(fatalWarnings)
+        .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isJavaEnabled(javaEnabled)
         .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
