@@ -82,12 +82,9 @@ public final class JvmPluginResolver {
     var pluginId = pluginIdDigest(plugin);
     var argLine = resolveAndBuildArgLine(session, plugin);
 
-    Path scriptPath;
-    if (hostSystem.isProbablyWindows()) {
-      scriptPath = writeWindowsBatchScript(pluginId, argLine);
-    } else {
-      scriptPath = writeShellScript(pluginId, argLine);
-    }
+    var scriptPath = hostSystem.isProbablyWindows()
+        ? writeWindowsBatchScript(pluginId, argLine)
+        : writeShellScript(pluginId, argLine);
 
     return ImmutableResolvedPlugin
         .builder()
@@ -125,7 +122,9 @@ public final class JvmPluginResolver {
   }
 
   private String buildClasspath(Iterator<Path> paths) {
-    var sb = new StringBuilder().append(paths.next());
+    // Expectation: at least one path is in the iterator.
+    var sb = new StringBuilder()
+        .append(paths.next());
 
     while (paths.hasNext()) {
       sb.append(":").append(paths.next());
