@@ -32,7 +32,7 @@ assertThat(dependencyDirectory).isDirectory()
 
 try (Stream<Path> listing = Files.list(dependencyDirectory)) {
   List<Path> directories = listing.collect(Collectors.toList())
-  assertThat(directories).hasSize(1)
+  assertThat(directories).hasSize(2)
 }
 
 return true

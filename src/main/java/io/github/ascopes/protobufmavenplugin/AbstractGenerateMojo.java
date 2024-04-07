@@ -101,6 +101,29 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private @Nullable List<File> sourceDirectories;
 
   /**
+   * Additional dependencies to compile, pulled from the Maven repository.
+   *
+   * <p>Note that this will resolve dependencies recursively unless
+   * {@code dependencyResolutionDepth} is set to {@code DIRECT}.
+   *
+   * <p>For example:
+   * <pre>{@code
+   * <sourceDependencies>
+   *   <sourceDependency>
+   *     <groupId>com.mycompany</groupId>
+   *     <artifactId>common-protos</artifactId>
+   *     <version>1.2.4</version>
+   *     <type>zip</type>
+   *   </sourceDependency>
+   * </sourceDependencies>
+   * }</pre>
+   *
+   * @since 1.2.0
+   */
+  @Parameter
+  private @Nullable List<MavenArtifactBean> sourceDependencies;
+
+  /**
    * The scope to resolve dependencies with.
    *
    * <p>Supported values:
@@ -416,6 +439,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .mavenSession(session)
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
+        .sourceDependencies(nonNullList(sourceDependencies))
         .sourceRootRegistrar(sourceRootRegistrar())
         .sourceRoots(sourceDirectories())
         .build();

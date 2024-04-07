@@ -50,6 +50,8 @@ public interface GenerationRequest {
 
   String getProtocVersion();
 
+  Collection<? extends MavenArtifact> getSourceDependencies();
+
   Collection<Path> getSourceRoots();
 
   SourceRootRegistrar getSourceRootRegistrar();

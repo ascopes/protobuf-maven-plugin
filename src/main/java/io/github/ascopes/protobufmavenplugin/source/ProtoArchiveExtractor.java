@@ -102,7 +102,7 @@ public final class ProtoArchiveExtractor {
   }
 
   private Path getExtractionRoot() {
-    return temporarySpace.createTemporarySpace("dependencies");
+    return temporarySpace.createTemporarySpace("archives");
   }
 
   private String generateUniqueName(Path path) {
