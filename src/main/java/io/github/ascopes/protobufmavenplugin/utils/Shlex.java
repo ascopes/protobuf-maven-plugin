@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.platform;
+package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.util.function.BiConsumer;
 

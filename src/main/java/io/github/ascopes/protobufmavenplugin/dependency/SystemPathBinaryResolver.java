@@ -16,8 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
-import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
+import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

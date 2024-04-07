@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
+import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import org.mockito.quality.Strictness;
 
 /**

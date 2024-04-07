@@ -23,8 +23,8 @@ import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactor
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependency.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.UrlResourceFetcher;
-import io.github.ascopes.protobufmavenplugin.platform.Digests;
-import io.github.ascopes.protobufmavenplugin.platform.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;

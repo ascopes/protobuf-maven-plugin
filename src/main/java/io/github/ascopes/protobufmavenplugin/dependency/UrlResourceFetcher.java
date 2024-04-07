@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.dependency;
 
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
-import io.github.ascopes.protobufmavenplugin.platform.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

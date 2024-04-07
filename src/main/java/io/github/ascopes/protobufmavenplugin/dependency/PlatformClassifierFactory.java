@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.dependency;
 
-import io.github.ascopes.protobufmavenplugin.platform.HostSystem;
+import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import javax.inject.Inject;
 import javax.inject.Named;
 
