@@ -104,7 +104,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Additional dependencies to compile, pulled from the Maven repository.
    *
    * <p>Note that only <strong>explicit</strong> dependencies here will be included in the
-   * compilation path. Transitive dependencies will only be included in the import path.
+   * compilation path. Transitive dependencies will only be included in the import path. If you
+   * wish to compile additional dependencies then they should be added here explicitly as well.
+   *
+   * <p>For example:
+   * <pre>{@code
+   * <sourceDependencies>
+   *   <sourceDependency>
+   *     <groupId>com.mycompany</groupId>
+   *     <artifactId>common-protos</artifactId>
+   *     <version>1.2.4</version>
+   *     <type>zip</type>
+   *   </sourceDependency>
+   * </sourceDependencies>
+   * }</pre>
    *
    * @since 1.2.0
    */
