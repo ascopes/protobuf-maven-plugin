@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin;
 
 /**
- * User parameter to configure how to resolve dependencies.
+ * Parameter to configure how to resolve dependencies.
  *
  * @author Ashley Scopes
  * @since 1.2.0

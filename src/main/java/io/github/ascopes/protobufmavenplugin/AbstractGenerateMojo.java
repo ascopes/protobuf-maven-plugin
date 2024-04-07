@@ -156,7 +156,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<MavenArtifact> binaryMavenPlugins;
+  private @Nullable List<MavenArtifactBean> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -219,7 +219,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<MavenArtifact> jvmMavenPlugins;
+  private @Nullable List<MavenArtifactBean> jvmMavenPlugins;
 
   /**
    * Override the directory to output generated code to.

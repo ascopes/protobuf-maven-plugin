@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.plugin;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.ImmutableMavenArtifact;
 import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactory;
@@ -62,7 +63,7 @@ public final class BinaryPluginResolver {
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
-      Collection<MavenArtifact> plugins
+      Collection<? extends MavenArtifact> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, plugin -> resolveMavenPlugin(session, plugin));
   }
@@ -83,14 +84,18 @@ public final class BinaryPluginResolver {
       MavenSession session,
       MavenArtifact plugin
   ) throws ResolutionException {
-    if (plugin.getClassifier().isEmpty()) {
+    var pluginBuilder = ImmutableMavenArtifact.builder().from(plugin);
+
+    if (plugin.getClassifier() == null) {
       var classifier = platformClassifierFactory.getClassifier(plugin.getArtifactId());
-      plugin.setClassifier(classifier);
+      pluginBuilder.classifier(classifier);
     }
 
-    if (plugin.getType().isEmpty()) {
-      plugin.setType("exe");
+    if (plugin.getType() == null) {
+      pluginBuilder.type("exe");
     }
+
+    plugin = pluginBuilder.build();
 
     // Only one dependency should ever be returned here.
     var path = dependencyResolver.resolveOne(session, plugin, DependencyResolutionDepth.DIRECT)

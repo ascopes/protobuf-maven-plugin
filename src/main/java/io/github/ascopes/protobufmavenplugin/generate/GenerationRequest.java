@@ -32,7 +32,7 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface GenerationRequest {
 
-  Collection<MavenArtifact> getBinaryMavenPlugins();
+  Collection<? extends MavenArtifact> getBinaryMavenPlugins();
 
   Collection<String> getBinaryPathPlugins();
 
@@ -42,7 +42,7 @@ public interface GenerationRequest {
 
   Collection<Path> getImportPaths();
 
-  Collection<MavenArtifact> getJvmMavenPlugins();
+  Collection<? extends MavenArtifact> getJvmMavenPlugins();
 
   MavenSession getMavenSession();
 

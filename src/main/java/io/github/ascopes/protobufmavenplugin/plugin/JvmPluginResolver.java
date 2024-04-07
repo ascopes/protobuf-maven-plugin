@@ -66,7 +66,7 @@ public final class JvmPluginResolver {
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
       MavenSession session,
-      Collection<MavenArtifact> plugins
+      Collection<? extends MavenArtifact> plugins
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedPlugin>();
     for (var plugin : plugins) {

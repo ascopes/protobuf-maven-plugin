@@ -16,11 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.maven.plugins.annotations.Parameter;
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
 
@@ -31,92 +28,19 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 1.2.0
  */
-public final class MavenArtifact {
-  private static final String UNKNOWN = "unknown";
+@Immutable
+@Modifiable
+public interface MavenArtifact {
 
-  private String groupId;
-  private String artifactId;
-  private String version;
-  private @Nullable String classifier;
-  private @Nullable String type;
+  String getGroupId();
 
-  public MavenArtifact() {
-    groupId = UNKNOWN;
-    artifactId = UNKNOWN;
-    version = UNKNOWN;
-    classifier = null;
-    type = null;
-  }
+  String getArtifactId();
 
-  public String getGroupId() {
-    return groupId;
-  }
+  String getVersion();
 
-  @Parameter(required = true)
-  public void setGroupId(String groupId) {
-    this.groupId = Objects.requireNonNull(groupId);
-  }
+  @Nullable
+  String getType();
 
-  public String getArtifactId() {
-    return artifactId;
-  }
-
-  @Parameter(required = true)
-  public void setArtifactId(String artifactId) {
-    this.artifactId = Objects.requireNonNull(artifactId);
-  }
-
-  public String getVersion() {
-    return version;
-  }
-
-  @Parameter(required = true)
-  public void setVersion(String version) {
-    this.version = Objects.requireNonNull(version);
-  }
-
-  public Optional<String> getClassifier() {
-    return Optional.ofNullable(classifier);
-  }
-
-  @Parameter
-  public void setClassifier(@Nullable String classifier) {
-    this.classifier = classifier;
-  }
-
-  public Optional<String> getType() {
-    return Optional.ofNullable(type);
-  }
-
-  @Parameter(alias = "extension")
-  public void setType(@Nullable String type) {
-    this.type = type;
-  }
-
-  @Override
-  public boolean equals(@Nullable Object other) {
-    if (!(other instanceof MavenArtifact)) {
-      return false;
-    }
-
-    var that = (MavenArtifact) other;
-
-    return Objects.equals(groupId, that.groupId)
-        && Objects.equals(artifactId, that.artifactId)
-        && Objects.equals(version, that.version)
-        && Objects.equals(classifier, that.classifier)
-        && Objects.equals(type, that.type);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(groupId, artifactId, version, classifier, type);
-  }
-
-  @Override
-  public String toString() {
-    return Stream.of(groupId, artifactId, version, classifier, type)
-        .map(attr -> Objects.requireNonNullElse(attr, ""))
-        .collect(Collectors.joining(":"));
-  }
+  @Nullable
+  String getClassifier();
 }

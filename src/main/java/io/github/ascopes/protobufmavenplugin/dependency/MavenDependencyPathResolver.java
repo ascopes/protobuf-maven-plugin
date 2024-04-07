@@ -41,6 +41,7 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,15 +114,12 @@ public final class MavenDependencyPathResolver {
     }
   }
 
-  private ArtifactRequest getArtifactRequest(
-      MavenSession session,
-      MavenArtifact mavenArtifact
-  ) throws ResolutionException {
+  private ArtifactRequest getArtifactRequest(MavenSession session, MavenArtifact mavenArtifact) {
     var artifact = new DefaultArtifact(
         mavenArtifact.getGroupId(),
         mavenArtifact.getArtifactId(),
-        mavenArtifact.getClassifier().orElseGet(artifactHandler::getClassifier),
-        mavenArtifact.getType().orElse("jar"),
+        specifiedOrElse(mavenArtifact.getClassifier(), artifactHandler::getClassifier),
+        specifiedOrElse(mavenArtifact.getType(), () -> "jar"),
         mavenArtifact.getVersion()
     );
     return new ArtifactRequest(artifact, remoteRepositories(session), null);
@@ -163,5 +161,14 @@ public final class MavenDependencyPathResolver {
 
   private List<RemoteRepository> remoteRepositories(MavenSession session) {
     return RepositoryUtils.toRepos(session.getProjectBuildingRequest().getRemoteRepositories());
+  }
+
+  private @Nullable String specifiedOrElse(
+      @Nullable String value,
+      Supplier<@Nullable String> elseGet
+  ) {
+    return value == null || value.isBlank()
+        ? elseGet.get()
+        : value;
   }
 }

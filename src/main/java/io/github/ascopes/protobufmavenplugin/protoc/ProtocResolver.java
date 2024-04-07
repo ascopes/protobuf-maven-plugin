@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.ImmutableMavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -113,12 +113,13 @@ public final class ProtocResolver {
       );
     }
 
-    var artifact = new MavenArtifact();
-    artifact.setGroupId(GROUP_ID);
-    artifact.setArtifactId(ARTIFACT_ID);
-    artifact.setVersion(version);
-    artifact.setType("exe");
-    artifact.setClassifier(platformClassifierFactory.getClassifier(ARTIFACT_ID));
+    var artifact = ImmutableMavenArtifact.builder()
+        .groupId(GROUP_ID)
+        .artifactId(ARTIFACT_ID)
+        .version(version)
+        .type("exe")
+        .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
+        .build();
 
     return dependencyResolver.resolveOne(session, artifact, DependencyResolutionDepth.DIRECT)
         .iterator()

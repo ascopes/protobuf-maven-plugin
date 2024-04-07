@@ -15,11 +15,15 @@
  */
 @NullMarked
 @Style(
+    beanFriendlyModifiables = true,
+    create = "new",
     deferCollectionAllocation = true,
     headerComments = true,
     jdkOnly = true,
     jdk9Collections = true,
+    nullableAnnotation = "org.jspecify.annotations.Nullable",
     optionalAcceptNullable = true,
+    typeModifiable = "*Bean",
     validationMethod = ValidationMethod.MANDATORY_ONLY
 )
 package io.github.ascopes.protobufmavenplugin;
