@@ -64,6 +64,8 @@ public interface GenerationRequest {
 
   boolean isFatalWarnings();
 
+  boolean isIgnoreProjectDependencies();
+
   boolean isJavaEnabled();
 
   boolean isKotlinEnabled();
