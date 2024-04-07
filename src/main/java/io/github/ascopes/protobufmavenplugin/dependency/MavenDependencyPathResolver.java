@@ -20,11 +20,13 @@ import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.RepositoryUtils;
@@ -90,24 +92,33 @@ public final class MavenDependencyPathResolver {
         .collect(Collectors.toList());
   }
 
-  private List<Artifact> resolveDirect(
+  private Collection<Artifact> resolveDirect(
+      MavenSession session,
+      Collection<? extends MavenArtifact> mavenArtifacts
+  ) throws ResolutionException {
+    return resolveDirectWithBackReferences(session, mavenArtifacts).keySet();
+  }
+
+  private Map<Artifact, MavenArtifact> resolveDirectWithBackReferences(
       MavenSession session,
       Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
     log.debug("Resolving direct artifacts {}", mavenArtifacts);
 
-    var artifactRequests = new ArrayList<ArtifactRequest>();
+    var artifactRequests = new LinkedHashMap<ArtifactRequest, MavenArtifact>();
 
     for (var mavenArtifact : mavenArtifacts) {
-      artifactRequests.add(getArtifactRequest(session, mavenArtifact));
+      artifactRequests.put(getArtifactRequest(session, mavenArtifact), mavenArtifact);
     }
 
     try {
       return repositorySystem
-          .resolveArtifacts(session.getRepositorySession(), artifactRequests)
+          .resolveArtifacts(session.getRepositorySession(), artifactRequests.keySet())
           .stream()
-          .map(ArtifactResult::getArtifact)
-          .collect(Collectors.toList());
+          .collect(Collectors.toMap(
+              ArtifactResult::getArtifact,
+              result -> artifactRequests.get(result.getRequest())
+          ));
 
     } catch (ArtifactResolutionException ex) {
       throw new ResolutionException("Failed to resolve one or more artifacts", ex);
@@ -125,20 +136,24 @@ public final class MavenDependencyPathResolver {
     return new ArtifactRequest(artifact, remoteRepositories(session), null);
   }
 
-  private List<Artifact> resolveTransitive(
+  private Collection<Artifact> resolveTransitive(
       MavenSession session,
       Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
-    var resolvedArtifacts = resolveDirect(session, mavenArtifacts);
-    var dependenciesToResolve = resolvedArtifacts.stream()
-        .map(artifact -> new Dependency(artifact, null, false))
+    var resolvedArtifacts = resolveDirectWithBackReferences(session, mavenArtifacts);
+
+    var dependenciesToResolve = resolvedArtifacts.keySet()
+        .stream()
+        .filter(artifact -> resolvedArtifacts.get(artifact)
+            .getDependencyResolutionDepth() != DependencyResolutionDepth.DIRECT)
+        .map(this::createDependencyFromArtifact)
         .collect(Collectors.toList());
 
     log.debug("Resolving transitive dependencies for {}", dependenciesToResolve);
 
     var collectRequest = new CollectRequest(
         dependenciesToResolve,
-        null,
+        createDependencyManagementFor(dependenciesToResolve, resolvedArtifacts.keySet()),
         remoteRepositories(session)
     );
 
@@ -157,6 +172,26 @@ public final class MavenDependencyPathResolver {
     } catch (DependencyResolutionException ex) {
       throw new ResolutionException("Failed to resolve one or more dependencies", ex);
     }
+  }
+
+  private Dependency createDependencyFromArtifact(Artifact artifact) {
+    return new Dependency(artifact, null, false);
+  }
+
+  private List<Dependency> createDependencyManagementFor(
+      List<Dependency> dependencies,
+      Collection<Artifact> artifacts
+  ) {
+    // We include the artifacts as well to ensure they are included on the dependencyManagement
+    // mapping, as this may impact the resolution of some edge cases where we both depend on an
+    // artifact directly with DIRECT resolution scope and that artifact via a transitive dependency
+    // elsewhere.
+    return Stream
+        .concat(
+            artifacts.stream().map(this::createDependencyFromArtifact),
+            dependencies.stream()
+        )
+        .collect(Collectors.toList());
   }
 
   private List<RemoteRepository> remoteRepositories(MavenSession session) {

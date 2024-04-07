@@ -43,4 +43,7 @@ public interface MavenArtifact {
 
   @Nullable
   String getClassifier();
+
+  @Nullable
+  DependencyResolutionDepth getDependencyResolutionDepth();
 }
