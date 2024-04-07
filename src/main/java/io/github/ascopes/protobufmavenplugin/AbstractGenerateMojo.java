@@ -118,6 +118,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </sourceDependencies>
    * }</pre>
    *
+   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *      the project settings with - optional</li>
+   * </ul>
+   *
    * @since 1.2.0
    */
   @Parameter
@@ -144,7 +156,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>These will not be compiled into Java sources directly.
    *
    * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
-   * with the {@code provided} or {@code test} scope instead.
+   * with the {@code provided} or {@code test} scope instead, or use {@code importDependencies}.
    *
    * <p>Prior to v1.2.0, this was called {@code additionalImportPaths}. This old name will
    * be maintained as a valid alias until v2.0.0.
@@ -153,6 +165,28 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(alias = "additionalImportPaths")
   private @Nullable List<File> importPaths;
+
+  /**
+   * Specify additional dependencies to import protobuf sources from.
+   *
+   * <p>These will not be compiled into Java sources directly.
+   *
+   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *      the project settings with - optional</li>
+   * </ul>
+   *
+   * @since 1.2.0
+   */
+  @Parameter
+  private @Nullable List<MavenArtifactBean> importDependencies;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -175,6 +209,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If you have a Java-based plugin that does not distribute a native
    * executable, or are using a more obscure system architecture, then using a
    * {@code jvmMavenPlugin} may be more preferrable.
+   *
+   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *      the project settings with - optional</li>
+   * </ul>
    *
    * @since 0.3.0
    */
@@ -238,6 +284,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>This mechanism allows plugin vendors to implement their plugins in
    * Java and just distribute platform-independent JAR instead.
+   *
+   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *      the project settings with - optional</li>
+   * </ul>
    *
    * @since 0.3.0
    */
@@ -430,6 +488,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .dependencyResolutionDepth(dependencyResolutionDepth)
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
+        .importDependencies(nonNullList(importDependencies))
         .importPaths(nonNullList(importPaths)
             .stream()
             .map(File::toPath)

@@ -177,10 +177,23 @@ public final class SourceCodeGenerator {
     var session = request.getMavenSession();
     var importPaths = new ArrayList<ProtoFileListing>();
 
+    if (!request.getImportDependencies().isEmpty()) {
+      log.debug(
+          "Finding importable protobuf sources from explicitly provided import dependencies ({})",
+          request.getImportDependencies()
+      );
+      var importDependencies = mavenDependencyPathResolver.resolveAll(
+          session,
+          request.getImportDependencies(),
+          request.getDependencyResolutionDepth()
+      );
+      importPaths.addAll(protoListingResolver.createProtoFileListings(importDependencies));
+    }
+
     if (!request.getImportPaths().isEmpty()) {
       log.debug(
           "Finding importable protobuf sources from explicitly provided import paths ({})",
-          request.getDependencyResolutionDepth()
+          request.getImportPaths()
       );
       importPaths.addAll(protoListingResolver.createProtoFileListings(request.getImportPaths()));
     }
