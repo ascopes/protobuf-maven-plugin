@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenProjectDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -217,11 +216,13 @@ public final class SourceCodeGenerator {
     log.debug("Discovering all compilable protobuf source files");
     var sourcePathsListings = protoListingResolver
         .createProtoFileListings(request.getSourceRoots());
+
     var sourceDependencies = mavenDependencyPathResolver.resolveAll(
         request.getMavenSession(),
         request.getSourceDependencies(),
-        DependencyResolutionDepth.DIRECT
+        request.getDependencyResolutionDepth()
     );
+
     var sourceDependencyListings = protoListingResolver
         .createProtoFileListings(sourceDependencies);
 
