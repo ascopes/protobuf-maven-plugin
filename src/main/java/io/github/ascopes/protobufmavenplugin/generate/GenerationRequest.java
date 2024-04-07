@@ -40,6 +40,8 @@ public interface GenerationRequest {
 
   DependencyResolutionDepth getDependencyResolutionDepth();
 
+  Collection<? extends MavenArtifact> getImportDependencies();
+
   Collection<Path> getImportPaths();
 
   Collection<? extends MavenArtifact> getJvmMavenPlugins();
