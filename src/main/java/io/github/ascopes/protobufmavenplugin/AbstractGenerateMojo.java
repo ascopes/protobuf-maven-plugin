@@ -143,8 +143,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * type are not provided explicitly.
    *
    * <p>For example:
-   *
-   * <p><pre>{@code
+   * <pre>{@code
    * <binaryMavenPlugins>
    *   <binaryMavenPlugin>
    *     <groupId>com.salesforce.servicelibs</groupId>
@@ -169,8 +168,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
    *
    * <p>For example:
-   *
-   * <p><pre>{@code
+   * <pre>{@code
    * <binaryPathPlugins>
    *   <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
    * </binaryPathPlugins>
@@ -187,7 +185,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
    *
    * <p>This includes support for:
-   *
    * <ul>
    *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
    *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
@@ -196,8 +193,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </ul>
    *
    * <p>For example:
-   *
-   * <p><pre>{@code
+   * <pre>{@code
    *   <binaryUrlPlugins>
    *     <binaryUrlPlugin>ftp://myorganisation.org/protoc/plugins/myplugin.exe</binaryUrlPlugin>
    *   </binaryUrlPlugins>
@@ -217,8 +213,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * protoc compiler API, and will be provided to the compiler via generated scripts.
    *
    * <p>For example:
-   *
-   * <p><pre>{@code
+   * <pre>{@code
    * <jvmMavenPlugins>
    *   <jvmMavenPlugin>
    *     <groupId>com.salesforce.servicelibs</groupId>
@@ -353,7 +348,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private boolean rustEnabled;
 
   /**
-   * Enable generating Objective C sources from the protobuf sources.
+   * Enable generating Objective-C sources from the protobuf sources.
    *
    * @since 1.1.0
    */
