@@ -56,7 +56,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The active Maven session.
    */
-  @Parameter(required = true, readonly = true, defaultValue = "${session}")
+  @Component
   private MavenSession session;
 
   /**
