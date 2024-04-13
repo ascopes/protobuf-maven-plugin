@@ -71,6 +71,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
   @SuppressWarnings({"auto-closeable", "ResultOfMethodCallIgnored"})
   @Override
   public void close() {
+    log.debug("Shutting down executor service");
     executorService.shutdown();
     try {
       executorService.awaitTermination(10, TimeUnit.SECONDS);
