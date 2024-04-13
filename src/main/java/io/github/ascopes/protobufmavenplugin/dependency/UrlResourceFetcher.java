@@ -99,11 +99,8 @@ public final class UrlResourceFetcher {
           .header(USER_AGENT, userAgent())
           .build();
 
-      log.info("Performing HTTP request to {} to download resources into {}", url, targetFile);
-
-      var resp = httpClient
-          .send(req, BodyHandlers.ofInputStream());
-
+      log.debug("Performing HTTP request to {} to download resources into {}", url, targetFile);
+      var resp = httpClient.send(req, BodyHandlers.ofInputStream());
       handleResponse(resp, targetFile);
 
     } catch (URISyntaxException | IOException | InterruptedException ex) {
@@ -122,17 +119,8 @@ public final class UrlResourceFetcher {
     try (var responseBody = response.body()) {
       // Successful response (200 OK), stream it to a file.
       if (status == 200) {
-        log.info(
-            "{} {} returned {}, streaming response...",
-            response.request().method(),
-            response.request().uri(),
-            response.statusCode()
-        );
-
-        try (var fileStream = new BufferedOutputStream(Files.newOutputStream(targetFile))) {
-          responseBody.transferTo(fileStream);
-        }
-
+        copyToFile(responseBody, targetFile);
+        log.info("Copied {} to {}", response.request().uri(), targetFile);
         return;
       }
 
@@ -166,13 +154,15 @@ public final class UrlResourceFetcher {
       conn.setRequestProperty(USER_AGENT, userAgent());
       conn.setUseCaches(true);
 
-      log.info("Connecting to '{}' (URLConnection) to copy resourcces to '{}'", url, targetFile);
+      log.debug("Connecting to '{}' (URLConnection) to copy resourcces to '{}'", url, targetFile);
 
       conn.connect();
 
       try (var responseBody = conn.getInputStream()) {
         copyToFile(responseBody, targetFile);
       }
+
+      log.info("Copied {} to {}", url, targetFile);
 
     } catch (IOException ex) {
       throw failedToCopy(url, targetFile, ex);
