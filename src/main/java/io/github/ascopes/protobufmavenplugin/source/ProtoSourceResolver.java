@@ -95,6 +95,8 @@ public final class ProtoSourceResolver implements AutoCloseable {
           .filter(ProtoFilePredicates::isProtoFile)
           .peek(protoFile -> log.debug("Found proto file in root {}: {}", path, protoFile))
           .collect(Collectors.collectingAndThen(
+              // Terminal operation, means we do not return a closed stream
+              // by mistake.
               Collectors.toCollection(LinkedHashSet::new),
               Optional::of
           ))
@@ -111,7 +113,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
   public Collection<ProtoFileListing> createProtoFileListings(
       Collection<Path> originalPaths
   ) throws IOException {
-    var results = new ArrayList<Optional<ProtoFileListing>>();
+    var results = new LinkedHashSet<ProtoFileListing>();
     var exceptions = new ArrayList<Exception>();
 
     originalPaths
@@ -122,11 +124,11 @@ public final class ProtoSourceResolver implements AutoCloseable {
         // GH-132: Avoid running multiple times on the same location.
         .distinct()
         .map(this::submitProtoFileListingTask)
-        // terminal operation to ensure all are scheduled prior to joining.
+        // Terminal operation to ensure all are scheduled prior to joining.
         .collect(Collectors.toList())
         .forEach(task -> {
           try {
-            results.add(task.get());
+            task.get().ifPresent(results::add);
           } catch (ExecutionException | InterruptedException ex) {
             exceptions.add(ex);
           }
@@ -141,10 +143,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
       throw ex;
     }
 
-    return results
-        .stream()
-        .flatMap(Optional::stream)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    return results;
   }
 
   private FutureTask<Optional<ProtoFileListing>> submitProtoFileListingTask(Path path) {
