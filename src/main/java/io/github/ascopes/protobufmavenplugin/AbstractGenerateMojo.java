@@ -481,7 +481,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       throw new MojoExecutionException(ex.getMessage(), ex);
     }
 
-    //noinspection DataFlowIssue
     var request = ImmutableGenerationRequest.builder()
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))

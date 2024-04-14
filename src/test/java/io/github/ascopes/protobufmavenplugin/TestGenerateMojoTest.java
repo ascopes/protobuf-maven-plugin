@@ -23,7 +23,7 @@ import org.apache.maven.execution.MavenSession;
 class TestGenerateMojoTest extends AbstractGenerateMojoTestTemplate<TestGenerateMojo> {
 
   @Override
-  TestGenerateMojo getInstance() {
+  TestGenerateMojo newInstance() {
     return new TestGenerateMojo();
   }
 

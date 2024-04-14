@@ -31,7 +31,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> {
 
-  abstract A getInstance();
+  abstract A newInstance();
 
   abstract SourceRootRegistrar expectedSourceRootRegistrar();
 
@@ -43,7 +43,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   void sourceRootRegistrarIsTheExpectedValue() {
     // Then
-    assertThat(getInstance().sourceRootRegistrar())
+    assertThat(newInstance().sourceRootRegistrar())
         .isEqualTo(expectedSourceRootRegistrar());
   }
 
@@ -60,7 +60,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         .thenReturn(mockCurrentProject);
 
     // Then
-    assertThat(getInstance().defaultSourceDirectory(mockMavenSession))
+    assertThat(newInstance().defaultSourceDirectory(mockMavenSession))
         .isEqualTo(expectedDefaultSourceDirectory(mockMavenSession));
   }
 
@@ -81,7 +81,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         .thenReturn(mockCurrentProject);
 
     // Then
-    assertThat(getInstance().defaultOutputDirectory(mockMavenSession))
+    assertThat(newInstance().defaultOutputDirectory(mockMavenSession))
         .isEqualTo(expectedDefaultOutputDirectory(mockMavenSession));
   }
 }
