@@ -69,6 +69,14 @@ public final class ProtocResolver {
   }
 
   public Path resolve(String version) throws ResolutionException {
+    if (version.equalsIgnoreCase("latest")) {
+      throw new IllegalArgumentException(
+          "Cannot use LATEST for the protoc version. "
+              + "Google has not released linear versions in the past, meaning that "
+              + "using LATEST will have unexpected behaviour."
+      );
+    }
+
     if (version.equalsIgnoreCase("PATH")) {
       return systemPathResolver.resolve(EXECUTABLE_NAME)
           .orElseThrow(() -> new ResolutionException("No protoc executable was found"));

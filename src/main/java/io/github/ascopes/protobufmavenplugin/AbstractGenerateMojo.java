@@ -506,12 +506,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    try {
-      validate();
-    } catch (IllegalArgumentException ex) {
-      throw new MojoExecutionException(ex.getMessage(), ex);
-    }
-
     var enabledLanguages = Language.setBuilder()
         .addIf(cppEnabled, Language.CPP)
         .addIf(csharpEnabled, Language.C_SHARP)
@@ -572,36 +566,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     } else {
       return List.of(defaultSourceDirectory());
     }
-  }
-
-  /**
-   * Validate this Mojo's parameters.
-   *
-   * @throws IllegalArgumentException if any parameters are invalid.
-   */
-  private void validate() {
-    // TODO: move this logic into the protoc resolver class.
-    if (protocVersion.equalsIgnoreCase("latest")) {
-      throw new IllegalArgumentException(
-          "Cannot use LATEST for the protoc version. "
-              + "Google has not released linear versions in the past, meaning that "
-              + "using LATEST will have unexpected behaviour."
-      );
-    }
-
-    // Having .jar on the output directory makes protoc generate a JAR with a
-    // Manifest. This will break our logic because generated sources will be
-    // inaccessible for the compilation phase later. For now, just prevent this
-    // edge case entirely.
-    // TODO: move this logic into the source generator class.
-    Optional.ofNullable(outputDirectory)
-        .map(File::toPath)
-        .flatMap(FileUtils::getFileExtension)
-        .filter(".jar"::equalsIgnoreCase)
-        .ifPresent(ext -> {
-          throw new IllegalArgumentException(
-              "The output directory cannot be a path with a JAR file extension");
-        });
   }
 
   private String protocVersion() {

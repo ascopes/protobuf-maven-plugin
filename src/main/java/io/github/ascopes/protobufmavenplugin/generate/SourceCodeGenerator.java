@@ -27,6 +27,7 @@ import io.github.ascopes.protobufmavenplugin.plugin.ResolvedPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.source.ProtoFileListing;
 import io.github.ascopes.protobufmavenplugin.source.ProtoSourceResolver;
+import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -231,6 +232,19 @@ public final class SourceCodeGenerator {
   private void createOutputDirectories(GenerationRequest request) throws IOException {
     var directory = request.getOutputDirectory();
     log.debug("Creating {}", directory);
+
+    // Having .jar on the output directory makes protoc generate a JAR with a
+    // Manifest. This will break our logic because generated sources will be
+    // inaccessible for the compilation phase later. For now, just prevent this
+    // edge case entirely.
+    FileUtils.getFileExtension(directory)
+        .filter(".jar"::equalsIgnoreCase)
+        .ifPresent(ext -> {
+          throw new IllegalArgumentException(
+              "The output directory '" + directory
+                  + "' cannot be a path with a JAR file extension");
+        });
+
     Files.createDirectories(directory);
 
     if (request.isRegisterAsCompilationRoot()) {
