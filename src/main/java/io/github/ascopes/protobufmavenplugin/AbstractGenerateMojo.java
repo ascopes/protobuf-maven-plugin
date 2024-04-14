@@ -469,6 +469,36 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean ignoreProjectDependencies;
 
   /**
+   * Provides the source root registrar for this Mojo.
+   *
+   * <p>This specifies where to attach generated sources to in order for it
+   * to be included as part of the compilation for main or test sources.
+   *
+   * @return the registrar to use.
+   */
+  abstract SourceRootRegistrar sourceRootRegistrar();
+
+  /**
+   * Provides the default source directory to read protobuf sources from.
+   *
+   * <p>This does not need to point to an existing directory, the plugin will
+   * handle this automatically.
+   *
+   * @return the path to the directory.
+   */
+  abstract Path defaultSourceDirectory();
+
+  /**
+   * Provides the default output directory to write generated code to.
+   *
+   * <p>This does not need to point to an existing directory, the plugin will
+   * handle this automatically.
+   *
+   * @return the path to the directory.
+   */
+  abstract Path defaultOutputDirectory();
+
+  /**
    * Execute the plugin and generate sources.
    *
    * @throws MojoExecutionException if execution fails.
@@ -530,13 +560,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
   }
 
-  Path outputDirectory() {
+  private Path outputDirectory() {
     return Optional.ofNullable(outputDirectory)
         .map(File::toPath)
         .orElseGet(this::defaultOutputDirectory);
   }
 
-  Collection<Path> sourceDirectories() {
+  private Collection<Path> sourceDirectories() {
     if (sourceDirectories != null) {
       return sourceDirectories.stream().map(File::toPath).collect(Collectors.toList());
     } else {
@@ -545,41 +575,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   /**
-   * Provides the source root registrar for this Mojo.
-   *
-   * <p>This specifies where to attach generated sources to in order for it
-   * to be included as part of the compilation for main or test sources.
-   *
-   * @return the registrar to use.
-   */
-  abstract SourceRootRegistrar sourceRootRegistrar();
-
-  /**
-   * Provides the default source directory to read protobuf sources from.
-   *
-   * <p>This does not need to point to an existing directory, the plugin will
-   * handle this automatically.
-   *
-   * @return the path to the directory.
-   */
-  abstract Path defaultSourceDirectory();
-
-  /**
-   * Provides the default output directory to write generated code to.
-   *
-   * <p>This does not need to point to an existing directory, the plugin will
-   * handle this automatically.
-   *
-   * @return the path to the directory.
-   */
-  abstract Path defaultOutputDirectory();
-
-  /**
    * Validate this Mojo's parameters.
    *
    * @throws IllegalArgumentException if any parameters are invalid.
    */
-  void validate() {
+  private void validate() {
     // TODO: move this logic into the protoc resolver class.
     if (protocVersion.equalsIgnoreCase("latest")) {
       throw new IllegalArgumentException(
@@ -604,14 +604,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         });
   }
 
-  String protocVersion() {
+  private String protocVersion() {
     // Give precedence to overriding the protoc version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty("protoc.version");
     return requireNonNullElse(overriddenVersion, protocVersion);
   }
 
-  <T> List<T> nonNullList(@Nullable List<T> list) {
+  private <T> List<T> nonNullList(@Nullable List<T> list) {
     return requireNonNullElseGet(list, List::of);
   }
 }

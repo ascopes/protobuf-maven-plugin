@@ -32,6 +32,14 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
   abstract A newInstance();
 
+  ///
+  /// Tests for functionality provided by AbstractGenerateMojo itself.
+  ///
+
+  ///
+  /// Tests for derived functionality only.
+  ///
+
   abstract SourceRootRegistrar expectedSourceRootRegistrar();
 
   abstract Path expectedDefaultSourceDirectory(MavenProject session);
