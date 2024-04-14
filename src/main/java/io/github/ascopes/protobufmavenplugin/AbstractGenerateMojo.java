@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
@@ -24,7 +25,6 @@ import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest
 import io.github.ascopes.protobufmavenplugin.generate.Language;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -48,6 +48,10 @@ import org.jspecify.annotations.Nullable;
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
+  ///
+  /// MOJO dependencies.
+  ///
+
   /**
    * The source code generator.
    */
@@ -60,134 +64,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Component
   MavenProject mavenProject;
 
-  /**
-   * Specifies where to find {@code protoc} or which version to download.
-   *
-   * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
-   * is in use.
-   *
-   * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
-   * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
-   * development version of {@code protoc}.
-   *
-   * <p>As of v0.4.0, you can also specify a URL that points to:
-   *
-   * <ul>
-   *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
-   *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
-   *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
-   *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
-   * </ul>
-   *
-   * <p>Note that specifying {@code -Dprotoc.version} in the {@code MAVEN_OPTS} or on the
-   * command line overrides the version specified in the POM. This enables users to easily
-   * override the version of {@code protoc} in use if their system is unable to support the
-   * version specified in the POM. Termux users in particular will find
-   * {@code -Dprotoc.version=PATH} to be useful, due to platform limitations with
-   * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
-   *
-   * @since 0.0.1
-   */
-  @Parameter(required = true, property = "protoc.version")
-  String protocVersion;
-
-  /**
-   * Override the source directories to compile from.
-   *
-   * <p>Leave unspecified or explicitly null/empty to use the defaults.
-   *
-   * @since 0.0.1
-   */
-  @Parameter
-  @Nullable List<File> sourceDirectories;
-
-  /**
-   * Additional dependencies to compile, pulled from the Maven repository.
-   *
-   * <p>Note that this will resolve dependencies recursively unless
-   * {@code dependencyResolutionDepth} is set to {@code DIRECT}.
-   *
-   * <p>For example:
-   * <pre>{@code
-   * <sourceDependencies>
-   *   <sourceDependency>
-   *     <groupId>com.mycompany</groupId>
-   *     <artifactId>common-protos</artifactId>
-   *     <version>1.2.4</version>
-   *     <type>zip</type>
-   *   </sourceDependency>
-   * </sourceDependencies>
-   * }</pre>
-   *
-   * <p>{@code MavenArtifactBean} objects support the following attributes:
-   *
-   * <ul>
-   *   <li>{@code groupId} - the group ID - required</li>
-   *   <li>{@code artifactId} - the artifact ID - required</li>
-   *   <li>{@code version} - the version - required</li>
-   *   <li>{@code type} - the artifact type - optional</li>
-   *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
-   *      the project settings with - optional</li>
-   * </ul>
-   *
-   * @since 1.2.0
-   */
-  @Parameter
-  @Nullable List<MavenArtifactBean> sourceDependencies;
-
-  /**
-   * The scope to resolve dependencies with.
-   *
-   * <p>Supported values:
-   *
-   * <ul>
-   *   <li><code>TRANSITIVE</code> - resolve all dependencies.</li>
-   *   <li><code>DIRECT</code> - only resolve dependencies that were explicitly specified.</li>
-   * </ul>
-   *
-   * @since 1.2.0
-   */
-  @Parameter(defaultValue = "TRANSITIVE")
-  DependencyResolutionDepth dependencyResolutionDepth;
-
-  /**
-   * Specify additional paths to import protobuf sources from on the local file system.
-   *
-   * <p>These will not be compiled into Java sources directly.
-   *
-   * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
-   * with the {@code provided} or {@code test} scope instead, or use {@code importDependencies}.
-   *
-   * <p>Prior to v1.2.0, this was called {@code additionalImportPaths}. This old name will
-   * be maintained as a valid alias until v2.0.0.
-   *
-   * @since 0.1.0
-   */
-  @Parameter(alias = "additionalImportPaths")
-  @Nullable List<File> importPaths;
-
-  /**
-   * Specify additional dependencies to import protobuf sources from.
-   *
-   * <p>These will not be compiled into Java sources directly.
-   *
-   * <p>{@code MavenArtifactBean} objects support the following attributes:
-   *
-   * <ul>
-   *   <li>{@code groupId} - the group ID - required</li>
-   *   <li>{@code artifactId} - the artifact ID - required</li>
-   *   <li>{@code version} - the version - required</li>
-   *   <li>{@code type} - the artifact type - optional</li>
-   *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
-   *      the project settings with - optional</li>
-   * </ul>
-   *
-   * @since 1.2.0
-   */
-  @Parameter
-  @Nullable List<MavenArtifactBean> importDependencies;
+  ///
+  /// MOJO parameters.
+  ///
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -267,6 +146,95 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<URL> binaryUrlPlugins;
 
   /**
+   * The scope to resolve dependencies with.
+   *
+   * <p>Supported values:
+   *
+   * <ul>
+   *   <li><code>TRANSITIVE</code> - resolve all dependencies.</li>
+   *   <li><code>DIRECT</code> - only resolve dependencies that were explicitly specified.</li>
+   * </ul>
+   *
+   * @since 1.2.0
+   */
+  @Parameter(defaultValue = "TRANSITIVE")
+  DependencyResolutionDepth dependencyResolutionDepth;
+
+  /**
+   * Whether to fail on missing sources.
+   *
+   * <p>If no sources are detected, it is usually a sign that this plugin
+   * is misconfigured, or that you are including this plugin in a project that does not need it. For
+   * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
+   * can explicitly set this to false instead.
+   *
+   * @since 0.5.0
+   */
+  @Parameter(defaultValue = "true")
+  boolean failOnMissingSources;
+
+  /**
+   * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
+   * build.
+   *
+   * <p>Defaults to {@code false}.
+   *
+   * @since 0.0.1
+   */
+  @Parameter(defaultValue = "false")
+  boolean fatalWarnings;
+
+  /**
+   * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
+   * {@code *.proto} files to add to the import paths.
+   *
+   * <p>Generally you will want to leave this enabled unless you have a very specific case where
+   * you wish to take control of how dependency resolution works.
+   *
+   * @since 1.2.0
+   */
+  @Parameter(defaultValue = "false")
+  boolean ignoreProjectDependencies;
+
+  /**
+   * Specify additional dependencies to import protobuf sources from.
+   *
+   * <p>These will not be compiled into Java sources directly.
+   *
+   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *      the project settings with - optional</li>
+   * </ul>
+   *
+   * @since 1.2.0
+   */
+  @Parameter
+  @Nullable List<MavenArtifactBean> importDependencies;
+
+  /**
+   * Specify additional paths to import protobuf sources from on the local file system.
+   *
+   * <p>These will not be compiled into Java sources directly.
+   *
+   * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
+   * with the {@code provided} or {@code test} scope instead, or use {@code importDependencies}.
+   *
+   * <p>Prior to v1.2.0, this was called {@code additionalImportPaths}. This old name will
+   * be maintained as a valid alias until v2.0.0.
+   *
+   * @since 0.1.0
+   */
+  @Parameter(alias = "additionalImportPaths")
+  @Nullable List<File> importPaths;
+
+  /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
    *
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
@@ -304,6 +272,19 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<MavenArtifactBean> jvmMavenPlugins;
 
   /**
+   * Whether to only generate "lite" messages or not.
+   *
+   * <p>These are bare-bones sources that do not contain most of the metadata that regular
+   * Protobuf sources contain, and are designed for low-latency/low-overhead scenarios.
+   *
+   * <p>See the protobuf documentation for the pros and cons of this.
+   *
+   * @since 0.0.1
+   */
+  @Parameter(defaultValue = "false")
+  boolean liteOnly;
+
+  /**
    * Override the directory to output generated code to.
    *
    * <p>Leave unspecified or explicitly null to use the default for the
@@ -315,28 +296,112 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable File outputDirectory;
 
   /**
-   * Whether to fail on missing sources.
+   * Specifies where to find {@code protoc} or which version to download.
    *
-   * <p>If no sources are detected, it is usually a sign that this plugin
-   * is misconfigured, or that you are including this plugin in a project that does not need it. For
-   * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
-   * can explicitly set this to false instead.
+   * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
+   * is in use.
+   *
+   * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
+   * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
+   * development version of {@code protoc}.
+   *
+   * <p>As of v0.4.0, you can also specify a URL that points to:
+   *
+   * <ul>
+   *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
+   *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
+   *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
+   *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
+   * </ul>
+   *
+   * <p>Note that specifying {@code -Dprotoc.version} in the {@code MAVEN_OPTS} or on the
+   * command line overrides the version specified in the POM. This enables users to easily
+   * override the version of {@code protoc} in use if their system is unable to support the
+   * version specified in the POM. Termux users in particular will find
+   * {@code -Dprotoc.version=PATH} to be useful, due to platform limitations with
+   * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
+   *
+   * @since 0.0.1
+   */
+  @Parameter(required = true, property = "protoc.version")
+  String protocVersion;
+
+  /**
+   * Whether to register the output directories as compilation roots with Maven.
+   *
+   * <p>Generally, you want to do this, but there may be edge cases where you
+   * wish to control this behaviour manually instead. In this case, set this parameter to be
+   * {@code false}.
    *
    * @since 0.5.0
    */
   @Parameter(defaultValue = "true")
-  boolean failOnMissingSources;
+  boolean registerAsCompilationRoot;
 
   /**
-   * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
-   * build.
+   * Additional dependencies to compile, pulled from the Maven repository.
    *
-   * <p>Defaults to {@code false}.
+   * <p>Note that this will resolve dependencies recursively unless
+   * {@code dependencyResolutionDepth} is set to {@code DIRECT}.
+   *
+   * <p>For example:
+   * <pre>{@code
+   * <sourceDependencies>
+   *   <sourceDependency>
+   *     <groupId>com.mycompany</groupId>
+   *     <artifactId>common-protos</artifactId>
+   *     <version>1.2.4</version>
+   *     <type>zip</type>
+   *   </sourceDependency>
+   * </sourceDependencies>
+   * }</pre>
+   *
+   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *      the project settings with - optional</li>
+   * </ul>
+   *
+   * @since 1.2.0
+   */
+  @Parameter
+  @Nullable List<MavenArtifactBean> sourceDependencies;
+
+  /**
+   * Override the source directories to compile from.
+   *
+   * <p>Leave unspecified or explicitly null/empty to use the defaults.
    *
    * @since 0.0.1
    */
+  @Parameter
+  @Nullable List<File> sourceDirectories;
+
+  ///
+  /// Language enabling flags
+  ///
+
+  /**
+   * Enable generating C++ sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
   @Parameter(defaultValue = "false")
-  boolean fatalWarnings;
+  boolean cppEnabled;
+
+  /**
+   * Enable generating C# sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  boolean csharpEnabled;
 
   /**
    * Enable generating Java sources from the protobuf sources.
@@ -359,6 +424,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = "false")
   boolean kotlinEnabled;
+
+  /**
+   * Enable generating Objective-C sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  boolean objcEnabled;
+
+  /**
+   * Enable generating PHP sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = "false")
+  boolean phpEnabled;
 
   /**
    * Enable generating Python sources from the protobuf sources.
@@ -392,22 +473,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean rubyEnabled;
 
   /**
-   * Enable generating C++ sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = "false")
-  boolean cppEnabled;
-
-  /**
-   * Enable generating C# sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = "false")
-  boolean csharpEnabled;
-
-  /**
    * Enable generating Rust sources from the protobuf sources.
    *
    * @since 1.1.0
@@ -415,58 +480,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter(defaultValue = "false")
   boolean rustEnabled;
 
-  /**
-   * Enable generating Objective-C sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = "false")
-  boolean objcEnabled;
-
-  /**
-   * Enable generating PHP sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = "false")
-  boolean phpEnabled;
-
-  /**
-   * Whether to only generate "lite" messages or not.
-   *
-   * <p>These are bare-bones sources that do not contain most of the metadata that regular
-   * Protobuf sources contain, and are designed for low-latency/low-overhead scenarios.
-   *
-   * <p>See the protobuf documentation for the pros and cons of this.
-   *
-   * @since 0.0.1
-   */
-  @Parameter(defaultValue = "false")
-  boolean liteOnly;
-
-  /**
-   * Whether to register the output directories as compilation roots with Maven.
-   *
-   * <p>Generally, you want to do this, but there may be edge cases where you
-   * wish to control this behaviour manually instead. In this case, set this parameter to be
-   * {@code false}.
-   *
-   * @since 0.5.0
-   */
-  @Parameter(defaultValue = "true")
-  boolean registerAsCompilationRoot;
-
-  /**
-   * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
-   * {@code *.proto} files to add to the import paths.
-   *
-   * <p>Generally you will want to leave this enabled unless you have a very specific case where
-   * you wish to take control of how dependency resolution works.
-   *
-   * @since 1.2.0
-   */
-  @Parameter(defaultValue = "false")
-  boolean ignoreProjectDependencies;
+  ///
+  /// Internal functionality
+  ///
 
   /**
    * Provides the source root registrar for this Mojo.
@@ -561,17 +577,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   private Collection<Path> sourceDirectories() {
-    if (sourceDirectories != null) {
-      return sourceDirectories.stream().map(File::toPath).collect(Collectors.toList());
-    } else {
+    if (sourceDirectories == null || sourceDirectories.isEmpty()) {
       return List.of(defaultSourceDirectory());
     }
+
+    return sourceDirectories.stream()
+        .map(File::toPath)
+        .collect(Collectors.toList());
   }
 
   private String protocVersion() {
     // Give precedence to overriding the protoc version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty("protoc.version");
+    requireNonNull(protocVersion, "protocVersion has not been set");
     return requireNonNullElse(overriddenVersion, protocVersion);
   }
 

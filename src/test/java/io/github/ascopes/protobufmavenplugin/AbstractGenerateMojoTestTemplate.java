@@ -16,77 +16,818 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
+import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
+import io.github.ascopes.protobufmavenplugin.generate.GenerationRequest;
+import io.github.ascopes.protobufmavenplugin.generate.Language;
+import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 import org.apache.maven.model.Build;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.quality.Strictness;
 
 abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> {
 
+  @TempDir
+  Path tempDir;
+
+  A mojo;
+
+  @BeforeEach
+  void setUp() throws Throwable {
+    // Final vars to disable checkstyle complaints.
+    final var mockBuild = mock(
+        Build.class,
+        withSettings().strictness(Strictness.LENIENT)
+    );
+    final var mavenProject = mock(
+        MavenProject.class,
+        withSettings().strictness(Strictness.LENIENT)
+    );
+    final var sourceCodeGenerator = sourceCodeGenerator(true);
+
+    when(mockBuild.getDirectory())
+        .thenReturn(tempDir.toString());
+    when(mavenProject.getBuild())
+        .thenReturn(mockBuild);
+    when(mavenProject.getBasedir())
+        .thenReturn(tempDir.toFile());
+
+    mojo = newInstance();
+    mojo.sourceCodeGenerator = sourceCodeGenerator;
+    mojo.mavenProject = mavenProject;
+    mojo.protocVersion = "4.26.0";
+  }
+
   abstract A newInstance();
-
-  ///
-  /// Tests for functionality provided by AbstractGenerateMojo itself.
-  ///
-
-  ///
-  /// Tests for derived functionality only.
-  ///
 
   abstract SourceRootRegistrar expectedSourceRootRegistrar();
 
-  abstract Path expectedDefaultSourceDirectory(MavenProject session);
+  abstract Path expectedDefaultSourceDirectory();
 
-  abstract Path expectedDefaultOutputDirectory(MavenProject session);
+  abstract Path expectedDefaultOutputDirectory();
 
-  @DisplayName("the sourceRootRegistrar is the expected value")
-  @Test
-  void sourceRootRegistrarIsTheExpectedValue() {
-    // Then
-    assertThat(newInstance().sourceRootRegistrar())
-        .isEqualTo(expectedSourceRootRegistrar());
+  @DisplayName("abstract method implementation tests")
+  @Nested
+  class AbstractMethodImplementationTest {
+
+    @DisplayName("the sourceRootRegistrar is the expected value")
+    @Test
+    void sourceRootRegistrarIsTheExpectedValue() {
+      // Then
+      assertThat(newInstance().sourceRootRegistrar())
+          .isEqualTo(expectedSourceRootRegistrar());
+    }
+
+    @DisplayName("the default source directory is the expected path")
+    @Test
+    void defaultSourceDirectoryIsTheExpectedPath() {
+      // Given
+      assertThat(mojo.defaultSourceDirectory())
+          .isEqualTo(expectedDefaultSourceDirectory());
+    }
+
+    @DisplayName("the default output directory is the expected path")
+    @Test
+    void defaultOutputDirectoryIsTheExpectedPath() {
+      // Then
+      assertThat(mojo.defaultOutputDirectory())
+          .isEqualTo(expectedDefaultOutputDirectory());
+    }
   }
 
-  @DisplayName("the default source directory is the expected path")
-  @Test
-  void defaultSourceDirectoryIsTheExpectedPath(@TempDir Path tempDir) {
-    // Given
-    var mockCurrentProject = mock(MavenProject.class);
-    when(mockCurrentProject.getBasedir())
-        .thenReturn(tempDir.toFile());
+  @DisplayName("SourceCodeGenerator error handling tests")
+  @Nested
+  class SourceCodeGeneratorErrorHandlingTest {
 
-    var pluginMojo = newInstance();
-    pluginMojo.mavenProject = mockCurrentProject;
+    @DisplayName("no exception is raised when the sourceCodeGenerator returns true")
+    @Test
+    void noExceptionRaisedWhenSourceCodeGeneratorReturnsTrue() throws Throwable {
+      // Given
+      mojo.sourceCodeGenerator = sourceCodeGenerator(true);
 
-    // Then
-    assertThat(pluginMojo.defaultSourceDirectory())
-        .isEqualTo(expectedDefaultSourceDirectory(mockCurrentProject));
+      // Then
+      assertThatNoException()
+          .isThrownBy(() -> mojo.execute());
+    }
+
+    @DisplayName("a MojoExecutionException is raised when the sourceCodeGenerator returns false")
+    @Test
+    void mojoExecutionExceptionRaisedWhenSourceCodeGeneratorReturnsFalse() throws Throwable {
+      // Given
+      mojo.sourceCodeGenerator = sourceCodeGenerator(false);
+
+      // Then
+      assertThatException()
+          .isThrownBy(() -> mojo.execute())
+          .isInstanceOf(MojoExecutionException.class)
+          .withMessage("Protoc invocation failed");
+    }
+
+    @DisplayName("a MojoFailureException is raised when the sourceCodeGenerator raises")
+    @ValueSource(classes = {IOException.class, ResolutionException.class})
+    @ParameterizedTest(name = "of type {0}")
+    void mojoFailureExceptionRaisedWhenSourceCodeGeneratorRaises(
+        Class<Throwable> causeType
+    ) throws Throwable {
+      // Given
+      var message = "some message blah blah " + someText();
+      var exceptionCause = causeType.getConstructor(String.class).newInstance(message);
+      mojo.sourceCodeGenerator = erroringSourceCodeGenerator(exceptionCause);
+
+      // Then
+      assertThatException()
+          .isThrownBy(() -> mojo.execute())
+          .isInstanceOf(MojoFailureException.class)
+          .withMessage(message)
+          .withCause(exceptionCause)
+          .hasFieldOrPropertyWithValue("source", mojo)
+          .hasFieldOrPropertyWithValue("longMessage", message);
+    }
   }
 
-  @DisplayName("the default output directory is the expected path")
-  @Test
-  void defaultOutputDirectoryIsTheExpectedPath(@TempDir Path tempDir) {
+  @DisplayName("binaryMavenPlugins tests")
+  @Nested
+  class BinaryMavenPluginsTest {
+
+    @DisplayName("when binaryMavenPlugins is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenBinaryMavenPluginsNullExpectEmptyListInRequest(
+        List<MavenArtifactBean> plugins
+    ) throws Throwable {
+      // Given
+      mojo.binaryMavenPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryMavenPlugins()).isEmpty();
+    }
+
+    @DisplayName("when binaryMavenPlugins is provided, expect the plugins in the request")
+    @Test
+    void whenBinaryMavenPluginsProvidedExpectPluginsInRequest() throws Throwable {
+      // Given
+      List<MavenArtifactBean> plugins = mock();
+      mojo.binaryMavenPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryMavenPlugins()).isSameAs(plugins);
+    }
+  }
+
+  @DisplayName("binaryPathPlugins tests")
+  @Nested
+  class BinaryPathPluginsTest {
+
+    @DisplayName("when binaryPathPlugins is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenBinaryPathPluginsNullExpectEmptyListInRequest(List<String> plugins) throws Throwable {
+      // Given
+      mojo.binaryPathPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryPathPlugins()).isEmpty();
+    }
+
+    @DisplayName("when binaryPathPlugins is provided, expect the plugins in the request")
+    @Test
+    void whenBinaryPathPluginsProvidedExpectPluginsInRequest() throws Throwable {
+      // Given
+      List<String> plugins = mock();
+      mojo.binaryPathPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryPathPlugins()).isSameAs(plugins);
+    }
+  }
+
+  @DisplayName("binaryUrlPlugins tests")
+  @Nested
+  class BinaryUrlPluginsTest {
+
+    @DisplayName("when binaryUrlPlugins is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenBinaryUrlPluginsNullExpectEmptyListInRequest(List<URL> plugins) throws Throwable {
+      // Given
+      mojo.binaryUrlPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryUrlPlugins()).isEmpty();
+    }
+
+    @DisplayName("when binaryUrlPlugins is provided, expect the plugins in the request")
+    @Test
+    void whenBinaryUrlPluginsProvidedExpectPluginsInRequest() throws Throwable {
+      // Given
+      List<URL> plugins = mock();
+      mojo.binaryUrlPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryUrlPlugins()).isSameAs(plugins);
+    }
+  }
+
+  @DisplayName("dependencyResolutionDepth tests")
+  @Nested
+  class DependencyResolutionDepthTest {
+
+    @DisplayName("the dependencyResolutionDepth is set to the specified value")
+    @EnumSource(DependencyResolutionDepth.class)
+    @ParameterizedTest(name = "for {0}")
+    void dependencyResolutionDepthIsSetToSpecifiedValue(
+        DependencyResolutionDepth dependencyResolutionDepth
+    ) throws Throwable {
+      mojo.dependencyResolutionDepth = dependencyResolutionDepth;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getBinaryUrlPlugins()).isEmpty();
+    }
+  }
+
+  @DisplayName("failOnMissingSources tests")
+  @Nested
+  class FailOnMissingSourcesTest {
+
+    @DisplayName("failOnMissingSources is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void failOnMissingSourcesIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.failOnMissingSources = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isFailOnMissingSources()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("fatalWarnings tests")
+  @Nested
+  class FatalWarningsTest {
+
+    @DisplayName("fatalWarnings is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void fatalWarningsIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.fatalWarnings = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isFatalWarnings()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("ignoreProjectDependencies tests")
+  @Nested
+  class IgnoreProjectDependenciesTest {
+
+    @DisplayName("ignoreProjectDependencies is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void ignoreProjectDependenciesIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.ignoreProjectDependencies = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isIgnoreProjectDependencies()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("importDependencies tests")
+  @Nested
+  class ImportDependenciesTest {
+
+    @DisplayName("when importDependencies is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenImportDependenciesNullExpectEmptyListInRequest(
+        List<MavenArtifactBean> plugins
+    ) throws Throwable {
+      // Given
+      mojo.importDependencies = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getImportDependencies()).isEmpty();
+    }
+
+    @DisplayName("when importDependencies is provided, expect the plugins in the request")
+    @Test
+    void whenImportDependenciesProvidedExpectPluginsInRequest() throws Throwable {
+      // Given
+      List<MavenArtifactBean> plugins = mock();
+      mojo.importDependencies = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getImportDependencies()).isSameAs(plugins);
+    }
+  }
+
+  @DisplayName("importPaths tests")
+  @Nested
+  class ImportPathsTest {
+
+    @DisplayName("when importPaths is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenImportPathsNullExpectEmptyListInRequest(List<File> importPaths) throws Throwable {
+      // Given
+      mojo.importPaths = importPaths;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getImportPaths()).isEmpty();
+    }
+
+    @DisplayName("when importPaths is provided, expect the paths in the request")
+    @Test
+    void whenImportPathsProvidedExpectPathsInRequest(
+        @TempDir Path someTempDir
+    ) throws Throwable {
+      // Given
+      var path1 = someTempDir.resolve("foo").resolve("bar");
+      var path2 = someTempDir.resolve("do").resolve("ray");
+      var path3 = someTempDir.resolve("aaa").resolve("bbb");
+
+      mojo.importPaths = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getImportPaths()).containsExactly(path1, path2, path3);
+    }
+  }
+
+  @DisplayName("jvmMavenPlugins tests")
+  @Nested
+  class JvmMavenPluginsTest {
+
+    @DisplayName("when jvmMavenPlugins is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenJvmMavenPluginsNullExpectEmptyListInRequest(
+        List<MavenArtifactBean> plugins
+    ) throws Throwable {
+      // Given
+      mojo.jvmMavenPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getJvmMavenPlugins()).isEmpty();
+    }
+
+    @DisplayName("when jvmMavenPlugins is provided, expect the plugins in the request")
+    @Test
+    void whenJvmMavenPluginsProvidedExpectPluginsInRequest() throws Throwable {
+      // Given
+      List<MavenArtifactBean> plugins = mock();
+      mojo.jvmMavenPlugins = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getJvmMavenPlugins()).isSameAs(plugins);
+    }
+  }
+
+  @DisplayName("liteOnly tests")
+  @Nested
+  class LiteOnlyTest {
+
+    @DisplayName("liteOnly is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void liteOnlyIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.liteOnly = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isLiteEnabled()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("outputDirectory tests")
+  @Nested
+  class OutputDirectoryTest {
+
+    @DisplayName(
+        "when outputDirectory is not provided, expect the default output directory to be used"
+    )
+    @Test
+    void whenOutputDirectoryNotProvidedExpectDefaultOutputDirectoryToBeUsed() throws Throwable {
+      // Given
+      // Final vars to disable checkstyle complaints.
+      final var expectedOutputDirectory = expectedDefaultOutputDirectory();
+      mojo.outputDirectory = null;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getOutputDirectory()).isEqualTo(expectedOutputDirectory);
+    }
+
+    @DisplayName("when outputDirectory is provided, expect the provided directory to be used")
+    @Test
+    void whenOutputDirectoryProvidedExpectProvidedDirectoryToBeUsed(
+        @TempDir Path expectedOutputDirectory
+    ) throws Throwable {
+      // Given
+      mojo.outputDirectory = expectedOutputDirectory.toFile();
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getOutputDirectory()).isEqualTo(expectedOutputDirectory);
+    }
+  }
+
+  @DisplayName("protocVersion tests")
+  @Nested
+  class ProtocVersionTest {
+
+    @DisplayName("when protocVersion is null, expect an exception to be raised")
+    @Test
+    @UsesSystemProperties
+    void whenProtocVersionNullExpectExceptionToBeRaised() {
+      // Given
+      //noinspection DataFlowIssue
+      mojo.protocVersion = null;
+
+      // Then
+      assertThatException()
+          .isThrownBy(mojo::execute)
+          .isInstanceOf(NullPointerException.class)
+          .withMessage("protocVersion has not been set");
+    }
+
+    @DisplayName("when protoc.version is set in system properties, expect that to be used")
+    @Test
+    @UsesSystemProperties
+    void whenProtocVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
+      // Given
+      mojo.protocVersion = "1.2.3";
+      System.setProperty("protoc.version", "4.5.6");
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getProtocVersion()).isEqualTo("4.5.6");
+    }
+
+    @DisplayName(
+        "when protoc.version is not set in system properties, expect the parameter to be used"
+    )
+    @Test
+    @UsesSystemProperties
+    void whenProtocVersionNotSetInSystemPropertiesExpectParameterToBeUsed() throws Throwable {
+      // Given
+      mojo.protocVersion = "1.2.3";
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getProtocVersion()).isEqualTo("1.2.3");
+    }
+  }
+
+  @DisplayName("registerAsCompilationRoot tests")
+  @Nested
+  class RegisterAsCompilationRootTest {
+
+    @DisplayName("registerAsCompilationRoot is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void registerAsCompilationRootIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.registerAsCompilationRoot = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isRegisterAsCompilationRoot()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("sourceDependencies tests")
+  @Nested
+  class SourceDependenciesTest {
+
+    @DisplayName("when sourceDependencies is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenSourceDependenciesNullExpectEmptyListInRequest(
+        List<MavenArtifactBean> dependencies
+    ) throws Throwable {
+      // Given
+      mojo.sourceDependencies = dependencies;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getSourceDependencies()).isEmpty();
+    }
+
+    @DisplayName("when sourceDependencies is provided, expect the dependencies in the request")
+    @Test
+    void whenSourceDependenciesProvidedExpectDependenciesInRequest() throws Throwable {
+      // Given
+      List<MavenArtifactBean> plugins = mock();
+      mojo.sourceDependencies = plugins;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getSourceDependencies()).isSameAs(plugins);
+    }
+  }
+
+  @DisplayName("sourceDirectories tests")
+  @Nested
+  class SourceDirectoriesTest {
+
+    @DisplayName("when sourceDirectories is null, expect an empty list in the request")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "when {0}")
+    void whenSourceDirectoriesNullExpectDefaultValueInRequest(
+        List<File> sourceDirectories
+    ) throws Throwable {
+      // Given
+      mojo.sourceDirectories = sourceDirectories;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getSourceRoots()).containsExactly(expectedDefaultSourceDirectory());
+    }
+
+    @DisplayName("when sourceDirectories is provided, expect the paths in the request")
+    @Test
+    void whenSourceDirectoriesProvidedExpectPathsInRequest(
+        @TempDir Path someTempDir
+    ) throws Throwable {
+      // Given
+      var path1 = someTempDir.resolve("foo").resolve("bar");
+      var path2 = someTempDir.resolve("do").resolve("ray");
+      var path3 = someTempDir.resolve("aaa").resolve("bbb");
+
+      mojo.sourceDirectories = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getSourceRoots()).containsExactly(path1, path2, path3);
+    }
+  }
+
+  @DisplayName("languages are enabled and disabled as expected")
+  @MethodSource("languageEnablingCases")
+  @ParameterizedTest(name = "when {0}, then expect {2} to be enabled")
+  void languagesAreEnabledAndDisabledAsExpected(
+      String description,
+      Consumer<A> languageConfigurer,
+      Set<Language> expectedEnabledLanguages
+  ) throws Throwable {
     // Given
-    var mockBuild = mock(Build.class);
-    when(mockBuild.getDirectory())
-        .thenReturn(tempDir.toString());
+    languageConfigurer.accept(mojo);
 
-    var mockCurrentProject = mock(MavenProject.class);
-    when(mockCurrentProject.getBuild())
-        .thenReturn(mockBuild);
-
-    var pluginMojo = newInstance();
-    pluginMojo.mavenProject = mockCurrentProject;
+    // When
+    mojo.execute();
 
     // Then
-    assertThat(pluginMojo.defaultOutputDirectory())
-        .isEqualTo(expectedDefaultOutputDirectory(mockCurrentProject));
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+
+    assertThat(actualRequest.getEnabledLanguages())
+        .withFailMessage("expected languages were not enabled when setting %s", description)
+        .containsExactlyInAnyOrderElementsOf(expectedEnabledLanguages);
+  }
+
+  static Stream<Arguments> languageEnablingCases() {
+    return Stream.of(
+        // Base cases
+        arguments("C++", consumer(a -> a.cppEnabled = true), EnumSet.of(Language.CPP)),
+        arguments("C#", consumer(a -> a.csharpEnabled = true), EnumSet.of(Language.C_SHARP)),
+        arguments("Java", consumer(a -> a.javaEnabled = true), EnumSet.of(Language.JAVA)),
+        arguments("Kotlin", consumer(a -> a.kotlinEnabled = true), EnumSet.of(Language.KOTLIN)),
+        arguments("ObjC", consumer(a -> a.objcEnabled = true), EnumSet.of(Language.OBJECTIVE_C)),
+        arguments("PHP", consumer(a -> a.phpEnabled = true), EnumSet.of(Language.PHP)),
+        arguments("Python", consumer(a -> a.pythonEnabled = true), EnumSet.of(Language.PYTHON)),
+        arguments("PYI", consumer(a -> a.pythonStubsEnabled = true), EnumSet.of(Language.PYI)),
+        arguments("Ruby", consumer(a -> a.rubyEnabled = true), EnumSet.of(Language.RUBY)),
+        arguments("Rust", consumer(a -> a.rustEnabled = true), EnumSet.of(Language.RUST)),
+        // Combined cases
+        arguments(
+            "Java and Kotlin",
+            consumer(a -> {
+              a.javaEnabled = true;
+              a.kotlinEnabled = true;
+            }),
+            EnumSet.of(Language.JAVA, Language.KOTLIN)
+        ),
+        arguments(
+            "Python and PYI",
+            consumer(a -> {
+              a.pythonEnabled = true;
+              a.pythonStubsEnabled = true;
+            }),
+            EnumSet.of(Language.PYTHON, Language.PYI)
+        ),
+        arguments(
+            "C++, C#, Rust, and ObjC",
+            consumer(a -> {
+              a.cppEnabled = true;
+              a.csharpEnabled = true;
+              a.objcEnabled = true;
+              a.rustEnabled = true;
+            }),
+            EnumSet.of(Language.CPP, Language.C_SHARP, Language.OBJECTIVE_C, Language.RUST)
+        )
+    );
+  }
+
+  static Consumer<AbstractGenerateMojo> consumer(Consumer<AbstractGenerateMojo> consumer) {
+    return consumer;
+  }
+
+  static SourceCodeGenerator sourceCodeGenerator(boolean result) throws Throwable {
+    var sourceCodeGenerator = mock(
+        SourceCodeGenerator.class,
+        withSettings().strictness(Strictness.LENIENT)
+    );
+    when(sourceCodeGenerator.generate(any()))
+        .thenReturn(result);
+    return sourceCodeGenerator;
+  }
+
+  static SourceCodeGenerator erroringSourceCodeGenerator(Throwable cause) throws Throwable {
+    var sourceCodeGenerator = mock(
+        SourceCodeGenerator.class,
+        withSettings().strictness(Strictness.LENIENT)
+    );
+    when(sourceCodeGenerator.generate(any()))
+        .thenThrow(cause);
+    return sourceCodeGenerator;
   }
 }

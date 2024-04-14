@@ -32,8 +32,4 @@ public final class RandomFixtures {
   public static String someText() {
     return UUID.randomUUID().toString();
   }
-
-  public static Object someObject() {
-    return new Object();
-  }
 }

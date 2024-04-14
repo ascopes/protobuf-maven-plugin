@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -75,7 +74,7 @@ public enum Language {
     }
 
     public Set<Language> build() {
-      return EnumSet.copyOf(set);
+      return set;
     }
   }
 }
