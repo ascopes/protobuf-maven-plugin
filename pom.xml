@@ -16,7 +16,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.ascopes</groupId>
@@ -55,7 +57,7 @@
     </developer>
   </developers>
 
-  <contributors />
+  <contributors/>
 
   <distributionManagement>
     <repository>
@@ -88,7 +90,8 @@
   <scm>
     <url>https://github.com/ascopes/protobuf-maven-plugin</url>
     <connection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</connection>
-    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</developerConnection>
+    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin
+    </developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -115,6 +118,7 @@
     <maven-invoker-plugin.version>3.6.1</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+    <maven-jxr-plugin.version>3.3.2</maven-jxr-plugin.version>
     <maven-plugin-plugin.version>3.12.0</maven-plugin-plugin.version>
     <maven-plugin-report-plugin.version>3.12.0</maven-plugin-report-plugin.version>
     <maven-project-info-reports-plugin.version>3.5.0</maven-project-info-reports-plugin.version>
@@ -406,16 +410,6 @@
       </plugin>
 
       <plugin>
-        <!-- We disable JavaDoc generation entirely as we do not need it. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven-javadoc-plugin.version}</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <!-- Generate plugin descriptors. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -458,7 +452,6 @@
         </configuration>
       </plugin>
 
-
       <plugin>
         <!-- Generate the plugin site. -->
         <groupId>org.apache.maven.plugins</groupId>
@@ -486,7 +479,8 @@
             This block is needed to show @DisplayName and @ParameterizedTest
             in reports with the provided names.
           -->
-          <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+          <statelessTestsetReporter
+            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
             <disable>false</disable>
             <version>3.0</version>
             <usePhrasedFileName>false</usePhrasedFileName>
@@ -494,7 +488,8 @@
             <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
             <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
           </statelessTestsetReporter>
-          <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+          <statelessTestsetInfoReporter
+            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
             <disable>false</disable>
             <printStacktraceOnError>true</printStacktraceOnError>
             <printStacktraceOnFailure>true</printStacktraceOnFailure>
@@ -577,8 +572,50 @@
       <plugin>
         <!-- Compile src/main/site and generate the goals site pages. -->
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>${maven-invoker-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <!-- Used to generate source code cross-references with other reporting plugins. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>${maven-jxr-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <!-- Compile src/main/site and generate the goals site pages. -->
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-report-plugin</artifactId>
         <version>${maven-plugin-report-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <!-- select non-aggregate reports only -->
+              <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
       </plugin>
     </plugins>
   </reporting>
