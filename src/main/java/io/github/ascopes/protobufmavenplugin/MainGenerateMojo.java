@@ -50,12 +50,12 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 public final class MainGenerateMojo extends AbstractGenerateMojo {
 
   @Override
-  protected SourceRootRegistrar sourceRootRegistrar() {
+  SourceRootRegistrar sourceRootRegistrar() {
     return SourceRootRegistrar.MAIN;
   }
 
   @Override
-  protected Path defaultSourceDirectory(MavenSession session) {
+  Path defaultSourceDirectory(MavenSession session) {
     return session.getCurrentProject().getBasedir().toPath()
         .resolve("src")
         .resolve("main")
@@ -63,7 +63,7 @@ public final class MainGenerateMojo extends AbstractGenerateMojo {
   }
 
   @Override
-  protected Path defaultOutputDirectory(MavenSession session) {
+  Path defaultOutputDirectory(MavenSession session) {
     return Path.of(session.getCurrentProject().getBuild().getDirectory())
         .resolve("generated-sources")
         .resolve("protobuf");

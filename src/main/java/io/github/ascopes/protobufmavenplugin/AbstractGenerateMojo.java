@@ -51,13 +51,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * The source code generator.
    */
   @Component
-  private SourceCodeGenerator sourceCodeGenerator;
+  SourceCodeGenerator sourceCodeGenerator;
 
   /**
    * The active Maven session.
    */
   @Component
-  private MavenSession session;
+  MavenSession session;
 
   /**
    * Specifies where to find {@code protoc} or which version to download.
@@ -88,7 +88,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protoc.version")
-  private String protocVersion;
+  String protocVersion;
 
   /**
    * Override the source directories to compile from.
@@ -98,7 +98,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter
-  private @Nullable List<File> sourceDirectories;
+  @Nullable List<File> sourceDirectories;
 
   /**
    * Additional dependencies to compile, pulled from the Maven repository.
@@ -133,7 +133,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  private @Nullable List<MavenArtifactBean> sourceDependencies;
+  @Nullable List<MavenArtifactBean> sourceDependencies;
 
   /**
    * The scope to resolve dependencies with.
@@ -148,7 +148,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter(defaultValue = "TRANSITIVE")
-  private DependencyResolutionDepth dependencyResolutionDepth;
+  DependencyResolutionDepth dependencyResolutionDepth;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -164,7 +164,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter(alias = "additionalImportPaths")
-  private @Nullable List<File> importPaths;
+  @Nullable List<File> importPaths;
 
   /**
    * Specify additional dependencies to import protobuf sources from.
@@ -186,7 +186,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  private @Nullable List<MavenArtifactBean> importDependencies;
+  @Nullable List<MavenArtifactBean> importDependencies;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -225,7 +225,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<MavenArtifactBean> binaryMavenPlugins;
+  @Nullable List<MavenArtifactBean> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -240,7 +240,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<String> binaryPathPlugins;
+  @Nullable List<String> binaryPathPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
@@ -263,7 +263,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.4.0
    */
   @Parameter
-  private @Nullable List<URL> binaryUrlPlugins;
+  @Nullable List<URL> binaryUrlPlugins;
 
   /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
@@ -300,7 +300,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  private @Nullable List<MavenArtifactBean> jvmMavenPlugins;
+  @Nullable List<MavenArtifactBean> jvmMavenPlugins;
 
   /**
    * Override the directory to output generated code to.
@@ -311,7 +311,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  private @Nullable File outputDirectory;
+  @Nullable File outputDirectory;
 
   /**
    * Whether to fail on missing sources.
@@ -324,7 +324,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.5.0
    */
   @Parameter(defaultValue = "true")
-  private boolean failOnMissingSources;
+  boolean failOnMissingSources;
 
   /**
    * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
@@ -335,7 +335,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  private boolean fatalWarnings;
+  boolean fatalWarnings;
 
   /**
    * Enable generating Java sources from the protobuf sources.
@@ -346,7 +346,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.1
    */
   @Parameter(defaultValue = "true")
-  private boolean javaEnabled;
+  boolean javaEnabled;
 
   /**
    * Enable generating Kotlin API wrapper code around the generated Java code.
@@ -357,7 +357,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean kotlinEnabled;
+  boolean kotlinEnabled;
 
   /**
    * Enable generating Python sources from the protobuf sources.
@@ -368,7 +368,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean pythonEnabled;
+  boolean pythonEnabled;
 
   /**
    * Enable generating Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
@@ -380,7 +380,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean pythonStubsEnabled;
+  boolean pythonStubsEnabled;
 
   /**
    * Enable generating Ruby sources from the protobuf sources.
@@ -388,7 +388,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean rubyEnabled;
+  boolean rubyEnabled;
 
   /**
    * Enable generating C++ sources from the protobuf sources.
@@ -396,7 +396,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean cppEnabled;
+  boolean cppEnabled;
 
   /**
    * Enable generating C# sources from the protobuf sources.
@@ -404,7 +404,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean csharpEnabled;
+  boolean csharpEnabled;
 
   /**
    * Enable generating Rust sources from the protobuf sources.
@@ -412,7 +412,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean rustEnabled;
+  boolean rustEnabled;
 
   /**
    * Enable generating Objective-C sources from the protobuf sources.
@@ -420,7 +420,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean objcEnabled;
+  boolean objcEnabled;
 
   /**
    * Enable generating PHP sources from the protobuf sources.
@@ -428,7 +428,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.1.0
    */
   @Parameter(defaultValue = "false")
-  private boolean phpEnabled;
+  boolean phpEnabled;
 
   /**
    * Whether to only generate "lite" messages or not.
@@ -441,7 +441,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
-  private boolean liteOnly;
+  boolean liteOnly;
 
   /**
    * Whether to register the output directories as compilation roots with Maven.
@@ -453,7 +453,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.5.0
    */
   @Parameter(defaultValue = "true")
-  private boolean registerAsCompilationRoot;
+  boolean registerAsCompilationRoot;
 
   /**
    * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
@@ -465,7 +465,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter(defaultValue = "false")
-  private boolean ignoreProjectDependencies;
+  boolean ignoreProjectDependencies;
 
   /**
    * Execute the plugin and generate sources.
@@ -527,13 +527,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
   }
 
-  private Path outputDirectory() {
+  Path outputDirectory() {
     return Optional.ofNullable(outputDirectory)
         .map(File::toPath)
         .orElseGet(() -> defaultOutputDirectory(session));
   }
 
-  private Collection<Path> sourceDirectories() {
+  Collection<Path> sourceDirectories() {
     if (sourceDirectories != null) {
       return sourceDirectories.stream().map(File::toPath).collect(Collectors.toList());
     } else {
@@ -549,7 +549,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @return the registrar to use.
    */
-  protected abstract SourceRootRegistrar sourceRootRegistrar();
+  abstract SourceRootRegistrar sourceRootRegistrar();
 
   /**
    * Provides the default source directory to read protobuf sources from.
@@ -560,7 +560,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @param session the Maven session.
    * @return the path to the directory.
    */
-  protected abstract Path defaultSourceDirectory(MavenSession session);
+  abstract Path defaultSourceDirectory(MavenSession session);
 
   /**
    * Provides the default output directory to write generated code to.
@@ -571,14 +571,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @param session the Maven session.
    * @return the path to the directory.
    */
-  protected abstract Path defaultOutputDirectory(MavenSession session);
+  abstract Path defaultOutputDirectory(MavenSession session);
 
   /**
    * Validate this Mojo's parameters.
    *
    * @throws IllegalArgumentException if any parameters are invalid.
    */
-  protected void validate() {
+  void validate() {
     // TODO: move this logic into the protoc resolver class.
     if (protocVersion.equalsIgnoreCase("latest")) {
       throw new IllegalArgumentException(
@@ -603,14 +603,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         });
   }
 
-  private String protocVersion() {
+  String protocVersion() {
     // Give precedence to overriding the protoc version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty("protoc.version");
     return requireNonNullElse(overriddenVersion, protocVersion);
   }
 
-  private <T> List<T> nonNullList(@Nullable List<T> list) {
+  <T> List<T> nonNullList(@Nullable List<T> list) {
     return requireNonNullElseGet(list, List::of);
   }
 }

@@ -55,12 +55,12 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 public final class TestGenerateMojo extends AbstractGenerateMojo {
 
   @Override
-  protected SourceRootRegistrar sourceRootRegistrar() {
+  SourceRootRegistrar sourceRootRegistrar() {
     return SourceRootRegistrar.TEST;
   }
 
   @Override
-  protected Path defaultSourceDirectory(MavenSession session) {
+  Path defaultSourceDirectory(MavenSession session) {
     return session.getCurrentProject().getBasedir().toPath()
         .resolve("src")
         .resolve("test")
@@ -68,7 +68,7 @@ public final class TestGenerateMojo extends AbstractGenerateMojo {
   }
 
   @Override
-  protected Path defaultOutputDirectory(MavenSession session) {
+  Path defaultOutputDirectory(MavenSession session) {
     return Path.of(session.getCurrentProject().getBuild().getDirectory())
         .resolve("generated-test-sources")
         .resolve("protobuf");
