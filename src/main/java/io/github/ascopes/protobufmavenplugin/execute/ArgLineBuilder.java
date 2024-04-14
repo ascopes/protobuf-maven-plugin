@@ -30,6 +30,7 @@ import java.util.List;
  * @author Ashley Scopes
  */
 public final class ArgLineBuilder {
+
   private final List<String> args;
   private int outputTargetCount;
 
@@ -60,6 +61,7 @@ public final class ArgLineBuilder {
     return this;
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   public ArgLineBuilder generateCodeFor(Language language, Path outputPath, boolean lite) {
     ++outputTargetCount;
     var flag = lite

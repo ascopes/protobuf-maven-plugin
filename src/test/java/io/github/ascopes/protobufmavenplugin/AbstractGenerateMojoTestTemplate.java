@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.DisplayName;
@@ -35,9 +34,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
   abstract SourceRootRegistrar expectedSourceRootRegistrar();
 
-  abstract Path expectedDefaultSourceDirectory(MavenSession session);
+  abstract Path expectedDefaultSourceDirectory(MavenProject session);
 
-  abstract Path expectedDefaultOutputDirectory(MavenSession session);
+  abstract Path expectedDefaultOutputDirectory(MavenProject session);
 
   @DisplayName("the sourceRootRegistrar is the expected value")
   @Test
@@ -55,13 +54,12 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     when(mockCurrentProject.getBasedir())
         .thenReturn(tempDir.toFile());
 
-    var mockMavenSession = mock(MavenSession.class);
-    when(mockMavenSession.getCurrentProject())
-        .thenReturn(mockCurrentProject);
+    var pluginMojo = newInstance();
+    pluginMojo.mavenProject = mockCurrentProject;
 
     // Then
-    assertThat(newInstance().defaultSourceDirectory(mockMavenSession))
-        .isEqualTo(expectedDefaultSourceDirectory(mockMavenSession));
+    assertThat(pluginMojo.defaultSourceDirectory())
+        .isEqualTo(expectedDefaultSourceDirectory(mockCurrentProject));
   }
 
   @DisplayName("the default output directory is the expected path")
@@ -76,12 +74,11 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     when(mockCurrentProject.getBuild())
         .thenReturn(mockBuild);
 
-    var mockMavenSession = mock(MavenSession.class);
-    when(mockMavenSession.getCurrentProject())
-        .thenReturn(mockCurrentProject);
+    var pluginMojo = newInstance();
+    pluginMojo.mavenProject = mockCurrentProject;
 
     // Then
-    assertThat(newInstance().defaultOutputDirectory(mockMavenSession))
-        .isEqualTo(expectedDefaultOutputDirectory(mockMavenSession));
+    assertThat(pluginMojo.defaultOutputDirectory())
+        .isEqualTo(expectedDefaultOutputDirectory(mockCurrentProject));
   }
 }

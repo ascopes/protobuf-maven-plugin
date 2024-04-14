@@ -35,13 +35,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
- * A bean that exposes information about the underlying platform and the context of the
- * invocation.
+ * A bean that exposes information about the underlying platform and the context of the invocation.
  *
  * @author Ashley Scopes
  */
 @Named
 public final class HostSystem {
+
   private final String operatingSystem;
   private final String cpuArchitecture;
   private final Path workingDirectory;

@@ -21,7 +21,6 @@ import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
-import org.apache.maven.execution.MavenSession;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -47,8 +46,6 @@ public interface GenerationRequest {
   Collection<Path> getImportPaths();
 
   Collection<? extends MavenArtifact> getJvmMavenPlugins();
-
-  MavenSession getMavenSession();
 
   Path getOutputDirectory();
 

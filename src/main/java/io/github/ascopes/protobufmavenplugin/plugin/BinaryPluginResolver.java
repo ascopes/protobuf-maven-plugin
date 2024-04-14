@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.execution.MavenSession;
 
 /**
  * Protoc plugin resolver for native binaries on the system.
@@ -62,10 +61,9 @@ public final class BinaryPluginResolver {
   }
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
-      MavenSession session,
       Collection<? extends MavenArtifact> plugins
   ) throws ResolutionException {
-    return resolveAll(plugins, plugin -> resolveMavenPlugin(session, plugin));
+    return resolveAll(plugins, this::resolveMavenPlugin);
   }
 
   public Collection<ResolvedPlugin> resolvePathPlugins(
@@ -81,7 +79,6 @@ public final class BinaryPluginResolver {
   }
 
   private ResolvedPlugin resolveMavenPlugin(
-      MavenSession session,
       MavenArtifact plugin
   ) throws ResolutionException {
     var pluginBuilder = ImmutableMavenArtifact.builder().from(plugin);
@@ -98,7 +95,7 @@ public final class BinaryPluginResolver {
     plugin = pluginBuilder.build();
 
     // Only one dependency should ever be returned here.
-    var path = dependencyResolver.resolveOne(session, plugin, DependencyResolutionDepth.DIRECT)
+    var path = dependencyResolver.resolveOne(plugin, DependencyResolutionDepth.DIRECT)
         .iterator()
         .next();
     makeExecutable(path);

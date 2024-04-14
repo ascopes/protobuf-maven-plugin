@@ -30,7 +30,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.execution.MavenSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,10 +68,7 @@ public final class ProtocResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Path resolve(
-      MavenSession session,
-      String version
-  ) throws ResolutionException {
+  public Path resolve(String version) throws ResolutionException {
     if (version.equalsIgnoreCase("PATH")) {
       return systemPathResolver.resolve(EXECUTABLE_NAME)
           .orElseThrow(() -> new ResolutionException("No protoc executable was found"));
@@ -80,7 +76,7 @@ public final class ProtocResolver {
 
     var path = version.contains(":")
         ? resolveFromUrl(version)
-        : resolveFromMavenRepositories(session, version);
+        : resolveFromMavenRepositories(version);
 
     try {
       FileUtils.makeExecutable(path);
@@ -99,10 +95,7 @@ public final class ProtocResolver {
     }
   }
 
-  private Path resolveFromMavenRepositories(
-      MavenSession session,
-      String version
-  ) throws ResolutionException {
+  private Path resolveFromMavenRepositories(String version) throws ResolutionException {
     if (hostSystem.isProbablyAndroidTermux()) {
       log.warn(
           "It looks like you are using Termux on Android. You may encounter issues "
@@ -121,7 +114,7 @@ public final class ProtocResolver {
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
-    return dependencyResolver.resolveOne(session, artifact, DependencyResolutionDepth.DIRECT)
+    return dependencyResolver.resolveOne(artifact, DependencyResolutionDepth.DIRECT)
         .iterator()
         .next();
   }

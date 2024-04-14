@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 @Named
 public final class TemporarySpace {
+
   private static final String FRAG = "protobuf-maven-plugin";
 
   private static final Logger log = LoggerFactory.getLogger(TemporarySpace.class);

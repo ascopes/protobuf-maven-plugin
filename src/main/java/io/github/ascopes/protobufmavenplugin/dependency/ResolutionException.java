@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  */
 public final class ResolutionException extends Exception {
+
   public ResolutionException(String message) {
     super(message);
   }

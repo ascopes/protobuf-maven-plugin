@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin;
 
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.nio.file.Path;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -30,12 +29,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * For test sources, use the {@code generate-test} goal instead.
  *
  * <p>Any project dependencies using the {@code compile}, {@code provided},
- * or {@code system} scopes will be made available to import from protobuf
- * sources.
+ * or {@code system} scopes will be made available to import from protobuf sources.
  *
  * <p>By default, sources will be read from {@code src/main/protobuf},
- * and generated sources will be written to
- * {@code target/generated-sources/protobuf}.
+ * and generated sources will be written to {@code target/generated-sources/protobuf}.
  *
  * @author Ashley Scopes
  */
@@ -55,16 +52,16 @@ public final class MainGenerateMojo extends AbstractGenerateMojo {
   }
 
   @Override
-  Path defaultSourceDirectory(MavenSession session) {
-    return session.getCurrentProject().getBasedir().toPath()
+  Path defaultSourceDirectory() {
+    return mavenProject.getBasedir().toPath()
         .resolve("src")
         .resolve("main")
         .resolve("protobuf");
   }
 
   @Override
-  Path defaultOutputDirectory(MavenSession session) {
-    return Path.of(session.getCurrentProject().getBuild().getDirectory())
+  Path defaultOutputDirectory() {
+    return Path.of(mavenProject.getBuild().getDirectory())
         .resolve("generated-sources")
         .resolve("protobuf");
   }

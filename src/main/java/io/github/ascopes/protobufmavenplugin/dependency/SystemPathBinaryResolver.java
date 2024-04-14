@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 @Named
 public final class SystemPathBinaryResolver {
+
   private static final Logger log = LoggerFactory.getLogger(SystemPathBinaryResolver.class);
 
   private final HostSystem hostSystem;

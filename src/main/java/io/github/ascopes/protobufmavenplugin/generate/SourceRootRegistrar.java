@@ -28,6 +28,7 @@ import org.apache.maven.project.MavenProject;
  */
 @FunctionalInterface
 public interface SourceRootRegistrar {
+
   MavenRegistrar MAIN = new MavenRegistrar("main", MavenProject::addCompileSourceRoot);
   MavenRegistrar TEST = new MavenRegistrar("test", MavenProject::addTestCompileSourceRoot);
 
@@ -37,6 +38,7 @@ public interface SourceRootRegistrar {
    * A basic registrar for {@link MavenProject} sources.
    */
   final class MavenRegistrar implements SourceRootRegistrar {
+
     private final String name;
     private final BiConsumer<MavenProject, String> delegate;
 

@@ -59,6 +59,7 @@ public enum Language {
    * @since 1.2.0
    */
   public static final class LanguageSetBuilder {
+
     private final Set<Language> set;
 
     private LanguageSetBuilder() {

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 public final class FileUtils {
+
   private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
   private FileUtils() {

@@ -33,12 +33,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -55,10 +55,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   SourceCodeGenerator sourceCodeGenerator;
 
   /**
-   * The active Maven session.
+   * The active Maven project.
    */
   @Component
-  MavenSession session;
+  MavenProject mavenProject;
 
   /**
    * Specifies where to find {@code protoc} or which version to download.
@@ -512,7 +512,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isLiteEnabled(liteOnly)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
-        .mavenSession(session)
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
         .sourceDependencies(nonNullList(sourceDependencies))
@@ -534,14 +533,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   Path outputDirectory() {
     return Optional.ofNullable(outputDirectory)
         .map(File::toPath)
-        .orElseGet(() -> defaultOutputDirectory(session));
+        .orElseGet(this::defaultOutputDirectory);
   }
 
   Collection<Path> sourceDirectories() {
     if (sourceDirectories != null) {
       return sourceDirectories.stream().map(File::toPath).collect(Collectors.toList());
     } else {
-      return List.of(defaultSourceDirectory(session));
+      return List.of(defaultSourceDirectory());
     }
   }
 
@@ -561,10 +560,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This does not need to point to an existing directory, the plugin will
    * handle this automatically.
    *
-   * @param session the Maven session.
    * @return the path to the directory.
    */
-  abstract Path defaultSourceDirectory(MavenSession session);
+  abstract Path defaultSourceDirectory();
 
   /**
    * Provides the default output directory to write generated code to.
@@ -572,10 +570,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This does not need to point to an existing directory, the plugin will
    * handle this automatically.
    *
-   * @param session the Maven session.
    * @return the path to the directory.
    */
-  abstract Path defaultOutputDirectory(MavenSession session);
+  abstract Path defaultOutputDirectory();
 
   /**
    * Validate this Mojo's parameters.

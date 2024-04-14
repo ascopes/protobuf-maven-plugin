@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.MavenSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,7 @@ public final class SourceCodeGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(SourceCodeGenerator.class);
 
+  private final MavenSession mavenSession;
   private final MavenDependencyPathResolver mavenDependencyPathResolver;
   private final MavenProjectDependencyPathResolver mavenProjectDependencyPathResolver;
   private final ProtocResolver protocResolver;
@@ -64,6 +66,7 @@ public final class SourceCodeGenerator {
 
   @Inject
   public SourceCodeGenerator(
+      MavenSession mavenSession,
       MavenDependencyPathResolver mavenDependencyPathResolver,
       MavenProjectDependencyPathResolver mavenProjectDependencyPathResolver,
       ProtocResolver protocResolver,
@@ -72,6 +75,7 @@ public final class SourceCodeGenerator {
       ProtoSourceResolver protoListingResolver,
       CommandLineExecutor commandLineExecutor
   ) {
+    this.mavenSession = mavenSession;
     this.mavenDependencyPathResolver = mavenDependencyPathResolver;
     this.mavenProjectDependencyPathResolver = mavenProjectDependencyPathResolver;
     this.protocResolver = protocResolver;
@@ -132,7 +136,7 @@ public final class SourceCodeGenerator {
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
-    return protocResolver.resolve(request.getMavenSession(), request.getProtocVersion());
+    return protocResolver.resolve(request.getProtocVersion());
   }
 
   private boolean logProtocVersion(Path protocPath) throws IOException {
@@ -145,20 +149,19 @@ public final class SourceCodeGenerator {
   ) throws IOException, ResolutionException {
     return concat(
         binaryPluginResolver
-            .resolveMavenPlugins(request.getMavenSession(), request.getBinaryMavenPlugins()),
+            .resolveMavenPlugins(request.getBinaryMavenPlugins()),
         binaryPluginResolver
             .resolvePathPlugins(request.getBinaryPathPlugins()),
         binaryPluginResolver
             .resolveUrlPlugins(request.getBinaryUrlPlugins()),
         jvmPluginResolver
-            .resolveMavenPlugins(request.getMavenSession(), request.getJvmMavenPlugins())
+            .resolveMavenPlugins(request.getJvmMavenPlugins())
     );
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(
       GenerationRequest request
   ) throws IOException, ResolutionException {
-    var session = request.getMavenSession();
     var importPaths = new ArrayList<ProtoFileListing>();
 
     if (!request.getImportDependencies().isEmpty()) {
@@ -167,7 +170,6 @@ public final class SourceCodeGenerator {
           request.getImportDependencies()
       );
       var importDependencies = mavenDependencyPathResolver.resolveAll(
-          session,
           request.getImportDependencies(),
           request.getDependencyResolutionDepth()
       );
@@ -188,7 +190,6 @@ public final class SourceCodeGenerator {
           request.getSourceDependencies()
       );
       var sourceDependencyPaths = mavenDependencyPathResolver.resolveAll(
-          session,
           request.getSourceDependencies(),
           request.getDependencyResolutionDepth()
       );
@@ -198,7 +199,6 @@ public final class SourceCodeGenerator {
     if (!request.isIgnoreProjectDependencies()) {
       log.debug("Finding importable protobuf sources from project dependencies");
       var projectDependencyPaths = mavenProjectDependencyPathResolver.resolveProjectDependencies(
-          session,
           request.getDependencyResolutionDepth()
       );
       importPaths.addAll(protoListingResolver.createProtoFileListings(projectDependencyPaths));
@@ -215,7 +215,6 @@ public final class SourceCodeGenerator {
         .createProtoFileListings(request.getSourceRoots());
 
     var sourceDependencies = mavenDependencyPathResolver.resolveAll(
-        request.getMavenSession(),
         request.getSourceDependencies(),
         request.getDependencyResolutionDepth()
     );
@@ -237,7 +236,7 @@ public final class SourceCodeGenerator {
     if (request.isRegisterAsCompilationRoot()) {
       var registrar = request.getSourceRootRegistrar();
       log.debug("Registering {} as {} compilation root", directory, registrar);
-      registrar.registerSourceRoot(request.getMavenSession(), directory);
+      registrar.registerSourceRoot(mavenSession, directory);
     } else {
       log.debug("Not registering {} as a compilation root", directory);
     }

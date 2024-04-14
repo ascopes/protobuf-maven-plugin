@@ -20,10 +20,10 @@ import java.nio.file.Path;
 import org.immutables.value.Value.Immutable;
 
 /**
-  * Model that holds details about a resolved protoc plugin.
-  *
-  * @author Ashley Scopes
-  */
+ * Model that holds details about a resolved protoc plugin.
+ *
+ * @author Ashley Scopes
+ */
 @Immutable
 public interface ResolvedPlugin {
 

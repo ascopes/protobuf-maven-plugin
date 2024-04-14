@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.execution.MavenSession;
 
 /**
  * Wraps a JVM-based plugin invocation using an OS-native script that calls Java.
@@ -65,22 +64,20 @@ public final class JvmPluginResolver {
   }
 
   public Collection<ResolvedPlugin> resolveMavenPlugins(
-      MavenSession session,
       Collection<? extends MavenArtifact> plugins
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedPlugin>();
     for (var plugin : plugins) {
-      resolvedPlugins.add(resolve(session, plugin));
+      resolvedPlugins.add(resolve(plugin));
     }
     return resolvedPlugins;
   }
 
   private ResolvedPlugin resolve(
-      MavenSession session,
       MavenArtifact plugin
   ) throws IOException, ResolutionException {
     var pluginId = pluginIdDigest(plugin);
-    var argLine = resolveAndBuildArgLine(session, plugin);
+    var argLine = resolveAndBuildArgLine(plugin);
 
     var scriptPath = hostSystem.isProbablyWindows()
         ? writeWindowsBatchScript(pluginId, argLine)
@@ -94,13 +91,12 @@ public final class JvmPluginResolver {
   }
 
   private List<String> resolveAndBuildArgLine(
-      MavenSession session,
       MavenArtifact plugin
   ) throws ResolutionException {
 
     // Resolve dependencies first.
     var dependencyIterator = dependencyResolver
-        .resolveOne(session, plugin, DependencyResolutionDepth.TRANSITIVE)
+        .resolveOne(plugin, DependencyResolutionDepth.TRANSITIVE)
         .iterator();
 
     // First dependency is always the thing we actually want to execute,

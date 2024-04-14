@@ -42,13 +42,14 @@ public final class MavenProjectDependencyPathResolver {
   // almost identical but incompatible with these calls. I have separated this concern
   // out to avoid confusion.
 
+  private final MavenSession mavenSession;
+
   @Inject
-  public MavenProjectDependencyPathResolver() {
-    // Nothing to do.
+  public MavenProjectDependencyPathResolver(MavenSession mavenSession) {
+    this.mavenSession = mavenSession;
   }
 
   public Collection<Path> resolveProjectDependencies(
-      MavenSession session,
       DependencyResolutionDepth dependencyResolutionDepth
   ) {
     // This assumes the mojo executing this request has specified the correct
@@ -57,10 +58,10 @@ public final class MavenProjectDependencyPathResolver {
     // which is re-resolve everything from scratch in a more error-prone way.
     //
     // This also avoids needing to call the resolver again directly.
-    return session.getCurrentProject().getArtifacts()
+    return mavenSession.getCurrentProject().getArtifacts()
         .stream()
         .filter(dependencyResolutionDepth == DependencyResolutionDepth.DIRECT
-            ? artifactIsDirectDependency(session)
+            ? artifactIsDirectDependency()
             : always())
         .map(Artifact::getFile)
         .map(File::toPath)
@@ -72,10 +73,8 @@ public final class MavenProjectDependencyPathResolver {
     return anything -> true;
   }
 
-  private Predicate<Artifact> artifactIsDirectDependency(
-      MavenSession session
-  ) {
-    var dependencies = session.getCurrentProject().getDependencies();
+  private Predicate<Artifact> artifactIsDirectDependency() {
+    var dependencies = mavenSession.getCurrentProject().getDependencies();
     return artifact -> dependencies.stream()
         .anyMatch(dependency -> Objects.equals(dependency.getGroupId(), artifact.getGroupId())
             && Objects.equals(dependency.getArtifactId(), artifact.getArtifactId())

@@ -26,6 +26,7 @@ import java.nio.file.Path;
  * @author Ashley Scopes
  */
 public final class ProtoFilePredicates {
+
   private ProtoFilePredicates() {
     // Static-only class
   }

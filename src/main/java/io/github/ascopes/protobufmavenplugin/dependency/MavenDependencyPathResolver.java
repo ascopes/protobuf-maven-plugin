@@ -56,34 +56,35 @@ import org.slf4j.LoggerFactory;
 public final class MavenDependencyPathResolver {
 
   private static final Logger log = LoggerFactory.getLogger(MavenDependencyPathResolver.class);
+  private final MavenSession mavenSession;
   private final RepositorySystem repositorySystem;
   private final ArtifactHandler artifactHandler;
 
   @Inject
   public MavenDependencyPathResolver(
+      MavenSession mavenSession,
       RepositorySystem repositorySystem,
       ArtifactHandler artifactHandler
   ) {
+    this.mavenSession = mavenSession;
     this.repositorySystem = repositorySystem;
     this.artifactHandler = artifactHandler;
   }
 
   public Collection<Path> resolveOne(
-      MavenSession session,
       MavenArtifact mavenArtifact,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
-    return resolveAll(session, List.of(mavenArtifact), dependencyResolutionDepth);
+    return resolveAll(List.of(mavenArtifact), dependencyResolutionDepth);
   }
 
   public Collection<Path> resolveAll(
-      MavenSession session,
       Collection<? extends MavenArtifact> mavenArtifacts,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
     var artifacts = dependencyResolutionDepth == DependencyResolutionDepth.DIRECT
-        ? resolveDirect(session, mavenArtifacts)
-        : resolveTransitive(session, mavenArtifacts);
+        ? resolveDirect(mavenArtifacts)
+        : resolveTransitive(mavenArtifacts);
 
     return artifacts
         .stream()
@@ -93,14 +94,12 @@ public final class MavenDependencyPathResolver {
   }
 
   private Collection<Artifact> resolveDirect(
-      MavenSession session,
       Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
-    return resolveDirectWithBackReferences(session, mavenArtifacts).keySet();
+    return resolveDirectWithBackReferences(mavenArtifacts).keySet();
   }
 
   private Map<Artifact, MavenArtifact> resolveDirectWithBackReferences(
-      MavenSession session,
       Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
     log.debug("Resolving direct artifacts {}", mavenArtifacts);
@@ -108,12 +107,12 @@ public final class MavenDependencyPathResolver {
     var artifactRequests = new LinkedHashMap<ArtifactRequest, MavenArtifact>();
 
     for (var mavenArtifact : mavenArtifacts) {
-      artifactRequests.put(getArtifactRequest(session, mavenArtifact), mavenArtifact);
+      artifactRequests.put(getArtifactRequest(mavenArtifact), mavenArtifact);
     }
 
     try {
       return repositorySystem
-          .resolveArtifacts(session.getRepositorySession(), artifactRequests.keySet())
+          .resolveArtifacts(mavenSession.getRepositorySession(), artifactRequests.keySet())
           .stream()
           .collect(Collectors.toMap(
               ArtifactResult::getArtifact,
@@ -125,7 +124,7 @@ public final class MavenDependencyPathResolver {
     }
   }
 
-  private ArtifactRequest getArtifactRequest(MavenSession session, MavenArtifact mavenArtifact) {
+  private ArtifactRequest getArtifactRequest(MavenArtifact mavenArtifact) {
     var artifact = new DefaultArtifact(
         mavenArtifact.getGroupId(),
         mavenArtifact.getArtifactId(),
@@ -133,14 +132,13 @@ public final class MavenDependencyPathResolver {
         specifiedOrElse(mavenArtifact.getType(), () -> "jar"),
         mavenArtifact.getVersion()
     );
-    return new ArtifactRequest(artifact, remoteRepositories(session), null);
+    return new ArtifactRequest(artifact, remoteRepositories(), null);
   }
 
   private Collection<Artifact> resolveTransitive(
-      MavenSession session,
       Collection<? extends MavenArtifact> mavenArtifacts
   ) throws ResolutionException {
-    var resolvedArtifacts = resolveDirectWithBackReferences(session, mavenArtifacts);
+    var resolvedArtifacts = resolveDirectWithBackReferences(mavenArtifacts);
 
     var dependenciesToResolve = resolvedArtifacts.keySet()
         .stream()
@@ -154,7 +152,7 @@ public final class MavenDependencyPathResolver {
     var collectRequest = new CollectRequest(
         dependenciesToResolve,
         createDependencyManagementFor(dependenciesToResolve, resolvedArtifacts.keySet()),
-        remoteRepositories(session)
+        remoteRepositories()
     );
 
     var dependencyRequest = new DependencyRequest(collectRequest, null);
@@ -163,7 +161,8 @@ public final class MavenDependencyPathResolver {
       // XXX: do I need to check the CollectResult exception list here as well? It isn't overly
       // clear to whether I care about this or whether it gets propagated in the
       // DependencyResolutionException anyway...
-      return repositorySystem.resolveDependencies(session.getRepositorySession(), dependencyRequest)
+      return repositorySystem
+          .resolveDependencies(mavenSession.getRepositorySession(), dependencyRequest)
           .getArtifactResults()
           .stream()
           .map(ArtifactResult::getArtifact)
@@ -194,8 +193,9 @@ public final class MavenDependencyPathResolver {
         .collect(Collectors.toList());
   }
 
-  private List<RemoteRepository> remoteRepositories(MavenSession session) {
-    return RepositoryUtils.toRepos(session.getProjectBuildingRequest().getRemoteRepositories());
+  private List<RemoteRepository> remoteRepositories() {
+    return RepositoryUtils
+        .toRepos(mavenSession.getProjectBuildingRequest().getRemoteRepositories());
   }
 
   private @Nullable String specifiedOrElse(
