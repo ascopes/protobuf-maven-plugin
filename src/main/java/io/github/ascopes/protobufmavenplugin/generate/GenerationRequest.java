@@ -40,6 +40,8 @@ public interface GenerationRequest {
 
   DependencyResolutionDepth getDependencyResolutionDepth();
 
+  Collection<Language> getEnabledLanguages();
+
   Collection<? extends MavenArtifact> getImportDependencies();
 
   Collection<Path> getImportPaths();
@@ -58,33 +60,13 @@ public interface GenerationRequest {
 
   SourceRootRegistrar getSourceRootRegistrar();
 
-  boolean isCppEnabled();
-
-  boolean isCsharpEnabled();
-
   boolean isFailOnMissingSources();
 
   boolean isFatalWarnings();
 
   boolean isIgnoreProjectDependencies();
 
-  boolean isJavaEnabled();
-
-  boolean isKotlinEnabled();
-
   boolean isLiteEnabled();
 
-  boolean isObjcEnabled();
-
-  boolean isPhpEnabled();
-
-  boolean isPythonEnabled();
-
-  boolean isPythonStubsEnabled();
-
   boolean isRegisterAsCompilationRoot();
-
-  boolean isRubyEnabled();
-
-  boolean isRustEnabled();
 }

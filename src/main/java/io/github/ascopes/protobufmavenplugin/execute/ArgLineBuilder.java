@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.execute;
 
+import io.github.ascopes.protobufmavenplugin.generate.Language;
 import io.github.ascopes.protobufmavenplugin.plugin.ResolvedPlugin;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,14 +37,6 @@ public final class ArgLineBuilder {
     args = new ArrayList<>();
     args.add(protocPath.toString());
     outputTargetCount = 0;
-  }
-
-  public ArgLineBuilder cppOut(Path outputPath, boolean lite) {
-    return langOut("cpp", outputPath, lite);
-  }
-
-  public ArgLineBuilder csharpOut(Path outputPath, boolean lite) {
-    return langOut("csharp", outputPath, lite);
   }
 
   public List<String> compile(Collection<Path> sourcesToCompile) {
@@ -67,27 +60,20 @@ public final class ArgLineBuilder {
     return this;
   }
 
+  public ArgLineBuilder generateCodeFor(Language language, Path outputPath, boolean lite) {
+    ++outputTargetCount;
+    var flag = lite
+        ? "--" + language.getFlagName() + "_out=lite:"
+        : "--" + language.getFlagName() + "_out=";
+    args.add(flag + outputPath);
+    return this;
+  }
+
   public ArgLineBuilder importPaths(Collection<Path> includePaths) {
     for (var includePath : includePaths) {
       args.add("--proto_path=" + includePath);
     }
     return this;
-  }
-
-  public ArgLineBuilder javaOut(Path outputPath, boolean lite) {
-    return langOut("java", outputPath, lite);
-  }
-
-  public ArgLineBuilder kotlinOut(Path outputPath, boolean lite) {
-    return langOut("kotlin", outputPath, lite);
-  }
-
-  public ArgLineBuilder objcOut(Path outputPath, boolean lite) {
-    return langOut("objc", outputPath, lite);
-  }
-
-  public ArgLineBuilder phpOut(Path outputPath, boolean lite) {
-    return langOut("php", outputPath, lite);
   }
 
   public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath) {
@@ -101,32 +87,7 @@ public final class ArgLineBuilder {
     return this;
   }
 
-  public ArgLineBuilder pyiOut(Path outputPath, boolean lite) {
-    return langOut("pyi", outputPath, lite);
-  }
-
-  public ArgLineBuilder pythonOut(Path outputPath, boolean lite) {
-    return langOut("python", outputPath, lite);
-  }
-
-  public ArgLineBuilder rubyOut(Path outputPath, boolean lite) {
-    return langOut("ruby", outputPath, lite);
-  }
-
-  public ArgLineBuilder rustOut(Path outputPath, boolean lite) {
-    return langOut("rust", outputPath, lite);
-  }
-
   public List<String> version() {
     return List.of(args.get(0), "--version");
-  }
-
-  private ArgLineBuilder langOut(String type, Path outputPath, boolean lite) {
-    ++outputTargetCount;
-    var flag = lite
-        ? "--" + type + "_out=lite:"
-        : "--" + type + "_out=";
-    args.add(flag + outputPath);
-    return this;
   }
 }

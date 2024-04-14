@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -112,16 +110,12 @@ public final class SourceCodeGenerator {
         .importPaths(request.getSourceRoots())
         .plugins(plugins, request.getOutputDirectory());
 
-    addOptionalOutput(request, GenerationRequest::isCppEnabled, argLineBuilder::cppOut);
-    addOptionalOutput(request, GenerationRequest::isCsharpEnabled, argLineBuilder::csharpOut);
-    addOptionalOutput(request, GenerationRequest::isKotlinEnabled, argLineBuilder::kotlinOut);
-    addOptionalOutput(request, GenerationRequest::isJavaEnabled, argLineBuilder::javaOut);
-    addOptionalOutput(request, GenerationRequest::isObjcEnabled, argLineBuilder::objcOut);
-    addOptionalOutput(request, GenerationRequest::isPhpEnabled, argLineBuilder::phpOut);
-    addOptionalOutput(request, GenerationRequest::isPythonStubsEnabled, argLineBuilder::pyiOut);
-    addOptionalOutput(request, GenerationRequest::isPythonEnabled, argLineBuilder::pythonOut);
-    addOptionalOutput(request, GenerationRequest::isRubyEnabled, argLineBuilder::rubyOut);
-    addOptionalOutput(request, GenerationRequest::isRustEnabled, argLineBuilder::rustOut);
+    request.getEnabledLanguages()
+        .forEach(language -> argLineBuilder.generateCodeFor(
+            language,
+            request.getOutputDirectory(),
+            request.isLiteEnabled()
+        ));
 
     var sourceFiles = sourcePaths
         .stream()
@@ -139,16 +133,6 @@ public final class SourceCodeGenerator {
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
     return protocResolver.resolve(request.getMavenSession(), request.getProtocVersion());
-  }
-
-  private void addOptionalOutput(
-      GenerationRequest request,
-      Predicate<GenerationRequest> check,
-      BiConsumer<Path, Boolean> consumer
-  ) {
-    if (check.test(request)) {
-      consumer.accept(request.getOutputDirectory(), request.isLiteEnabled());
-    }
   }
 
   private boolean logProtocVersion(Path protocPath) throws IOException {

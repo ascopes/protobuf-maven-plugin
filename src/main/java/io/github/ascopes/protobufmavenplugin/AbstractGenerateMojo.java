@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNullElseGet;
 
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
+import io.github.ascopes.protobufmavenplugin.generate.Language;
 import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
@@ -481,32 +482,36 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       throw new MojoExecutionException(ex.getMessage(), ex);
     }
 
+    var enabledLanguages = Language.setBuilder()
+        .addIf(cppEnabled, Language.CPP)
+        .addIf(csharpEnabled, Language.C_SHARP)
+        .addIf(javaEnabled, Language.JAVA)
+        .addIf(kotlinEnabled, Language.KOTLIN)
+        .addIf(objcEnabled, Language.OBJECTIVE_C)
+        .addIf(phpEnabled, Language.PHP)
+        .addIf(pythonEnabled, Language.PYTHON)
+        .addIf(pythonStubsEnabled, Language.PYI)
+        .addIf(rubyEnabled, Language.RUBY)
+        .addIf(rustEnabled, Language.RUST)
+        .build();
+
     var request = ImmutableGenerationRequest.builder()
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .dependencyResolutionDepth(dependencyResolutionDepth)
+        .enabledLanguages(enabledLanguages)
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
         .importDependencies(nonNullList(importDependencies))
         .importPaths(nonNullList(importPaths)
             .stream()
             .map(File::toPath)
             .collect(Collectors.toList()))
-        .isCppEnabled(cppEnabled)
-        .isCsharpEnabled(csharpEnabled)
         .isFailOnMissingSources(failOnMissingSources)
         .isFatalWarnings(fatalWarnings)
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
-        .isJavaEnabled(javaEnabled)
-        .isKotlinEnabled(kotlinEnabled)
         .isLiteEnabled(liteOnly)
-        .isObjcEnabled(objcEnabled)
-        .isPhpEnabled(phpEnabled)
-        .isPythonEnabled(pythonEnabled)
-        .isPythonStubsEnabled(pythonStubsEnabled)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
-        .isRubyEnabled(rubyEnabled)
-        .isRustEnabled(rustEnabled)
         .mavenSession(session)
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
