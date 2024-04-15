@@ -16,8 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.EnumSet;
 
 /**
  * Supported generated source languages.
@@ -43,6 +43,11 @@ public enum Language {
     this.flagName = flagName;
   }
 
+  /**
+   * Get the flag name.
+   *
+   * @return the name of the flag to pass to {@code protoc}.
+   */
   public String getFlagName() {
     return flagName;
   }
@@ -59,22 +64,25 @@ public enum Language {
    */
   public static final class LanguageSetBuilder {
 
-    private final Set<Language> set;
+    private final ArrayList<Language> values;
 
     private LanguageSetBuilder() {
-      set = new LinkedHashSet<>();
+      values = new ArrayList<>(4);
     }
 
     public LanguageSetBuilder addIf(boolean condition, Language language) {
-      if (condition) {
-        set.add(language);
-      }
+      return condition ? add(language) : this;
+    }
 
+    public LanguageSetBuilder add(Language language) {
+      values.add(language);
       return this;
     }
 
-    public Set<Language> build() {
-      return set;
+    public EnumSet<Language> build() {
+      return values.isEmpty() 
+          ? EnumSet.noneOf(Language.class)
+          : EnumSet.copyOf(values);
     }
   }
 }
