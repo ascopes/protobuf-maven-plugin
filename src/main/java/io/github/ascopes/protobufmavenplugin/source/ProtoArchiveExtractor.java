@@ -80,7 +80,6 @@ public final class ProtoArchiveExtractor {
       var listing = ImmutableProtoFileListing
           .builder()
           .addAllProtoFiles(targetFiles)
-          .originalRoot(zipPath)
           .protoFilesRoot(extractionRoot)
           .build();
 

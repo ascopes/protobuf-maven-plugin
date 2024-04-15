@@ -29,8 +29,6 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface ProtoFileListing {
 
-  Path getOriginalRoot();
-
   Path getProtoFilesRoot();
 
   Set<Path> getProtoFiles();

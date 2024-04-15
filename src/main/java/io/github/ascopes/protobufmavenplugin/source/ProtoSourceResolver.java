@@ -106,7 +106,6 @@ public final class ProtoSourceResolver implements AutoCloseable {
               .builder()
               .addAllProtoFiles(protoFiles)
               .protoFilesRoot(path)
-              .originalRoot(path)
               .build());
     }
   }
