@@ -107,7 +107,7 @@
     <maven-resolver-api.version>1.9.18</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.0</memoryfilesystem.version>
     <mockito.version>5.11.0</mockito.version>
-    <slf4j.version>2.0.12</slf4j.version>
+    <slf4j.version>2.0.13</slf4j.version>
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
