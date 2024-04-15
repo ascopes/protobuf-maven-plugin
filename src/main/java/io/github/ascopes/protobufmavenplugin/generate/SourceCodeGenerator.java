@@ -99,7 +99,7 @@ public final class SourceCodeGenerator {
             + "configuration and try again.");
         return false;
       } else {
-        log.info("No protobuf sources found; nothing to do!");
+        log.warn("No protobuf sources found; nothing to do!");
         return true;
       }
     }
