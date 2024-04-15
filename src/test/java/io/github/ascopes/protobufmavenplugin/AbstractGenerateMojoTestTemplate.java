@@ -767,6 +767,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   static Stream<Arguments> languageEnablingCases() {
     return Stream.of(
         // Base cases
+        arguments("nothing", consumer(), EnumSet.noneOf(Language.class)),
         arguments("C++", consumer(a -> a.cppEnabled = true), EnumSet.of(Language.CPP)),
         arguments("C#", consumer(a -> a.csharpEnabled = true), EnumSet.of(Language.C_SHARP)),
         arguments("Java", consumer(a -> a.javaEnabled = true), EnumSet.of(Language.JAVA)),
@@ -803,8 +804,30 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
               a.rustEnabled = true;
             }),
             EnumSet.of(Language.CPP, Language.C_SHARP, Language.OBJECTIVE_C, Language.RUST)
+        ),
+        arguments(
+            "all languages",
+            consumer(a -> {
+              a.cppEnabled = true;
+              a.csharpEnabled = true;
+              a.javaEnabled = true;
+              a.kotlinEnabled = true;
+              a.objcEnabled = true;
+              a.phpEnabled = true;
+              a.pythonEnabled = true;
+              a.pythonStubsEnabled = true;
+              a.rubyEnabled = true;
+              a.rustEnabled = true;
+            }),
+            EnumSet.allOf(Language.class)
         )
     );
+  }
+
+  static Consumer<AbstractGenerateMojo> consumer() {
+    return a -> {
+      // Do nothing.
+    };
   }
 
   static Consumer<AbstractGenerateMojo> consumer(Consumer<AbstractGenerateMojo> consumer) {
