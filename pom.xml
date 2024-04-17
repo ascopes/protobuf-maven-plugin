@@ -16,14 +16,12 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>1.2.0-rc2-SNAPSHOT</version>
+  <version>1.2.0</version>
 
   <name>Protobuf Maven Plugin</name>
   <description>Generates compilable sources from Protobuf definitions.</description>
@@ -57,7 +55,7 @@
     </developer>
   </developers>
 
-  <contributors/>
+  <contributors />
 
   <distributionManagement>
     <repository>
@@ -92,7 +90,7 @@
     <connection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</connection>
     <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin
     </developerConnection>
-    <tag>HEAD</tag>
+    <tag>v1.2.0</tag>
   </scm>
 
   <properties>
@@ -479,8 +477,7 @@
             This block is needed to show @DisplayName and @ParameterizedTest
             in reports with the provided names.
           -->
-          <statelessTestsetReporter
-            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+          <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
             <disable>false</disable>
             <version>3.0</version>
             <usePhrasedFileName>false</usePhrasedFileName>
@@ -488,8 +485,7 @@
             <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
             <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
           </statelessTestsetReporter>
-          <statelessTestsetInfoReporter
-            implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+          <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
             <disable>false</disable>
             <printStacktraceOnError>true</printStacktraceOnError>
             <printStacktraceOnFailure>true</printStacktraceOnFailure>
