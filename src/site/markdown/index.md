@@ -51,7 +51,7 @@ do is provide the version of `protoc` to use.
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>4.26.0</protocVersion>
+    <protocVersion>4.26.1</protocVersion>
   </configuration>
 
   <executions>
@@ -63,6 +63,9 @@ do is provide the version of `protoc` to use.
   </executions>
 </plugin>
 ```
+
+Currently, the newest supported version of `protoc` is
+![newest-protoc-version](https://img.shields.io/maven-central/v/com.google.protobuf/protoc?versionPrefix=4).
 
 To generate test sources, use the `generate-test` goal instead.
 
@@ -93,7 +96,7 @@ like Dependabot to keep the compiler version up-to-date automatically.
   ...
 
   <properties>
-    <protobuf.version>4.26.0</protobuf.version>
+    <protobuf.version>4.26.1</protobuf.version>
     <protobuf-maven-plugin.version>...</protobuf-maven-plugin.version>
   </properties>
 
