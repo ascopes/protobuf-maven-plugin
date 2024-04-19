@@ -113,14 +113,16 @@ public final class SourceCodeGenerator {
             .map(ProtoFileListing::getProtoFilesRoot)
             .collect(Collectors.toCollection(LinkedHashSet::new)))
         .importPaths(request.getSourceRoots())
-        .plugins(plugins, request.getOutputDirectory());
+        .plugins(plugins, request.getOutputDirectory(), request.pluginOption());
 
-    request.getEnabledLanguages()
-        .forEach(language -> argLineBuilder.generateCodeFor(
-            language,
-            request.getOutputDirectory(),
-            request.isLiteEnabled()
-        ));
+    if (!request.isPluginOnly()) {
+      request.getEnabledLanguages()
+          .forEach(language -> argLineBuilder.generateCodeFor(
+              language,
+              request.getOutputDirectory(),
+              request.isLiteEnabled()
+          ));
+    }
 
     var sourceFiles = sourcePaths
         .stream()

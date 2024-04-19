@@ -66,4 +66,8 @@ public interface GenerationRequest {
   boolean isLiteEnabled();
 
   boolean isRegisterAsCompilationRoot();
+
+  boolean isPluginOnly();
+
+  String pluginOption();
 }

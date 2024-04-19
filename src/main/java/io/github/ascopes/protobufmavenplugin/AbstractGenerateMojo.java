@@ -480,6 +480,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter(defaultValue = "false")
   boolean rustEnabled;
 
+  @Parameter(defaultValue = "false")
+  boolean pluginOnly;
+
+  @Parameter
+  @Nullable String pluginOption;
+
   ///
   /// Internal functionality
   ///
@@ -547,6 +553,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
             .stream()
             .map(File::toPath)
             .collect(Collectors.toList()))
+        .isPluginOnly(pluginOnly)
+        .pluginOption(pluginOption)
         .isFailOnMissingSources(failOnMissingSources)
         .isFatalWarnings(fatalWarnings)
         .isIgnoreProjectDependencies(ignoreProjectDependencies)

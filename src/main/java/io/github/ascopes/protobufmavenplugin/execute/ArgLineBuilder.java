@@ -78,13 +78,21 @@ public final class ArgLineBuilder {
     return this;
   }
 
-  public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath) {
+  public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath,
+      String pluginOption) {
     for (var plugin : plugins) {
       // protoc always maps a flag `--xxx_out` to a plugin named `protoc-gen-xxx`, so we have
       // to inject this flag to be consistent.
       ++outputTargetCount;
+
       args.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
-      args.add("--" + plugin.getId() + "_out=" + outputPath);
+
+      if (pluginOption != null) {
+        args.add("--" + plugin.getId() + "_out=" + plugin.getId()
+            + "_opt=" + pluginOption + ":" + outputPath);
+      } else {
+        args.add("--" + plugin.getId() + "_out=" + outputPath);
+      }
     }
     return this;
   }
