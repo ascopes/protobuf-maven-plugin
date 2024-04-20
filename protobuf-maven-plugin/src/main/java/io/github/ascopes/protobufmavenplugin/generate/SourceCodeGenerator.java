@@ -133,7 +133,12 @@ public final class SourceCodeGenerator {
       return false;
     }
 
-    return commandLineExecutor.execute(argLineBuilder.compile(sourceFiles));
+    if (!commandLineExecutor.execute(argLineBuilder.compile(sourceFiles))) {
+      return false;
+    }
+
+    registerSourceRoots(request);
+    return true;
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
@@ -246,6 +251,10 @@ public final class SourceCodeGenerator {
         });
 
     Files.createDirectories(directory);
+  }
+
+  private void registerSourceRoots(GenerationRequest request) {
+    var directory = request.getOutputDirectory();
 
     if (request.isRegisterAsCompilationRoot()) {
       var registrar = request.getSourceRootRegistrar();

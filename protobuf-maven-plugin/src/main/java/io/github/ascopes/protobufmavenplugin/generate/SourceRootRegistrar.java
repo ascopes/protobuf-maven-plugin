@@ -20,6 +20,8 @@ import java.nio.file.Path;
 import java.util.function.BiConsumer;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Registrar for source roots.
@@ -38,6 +40,7 @@ public interface SourceRootRegistrar {
    * A basic registrar for {@link MavenProject} sources.
    */
   final class MavenRegistrar implements SourceRootRegistrar {
+    static final Logger log = LoggerFactory.getLogger(SourceRootRegistrar.class);
 
     private final String name;
     private final BiConsumer<MavenProject, String> delegate;
@@ -49,6 +52,7 @@ public interface SourceRootRegistrar {
 
     @Override
     public void registerSourceRoot(MavenSession session, Path path) {
+      log.info("Registering {} as a {} source root", path, this);
       delegate.accept(session.getCurrentProject(), path.toString());
     }
 
