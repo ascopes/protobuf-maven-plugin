@@ -24,10 +24,16 @@
     <artifactId>protobuf-maven-plugin-parent</artifactId>
     <version>1.2.1-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
-</parent>  <artifactId>protobuf-maven-plugin</artifactId>
+  </parent>
+
+  <artifactId>protobuf-maven-plugin</artifactId>
   <name>Protobuf Maven Plugin</name>
   <description>Generates compilable sources from Protobuf definitions.</description>
   <packaging>maven-plugin</packaging>
+
+  <prerequisites>
+    <maven>3.8.2</maven>
+  </prerequisites>
 
   <dependencyManagement>
     <dependencies>
