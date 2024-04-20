@@ -66,3 +66,23 @@ In addition, the following identifiers will be made available:
 | `localRepositoryPath` | `java.io.File` | The absolute path to the local Maven repository.   |
 | `mavenVersion`        | `String`       | The version of Maven being used.                   |
 
+## Debugging
+
+Enable the `invoker-debug` Maven profile with `./mvnw -Pinvoker-debug ...`. This will enable the
+use of the `invoker-debug.properties` in this directory rather than `invoker.properties`.
+
+For example, to debug the plugin while running the `path-protoc` IT case, you could run
+
+```console
+$ ./mvnw verify -DskipTests -Dinvoker.test=path-protoc -Pinvoker-debug
+```
+
+This debugger will suspend the invoked IT Maven process until a debugger client connects to the
+debugger server. This can be done by using an IDE such as IntelliJ and setting up a
+"Remote Debugger" run configuration to connect to port `5005.
+
+Any breakpoints in the project source code will then be able to be hit and stepped through
+individually.
+
+If you wish to enable verbose output from Maven, edit the `invoker-debug.properties` to set
+the `invoker.debug` property to `true`.
