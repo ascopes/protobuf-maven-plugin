@@ -248,7 +248,8 @@ function wait-for-closure-to-end() {
   local url="https://${server}/service/local/staging/repository/${repository_id}/activity"
 
   echo -e "\e[1;33m[GET ${url}]\e[0m Waiting for the repository to complete the closure process" >&2
-  for _ in {1..50}; do
+  local attempt=1
+  while true; do
     # In our case, the "close" activity will gain the attribute named "stopped" once the process
     # is over (we then need to check if it passed or failed separately).
     if curl \
@@ -260,16 +261,14 @@ function wait-for-closure-to-end() {
       "${url}" |
       try-jq -e '.[] | select(.name == "close") | .stopped != null' >/dev/null; then
 
-      echo -e "\e[1;32mClosure process completed\e[0m" >&2
+      echo -e "\e[1;32mClosure process completed after ${attempt} attempts (@ $(date))}\e[0m" >&2
       return 0
     else
-      echo -e "\e[1;32mStill waiting for closure to complete...\e[0m" >&2
+      echo -e "\e[1;32mStill waiting for closure to complete... - attempt $attempt (@ $(date))\e[0m" >&2
+      ((attempt++))
     fi
-    sleep 2
+    sleep 5
   done
-
-  echo -e "\e[1;31mERROR: Repository did not close after 50 iterations. Is Nexus down?\e[0m" >&2
-  return 104
 }
 
 function ensure-closure-succeeded() {
