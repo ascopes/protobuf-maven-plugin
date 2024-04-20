@@ -23,7 +23,7 @@
 
   <parent>
     <groupId>gh-135-compile-dependencies</groupId>
-    <artifactId>gh-135-compile-dependencies</artifactId>
+    <artifactId>parent</artifactId>
     <version>@project.version@</version>
   </parent>
 
