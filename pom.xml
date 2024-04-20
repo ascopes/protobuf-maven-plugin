@@ -101,7 +101,7 @@
     <immutables.version>2.10.1</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.2</junit.version>
-    <kotlin.version>1.9.21</kotlin.version>
+    <kotlin.version>1.9.23</kotlin.version>
     <maven-core.version>3.9.6</maven-core.version>
     <maven-plugin-annotations.version>3.12.0</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
