@@ -129,7 +129,8 @@ jobs:
             java -version
             javac -version
             protoc --version
-          run: ./mvnw -B verify
+          # Run single threaded in the hope QEMU doesn't deadlock.
+          run: ./mvnw -B -T1 verify
 
       - name: Publish code coverage
         uses: codecov/codecov-action@v4
