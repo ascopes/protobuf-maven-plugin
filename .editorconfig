@@ -16,6 +16,12 @@ ij_smart_tabs = false
 ij_visual_guides = 100
 ij_wrap_on_typing = false
 
+# If we don't override this then it messes up on Windows by injecting a LF.
+[.mvn/jvm.config]
+charset              = latin1
+end_of_line          = unset
+insert_final_newline = false
+
 [*.java]
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
