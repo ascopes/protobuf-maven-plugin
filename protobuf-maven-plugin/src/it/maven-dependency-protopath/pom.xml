@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>maven-dependency-protopath</groupId>
   <artifactId>maven-dependency-protopath</artifactId>
 
   <properties>

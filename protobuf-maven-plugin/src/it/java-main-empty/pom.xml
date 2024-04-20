@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>java-main-empty</groupId>
   <artifactId>java-main-empty</artifactId>
 
   <properties>

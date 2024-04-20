@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>http-url-grpc-plugin</groupId>
   <artifactId>http-url-grpc-plugin</artifactId>
 
   <properties>

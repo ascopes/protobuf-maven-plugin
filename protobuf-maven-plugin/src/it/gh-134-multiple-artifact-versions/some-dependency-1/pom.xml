@@ -22,8 +22,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>gh-134-multiple-artifact-versions</artifactId>
+    <groupId>gh-134-multiple-artifact-versions</groupId>
+    <artifactId>parent</artifactId>
     <version>@project.version@</version>
   </parent>
 

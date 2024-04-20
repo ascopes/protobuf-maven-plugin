@@ -22,8 +22,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>gh-132-duplicate-maven-dependencies</artifactId>
+    <groupId>gh-132-duplicate-maven-dependencies</groupId>
+    <artifactId>parent</artifactId>
     <version>@project.version@</version>
   </parent>
 

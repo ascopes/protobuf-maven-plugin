@@ -17,9 +17,13 @@
 
 -->
 <settings>
+  <activeProfiles>
+    <activeProfile>it</activeProfile>
+  </activeProfiles>
+
   <profiles>
     <profile>
-      <id>its</id>
+      <id>it</id>
 
       <repositories>
         <repository>

@@ -28,8 +28,8 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>reactor-grpc-jvm-plugin</groupId>
   <artifactId>reactor-grpc-jvm-plugin</artifactId>
-
 
   <properties>
     <grpc.version>1.61.1</grpc.version>

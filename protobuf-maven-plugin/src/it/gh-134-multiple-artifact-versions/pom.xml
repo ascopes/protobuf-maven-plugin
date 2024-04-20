@@ -28,7 +28,8 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>gh-134-multiple-artifact-versions</artifactId>
+  <groupId>gh-134-multiple-artifact-versions</groupId>
+  <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>

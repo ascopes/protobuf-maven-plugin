@@ -33,6 +33,15 @@ The `invoker.goals` can be changed to use any combination of Maven goals.
 The `invoker.properties` within this directory is inherited by all projects implicitly for global
 configuration.
 
+## Naming
+
+The project directory name should summarise what the test is for, starting with a GitHub issue
+number if relevant.
+
+The `groupId` of the project should be the directory name. This ensures that each test is isolated.
+
+The local repository can be found in the `target/it-repo` directory.
+
 ## Skipping tests conditionally
 
 If there are certain conditions where the test should not run, you can create a script within the test

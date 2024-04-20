@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>reactor-grpc-binary-plugin</groupId>
   <artifactId>reactor-grpc-binary-plugin</artifactId>
 
   <properties>

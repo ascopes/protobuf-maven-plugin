@@ -28,5 +28,6 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>help-goal</groupId>
   <artifactId>help-goal</artifactId>
 </project>

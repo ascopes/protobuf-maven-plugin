@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>java-main-lite</groupId>
   <artifactId>java-main-lite</artifactId>
 
   <properties>

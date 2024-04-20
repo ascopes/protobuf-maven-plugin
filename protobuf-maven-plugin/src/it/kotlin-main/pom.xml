@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>kotlin-main</groupId>
   <artifactId>kotlin-main</artifactId>
 
   <properties>

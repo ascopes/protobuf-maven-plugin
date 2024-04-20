@@ -28,7 +28,8 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>gh-132-duplicate-maven-dependencies</artifactId>
+  <groupId>gh-132-duplicate-maven-dependencies</groupId>
+  <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>

@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>java-test-empty</groupId>
   <artifactId>java-test-empty</artifactId>
 
   <properties>

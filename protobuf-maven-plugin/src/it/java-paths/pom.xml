@@ -28,6 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>java-paths</groupId>
   <artifactId>java-paths</artifactId>
 
   <properties>

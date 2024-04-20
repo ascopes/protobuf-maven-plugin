@@ -28,7 +28,8 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>gh-135-compile-dependencies</artifactId>
+  <groupId>gh-135-compile-dependencies</groupId>
+  <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>

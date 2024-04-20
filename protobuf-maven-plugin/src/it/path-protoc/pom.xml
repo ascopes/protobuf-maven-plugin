@@ -28,7 +28,9 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
+  <groupId>path-protoc</groupId>
   <artifactId>path-protoc</artifactId>
+
   <properties>
     <protobuf.version>3.25.0</protobuf.version>
   </properties>

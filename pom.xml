@@ -372,19 +372,6 @@
           <artifactId>maven-invoker-plugin</artifactId>
           <version>${maven-invoker-plugin.version}</version>
 
-          <configuration>
-            <addTestClassPath>true</addTestClassPath>
-            <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-            <failIfNoProjects>true</failIfNoProjects>
-            <postBuildHookScript>test</postBuildHookScript>
-            <settingsFile>src/it/settings.xml</settingsFile>
-            <showErrors>true</showErrors>
-            <showVersion>true</showVersion>
-            <streamLogs>true</streamLogs>
-            <streamLogsOnFailures>true</streamLogsOnFailures>
-            <writeJunitReport>true</writeJunitReport>
-          </configuration>
-
           <executions>
             <execution>
               <id>integration-test</id>
@@ -393,6 +380,21 @@
                 <goal>install</goal>
                 <goal>run</goal>
               </goals>
+
+              <configuration>
+                <addTestClassPath>true</addTestClassPath>
+                <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                <failIfNoProjects>true</failIfNoProjects>
+                <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
+                <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
+                <postBuildHookScript>test</postBuildHookScript>
+                <settingsFile>src/it/settings.xml</settingsFile>
+                <showErrors>true</showErrors>
+                <showVersion>true</showVersion>
+                <streamLogs>true</streamLogs>
+                <streamLogsOnFailures>true</streamLogsOnFailures>
+                <writeJunitReport>true</writeJunitReport>
+              </configuration>
             </execution>
           </executions>
         </plugin>
