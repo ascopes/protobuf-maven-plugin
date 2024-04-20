@@ -82,6 +82,12 @@ public final class MavenDependencyPathResolver {
       Collection<? extends MavenArtifact> mavenArtifacts,
       DependencyResolutionDepth dependencyResolutionDepth
   ) throws ResolutionException {
+
+    if (mavenArtifacts.isEmpty()) {
+      log.debug("No artifacts provided, not resolving anything in this round...");
+      return List.of();
+    }
+
     var artifacts = dependencyResolutionDepth == DependencyResolutionDepth.DIRECT
         ? resolveDirect(mavenArtifacts)
         : resolveTransitive(mavenArtifacts);
