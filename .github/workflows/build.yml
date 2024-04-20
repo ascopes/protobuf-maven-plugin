@@ -84,10 +84,12 @@ jobs:
       - name: Change Maven version to the prerequisite version
         shell: bash
         run: |-
-          version=$(./mvnw help:evaluate -q \
+          # Use -T1 here as the plugins emit warnings about thread safety if we use the
+          # default concurrency settings for the project.
+          version=$(./mvnw -T1 help:evaluate -q \
               -Dexpression='project.prerequisites.maven' \
               -DforceStdout)
-          ./mvnw wrapper:wrapper -Dmaven="${version}"
+          ./mvnw -T1 -B wrapper:wrapper -Dmaven="${version}"
 
       - name: Build and test
         shell: bash

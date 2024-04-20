@@ -36,7 +36,7 @@ If you need the full reference for a parameters that are allowed, visit the [goa
 
 ## Minimum requirements
 
-You will need to be using Maven 3.8.1 and Java 11 at a minimum.
+You will need to be using Maven 3.8.2 and Java 11 at a minimum.
 
 ## Basic configuration
 
