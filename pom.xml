@@ -33,10 +33,6 @@
          from this parent POM, but are not explicitly listed as modules directly. -->
   </modules>
 
-  <prerequisites>
-    <maven>3.8.2</maven>
-  </prerequisites>
-
   <inceptionYear>2023</inceptionYear>
 
   <licenses>
