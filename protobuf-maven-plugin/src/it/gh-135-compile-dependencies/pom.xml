@@ -21,9 +21,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.example</groupId>
-  <artifactId>some-parent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <parent>
+    <groupId>@project.groupId@</groupId>
+    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <version>@project.version@</version>
+    <relativePath>../../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>gh-135-compile-dependencies</artifactId>
   <packaging>pom</packaging>
 
   <modules>
@@ -32,12 +37,6 @@
 
   <properties>
     <protobuf.version>4.26.1</protobuf.version>
-    <junit.version>5.10.1</junit.version>
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
-    <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
-
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencyManagement>
@@ -47,13 +46,6 @@
         <artifactId>protobuf-java</artifactId>
         <version>${protobuf.version}</version>
       </dependency>
-
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -62,7 +54,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
-        <version>${maven-install-plugin.version}</version>
         <executions>
           <execution>
             <!-- Inject the user-protos.zip archive into the current Maven repository prior to
@@ -88,18 +79,6 @@
 
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven-surefire-plugin.version}</version>
-        </plugin>
-
         <plugin>
           <groupId>@project.groupId@</groupId>
           <artifactId>@project.artifactId@</artifactId>

@@ -21,9 +21,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.example</groupId>
-  <artifactId>some-parent</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <parent>
+    <groupId>@project.groupId@</groupId>
+    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <version>@project.version@</version>
+    <relativePath>../../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>gh-132-duplicate-maven-dependencies</artifactId>
   <packaging>pom</packaging>
 
   <modules>
@@ -35,14 +40,8 @@
   </modules>
 
   <properties>
-    <junit.version>5.10.1</junit.version>
     <protobuf.version>4.26.1</protobuf.version>
     <proto-google-common-protos.version>2.37.0</proto-google-common-protos.version>
-
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
-
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencyManagement>
@@ -60,31 +59,12 @@
         <version>${proto-google-common-protos.version}</version>
         <scope>compile</scope>
       </dependency>
-
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven-surefire-plugin.version}</version>
-        </plugin>
-
         <plugin>
           <groupId>@project.groupId@</groupId>
           <artifactId>@project.artifactId@</artifactId>

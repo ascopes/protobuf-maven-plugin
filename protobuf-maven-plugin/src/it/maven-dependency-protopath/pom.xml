@@ -21,19 +21,18 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.example</groupId>
-  <artifactId>example</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <parent>
+    <groupId>@project.groupId@</groupId>
+    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <version>@project.version@</version>
+    <relativePath>../../../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>maven-dependency-protopath</artifactId>
 
   <properties>
-    <junit.version>5.10.1</junit.version>
     <protobuf.version>3.25.3</protobuf.version>
     <proto-google-common-protos.version>2.29.0</proto-google-common-protos.version>
-
-    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
-
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
@@ -54,7 +53,6 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -64,13 +62,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
       </plugin>
 
       <plugin>
