@@ -167,11 +167,17 @@ public final class MavenDependencyPathResolver {
       // XXX: do I need to check the CollectResult exception list here as well? It isn't overly
       // clear to whether I care about this or whether it gets propagated in the
       // DependencyResolutionException anyway...
-      return repositorySystem
+      var resolvedDependencies = repositorySystem
           .resolveDependencies(mavenSession.getRepositorySession(), dependencyRequest)
           .getArtifactResults()
           .stream()
-          .map(ArtifactResult::getArtifact)
+          .map(ArtifactResult::getArtifact);
+
+      // Concatenate with the initial artifacts and return distinct values only. That way we
+      // still include dependencies that were defined with a custom dependencyResolutionScope
+      // that overrides the global setting.
+      return Stream.concat(resolvedArtifacts.keySet().stream(), resolvedDependencies)
+          .distinct()
           .collect(Collectors.toList());
 
     } catch (DependencyResolutionException ex) {
