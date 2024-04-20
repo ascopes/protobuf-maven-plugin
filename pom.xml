@@ -16,16 +16,24 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.ascopes</groupId>
-  <artifactId>protobuf-maven-plugin</artifactId>
+  <artifactId>protobuf-maven-plugin-parent</artifactId>
   <version>1.2.1-SNAPSHOT</version>
 
-  <name>Protobuf Maven Plugin</name>
-  <description>Generates compilable sources from Protobuf definitions.</description>
-  <packaging>maven-plugin</packaging>
+  <name>Protobuf Maven Plugin Parent</name>
+  <description>Parent POM for the Protobuf Maven Plugin.</description>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>protobuf-maven-plugin</module>
+    <!-- Integration tests within the protobuf-maven-plugin module will also be derived
+         from this parent POM, but are not explicitly listed as modules directly. -->
+  </modules>
 
   <prerequisites>
     <maven>3.8.1</maven>
@@ -55,7 +63,7 @@
     </developer>
   </developers>
 
-  <contributors />
+  <contributors/>
 
   <distributionManagement>
     <repository>
@@ -142,6 +150,55 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>com.github.marschall</groupId>
+        <artifactId>memoryfilesystem</artifactId>
+        <version>${memoryfilesystem.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>${maven-plugin-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.plugin-tools</groupId>
+        <artifactId>maven-plugin-annotations</artifactId>
+        <version>${maven-plugin-annotations.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-api</artifactId>
+        <version>${maven-resolver-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${maven-core.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.immutables</groupId>
+        <artifactId>value</artifactId>
+        <version>${immutables.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
         <version>${junit.version}</version>
@@ -156,106 +213,19 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-bom</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>${maven-plugin-api.version}</version>
-      <!-- Provided by Maven at runtime -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>${maven-plugin-annotations.version}</version>
-      <!-- Provided by Maven at runtime -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-api</artifactId>
-      <version>${maven-resolver-api.version}</version>
-      <!-- Provided by Maven at runtime -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${maven-core.version}</version>
-      <!-- Provided by Maven at runtime -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jspecify</groupId>
-      <artifactId>jspecify</artifactId>
-      <version>${jspecify.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-      <!-- Provided by Maven at runtime, so don't bundle it. -->
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.immutables</groupId>
-      <artifactId>value</artifactId>
-      <version>${immutables.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>com.github.marschall</groupId>
-      <artifactId>memoryfilesystem</artifactId>
-      <version>${memoryfilesystem.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>${assertj.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <build>
+    <!-- Plugins to run on all subprojects implicitly. -->
     <plugins>
       <plugin>
         <!-- Enforces our license header and allows adding it automatically to code. -->
@@ -339,105 +309,6 @@
       </plugin>
 
       <plugin>
-        <!-- Java compiler config. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
-
-        <configuration>
-          <compilerArgs>
-            <compilerArg>-Xlint:all,-classfile,-processing,-serial</compilerArg>
-          </compilerArgs>
-          <failOnWarning>true</failOnWarning>
-          <showDeprecation>true</showDeprecation>
-          <release>11</release>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <!-- Runs integration tests. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <version>${maven-invoker-plugin.version}</version>
-
-        <configuration>
-          <addTestClassPath>true</addTestClassPath>
-          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-          <failIfNoProjects>true</failIfNoProjects>
-          <postBuildHookScript>test</postBuildHookScript>
-          <settingsFile>src/it/settings.xml</settingsFile>
-          <showErrors>true</showErrors>
-          <showVersion>true</showVersion>
-          <streamLogs>true</streamLogs>
-          <streamLogsOnFailures>true</streamLogsOnFailures>
-          <writeJunitReport>true</writeJunitReport>
-        </configuration>
-
-        <executions>
-          <execution>
-            <id>integration-test</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>install</goal>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <!-- Add additional entries to the JAR's MANIFEST.MF. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin.version}</version>
-
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifest>
-              <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-              <addExtensions>true</addExtensions>
-            </manifest>
-            <manifestEntries>
-              <Sealed>true</Sealed>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <!-- Generate plugin descriptors. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>${maven-plugin-plugin.version}</version>
-
-        <executions>
-          <execution>
-            <!-- We already generate the main descriptor by default.
-                The help mojo is then generated for us by this
-                custom execution. -->
-            <id>generate-help-mojo</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>helpmojo</goal>
-            </goals>
-            <configuration>
-              <helpPackageName>io.github.ascopes.protobufmavenplugin</helpPackageName>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <!-- Create site info pages. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>${maven-project-info-reports-plugin.version}</version>
-      </plugin>
-
-      <plugin>
         <!-- Deployments and version incrementing. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
@@ -449,118 +320,171 @@
           <releaseProfiles>gpg</releaseProfiles>
         </configuration>
       </plugin>
-
-      <plugin>
-        <!-- Generate the plugin site. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>${maven-site-plugin.version}</version>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>${maven-source-plugin.version}</version>
-      </plugin>
-
-      <plugin>
-        <!-- Unit testing. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
-
-        <configuration>
-          <consoleOutputReporter>
-            <disable>true</disable>
-          </consoleOutputReporter>
-          <!--
-            This block is needed to show @DisplayName and @ParameterizedTest
-            in reports with the provided names.
-          -->
-          <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
-            <disable>false</disable>
-            <version>3.0</version>
-            <usePhrasedFileName>false</usePhrasedFileName>
-            <usePhrasedTestSuiteClassName>true</usePhrasedTestSuiteClassName>
-            <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
-            <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
-          </statelessTestsetReporter>
-          <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
-            <disable>false</disable>
-            <printStacktraceOnError>true</printStacktraceOnError>
-            <printStacktraceOnFailure>true</printStacktraceOnFailure>
-            <usePhrasedFileName>false</usePhrasedFileName>
-            <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
-            <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
-          </statelessTestsetInfoReporter>
-        </configuration>
-
-        <dependencies>
-          <dependency>
-            <groupId>me.fabriciorby</groupId>
-            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-            <version>${maven-surefire-junit5-tree-reporter.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <plugin>
-        <!-- Generates JSR-330 CDI configuration data to enable using dependency injection -->
-        <groupId>org.eclipse.sisu</groupId>
-        <artifactId>sisu-maven-plugin</artifactId>
-        <version>${sisu-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>generate-index</id>
-            <goals>
-              <goal>main-index</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <!-- Code coverage. -->
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-
-        <executions>
-          <execution>
-            <id>prepare-coverage-agent-surefire</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-
-          <execution>
-            <id>prepare-coverage-agent-invoker</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <!-- Append to ensure multiple invoker test calls are included -->
-              <append>true</append>
-              <!-- Ensure `${invoker.mavenOpts}` is set in the invoker.properties as well
-                  if maven.argLine is overridden. -->
-              <includes>io.github.ascopes.protobufmavenplugin.*</includes>
-              <propertyName>invoker.mavenOpts</propertyName>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>generate-coverage-reports</id>
-            <goals>
-              <goal>report</goal>
-              <goal>report-integration</goal>
-              <goal>report-aggregate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
+
+    <!-- Management for optional plugins. -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <!-- Java compiler config. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+
+          <configuration>
+            <compilerArgs>
+              <compilerArg>-Xlint:all,-classfile,-processing,-serial</compilerArg>
+            </compilerArgs>
+            <failOnWarning>true</failOnWarning>
+            <showDeprecation>true</showDeprecation>
+            <release>11</release>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <!-- Runs integration tests. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-invoker-plugin</artifactId>
+          <version>${maven-invoker-plugin.version}</version>
+
+          <configuration>
+            <addTestClassPath>true</addTestClassPath>
+            <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+            <failIfNoProjects>true</failIfNoProjects>
+            <postBuildHookScript>test</postBuildHookScript>
+            <settingsFile>src/it/settings.xml</settingsFile>
+            <showErrors>true</showErrors>
+            <showVersion>true</showVersion>
+            <streamLogs>true</streamLogs>
+            <streamLogsOnFailures>true</streamLogsOnFailures>
+            <writeJunitReport>true</writeJunitReport>
+          </configuration>
+
+          <executions>
+            <execution>
+              <id>integration-test</id>
+              <phase>integration-test</phase>
+              <goals>
+                <goal>install</goal>
+                <goal>run</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <!-- Add additional entries to the JAR's MANIFEST.MF. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+
+          <configuration>
+            <archive>
+              <index>true</index>
+              <manifest>
+                <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                <addExtensions>true</addExtensions>
+              </manifest>
+              <manifestEntries>
+                <Sealed>true</Sealed>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <!-- Generate plugin descriptors. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>${maven-plugin-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <!-- Create site info pages. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>${maven-project-info-reports-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <!-- Generate the plugin site. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${maven-site-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <!-- Bundles project sources into an additional JAR for release. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+        </plugin>
+
+        <plugin>
+          <!-- Unit testing. -->
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+
+          <configuration>
+            <consoleOutputReporter>
+              <disable>true</disable>
+            </consoleOutputReporter>
+            <!--
+              This block is needed to show @DisplayName and @ParameterizedTest
+              in reports with the provided names.
+            -->
+            <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+              <disable>false</disable>
+              <version>3.0</version>
+              <usePhrasedFileName>false</usePhrasedFileName>
+              <usePhrasedTestSuiteClassName>true</usePhrasedTestSuiteClassName>
+              <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
+              <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
+            </statelessTestsetReporter>
+            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+              <disable>false</disable>
+              <printStacktraceOnError>true</printStacktraceOnError>
+              <printStacktraceOnFailure>true</printStacktraceOnFailure>
+              <usePhrasedFileName>false</usePhrasedFileName>
+              <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
+              <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
+            </statelessTestsetInfoReporter>
+          </configuration>
+
+          <dependencies>
+            <dependency>
+              <groupId>me.fabriciorby</groupId>
+              <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+              <version>${maven-surefire-junit5-tree-reporter.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+        <plugin>
+          <!-- Generates JSR-330 CDI configuration data to enable using dependency injection. -->
+          <groupId>org.eclipse.sisu</groupId>
+          <artifactId>sisu-maven-plugin</artifactId>
+          <version>${sisu-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>generate-index</id>
+              <goals>
+                <goal>main-index</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <!-- Code coverage. -->
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <reporting>
@@ -615,6 +539,7 @@
       </plugin>
     </plugins>
   </reporting>
+
 
   <profiles>
     <profile>

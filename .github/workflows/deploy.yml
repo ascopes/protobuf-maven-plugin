@@ -123,7 +123,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
         with:
-          path: target/site
+          path: protobuf-maven-plugin/target/site
 
       - name: Create GitHub Release
         if: ${{ ! inputs.dry-run && ! inputs.skip-github-release }}
