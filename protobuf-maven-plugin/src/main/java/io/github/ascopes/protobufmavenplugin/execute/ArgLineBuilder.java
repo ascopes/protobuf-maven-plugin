@@ -31,65 +31,115 @@ import java.util.List;
  */
 public final class ArgLineBuilder {
 
-  private final List<String> args;
-  private int outputTargetCount;
+  private final Path protocPath;
+  private boolean fatalWarnings;
+  private final List<Target> targets;
+  private final List<Path> importPaths;
 
   public ArgLineBuilder(Path protocPath) {
-    args = new ArrayList<>();
-    args.add(protocPath.toString());
-    outputTargetCount = 0;
+    this.protocPath = protocPath;
+    fatalWarnings = false;
+    targets = new ArrayList<>();
+    importPaths = new ArrayList<>();
   }
 
   public List<String> compile(Collection<Path> sourcesToCompile) {
-    if (outputTargetCount == 0) {
-      throw new IllegalStateException("No output targets were provided");
+    if (targets.isEmpty()) {
+      throw new IllegalStateException("No output target operations were provided");
     }
 
-    var finalArgs = new ArrayList<>(args);
+    var args = new ArrayList<String>();
+    args.add(protocPath.toString());
 
-    for (var path : sourcesToCompile) {
-      finalArgs.add(path.toString());
-    }
-
-    return Collections.unmodifiableList(finalArgs);
-  }
-
-  public ArgLineBuilder fatalWarnings(boolean fatalWarnings) {
     if (fatalWarnings) {
       args.add("--fatal_warnings");
     }
+
+    for (var target : targets) {
+      target.addArgsTo(args);
+    }
+
+    for (var sourceToCompile : sourcesToCompile) {
+      args.add(sourceToCompile.toString());
+    }
+
+    for (var importPath : importPaths) {
+      args.add("--proto_path=" + importPath.toString());
+    }
+
+    return Collections.unmodifiableList(args);
+  }
+
+  public ArgLineBuilder fatalWarnings(boolean fatalWarnings) {
+    this.fatalWarnings = fatalWarnings;
     return this;
   }
 
   @SuppressWarnings("UnusedReturnValue")
   public ArgLineBuilder generateCodeFor(Language language, Path outputPath, boolean lite) {
-    ++outputTargetCount;
-    var flag = lite
-        ? "--" + language.getFlagName() + "_out=lite:"
-        : "--" + language.getFlagName() + "_out=";
-    args.add(flag + outputPath);
+    targets.add(new LanguageTarget(language, outputPath, lite));
     return this;
   }
 
-  public ArgLineBuilder importPaths(Collection<Path> includePaths) {
-    for (var includePath : includePaths) {
-      args.add("--proto_path=" + includePath);
-    }
+  public ArgLineBuilder importPaths(Collection<Path> importPaths) {
+    this.importPaths.addAll(importPaths);
     return this;
   }
 
   public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath) {
     for (var plugin : plugins) {
-      // protoc always maps a flag `--xxx_out` to a plugin named `protoc-gen-xxx`, so we have
-      // to inject this flag to be consistent.
-      ++outputTargetCount;
-      args.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
-      args.add("--" + plugin.getId() + "_out=" + outputPath);
+      targets.add(new PluginTarget(plugin, outputPath));
     }
     return this;
   }
 
   public List<String> version() {
-    return List.of(args.get(0), "--version");
+    return List.of(protocPath.toString(), "--version");
+  }
+
+  private interface Target {
+    void addArgsTo(List<String> list);
+  }
+
+  private static final class LanguageTarget implements Target {
+
+    private final Language language;
+    private final Path outputPath;
+    private final boolean lite;
+
+    private LanguageTarget(Language language, Path outputPath, boolean lite) {
+      this.language = language;
+      this.outputPath = outputPath;
+      this.lite = lite;
+    }
+
+    @Override
+    public void addArgsTo(List<String> list) {
+      var flag = "--" + language.getFlagName() + "_out"
+          + "="
+          + (lite ? "lite:" : "")
+          + outputPath;
+
+      list.add(flag);
+    }
+  }
+
+  private static final class PluginTarget implements Target {
+
+    private final ResolvedPlugin plugin;
+    private final Path outputPath;
+
+    private PluginTarget(ResolvedPlugin plugin, Path outputPath) {
+      this.plugin = plugin;
+      this.outputPath = outputPath;
+    }
+
+    @Override
+    public void addArgsTo(List<String> list) {
+      // protoc always maps a flag `--xxx_out` to a plugin named `protoc-gen-xxx`, so we have
+      // to inject this flag to be consistent.
+      list.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
+      list.add("--" + plugin.getId() + "_out=" + outputPath);
+    }
   }
 }
