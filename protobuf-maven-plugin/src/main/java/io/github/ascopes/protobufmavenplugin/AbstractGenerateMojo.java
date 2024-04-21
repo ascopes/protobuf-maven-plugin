@@ -579,7 +579,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private Collection<Path> sourceDirectories() {
     if (sourceDirectories == null || sourceDirectories.isEmpty()) {
-      var defaultSourceDirectory = defaultSourceDirectory()
+      var defaultSourceDirectory = defaultSourceDirectory();
       // Don't bother injecting the default source directory if it doesn't exist. Let the
       // plugin error instead.
       return Files.exists(defaultSourceDirectory)
