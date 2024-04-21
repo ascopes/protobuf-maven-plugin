@@ -22,7 +22,8 @@ Please raise any bugs or feature requests on
 
 # Detailed examples
 
-If you need detailed working examples to use as reference, then the [integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it)
+If you need detailed working examples to use as reference, then the 
+[integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it)
 are a great place to start, since they are full working Maven projects.
 
 If you wish to contribute additional test cases to show integration with custom plugins or more
