@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * Shell/batch file quoting.
@@ -24,25 +24,35 @@ import java.util.function.BiConsumer;
  * <p>Losely based on Python's {@code shlex} module.
  *
  * <p>This is far from perfect but should work in the majority of use cases
- * to ensure scripts do not interpret special characters in paths in strange and unexpected ways.
+ * to ensure scripts do not interpret special characters in paths in strange
+ * and unexpected ways.
+ *
+ * <p>Long lines will be split up with line continuations.
  *
  * @author Ashley Scopes
  */
 public final class Shlex {
+
+  private static final int LINE_LENGTH_TARGET = 99;
+  private static final String INDENT = " ".repeat(4);
 
   private Shlex() {
     // Static-only class
   }
 
   public static String quoteShellArgs(Iterable<String> args) {
-    return quote(args, Shlex::quoteShellArg);
+    return quote(args, Shlex::quoteShellArg, " \\\n");
   }
 
   public static String quoteBatchArgs(Iterable<String> args) {
-    return quote(args, Shlex::quoteBatchArg);
+    return quote(args, Shlex::quoteBatchArg, " ^\r\n");
   }
 
-  private static String quote(Iterable<String> args, BiConsumer<StringBuilder, String> quoter) {
+  private static String quote(
+      Iterable<String> args,
+      Function<String, String> quoter,
+      String continuation
+  ) {
     var iter = args.iterator();
 
     if (!iter.hasNext()) {
@@ -50,23 +60,34 @@ public final class Shlex {
       return "";
     }
 
-    var sb = new StringBuilder();
-    quoter.accept(sb, iter.next());
+    var sb = new StringBuilder(quoter.apply(iter.next()));
+    var lineLength = sb.length();
 
     while (iter.hasNext()) {
-      sb.append(' ');
-      quoter.accept(sb, iter.next());
+      var next = quoter.apply(iter.next());
+
+      if (lineLength + next.length() >= LINE_LENGTH_TARGET) {
+        sb.append(continuation);
+        lineLength = INDENT.length();
+        sb.append(INDENT);
+      } else {
+        sb.append(" ");
+        lineLength += 1;
+      }
+
+      sb.append(next);
+      lineLength += next.length();
     }
 
     return sb.toString();
   }
 
-  private static void quoteShellArg(StringBuilder sb, String arg) {
+  private static String quoteShellArg(String arg) {
     if (isSafe(arg)) {
-      sb.append(arg);
-      return;
+      return arg;
     }
 
+    var sb = new StringBuilder();
     sb.append('\'');
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
@@ -89,14 +110,16 @@ public final class Shlex {
       }
     }
     sb.append('\'');
+
+    return sb.toString();
   }
 
-  private static void quoteBatchArg(StringBuilder sb, String arg) {
+  private static String quoteBatchArg(String arg) {
     if (isSafe(arg)) {
-      sb.append(arg);
-      return;
+      return arg;
     }
 
+    var sb = new StringBuilder();
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       switch (c) {
@@ -121,6 +144,8 @@ public final class Shlex {
           break;
       }
     }
+
+    return sb.toString();
   }
 
   private static boolean isSafe(String arg) {

@@ -85,7 +85,16 @@ class ShlexTest {
         arguments(list("'potato'"), "''\"'\"'potato'\"'\"''"),
         arguments(list("foo\nbar", "baz"), "'foo'$'\\n''bar' baz"),
         arguments(list("foo\rbar", "baz"), "'foo'$'\\r''bar' baz"),
-        arguments(list("foo\tbar", "baz"), "'foo'$'\\t''bar' baz")
+        arguments(list("foo\tbar", "baz"), "'foo'$'\\t''bar' baz"),
+        arguments(
+            list("a".repeat(100), "b".repeat(100), "c".repeat(100)),
+            String.join(
+                " \\\n    ",
+                "a".repeat(100),
+                "b".repeat(100),
+                "c".repeat(100)
+            )
+        )
     );
   }
 
@@ -115,7 +124,16 @@ class ShlexTest {
         arguments(list("<"), "^<"),
         arguments(list(">"), "^>"),
         arguments(list("|"), "^|"),
-        arguments(list("100% complete", "0% incomplete"), "100%%^ complete 0%%^ incomplete")
+        arguments(list("100% complete", "0% incomplete"), "100%%^ complete 0%%^ incomplete"),
+        arguments(
+            list("a".repeat(100), "b".repeat(100), "c".repeat(100)),
+            String.join(
+                " ^\r\n    ",
+                "a".repeat(100),
+                "b".repeat(100),
+                "c".repeat(100)
+            )
+        )
     );
   }
 
