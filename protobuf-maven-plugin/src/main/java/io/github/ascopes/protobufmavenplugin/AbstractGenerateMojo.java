@@ -28,6 +28,7 @@ import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -578,7 +579,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private Collection<Path> sourceDirectories() {
     if (sourceDirectories == null || sourceDirectories.isEmpty()) {
-      return List.of(defaultSourceDirectory());
+      var defaultSourceDirectory = defaultSourceDirectory()
+      // Don't bother injecting the default source directory if it doesn't exist. Let the
+      // plugin error instead.
+      return Files.exists(defaultSourceDirectory)
+          ? List.of(defaultSourceDirectory)
+          : List.of();
     }
 
     return sourceDirectories.stream()
