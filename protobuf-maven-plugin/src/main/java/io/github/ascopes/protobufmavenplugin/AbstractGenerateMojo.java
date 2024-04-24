@@ -98,7 +98,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
    *      the project settings with - optional</li>
    * </ul>
    *
@@ -209,7 +209,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
    *      the project settings with - optional</li>
    * </ul>
    *
@@ -262,7 +262,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
    *      the project settings with - optional</li>
    * </ul>
    *
@@ -364,7 +364,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionScope} - the dependency resolution scope to override
+   *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
    *      the project settings with - optional</li>
    * </ul>
    *
