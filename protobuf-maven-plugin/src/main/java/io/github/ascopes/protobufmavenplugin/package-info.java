@@ -17,17 +17,22 @@
 @Style(
     beanFriendlyModifiables = true,
     create = "new",
+    defaults = @Immutable(copy = false),
     deferCollectionAllocation = true,
     headerComments = true,
+    jacksonIntegration = false,
     jdkOnly = true,
     jdk9Collections = true,
     nullableAnnotation = "org.jspecify.annotations.Nullable",
+    passAnnotations = Nullable.class,
     optionalAcceptNullable = true,
     typeModifiable = "*Bean",
     validationMethod = ValidationMethod.MANDATORY_ONLY
 )
 package io.github.ascopes.protobufmavenplugin;
 
+import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
 import org.immutables.value.Value.Style.ValidationMethod;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
