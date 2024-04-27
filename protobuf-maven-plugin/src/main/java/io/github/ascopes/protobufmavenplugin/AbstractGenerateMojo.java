@@ -242,12 +242,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
    * with the {@code provided} or {@code test} scope instead, or use {@code importDependencies}.
    *
-   * <p>Prior to v1.2.0, this was called {@code additionalImportPaths}. This old name will
-   * be maintained as a valid alias until v2.0.0.
-   *
    * @since 0.1.0
    */
-  @Parameter(alias = "additionalImportPaths")
+  @Parameter
   @Nullable List<File> importPaths;
 
   /**
