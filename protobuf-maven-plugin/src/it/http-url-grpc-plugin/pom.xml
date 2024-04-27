@@ -97,7 +97,9 @@
 
         <configuration>
           <binaryUrlPlugins>
-            <binaryUrlPlugin>https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/${grpc.version}/protoc-gen-grpc-java-${grpc.version}-linux-x86_64.exe</binaryUrlPlugin>
+            <binaryUrlPlugin>
+              <url>https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/${grpc.version}/protoc-gen-grpc-java-${grpc.version}-linux-x86_64.exe</url>
+            </binaryUrlPlugin>
           </binaryUrlPlugins>
 
           <protocVersion>${protobuf.version}</protocVersion>
