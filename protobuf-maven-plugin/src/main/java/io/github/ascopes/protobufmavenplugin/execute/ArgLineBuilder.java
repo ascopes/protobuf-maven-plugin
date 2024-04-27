@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.execute;
 
 import io.github.ascopes.protobufmavenplugin.generate.Language;
-import io.github.ascopes.protobufmavenplugin.plugin.ResolvedPlugin;
+import io.github.ascopes.protobufmavenplugin.plugin.ResolvedProtocPlugin;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,7 +86,7 @@ public final class ArgLineBuilder {
     return this;
   }
 
-  public ArgLineBuilder plugins(Collection<ResolvedPlugin> plugins, Path outputPath) {
+  public ArgLineBuilder plugins(Collection<ResolvedProtocPlugin> plugins, Path outputPath) {
     for (var plugin : plugins) {
       targets.add(new PluginTarget(plugin, outputPath));
     }
@@ -126,10 +126,10 @@ public final class ArgLineBuilder {
 
   private static final class PluginTarget implements Target {
 
-    private final ResolvedPlugin plugin;
+    private final ResolvedProtocPlugin plugin;
     private final Path outputPath;
 
-    private PluginTarget(ResolvedPlugin plugin, Path outputPath) {
+    private PluginTarget(ResolvedProtocPlugin plugin, Path outputPath) {
       this.plugin = plugin;
       this.outputPath = outputPath;
     }
@@ -140,6 +140,9 @@ public final class ArgLineBuilder {
       // to inject this flag to be consistent.
       list.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
       list.add("--" + plugin.getId() + "_out=" + outputPath);
+      plugin.getOptions()
+          .map(options -> "--" + plugin.getId() + "_opt=" + options)
+          .ifPresent(list::add);
     }
   }
 }

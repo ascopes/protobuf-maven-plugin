@@ -35,7 +35,6 @@ import io.github.ascopes.protobufmavenplugin.generate.SourceCodeGenerator;
 import io.github.ascopes.protobufmavenplugin.generate.SourceRootRegistrar;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
@@ -188,7 +187,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
     void whenBinaryMavenPluginsNullExpectEmptyListInRequest(
-        List<MavenArtifactBean> plugins
+        List<MavenProtocPluginBean> plugins
     ) throws Throwable {
       // Given
       mojo.binaryMavenPlugins = plugins;
@@ -207,7 +206,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void whenBinaryMavenPluginsProvidedExpectPluginsInRequest() throws Throwable {
       // Given
-      List<MavenArtifactBean> plugins = mock();
+      List<MavenProtocPluginBean> plugins = mock();
       mojo.binaryMavenPlugins = plugins;
 
       // When
@@ -228,7 +227,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when binaryPathPlugins is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenBinaryPathPluginsNullExpectEmptyListInRequest(List<String> plugins) throws Throwable {
+    void whenBinaryPathPluginsNullExpectEmptyListInRequest(
+        List<PathProtocPluginBean> plugins
+    ) throws Throwable {
       // Given
       mojo.binaryPathPlugins = plugins;
 
@@ -246,7 +247,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void whenBinaryPathPluginsProvidedExpectPluginsInRequest() throws Throwable {
       // Given
-      List<String> plugins = mock();
+      List<PathProtocPluginBean> plugins = mock();
       mojo.binaryPathPlugins = plugins;
 
       // When
@@ -267,7 +268,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when binaryUrlPlugins is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenBinaryUrlPluginsNullExpectEmptyListInRequest(List<URL> plugins) throws Throwable {
+    void whenBinaryUrlPluginsNullExpectEmptyListInRequest(
+        List<UrlProtocPluginBean> plugins
+    ) throws Throwable {
       // Given
       mojo.binaryUrlPlugins = plugins;
 
@@ -285,7 +288,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void whenBinaryUrlPluginsProvidedExpectPluginsInRequest() throws Throwable {
       // Given
-      List<URL> plugins = mock();
+      List<UrlProtocPluginBean> plugins = mock();
       mojo.binaryUrlPlugins = plugins;
 
       // When
@@ -478,7 +481,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
     void whenJvmMavenPluginsNullExpectEmptyListInRequest(
-        List<MavenArtifactBean> plugins
+        List<MavenProtocPluginBean> plugins
     ) throws Throwable {
       // Given
       mojo.jvmMavenPlugins = plugins;
@@ -497,7 +500,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void whenJvmMavenPluginsProvidedExpectPluginsInRequest() throws Throwable {
       // Given
-      List<MavenArtifactBean> plugins = mock();
+      List<MavenProtocPluginBean> plugins = mock();
       mojo.jvmMavenPlugins = plugins;
 
       // When

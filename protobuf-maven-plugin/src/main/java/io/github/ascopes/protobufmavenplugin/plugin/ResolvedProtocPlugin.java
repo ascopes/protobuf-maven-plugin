@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.plugin;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -25,9 +26,11 @@ import org.immutables.value.Value.Immutable;
  * @author Ashley Scopes
  */
 @Immutable
-public interface ResolvedPlugin {
+public interface ResolvedProtocPlugin {
 
   Path getPath();
 
   String getId();
+
+  Optional<String> getOptions();
 }
