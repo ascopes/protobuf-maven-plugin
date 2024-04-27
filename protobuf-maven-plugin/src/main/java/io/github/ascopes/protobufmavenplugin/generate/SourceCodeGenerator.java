@@ -23,7 +23,7 @@ import io.github.ascopes.protobufmavenplugin.execute.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.execute.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.plugin.BinaryPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugin.JvmPluginResolver;
-import io.github.ascopes.protobufmavenplugin.plugin.ResolvedPlugin;
+import io.github.ascopes.protobufmavenplugin.plugin.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.source.ProtoFileListing;
 import io.github.ascopes.protobufmavenplugin.source.ProtoSourceResolver;
@@ -150,7 +150,7 @@ public final class SourceCodeGenerator {
     return commandLineExecutor.execute(args);
   }
 
-  private Collection<ResolvedPlugin> discoverPlugins(
+  private Collection<ResolvedProtocPlugin> discoverPlugins(
       GenerationRequest request
   ) throws IOException, ResolutionException {
     return concat(

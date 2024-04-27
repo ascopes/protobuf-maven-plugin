@@ -17,8 +17,11 @@
 package io.github.ascopes.protobufmavenplugin.plugin;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.ImmutableMavenArtifact;
-import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.ImmutableMavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.MavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.PathProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.UrlProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -60,28 +63,29 @@ public final class BinaryPluginResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Collection<ResolvedPlugin> resolveMavenPlugins(
-      Collection<? extends MavenArtifact> plugins
+  public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
+      Collection<? extends MavenProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveMavenPlugin);
   }
 
-  public Collection<ResolvedPlugin> resolvePathPlugins(
-      Collection<String> plugins
+  public Collection<ResolvedProtocPlugin> resolvePathPlugins(
+      Collection<? extends PathProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolvePathPlugin);
   }
 
-  public Collection<ResolvedPlugin> resolveUrlPlugins(
-      Collection<URL> plugins
+  public Collection<ResolvedProtocPlugin> resolveUrlPlugins(
+      Collection<? extends UrlProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveUrlPlugin);
   }
 
-  private ResolvedPlugin resolveMavenPlugin(
-      MavenArtifact plugin
+  private ResolvedProtocPlugin resolveMavenPlugin(
+      MavenProtocPlugin plugin
   ) throws ResolutionException {
-    var pluginBuilder = ImmutableMavenArtifact.builder().from(plugin);
+    var pluginBuilder = ImmutableMavenProtocPlugin.builder()
+        .from(plugin);
 
     if (plugin.getClassifier() == null) {
       var classifier = platformClassifierFactory.getClassifier(plugin.getArtifactId());
@@ -98,36 +102,47 @@ public final class BinaryPluginResolver {
     var path = dependencyResolver.resolveOne(plugin, DependencyResolutionDepth.DIRECT)
         .iterator()
         .next();
+
     makeExecutable(path);
-    return createResolvedPlugin(path);
+    return createResolvedProtocPlugin(plugin, path);
   }
 
-  private ResolvedPlugin resolvePathPlugin(String binaryName) throws ResolutionException {
-    var path = systemPathResolver.resolve(binaryName)
-        .orElseThrow(() -> new ResolutionException("No executable '"
-            + binaryName + "' was found on the system path"));
-    return createResolvedPlugin(path);
+  private ResolvedProtocPlugin resolvePathPlugin(
+      PathProtocPlugin plugin
+  ) throws ResolutionException {
+    var path = systemPathResolver.resolve(plugin.getName())
+        .orElseThrow(() -> new ResolutionException(
+            "No executable '"
+                + plugin.getName()
+                + "' was found on the system path"
+        ));
+
+    return createResolvedProtocPlugin(plugin, path);
   }
 
-  private ResolvedPlugin resolveUrlPlugin(URL url) throws ResolutionException {
-    var path = urlResourceFetcher.fetchFileFromUrl(url, ".exe");
+  private ResolvedProtocPlugin resolveUrlPlugin(
+      UrlProtocPlugin plugin
+  ) throws ResolutionException {
+    var path = urlResourceFetcher.fetchFileFromUrl(plugin.getUrl(), ".exe");
     makeExecutable(path);
-    return createResolvedPlugin(path);
+
+    return createResolvedProtocPlugin(plugin, path);
   }
 
-  private ResolvedPlugin createResolvedPlugin(Path path) {
-    return ImmutableResolvedPlugin
+  private ResolvedProtocPlugin createResolvedProtocPlugin(ProtocPlugin plugin, Path path) {
+    return ImmutableResolvedProtocPlugin
         .builder()
         .id(Digests.sha1(path.toString()))
         .path(path)
+        .options(plugin.getOptions())
         .build();
   }
 
-  private <A> Collection<ResolvedPlugin> resolveAll(
+  private <A> Collection<ResolvedProtocPlugin> resolveAll(
       Collection<A> plugins,
       Resolver<A> resolver
   ) throws ResolutionException {
-    var resolvedPlugins = new ArrayList<ResolvedPlugin>();
+    var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
       resolvedPlugins.add(resolver.resolve(plugin));
     }
@@ -145,6 +160,6 @@ public final class BinaryPluginResolver {
   @FunctionalInterface
   private interface Resolver<A> {
 
-    ResolvedPlugin resolve(A arg) throws ResolutionException;
+    ResolvedProtocPlugin resolve(A arg) throws ResolutionException;
   }
 }

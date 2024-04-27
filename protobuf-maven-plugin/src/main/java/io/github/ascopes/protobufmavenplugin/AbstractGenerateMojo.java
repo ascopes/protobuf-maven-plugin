@@ -90,7 +90,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * executable, or are using a more obscure system architecture, then using a
    * {@code jvmMavenPlugin} may be more preferrable.
    *
-   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   * <p>Objects support the following attributes:
    *
    * <ul>
    *   <li>{@code groupId} - the group ID - required</li>
@@ -98,14 +98,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
-   *      the project settings with - optional</li>
+   *   <li>{@code options} - a string of options to pass to the plugin
+   *       - optional.</li>
    * </ul>
    *
    * @since 0.3.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> binaryMavenPlugins;
+  @Nullable List<MavenProtocPluginBean> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -113,14 +113,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>For example:
    * <pre>{@code
    * <binaryPathPlugins>
-   *   <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
+   *   <binaryPathPlugin>
+   *     <name>protoc-gen-grpc-java</name>
+   *   </binaryPathPlugin>
+   *   <binaryPathPlugin>
+   *     <name>protoc-gen-something-else</name>
+   *     <options>foo=bar</options>
+   *   </binaryPathPlugin>
    * </binaryPathPlugins>
    * }</pre>
    *
-   * @since 0.3.0
+   * <p>Prior to v2.0.0, this attribute was a list of strings.
+   *
+   * @since 2.0.0
    */
   @Parameter
-  @Nullable List<String> binaryPathPlugins;
+  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
@@ -136,14 +144,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>For example:
    * <pre>{@code
    *   <binaryUrlPlugins>
-   *     <binaryUrlPlugin>ftp://myorganisation.org/protoc/plugins/myplugin.exe</binaryUrlPlugin>
+   *     <binaryUrlPlugin>
+   *       <url>ftp://myorganisation.org/protoc/plugins/myplugin.exe</url>
+   *     </binaryUrlPlugin>
+   *     <binaryUrlPlugin>
+   *       <url>ftp://myorganisation.org/protoc/plugins/myplugin2.exe</url>
+   *       <options>foo=bar</options>
+   *     </binaryUrlPlugin>
    *   </binaryUrlPlugins>
    * }</pre>
    *
-   * @since 0.4.0
+   * <p>Prior to v2.0.0, this attribute was a list of URLs.
+   *
+   * @since 2.0.0
    */
   @Parameter
-  @Nullable List<URL> binaryUrlPlugins;
+  @Nullable List<UrlProtocPluginBean> binaryUrlPlugins;
 
   /**
    * The scope to resolve dependencies with.
@@ -201,7 +217,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>These will not be compiled into Java sources directly.
    *
-   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   * <p>Objects support the following attributes:
    *
    * <ul>
    *   <li>{@code groupId} - the group ID - required</li>
@@ -254,7 +270,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This mechanism allows plugin vendors to implement their plugins in
    * Java and just distribute platform-independent JAR instead.
    *
-   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   * <p>Objects support the following attributes:
    *
    * <ul>
    *   <li>{@code groupId} - the group ID - required</li>
@@ -262,14 +278,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
-   *      the project settings with - optional</li>
+   *   <li>{@code options} - a string of options to pass to the plugin
+   *       - optional.</li>
    * </ul>
    *
    * @since 0.3.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> jvmMavenPlugins;
+  @Nullable List<MavenProtocPluginBean> jvmMavenPlugins;
 
   /**
    * Whether to only generate "lite" messages or not.
@@ -356,7 +372,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </sourceDependencies>
    * }</pre>
    *
-   * <p>{@code MavenArtifactBean} objects support the following attributes:
+   * <p>Objects support the following attributes:
    *
    * <ul>
    *   <li>{@code groupId} - the group ID - required</li>

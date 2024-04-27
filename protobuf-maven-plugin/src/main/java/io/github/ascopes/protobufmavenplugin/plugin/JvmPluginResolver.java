@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.plugin;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
@@ -63,18 +63,18 @@ public final class JvmPluginResolver {
     this.temporarySpace = temporarySpace;
   }
 
-  public Collection<ResolvedPlugin> resolveMavenPlugins(
-      Collection<? extends MavenArtifact> plugins
+  public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
+      Collection<? extends MavenProtocPlugin> plugins
   ) throws IOException, ResolutionException {
-    var resolvedPlugins = new ArrayList<ResolvedPlugin>();
+    var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
       resolvedPlugins.add(resolve(plugin));
     }
     return resolvedPlugins;
   }
 
-  private ResolvedPlugin resolve(
-      MavenArtifact plugin
+  private ResolvedProtocPlugin resolve(
+      MavenProtocPlugin plugin
   ) throws IOException, ResolutionException {
     var pluginId = pluginIdDigest(plugin);
     var argLine = resolveAndBuildArgLine(plugin);
@@ -83,15 +83,16 @@ public final class JvmPluginResolver {
         ? writeWindowsBatchScript(pluginId, argLine)
         : writeShellScript(pluginId, argLine);
 
-    return ImmutableResolvedPlugin
+    return ImmutableResolvedProtocPlugin
         .builder()
         .id(pluginId)
         .path(scriptPath)
+        .options(plugin.getOptions())
         .build();
   }
 
   private List<String> resolveAndBuildArgLine(
-      MavenArtifact plugin
+      MavenProtocPlugin plugin
   ) throws ResolutionException {
 
     // Resolve dependencies first.
@@ -129,7 +130,7 @@ public final class JvmPluginResolver {
     return sb.toString();
   }
 
-  private String pluginIdDigest(MavenArtifact plugin) {
+  private String pluginIdDigest(MavenProtocPlugin plugin) {
     return Digests.sha1(plugin.toString());
   }
 

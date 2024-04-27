@@ -18,6 +18,9 @@ package io.github.ascopes.protobufmavenplugin.generate;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.MavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.PathProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.UrlProtocPlugin;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -31,11 +34,11 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface GenerationRequest {
 
-  Collection<? extends MavenArtifact> getBinaryMavenPlugins();
+  Collection<? extends MavenProtocPlugin> getBinaryMavenPlugins();
 
-  Collection<String> getBinaryPathPlugins();
+  Collection<? extends PathProtocPlugin> getBinaryPathPlugins();
 
-  Collection<URL> getBinaryUrlPlugins();
+  Collection<? extends UrlProtocPlugin> getBinaryUrlPlugins();
 
   DependencyResolutionDepth getDependencyResolutionDepth();
 
@@ -45,7 +48,7 @@ public interface GenerationRequest {
 
   Collection<Path> getImportPaths();
 
-  Collection<? extends MavenArtifact> getJvmMavenPlugins();
+  Collection<? extends MavenProtocPlugin> getJvmMavenPlugins();
 
   Path getOutputDirectory();
 
