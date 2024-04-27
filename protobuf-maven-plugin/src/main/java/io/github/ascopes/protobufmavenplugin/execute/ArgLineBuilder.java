@@ -140,6 +140,9 @@ public final class ArgLineBuilder {
       // to inject this flag to be consistent.
       list.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
       list.add("--" + plugin.getId() + "_out=" + outputPath);
+      plugin.getOptions()
+          .map(options -> "--" + plugin.getId() + "_opt=" + options)
+          .ifPresent(list::add);
     }
   }
 }
