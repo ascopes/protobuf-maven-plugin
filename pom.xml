@@ -600,7 +600,7 @@
           <reportSet>
             <reports>
               <!-- select non-aggregate reports only -->
-              <report>report</report>
+              <report>report-aggregate</report>
             </reports>
           </reportSet>
         </reportSets>
