@@ -223,30 +223,94 @@ If there are additional paths on the file system that you wish to add to the imp
 you can specify these using the `importPaths` parameter. Note that these will not be
 compiled, only made visible to the protobuf compiler.
 
-## Kotlin generation
+## Generating other language sources
 
-Protoc support for Kotlin currently takes the shape of producing additional Kotlin API wrapper
-calls that can decorate the existing generated Java code.
+The following languages are available. You can turn any combination on and off. If all
+are disabled then at least one plugin must be provided.
 
-To opt in to also generating these sources, set the `kotlinEnabled` plugin property to
-`true`:
+<table>
+  <thead>
+    <tr>
+      <th>Language</th>
+      <th>Parameter</th>
+      <th>Default value</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>C++</td>
+      <td><code>cppEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>C#</td>
+      <td><code>csharpEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>Java</td>
+      <td><code>javaEnabled</code></td>
+      <td><code>true</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>Kotlin</td>
+      <td><code>kotlinEnabled</code></td>
+      <td><code>false</code></td>
+      <td>Generates JVM Kotlin descriptors. You should also ensure <code>javaEnabled</code> is true.</td>
+    </tr>
+    <tr>
+      <td>Objective-C</td>
+      <td><code>objcEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>PHP</td>
+      <td><code>phpEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>Python</td>
+      <td><code>pythonEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>Python typeshed stubs</td>
+      <td><code>pyiEnabled</code></td>
+      <td><code>false</code></td>
+      <td>Enable this alongside <code>pythonEnabled</code> to generate MyPy-compatible typehint stubs.</td>
+    </tr>
+    <tr>
+      <td>Ruby</td>
+      <td><code>rubyEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+    <tr>
+      <td>Rust</td>
+      <td><code>rustEnabled</code></td>
+      <td><code>false</code></td>
+      <td/>
+    </tr>
+  </tbody>
+</table>
 
-```xml
-<plugin>
-  <groupId>io.github.ascopes</groupId>
-  <artifactId>protobuf-maven-plugin</artifactId>
-  <version>...</version>
-  
-  <configuration>
-    <kotlinEnabled>true</kotlinEnabled>
-    ...
-  </configuration>
-    
-  ...
-</plugin>
-```
+Other languages (such as Scala, Clojure, etc) can be configured by using
+third-party plugins (see further down this page).
 
-Sources will be emitted in the same location as the Java sources.
+Note that all generated sources will be written to the same output directory, so you
+may want to configure multiple executions for each language to override the individual
+output directories.
+
+It is also important to note that you need to provide a valid compiler or tooling to
+make use of the generared sources (other than Java). For example, Kotlin generation
+would require you to also configure the `kotlin-maven-plugin`.
 
 ## Changing the input directories
 
@@ -360,7 +424,7 @@ directly:
 This is not recommended outside specific use cases, and care should be taken to ensure the
 legitimacy and security of any URLs being provided prior to adding them.
 
-Providing authentication details is not supported at this time.
+Providing authentication details or proxy details is not supported at this time.
 
 ## Additional plugins
 
@@ -398,6 +462,9 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
 </plugin>
 ```
 
+Each `binaryMavenPlugin` can take an optional `options` parameter which will
+be passed as an option to the plugin if specified.
+
 #### Binary plugins from the system path
 
 If you instead wish to read the executable from the system `$PATH`, then you can specify an
@@ -412,13 +479,18 @@ executable name instead:
   <configuration>
     ...
     <binaryPathPlugins>
-      <binaryPathPlugin>protoc-gen-grpc-java</binaryPathPlugin>
+      <binaryPathPlugin>
+        <name>protoc-gen-grpc-java</name>
+      </binaryPathPlugin>
     </binaryPathPlugins>
   </configuration>
 
   ...
 </plugin>
 ```
+
+Each `binarPathPlugin` can take an optional `options` parameter which will
+be passed as an option to the plugin if specified.
 
 #### Binary plugins from specific locations
 
@@ -434,9 +506,16 @@ specific file system path:
   <configuration>
     ...
     <binaryUrlPlugins>
-      <binaryUrlPlugin>file:///opt/protoc/protoc-gen-grpc-java</binaryUrlPlugin>
-      <binaryUrlPlugin>ftp://company-server.internal/some-other-plugin.exe</binaryUrlPlugin>
-      <binaryUrlPlugin>https://some-website.net/downloads/my-cool-protoc-plugin.exe</binaryUrlPlugin>
+      <binaryUrlPlugin>
+        <url>file:///opt/protoc/protoc-gen-grpc-java</url>
+      </binaryUrlPlugin>
+      <binaryUrlPlugin>
+        <url>ftp://company-server.internal/some-other-plugin.exe
+      </binaryUrlPlugin>
+      <binaryUrlPlugin>
+        <url>https://some-website.net/downloads/my-cool-protoc-plugin.exe</url>
+        <options>some-option=some-value</options>
+      </binaryUrlPlugin>
     </binaryUrlPlugins>
   </configuration>
 
@@ -444,10 +523,13 @@ specific file system path:
 </plugin>
 ```
 
+Each `binaryUrlPlugin` can take an optional `options` parameter which will
+be passed as an option to the plugin if specified.
+
 This is not recommended outside specific use cases, and care should be taken to ensure the
 legitimacy and security of any URLs being provided prior to adding them.
 
-Providing authentication details is not supported at this time.
+Providing authentication details or proxy details is not supported at this time.
 
 ### Pure-Java plugins
 
@@ -478,10 +560,11 @@ dependencies to execute.
 </plugin>
 ```
 
+Each `jvmMavenPlugin` can take an optional `options` parameter which will
+be passed as an option to the plugin if specified.
+
 Currently, you are required to be able to execute `*.bat` files on Windows, or have 
 `sh` available on the system `$PATH` for any other platform.
-
-Java plugin functionality is experimental and subject to change.
 
 ### Mixing plugins
 
