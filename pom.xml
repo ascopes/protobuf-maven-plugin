@@ -562,11 +562,12 @@
       </plugin>
 
       <plugin>
+        <!-- Generate source documentation listings. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${maven-javadoc-plugin.version}</version>
         <configuration>
-          <skip>true</skip>
+          <doclint>all,-missing</doclint>
         </configuration>
       </plugin>
 
@@ -585,12 +586,14 @@
       </plugin>
 
       <plugin>
+        <!-- Report unit test results. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
       </plugin>
 
       <plugin>
+        <!-- Report coverage. -->
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <reportSets>
