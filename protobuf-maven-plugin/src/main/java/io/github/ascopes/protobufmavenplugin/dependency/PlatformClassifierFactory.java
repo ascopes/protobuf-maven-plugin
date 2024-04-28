@@ -35,7 +35,7 @@ public final class PlatformClassifierFactory {
     this.hostSystem = hostSystem;
   }
 
-  public String getClassifier(String artifactId) {
+  public String getClassifier(String binaryName) {
     var rawOs = hostSystem.getOperatingSystem();
     var rawArch = hostSystem.getCpuArchitecture();
 
@@ -92,10 +92,12 @@ public final class PlatformClassifierFactory {
 
     var message = String.format(
         "No '%s' binary is available for reported OS '%s' and CPU architecture '%s'",
-        artifactId,
+        binaryName,
         rawOs,
         rawArch
     );
+
+    // TODO: throw ResolutionException here instead.
     throw new UnsupportedOperationException(message);
   }
 }
