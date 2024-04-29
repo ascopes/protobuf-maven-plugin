@@ -28,4 +28,7 @@ import org.jspecify.annotations.Nullable;
 public interface ProtocPlugin {
   @Nullable
   String getOptions();
+
+  @Nullable
+  Boolean isOptional();
 }
