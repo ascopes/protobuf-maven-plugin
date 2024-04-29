@@ -31,9 +31,11 @@ import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -81,7 +83,7 @@ public final class BinaryPluginResolver {
     return resolveAll(plugins, this::resolveUrlPlugin);
   }
 
-  private ResolvedProtocPlugin resolveMavenPlugin(
+  private Optional<ResolvedProtocPlugin> resolveMavenPlugin(
       MavenProtocPlugin plugin
   ) throws ResolutionException {
     var pluginBuilder = ImmutableMavenProtocPlugin.builder()
@@ -103,30 +105,43 @@ public final class BinaryPluginResolver {
         .iterator()
         .next();
 
+    if (plugin.isOptional() && !Files.exists(path)) {
+      return Optional.empty();
+    }
+
     makeExecutable(path);
-    return createResolvedProtocPlugin(plugin, path);
+    return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
-  private ResolvedProtocPlugin resolvePathPlugin(
+  private Optional<ResolvedProtocPlugin> resolvePathPlugin(
       PathProtocPlugin plugin
   ) throws ResolutionException {
-    var path = systemPathResolver.resolve(plugin.getName())
-        .orElseThrow(() -> new ResolutionException(
-            "No executable '"
-                + plugin.getName()
-                + "' was found on the system path"
-        ));
+    var path = systemPathResolver.resolve(plugin.getName());
 
-    return createResolvedProtocPlugin(plugin, path);
+    if (!path.isPresent()) {
+      if (plugin.isOptional()) {
+        return Optional.empty();
+      }
+
+      new ResolutionException(
+          "No executable '" + plugin.getName() + "' was found on the system path");
+    }
+
+    return Optional.of(createResolvedProtocPlugin(plugin, path.get()));
   }
 
-  private ResolvedProtocPlugin resolveUrlPlugin(
+  private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
       UrlProtocPlugin plugin
   ) throws ResolutionException {
     var path = urlResourceFetcher.fetchFileFromUrl(plugin.getUrl(), ".exe");
+
+    if (plugin.isOptional() && !Files.exists(path)) {
+      return Optional.empty();
+    }
+
     makeExecutable(path);
 
-    return createResolvedProtocPlugin(plugin, path);
+    return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
   private ResolvedProtocPlugin createResolvedProtocPlugin(ProtocPlugin plugin, Path path) {
@@ -144,7 +159,7 @@ public final class BinaryPluginResolver {
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
-      resolvedPlugins.add(resolver.resolve(plugin));
+      resolver.resolve(plugin).ifPresent(resolvedPlugins::add);
     }
     return resolvedPlugins;
   }
@@ -160,6 +175,6 @@ public final class BinaryPluginResolver {
   @FunctionalInterface
   private interface Resolver<A> {
 
-    ResolvedProtocPlugin resolve(A arg) throws ResolutionException;
+    Optional<ResolvedProtocPlugin> resolve(A arg) throws ResolutionException;
   }
 }

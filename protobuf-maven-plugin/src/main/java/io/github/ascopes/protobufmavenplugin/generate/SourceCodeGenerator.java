@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
+import io.github.ascopes.protobufmavenplugin.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenProjectDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -86,12 +87,24 @@ public final class SourceCodeGenerator {
     this.commandLineExecutor = commandLineExecutor;
   }
 
-  public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
-    var protocPath = discoverProtocPath(request);
+  private boolean hasPlugins(GenerationRequest request) {
+    return !request.getBinaryUrlPlugins().isEmpty()
+        || !request.getBinaryMavenPlugins().isEmpty()
+        || !request.getBinaryPathPlugins().isEmpty();
+  }
 
-    var plugins = discoverPlugins(request);
-    var importPaths = discoverImportPaths(request);
-    var sourcePaths = discoverCompilableSources(request);
+  private boolean pluginsOptional(GenerationRequest request) {
+    return request.getBinaryUrlPlugins().stream().allMatch(ProtocPlugin::isOptional)
+        && request.getBinaryMavenPlugins().stream().allMatch(ProtocPlugin::isOptional)
+        && request.getBinaryPathPlugins().stream().allMatch(ProtocPlugin::isOptional);
+  }
+
+  public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
+    final var protocPath = discoverProtocPath(request);
+
+    final var resolvedPlugins = discoverPlugins(request);
+    final var importPaths = discoverImportPaths(request);
+    final var sourcePaths = discoverCompilableSources(request);
 
     if (sourcePaths.isEmpty()) {
       if (request.isFailOnMissingSources()) {
@@ -104,6 +117,11 @@ public final class SourceCodeGenerator {
       }
     }
 
+    if (resolvedPlugins.isEmpty() && hasPlugins(request) && pluginsOptional(request)) {
+      log.info("No resolved plugins found and all are optional, nothing to do.");
+      return true;
+    }
+
     createOutputDirectories(request);
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
@@ -113,7 +131,7 @@ public final class SourceCodeGenerator {
             .map(ProtoFileListing::getProtoFilesRoot)
             .collect(Collectors.toCollection(LinkedHashSet::new)))
         .importPaths(request.getSourceRoots())
-        .plugins(plugins, request.getOutputDirectory());
+        .plugins(resolvedPlugins, request.getOutputDirectory());
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(
