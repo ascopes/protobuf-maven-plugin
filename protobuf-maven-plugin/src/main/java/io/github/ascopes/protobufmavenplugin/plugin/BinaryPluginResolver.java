@@ -104,7 +104,7 @@ public final class BinaryPluginResolver {
         .iterator()
         .next();
 
-    if (plugin.isOptional() && !Files.exists(path)) {
+    if (plugin.isOptional() != null && plugin.isOptional() && !Files.exists(path)) {
       return Optional.empty();
     }
 
@@ -118,7 +118,7 @@ public final class BinaryPluginResolver {
     var path = systemPathResolver.resolve(plugin.getName());
 
     if (!path.isPresent()) {
-      if (plugin.isOptional()) {
+      if (plugin.isOptional() != null && plugin.isOptional()) {
         return Optional.empty();
       }
 
