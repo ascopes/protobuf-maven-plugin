@@ -105,7 +105,7 @@
     <maven-core.version>3.9.6</maven-core.version>
     <maven-plugin-annotations.version>3.12.0</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
-    <maven-resolver-api.version>1.9.19</maven-resolver-api.version>
+    <maven-resolver-api.version>1.9.20</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.0</memoryfilesystem.version>
     <mockito.version>5.11.0</mockito.version>
     <slf4j.version>2.0.13</slf4j.version>
@@ -117,7 +117,7 @@
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <maven-gpg-plugin.version>3.2.1</maven-gpg-plugin.version>
-    <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
+    <maven-install-plugin.version>3.1.2</maven-install-plugin.version>
     <maven-invoker-plugin.version>3.6.1</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
@@ -132,7 +132,7 @@
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
 
     <!-- Plugin dependencies -->
-    <checkstyle.version>10.15.0</checkstyle.version>
+    <checkstyle.version>10.16.0</checkstyle.version>
     <maven-surefire-junit5-tree-reporter.version>1.2.1</maven-surefire-junit5-tree-reporter.version>
 
     <!-- Other stuff -->
