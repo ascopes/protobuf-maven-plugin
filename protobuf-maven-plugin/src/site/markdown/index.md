@@ -598,3 +598,25 @@ then you can provide the following:
   ...
 </plugin>
 ```
+
+### Inheriting plugins in multi-module projects
+
+A lesser-known feature of Maven is that you can control how child projects override plugin configurations
+that are provided in the parent POM.
+
+If you want to force children to always use a base set of `protoc` plugins, whilst being able to add
+additional plugins per project, you can change the overriding mechanism directly.
+
+To do this, configure the plugin like so in your parent.
+
+```xml
+<configuration>
+  ...
+  <binaryMavenPlugins combine.children="append">
+    ...
+  </binaryMavenPlugins>
+</configuration>
+```
+
+Note that this is just an example. The `combine.children` attribute can be used anywhere and is documented
+in the [Apache Maven POM Reference](https://maven.apache.org/pom.html#Build).
