@@ -63,7 +63,7 @@ A simple and modern Maven plugin to generate source code from protobuf definitio
 ## Usage
 
 Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
-and  examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/src/it).
+and  examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
 ## Why do we need _another_ plugin?
 
