@@ -79,7 +79,7 @@ $ ./mvnw verify -DskipTests -Dinvoker.test=path-protoc -Pinvoker-debug
 
 This debugger will suspend the invoked IT Maven process until a debugger client connects to the
 debugger server. This can be done by using an IDE such as IntelliJ and setting up a
-"Remote Debugger" run configuration to connect to port `5005.
+"Remote Debugger" run configuration to connect to port `5005`.
 
 Any breakpoints in the project source code will then be able to be hit and stepped through
 individually.
