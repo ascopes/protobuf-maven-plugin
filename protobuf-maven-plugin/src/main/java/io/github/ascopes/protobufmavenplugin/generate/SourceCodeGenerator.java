@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.generate;
 
-import io.github.ascopes.protobufmavenplugin.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenProjectDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -105,10 +104,16 @@ public final class SourceCodeGenerator {
       }
     }
 
-    //if (resolvedPlugins.isEmpty() && hasPlugins(request) && pluginsOptional(request)) {
-    //  log.info("No resolved plugins found and all are optional, nothing to do.");
-    //  return true;
-    //}
+    if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()) {
+      if (request.isFailOnMissingTargets()) {
+        log.error("No languages are enabled and no plugins found, check your "
+            + "configuration and try again.");
+        return false;
+      } else {
+        log.warn("No languages are enabled and no plugins found; nothing to do!");
+        return true;
+      }
+    }
 
     createOutputDirectories(request);
 

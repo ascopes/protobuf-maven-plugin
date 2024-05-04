@@ -189,6 +189,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean failOnMissingSources;
 
   /**
+   * Whether to fail if no output languages and no plugins are enabled.
+   *
+   * <p>This defaults to {@code true}, but may be set to {@code false} if all plugins are optional
+   * and no languages are enabled.
+   *
+   * @since 2.0.0
+   */
+  @Parameter(defaultValue = "true")
+  boolean failOnMissingTargets;
+
+  /**
    * Specify that any warnings emitted by {@code protoc} should be treated as errors and fail the
    * build.
    *
@@ -560,6 +571,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
             .map(File::toPath)
             .collect(Collectors.toList()))
         .isFailOnMissingSources(failOnMissingSources)
+        .isFailOnMissingTargets(failOnMissingTargets)
         .isFatalWarnings(fatalWarnings)
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isLiteEnabled(liteOnly)
