@@ -123,7 +123,12 @@ public final class BinaryPluginResolver {
   private ResolvedProtocPlugin resolveUrlPlugin(
       UrlProtocPlugin plugin
   ) throws ResolutionException {
-    var path = urlResourceFetcher.fetchFileFromUrl(plugin.getUrl(), ".exe");
+    var path = urlResourceFetcher
+        .fetchFileFromUrl(plugin.getUrl(), ".exe")
+        .orElseThrow(() -> new ResolutionException(
+            "Resource at " + plugin.getUrl() + " does not exist"
+        ));
+
     makeExecutable(path);
 
     return createResolvedProtocPlugin(plugin, path);

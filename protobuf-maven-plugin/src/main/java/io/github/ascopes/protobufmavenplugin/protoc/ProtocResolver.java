@@ -28,6 +28,7 @@ import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public final class ProtocResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Path resolve(String version) throws ResolutionException {
+  public Optional<Path> resolve(String version) throws ResolutionException {
     if (version.equalsIgnoreCase("latest")) {
       throw new IllegalArgumentException(
           "Cannot use LATEST for the protoc version. "
@@ -78,24 +79,25 @@ public final class ProtocResolver {
     }
 
     if (version.equalsIgnoreCase("PATH")) {
-      return systemPathResolver.resolve(EXECUTABLE_NAME)
-          .orElseThrow(() -> new ResolutionException("No protoc executable was found"));
+      return systemPathResolver.resolve(EXECUTABLE_NAME);
     }
 
     var path = version.contains(":")
         ? resolveFromUrl(version)
         : resolveFromMavenRepositories(version);
 
-    try {
-      FileUtils.makeExecutable(path);
-    } catch (IOException ex) {
-      throw new ResolutionException("Failed to set executable bit on protoc binary", ex);
+    if (path.isPresent()) {
+      try {
+        FileUtils.makeExecutable(path.get());
+      } catch (IOException ex) {
+        throw new ResolutionException("Failed to set executable bit on protoc binary", ex);
+      }
     }
 
     return path;
   }
 
-  private Path resolveFromUrl(String url) throws ResolutionException {
+  private Optional<Path> resolveFromUrl(String url) throws ResolutionException {
     try {
       return urlResourceFetcher.fetchFileFromUrl(new URL(url), ".exe");
     } catch (IOException ex) {
@@ -103,7 +105,7 @@ public final class ProtocResolver {
     }
   }
 
-  private Path resolveFromMavenRepositories(String version) throws ResolutionException {
+  private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
     if (hostSystem.isProbablyAndroidTermux()) {
       log.warn(
           "It looks like you are using Termux on Android. You may encounter issues "
@@ -122,8 +124,11 @@ public final class ProtocResolver {
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
-    return dependencyResolver.resolveOne(artifact, DependencyResolutionDepth.DIRECT)
+    // First result is all we care about as it is the direct dependency.
+    var path = dependencyResolver.resolveOne(artifact, DependencyResolutionDepth.DIRECT)
         .iterator()
         .next();
+
+    return Optional.of(path);
   }
 }

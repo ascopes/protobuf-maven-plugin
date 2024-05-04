@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -26,6 +27,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.Maven;
@@ -52,21 +54,23 @@ public final class UrlResourceFetcher {
     this.temporarySpace = temporarySpace;
   }
 
-  public Path fetchFileFromUrl(URL url, String defaultExtension) throws ResolutionException {
+  public Optional<Path> fetchFileFromUrl(URL url, String extension) throws ResolutionException {
     return url.getProtocol().equalsIgnoreCase("file")
         ? handleFileSystemUrl(url)
-        : handleOtherUrl(url, defaultExtension);
+        : handleOtherUrl(url, extension);
   }
 
-  private Path handleFileSystemUrl(URL url) throws ResolutionException {
+  private Optional<Path> handleFileSystemUrl(URL url) throws ResolutionException {
     try {
-      return Path.of(url.toURI());
+      return Optional.of(url.toURI())
+          .map(Path::of)
+          .filter(Files::exists);
     } catch (URISyntaxException ex) {
       throw new ResolutionException("Failed to resolve '" + url + "' due to malformed syntax", ex);
     }
   }
 
-  private Path handleOtherUrl(URL url, String extension) throws ResolutionException {
+  private Optional<Path> handleOtherUrl(URL url, String extension) throws ResolutionException {
     var targetFile = targetFile(url, extension);
 
     try {
@@ -84,6 +88,8 @@ public final class UrlResourceFetcher {
 
       try (var responseBody = conn.getInputStream()) {
         copyToFile(responseBody, targetFile);
+      } catch (FileNotFoundException ex) {
+        return Optional.empty();
       }
 
       log.info("Copied {} to {}", url, targetFile);
@@ -92,7 +98,7 @@ public final class UrlResourceFetcher {
       throw failedToCopy(url, targetFile, ex);
     }
 
-    return targetFile;
+    return Optional.of(targetFile);
   }
 
   private ResolutionException failedToCopy(URL source, Path destination, Exception cause) {
