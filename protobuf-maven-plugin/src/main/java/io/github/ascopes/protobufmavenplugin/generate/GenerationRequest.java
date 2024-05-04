@@ -21,7 +21,6 @@ import io.github.ascopes.protobufmavenplugin.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.UrlProtocPlugin;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
 import org.immutables.value.Value.Immutable;
