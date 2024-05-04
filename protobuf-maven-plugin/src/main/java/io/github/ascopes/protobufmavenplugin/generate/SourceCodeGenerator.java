@@ -87,18 +87,6 @@ public final class SourceCodeGenerator {
     this.commandLineExecutor = commandLineExecutor;
   }
 
-  private boolean hasPlugins(GenerationRequest request) {
-    return !request.getBinaryUrlPlugins().isEmpty()
-        || !request.getBinaryMavenPlugins().isEmpty()
-        || !request.getBinaryPathPlugins().isEmpty();
-  }
-
-  private boolean pluginsOptional(GenerationRequest request) {
-    return request.getBinaryUrlPlugins().stream().allMatch(ProtocPlugin::isOptional)
-        && request.getBinaryMavenPlugins().stream().allMatch(ProtocPlugin::isOptional)
-        && request.getBinaryPathPlugins().stream().allMatch(ProtocPlugin::isOptional);
-  }
-
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
     final var protocPath = discoverProtocPath(request);
 
@@ -117,10 +105,10 @@ public final class SourceCodeGenerator {
       }
     }
 
-    if (resolvedPlugins.isEmpty() && hasPlugins(request) && pluginsOptional(request)) {
-      log.info("No resolved plugins found and all are optional, nothing to do.");
-      return true;
-    }
+    //if (resolvedPlugins.isEmpty() && hasPlugins(request) && pluginsOptional(request)) {
+    //  log.info("No resolved plugins found and all are optional, nothing to do.");
+    //  return true;
+    //}
 
     createOutputDirectories(request);
 

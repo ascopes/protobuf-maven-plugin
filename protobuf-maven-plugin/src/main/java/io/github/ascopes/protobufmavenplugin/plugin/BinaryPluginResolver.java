@@ -30,7 +30,6 @@ import io.github.ascopes.protobufmavenplugin.dependency.UrlResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,39 +103,40 @@ public final class BinaryPluginResolver {
         .iterator()
         .next();
 
-    if (plugin.isOptional() != null && plugin.isOptional() && !Files.exists(path)) {
-      return Optional.empty();
-    }
-
     makeExecutable(path);
-    return Optional.of(createResolvedProtocPlugin(plugin, path));
+    var resolvedPlugin = createResolvedProtocPlugin(plugin, path);
+    return Optional.of(resolvedPlugin);
   }
 
   private Optional<ResolvedProtocPlugin> resolvePathPlugin(
       PathProtocPlugin plugin
   ) throws ResolutionException {
-    var path = systemPathResolver.resolve(plugin.getName());
+    var maybePath = systemPathResolver.resolve(plugin.getName());
 
-    if (!path.isPresent()) {
-      if (plugin.isOptional() != null && plugin.isOptional()) {
-        return Optional.empty();
-      }
-
-      new ResolutionException(
-          "No executable '" + plugin.getName() + "' was found on the system path");
+    if (maybePath.isEmpty() && plugin.isOptional()) {
+      return Optional.empty();
     }
 
-    return Optional.of(createResolvedProtocPlugin(plugin, path.get()));
+    var path = maybePath.orElseThrow(() -> new ResolutionException(
+        "No plugin named " + plugin.getName() + " was found on the system path"
+    ));
+
+    return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
   private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
       UrlProtocPlugin plugin
   ) throws ResolutionException {
-    var path = urlResourceFetcher
-        .fetchFileFromUrl(plugin.getUrl(), ".exe")
-        .orElseThrow(() -> new ResolutionException(
-            "Resource at " + plugin.getUrl() + " does not exist"
-        ));
+    var maybePath = urlResourceFetcher
+        .fetchFileFromUrl(plugin.getUrl(), ".exe");
+
+    if (maybePath.isEmpty() && plugin.isOptional()) {
+      return Optional.empty();
+    }
+
+    var path = maybePath.orElseThrow(() -> new ResolutionException(
+        "Plugin at " + plugin.getUrl() + " does not exist"
+    ));
 
     makeExecutable(path);
 

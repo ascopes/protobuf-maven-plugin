@@ -16,22 +16,19 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
-import java.net.URL;
-import org.immutables.value.Value.Modifiable;
-
+import org.immutables.value.Value.Default;
 
 /**
- * Implementation independent descriptor for a protoc plugin that can
- * be resolved from a URL.
+ * Protoc plugin base that can be optionally ignored if it cannot be resolved.
  *
- * <p>URL-based plugins can be marked as optional if they should be
- * skipped when the resource is unable to be resolved.
+ * <p>By default, plugins are <strong>NOT</strong> optional.
  *
- * @author Ashley Scopes
+ * @author Ashley Scopes, Anthony Alayo
  * @since 2.0.0
  */
-@Modifiable
-public interface UrlProtocPlugin extends OptionalProtocPlugin {
-
-  URL getUrl();
+public interface OptionalProtocPlugin extends ProtocPlugin {
+  @Default
+  default boolean isOptional() {
+    return false;
+  }
 }
