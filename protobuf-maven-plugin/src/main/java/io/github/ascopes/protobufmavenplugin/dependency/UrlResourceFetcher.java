@@ -19,17 +19,10 @@ package io.github.ascopes.protobufmavenplugin.dependency;
 import io.github.ascopes.protobufmavenplugin.generate.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpClient.Redirect;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -52,28 +45,17 @@ public final class UrlResourceFetcher {
   private static final String USER_AGENT = "User-Agent";
   private static final Logger log = LoggerFactory.getLogger(UrlResourceFetcher.class);
 
-  private final HttpClient httpClient;
   private final TemporarySpace temporarySpace;
 
   @Inject
   public UrlResourceFetcher(TemporarySpace temporarySpace) {
-    httpClient = HttpClient.newBuilder()
-        .connectTimeout(CONNECT_TIMEOUT)
-        .followRedirects(Redirect.NORMAL)
-        .build();
     this.temporarySpace = temporarySpace;
   }
 
   public Path fetchFileFromUrl(URL url, String defaultExtension) throws ResolutionException {
-    switch (url.getProtocol().toLowerCase()) {
-      case "file":
-        return handleFileSystemUrl(url);
-      case "http":
-      case "https":
-        return handleHttpRequest(url, defaultExtension);
-      default:
-        return handleOtherUrl(url, defaultExtension);
-    }
+    return url.getProtocol().equalsIgnoreCase("file")
+        ? handleFileSystemUrl(url)
+        : handleOtherUrl(url, defaultExtension);
   }
 
   private Path handleFileSystemUrl(URL url) throws ResolutionException {
@@ -84,65 +66,7 @@ public final class UrlResourceFetcher {
     }
   }
 
-  private Path handleHttpRequest(URL url, String extension) throws ResolutionException {
-    // Use the HTTP Client API for this rather than the old HttpUrlConnection API as this
-    // is easier to manipulate and fetch responses from without lots of odd error handling.
-    var targetFile = targetFile(url, extension);
-
-    try {
-      var uri = url.toURI();
-
-      var req = HttpRequest
-          .newBuilder()
-          .GET()
-          .uri(uri)
-          .header(USER_AGENT, userAgent())
-          .build();
-
-      log.debug("Performing HTTP request to {} to download resources into {}", url, targetFile);
-      var resp = httpClient.send(req, BodyHandlers.ofInputStream());
-      handleResponse(resp, targetFile);
-
-    } catch (URISyntaxException | IOException | InterruptedException ex) {
-      throw failedToCopy(url, targetFile, ex);
-    }
-
-    return targetFile;
-  }
-
-  private void handleResponse(
-      HttpResponse<InputStream> response,
-      Path targetFile
-  ) throws IOException, ResolutionException {
-    var status = response.statusCode();
-
-    try (var responseBody = response.body()) {
-      // Successful response (200 OK), stream it to a file.
-      if (status == 200) {
-        copyToFile(responseBody, targetFile);
-        log.info("Copied {} to {}", response.request().uri(), targetFile);
-        return;
-      }
-
-      // Handle errors instead.
-      try (var baos = new ByteArrayOutputStream()) {
-        responseBody.transferTo(baos);
-
-        // Use 8-bit ASCII to avoid dodgy data causing encoding errors. This is best-effort only.
-        var body = baos.toString(StandardCharsets.ISO_8859_1);
-
-        throw new ResolutionException(
-            "Failed to request '" + response.uri() + "', received a " + status
-                + " status with body: " + body
-        );
-      }
-    }
-  }
-
   private Path handleOtherUrl(URL url, String extension) throws ResolutionException {
-    // For all other purposes, we fall back to the legacy URLConnection, which can handle things
-    // like JAR references, FTP server paths, etc.
-
     var targetFile = targetFile(url, extension);
 
     try {
@@ -154,7 +78,7 @@ public final class UrlResourceFetcher {
       conn.setRequestProperty(USER_AGENT, userAgent());
       conn.setUseCaches(true);
 
-      log.debug("Connecting to '{}' (URLConnection) to copy resourcces to '{}'", url, targetFile);
+      log.debug("Connecting to '{}' to copy resources to '{}'", url, targetFile);
 
       conn.connect();
 
