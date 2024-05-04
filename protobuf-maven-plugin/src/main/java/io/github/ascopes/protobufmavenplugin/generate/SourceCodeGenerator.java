@@ -142,7 +142,8 @@ public final class SourceCodeGenerator {
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
-    return protocResolver.resolve(request.getProtocVersion());
+    return protocResolver.resolve(request.getProtocVersion())
+        .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
   }
 
   private boolean logProtocVersion(Path protocPath) throws IOException {
