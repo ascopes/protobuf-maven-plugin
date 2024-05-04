@@ -36,6 +36,8 @@ import java.util.Collection;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Protoc plugin resolver for native binaries on the system.
@@ -44,6 +46,8 @@ import javax.inject.Named;
  */
 @Named
 public final class BinaryPluginResolver {
+
+  private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
   private final MavenDependencyPathResolver dependencyResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
@@ -98,6 +102,8 @@ public final class BinaryPluginResolver {
 
     plugin = pluginBuilder.build();
 
+    log.debug("Resolving Maven protoc plugin {}", plugin);
+
     // Only one dependency should ever be returned here.
     var path = dependencyResolver.resolveOne(plugin, DependencyResolutionDepth.DIRECT)
         .iterator()
@@ -111,6 +117,9 @@ public final class BinaryPluginResolver {
   private Optional<ResolvedProtocPlugin> resolvePathPlugin(
       PathProtocPlugin plugin
   ) throws ResolutionException {
+
+    log.debug("Resolving Path protoc plugin {}", plugin);
+
     var maybePath = systemPathResolver.resolve(plugin.getName());
 
     if (maybePath.isEmpty() && plugin.isOptional()) {
@@ -127,8 +136,10 @@ public final class BinaryPluginResolver {
   private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
       UrlProtocPlugin plugin
   ) throws ResolutionException {
-    var maybePath = urlResourceFetcher
-        .fetchFileFromUrl(plugin.getUrl(), ".exe");
+
+    log.debug("Resolving URL protoc plugin {}", plugin);
+
+    var maybePath = urlResourceFetcher.fetchFileFromUrl(plugin.getUrl(), ".exe");
 
     if (maybePath.isEmpty() && plugin.isOptional()) {
       return Optional.empty();
