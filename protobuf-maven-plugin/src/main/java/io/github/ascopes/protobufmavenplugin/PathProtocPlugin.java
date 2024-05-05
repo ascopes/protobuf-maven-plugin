@@ -23,11 +23,14 @@ import org.immutables.value.Value.Modifiable;
  * Implementation independent descriptor for a protoc plugin that can
  * be resolved from the system {@code $PATH}.
  *
+ * <p>Path-based plugins can be marked as optional if they should be
+ * skipped when the resource is unable to be resolved.
+ *
  * @author Ashley Scopes
  * @since 2.0.0
  */
 @Modifiable
-public interface PathProtocPlugin extends ProtocPlugin {
+public interface PathProtocPlugin extends OptionalProtocPlugin {
 
   String getName();
 }

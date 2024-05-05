@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps a JVM-based plugin invocation using an OS-native script that calls Java.
@@ -47,6 +49,8 @@ import javax.inject.Named;
  */
 @Named
 public final class JvmPluginResolver {
+
+  private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
   private final HostSystem hostSystem;
   private final MavenDependencyPathResolver dependencyResolver;
@@ -68,6 +72,11 @@ public final class JvmPluginResolver {
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
+      if (plugin.isSkip()) {
+        log.info("Skipping plugin {}", plugin);
+        continue;
+      }
+
       resolvedPlugins.add(resolve(plugin));
     }
     return resolvedPlugins;
@@ -76,6 +85,12 @@ public final class JvmPluginResolver {
   private ResolvedProtocPlugin resolve(
       MavenProtocPlugin plugin
   ) throws IOException, ResolutionException {
+
+    log.debug(
+        "Resolving JVM-based Maven protoc plugin {} and generating OS-specific boostrap scripts",
+        plugin
+    );
+
     var pluginId = pluginIdDigest(plugin);
     var argLine = resolveAndBuildArgLine(plugin);
 

@@ -61,6 +61,8 @@ public interface GenerationRequest {
 
   boolean isFailOnMissingSources();
 
+  boolean isFailOnMissingTargets();
+
   boolean isFatalWarnings();
 
   boolean isIgnoreProjectDependencies();

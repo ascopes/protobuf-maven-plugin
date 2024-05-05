@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
@@ -34,6 +35,7 @@ import org.jspecify.annotations.Nullable;
 public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
 
   // Do not allow Immutables to allow us to specify this attribute.
+  @Derived
   @Override
   @Nullable
   default DependencyResolutionDepth getDependencyResolutionDepth() {

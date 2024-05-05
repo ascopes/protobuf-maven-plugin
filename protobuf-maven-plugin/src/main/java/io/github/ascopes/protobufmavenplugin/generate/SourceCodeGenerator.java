@@ -87,11 +87,11 @@ public final class SourceCodeGenerator {
   }
 
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
-    var protocPath = discoverProtocPath(request);
+    final var protocPath = discoverProtocPath(request);
 
-    var plugins = discoverPlugins(request);
-    var importPaths = discoverImportPaths(request);
-    var sourcePaths = discoverCompilableSources(request);
+    final var resolvedPlugins = discoverPlugins(request);
+    final var importPaths = discoverImportPaths(request);
+    final var sourcePaths = discoverCompilableSources(request);
 
     if (sourcePaths.isEmpty()) {
       if (request.isFailOnMissingSources()) {
@@ -100,6 +100,17 @@ public final class SourceCodeGenerator {
         return false;
       } else {
         log.warn("No protobuf sources found; nothing to do!");
+        return true;
+      }
+    }
+
+    if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()) {
+      if (request.isFailOnMissingTargets()) {
+        log.error("No languages are enabled and no plugins found, check your "
+            + "configuration and try again.");
+        return false;
+      } else {
+        log.warn("No languages are enabled and no plugins found; nothing to do!");
         return true;
       }
     }
@@ -113,7 +124,7 @@ public final class SourceCodeGenerator {
             .map(ProtoFileListing::getProtoFilesRoot)
             .collect(Collectors.toCollection(LinkedHashSet::new)))
         .importPaths(request.getSourceRoots())
-        .plugins(plugins, request.getOutputDirectory());
+        .plugins(resolvedPlugins, request.getOutputDirectory());
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(

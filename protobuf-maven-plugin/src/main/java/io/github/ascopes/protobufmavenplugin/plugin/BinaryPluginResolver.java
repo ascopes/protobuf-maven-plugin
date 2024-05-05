@@ -33,8 +33,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Protoc plugin resolver for native binaries on the system.
@@ -43,6 +46,8 @@ import javax.inject.Named;
  */
 @Named
 public final class BinaryPluginResolver {
+
+  private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
   private final MavenDependencyPathResolver dependencyResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
@@ -80,7 +85,7 @@ public final class BinaryPluginResolver {
     return resolveAll(plugins, this::resolveUrlPlugin);
   }
 
-  private ResolvedProtocPlugin resolveMavenPlugin(
+  private Optional<ResolvedProtocPlugin> resolveMavenPlugin(
       MavenProtocPlugin plugin
   ) throws ResolutionException {
     var pluginBuilder = ImmutableMavenProtocPlugin.builder()
@@ -97,40 +102,56 @@ public final class BinaryPluginResolver {
 
     plugin = pluginBuilder.build();
 
+    log.debug("Resolving Maven protoc plugin {}", plugin);
+
     // Only one dependency should ever be returned here.
     var path = dependencyResolver.resolveOne(plugin, DependencyResolutionDepth.DIRECT)
         .iterator()
         .next();
 
     makeExecutable(path);
-    return createResolvedProtocPlugin(plugin, path);
+    var resolvedPlugin = createResolvedProtocPlugin(plugin, path);
+    return Optional.of(resolvedPlugin);
   }
 
-  private ResolvedProtocPlugin resolvePathPlugin(
+  private Optional<ResolvedProtocPlugin> resolvePathPlugin(
       PathProtocPlugin plugin
   ) throws ResolutionException {
-    var path = systemPathResolver.resolve(plugin.getName())
-        .orElseThrow(() -> new ResolutionException(
-            "No executable '"
-                + plugin.getName()
-                + "' was found on the system path"
-        ));
 
-    return createResolvedProtocPlugin(plugin, path);
+    log.debug("Resolving Path protoc plugin {}", plugin);
+
+    var maybePath = systemPathResolver.resolve(plugin.getName());
+
+    if (maybePath.isEmpty() && plugin.isOptional()) {
+      return Optional.empty();
+    }
+
+    var path = maybePath.orElseThrow(() -> new ResolutionException(
+        "No plugin named " + plugin.getName() + " was found on the system path"
+    ));
+
+    return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
-  private ResolvedProtocPlugin resolveUrlPlugin(
+  private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
       UrlProtocPlugin plugin
   ) throws ResolutionException {
-    var path = urlResourceFetcher
-        .fetchFileFromUrl(plugin.getUrl(), ".exe")
-        .orElseThrow(() -> new ResolutionException(
-            "Resource at " + plugin.getUrl() + " does not exist"
-        ));
+
+    log.debug("Resolving URL protoc plugin {}", plugin);
+
+    var maybePath = urlResourceFetcher.fetchFileFromUrl(plugin.getUrl(), ".exe");
+
+    if (maybePath.isEmpty() && plugin.isOptional()) {
+      return Optional.empty();
+    }
+
+    var path = maybePath.orElseThrow(() -> new ResolutionException(
+        "Plugin at " + plugin.getUrl() + " does not exist"
+    ));
 
     makeExecutable(path);
 
-    return createResolvedProtocPlugin(plugin, path);
+    return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
   private ResolvedProtocPlugin createResolvedProtocPlugin(ProtocPlugin plugin, Path path) {
@@ -142,13 +163,21 @@ public final class BinaryPluginResolver {
         .build();
   }
 
-  private <A> Collection<ResolvedProtocPlugin> resolveAll(
-      Collection<A> plugins,
-      Resolver<A> resolver
+  private <P extends ProtocPlugin> Collection<ResolvedProtocPlugin> resolveAll(
+      Collection<? extends P> plugins,
+      Resolver<? super P> resolver
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
-      resolvedPlugins.add(resolver.resolve(plugin));
+      if (plugin.isSkip()) {
+        log.info("Skipping plugin {}", plugin);
+        continue;
+      }
+
+      resolver.resolve(plugin).ifPresentOrElse(
+          resolvedPlugins::add,
+          () -> log.info("Skipping unresolved missing plugin {}", plugin)
+      );
     }
     return resolvedPlugins;
   }
@@ -162,8 +191,8 @@ public final class BinaryPluginResolver {
   }
 
   @FunctionalInterface
-  private interface Resolver<A> {
+  private interface Resolver<P extends ProtocPlugin> {
 
-    ResolvedProtocPlugin resolve(A arg) throws ResolutionException;
+    Optional<ResolvedProtocPlugin> resolve(P plugin) throws ResolutionException;
   }
 }
