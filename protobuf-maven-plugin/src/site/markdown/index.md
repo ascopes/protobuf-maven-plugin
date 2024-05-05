@@ -492,6 +492,11 @@ executable name instead:
 Each `binarPathPlugin` can take an optional `options` parameter which will
 be passed as an option to the plugin if specified.
 
+You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
+individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
+cannot be resolved on the system path. This is useful for specific cases where resources may only be available 
+during CI builds but do not prevent the application being built locally.
+
 #### Binary plugins from specific locations
 
 In some situations, you may wish to download plugins directly from a URL or run them from a 
@@ -523,8 +528,22 @@ specific file system path:
 </plugin>
 ```
 
+Any protocols supported by your JRE should be able to be used here, including:
+
+- `file://`
+- `http://`
+- `https://`
+- `ftp://`
+- `jar://`
+
 Each `binaryUrlPlugin` can take an optional `options` parameter which will
 be passed as an option to the plugin if specified.
+
+You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
+individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
+cannot be resolved. This is useful for specific cases where resources may only be available during CI builds but do not
+prevent the application being built locally. If set to optional, then any "not found" response provided by
+the underlying URL protocol will be ignored.
 
 This is not recommended outside specific use cases, and care should be taken to ensure the
 legitimacy and security of any URLs being provided prior to adding them.
