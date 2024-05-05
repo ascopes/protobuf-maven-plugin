@@ -163,13 +163,21 @@ public final class BinaryPluginResolver {
         .build();
   }
 
-  private <A> Collection<ResolvedProtocPlugin> resolveAll(
-      Collection<A> plugins,
-      Resolver<A> resolver
+  private <P extends ProtocPlugin> Collection<ResolvedProtocPlugin> resolveAll(
+      Collection<? extends P> plugins,
+      Resolver<? super P> resolver
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
-      resolver.resolve(plugin).ifPresent(resolvedPlugins::add);
+      if (plugin.isSkip()) {
+        log.info("Skipping plugin {}", plugin);
+        continue;
+      }
+
+      resolver.resolve(plugin).ifPresentOrElse(
+          resolvedPlugins::add,
+          () -> log.info("Skipping unresolved missing plugin {}", plugin)
+      );
     }
     return resolvedPlugins;
   }
@@ -183,8 +191,8 @@ public final class BinaryPluginResolver {
   }
 
   @FunctionalInterface
-  private interface Resolver<A> {
+  private interface Resolver<P extends ProtocPlugin> {
 
-    Optional<ResolvedProtocPlugin> resolve(A arg) throws ResolutionException;
+    Optional<ResolvedProtocPlugin> resolve(P plugin) throws ResolutionException;
   }
 }

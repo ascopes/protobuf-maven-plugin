@@ -99,6 +99,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code classifier} - the artifact classifier - optional</li>
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
+   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
+   *       useful if you want to control whether the plugin runs via a
+   *       property - optional.</li>
    * </ul>
    *
    * @since 0.3.0
@@ -124,6 +127,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Prior to v2.0.0, this attribute was a list of strings.
    *
+   * <p>Objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code name} - the name of the binary to resolve.</li>
+   *   <li>{@code options} - a string of options to pass to the plugin
+   *       - optional.</li>
+   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
+   *       useful if you want to control whether the plugin runs via a
+   *       property - optional.</li>
+   * </ul>
+   *
    * @since 2.0.0
    */
   @Parameter
@@ -133,6 +147,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
    *
    * <p>This includes support for:
+   *
    * <ul>
    *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
    *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
@@ -154,6 +169,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * }</pre>
    *
    * <p>Prior to v2.0.0, this attribute was a list of URLs.
+   *
+   * <p>Objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code url} - the URL to resolve.</li>
+   *   <li>{@code options} - a string of options to pass to the plugin
+   *       - optional.</li>
+   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
+   *       useful if you want to control whether the plugin runs via a
+   *       property - optional.</li>
+   * </ul>
    *
    * @since 2.0.0
    */
@@ -287,6 +313,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code classifier} - the artifact classifier - optional</li>
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
+   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
+   *       useful if you want to control whether the plugin runs via a
+   *       property - optional.</li>
    * </ul>
    *
    * @since 0.3.0

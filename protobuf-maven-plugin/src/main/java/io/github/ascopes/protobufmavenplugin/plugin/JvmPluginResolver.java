@@ -72,6 +72,11 @@ public final class JvmPluginResolver {
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
+      if (plugin.isSkip()) {
+        log.info("Skipping plugin {}", plugin);
+        continue;
+      }
+
       resolvedPlugins.add(resolve(plugin));
     }
     return resolvedPlugins;
