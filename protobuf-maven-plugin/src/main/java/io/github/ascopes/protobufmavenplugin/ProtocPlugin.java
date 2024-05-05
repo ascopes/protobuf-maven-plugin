@@ -16,8 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import org.immutables.value.Value.Default,;
 import org.jspecify.annotations.Nullable;
-
 
 /**
  * Base interface for a Protoc plugin reference.
@@ -29,5 +29,8 @@ public interface ProtocPlugin {
   @Nullable
   String getOptions();
 
-  boolean isSkip();
+  @Default
+  default boolean isSkip() {
+    return false;
+  }
 }

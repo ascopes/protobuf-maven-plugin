@@ -16,6 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import org.immutables.value.Value.Default;
+
 /**
  * Protoc plugin base that can be optionally ignored if it cannot be resolved.
  *
@@ -26,6 +28,8 @@ package io.github.ascopes.protobufmavenplugin;
  */
 public interface OptionalProtocPlugin extends ProtocPlugin {
 
-  // Expected to default to false implicitly.
-  boolean isOptional();
+  @Default
+  default boolean isOptional() {
+    return false;
+  }
 }
