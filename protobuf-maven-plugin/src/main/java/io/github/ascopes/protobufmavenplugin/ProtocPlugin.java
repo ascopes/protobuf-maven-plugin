@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
-import org.immutables.value.Value.Default,;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -29,7 +28,6 @@ public interface ProtocPlugin {
   @Nullable
   String getOptions();
 
-  @Default
   default boolean isSkip() {
     return false;
   }

@@ -18,6 +18,7 @@
     beanFriendlyModifiables = true,
     create = "new",
     defaults = @Immutable(copy = false),
+    defaultAsDefault = true,
     deferCollectionAllocation = true,
     headerComments = true,
     jacksonIntegration = false,
