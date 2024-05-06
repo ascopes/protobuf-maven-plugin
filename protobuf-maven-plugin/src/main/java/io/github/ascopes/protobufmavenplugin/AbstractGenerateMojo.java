@@ -39,6 +39,8 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base for a code generation Mojo that calls {@code protoc}.
@@ -46,6 +48,8 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
+
+  private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
 
   ///
   /// MOJO dependencies.
@@ -391,6 +395,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean registerAsCompilationRoot;
 
   /**
+   * Whether to skip the plugin execution entirely.
+   *
+   * @since 2.0.0
+   */
+  @Parameter(defaultValue = "false", property = "protobuf.skip")
+  boolean skip;
+
+  /**
    * Additional dependencies to compile, pulled from the Maven repository.
    *
    * <p>Note that this will resolve dependencies recursively unless
@@ -574,6 +586,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    if (skip) {
+      log.info("Plugin execution is skipped");
+      return;
+    }
+
     var enabledLanguages = Language.setBuilder()
         .addIf(cppEnabled, Language.CPP)
         .addIf(csharpEnabled, Language.C_SHARP)

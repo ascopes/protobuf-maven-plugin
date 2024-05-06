@@ -18,25 +18,8 @@ import java.nio.file.Path
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-Path generatedSourcesDir = baseDirectory.resolve("target/generated-test-sources/protobuf")
-def classesDir = baseDirectory.resolve("target/test-classes")
-def expectedGeneratedFiles = [
-    "org/example/helloworld/Helloworld",
-    "org/example/helloworld/GreetingRequest",
-    "org/example/helloworld/GreetingRequestOrBuilder",
-]
+Path generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
 
-assertThat(generatedSourcesDir).isDirectory()
-
-assertThat(classesDir).isDirectory()
-
-expectedGeneratedFiles.forEach {
-  assertThat(generatedSourcesDir.resolve("${it}.java"))
-      .exists()
-      .isNotEmptyFile()
-  assertThat(classesDir.resolve("${it}.class"))
-      .exists()
-      .isNotEmptyFile()
-}
+assertThat(generatedSourcesDir).doesNotExist()
 
 return true
