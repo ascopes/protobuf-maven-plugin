@@ -282,7 +282,7 @@ are disabled then at least one plugin must be provided.
     </tr>
     <tr>
       <td>Python typeshed stubs</td>
-      <td><code>pyiEnabled</code></td>
+      <td><code>pythonStubsEnabled</code></td>
       <td><code>false</code></td>
       <td>Enable this alongside <code>pythonEnabled</code> to generate MyPy-compatible typehint stubs.</td>
     </tr>
