@@ -28,8 +28,8 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
-  <groupId>java-main</groupId>
-  <artifactId>java-main</artifactId>
+  <groupId>skip</groupId>
+  <artifactId>skip</artifactId>
 
   <properties>
     <protobuf.version>4.26.1</protobuf.version>
@@ -64,6 +64,7 @@
           <execution>
             <goals>
               <goal>generate</goal>
+              <goal>generate-test</goal>
             </goals>
           </execution>
         </executions>

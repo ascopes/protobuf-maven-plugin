@@ -19,7 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
 Path generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
+Path generatedTestSourcesDir = baseDirectory.resolve("target/generated-test-sources/protobuf")
 
 assertThat(generatedSourcesDir).doesNotExist()
+assertThat(generatedTestSourcesDir).doesNotExist()
 
 return true
