@@ -24,6 +24,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -126,6 +127,24 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       // Then
       assertThat(mojo.defaultOutputDirectory())
           .isEqualTo(expectedDefaultOutputDirectory());
+    }
+  }
+
+  @DisplayName("Plugin skipping tests")
+  @Nested
+  class PluginSkippingTest {
+
+    @DisplayName("nothing is run when the plugin is skipped")
+    @Test
+    void nothingIsRunWhenThePluginIsSkipped() throws Throwable {
+      // Given
+      mojo.skip = true;
+
+      // When
+      mojo.execute();
+
+      // Then
+      verifyNoInteractions(mojo.sourceCodeGenerator);
     }
   }
 
