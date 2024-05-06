@@ -370,16 +370,21 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
    * </ul>
    *
-   * <p>Note that specifying {@code -Dprotoc.version} in the {@code MAVEN_OPTS} or on the
-   * command line overrides the version specified in the POM. This enables users to easily
+   * <p>Note that specifying {@code -Dprotobuf.compiler.version} in the {@code MAVEN_OPTS} or on 
+   * the command line overrides the version specified in the POM. This enables users to easily
    * override the version of {@code protoc} in use if their system is unable to support the
    * version specified in the POM. Termux users in particular will find
-   * {@code -Dprotoc.version=PATH} to be useful, due to platform limitations with
+   * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
    * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
+   *
+   * <p>Prior to v2.0.0, this parameter was named {@code protoc.version} when specified on the
+   * commandline via JVM properties. This has been changed in v2.0.0 to
+   * {@code protobuf.compiler.version} for consistency and to reduce naming collisions with
+   * user-specified properties.
    *
    * @since 0.0.1
    */
-  @Parameter(required = true, property = "protoc.version")
+  @Parameter(required = true, property = "protobuf.compiler.version")
   String protocVersion;
 
   /**
@@ -657,9 +662,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   private String protocVersion() {
-    // Give precedence to overriding the protoc version via the command line
+    // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
-    var overriddenVersion = System.getProperty("protoc.version");
+    var overriddenVersion = System.getProperty("protobuf.compiler.version");
     requireNonNull(protocVersion, "protocVersion has not been set");
     return requireNonNullElse(overriddenVersion, protocVersion);
   }

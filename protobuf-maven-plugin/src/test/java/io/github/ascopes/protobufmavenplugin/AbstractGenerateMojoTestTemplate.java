@@ -616,13 +616,13 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
           .withMessage("protocVersion has not been set");
     }
 
-    @DisplayName("when protoc.version is set in system properties, expect that to be used")
+    @DisplayName("when protobuf.compiler.version is set, expect that to be used")
     @Test
     @UsesSystemProperties
     void whenProtocVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
       // Given
       mojo.protocVersion = "1.2.3";
-      System.setProperty("protoc.version", "4.5.6");
+      System.setProperty("protobuf.compiler.version", "4.5.6");
 
       // When
       mojo.execute();
@@ -634,9 +634,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       assertThat(actualRequest.getProtocVersion()).isEqualTo("4.5.6");
     }
 
-    @DisplayName(
-        "when protoc.version is not set in system properties, expect the parameter to be used"
-    )
+    @DisplayName("when protobuf.compiler.version is not set, expect the parameter to be used")
     @Test
     @UsesSystemProperties
     void whenProtocVersionNotSetInSystemPropertiesExpectParameterToBeUsed() throws Throwable {

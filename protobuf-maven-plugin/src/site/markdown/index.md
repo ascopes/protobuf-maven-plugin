@@ -76,9 +76,9 @@ and will be output to `target/generated-sources/protobuf`
 in the `configuration` block if needed.
 
 The `protoc` version itself can be set via the `<protocVersion>` configuration parameter
-as shown above, or can be set via the `protoc.version` property in your POM. It may
-optionally be totally overridden on the command line by passing `-Dprotoc.version=xxx`,
-in which case the `<protocVersion>` and `protoc.version` will be ignored. This is done
+as shown above, or can be set via the `protobuf.compiler.version` property in your POM. It may
+optionally be totally overridden on the command line by passing `-Dprotobuf.compiler.version=xxx`,
+in which case the `<protocVersion>` and `protobuf.compiler.version` will be ignored. This is done
 to allow users who may have an incompatible system to be able to request a build using
 the `$PATH`-based `protoc` binary on their system (documented later in this page).
 
