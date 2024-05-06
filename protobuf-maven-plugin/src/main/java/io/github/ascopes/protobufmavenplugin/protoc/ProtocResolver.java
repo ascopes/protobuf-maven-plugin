@@ -72,7 +72,7 @@ public final class ProtocResolver {
   public Optional<Path> resolve(String version) throws ResolutionException {
     if (version.equalsIgnoreCase("latest")) {
       throw new IllegalArgumentException(
-          "Cannot use LATEST for the protoc version. "
+          "Cannot use LATEST for the protobuf.compiler.version. "
               + "Google has not released linear versions in the past, meaning that "
               + "using LATEST will have unexpected behaviour."
       );
@@ -112,7 +112,7 @@ public final class ProtocResolver {
               + "running the detected protoc binary from Maven central. If this is "
               + "an issue, install the protoc compiler manually from your package "
               + "manager (apt update && apt install protobuf), and then invoke "
-              + "Maven with the -Dprotoc.version=PATH flag."
+              + "Maven with the -Dprotobuf.compiler.version=PATH flag."
       );
     }
 
