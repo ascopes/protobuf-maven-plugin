@@ -242,7 +242,14 @@ public final class SourceCodeGenerator {
 
     var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
 
-    log.info("Will generate source code for {} protobuf file(s)", sourcePaths.size());
+    log.atInfo()
+        .setMessage("Will generate source code for {} protobuf file(s) from {} file tree(s)")
+        .addArgument(() -> sourcePaths.stream()
+            .mapToInt(sourcePath -> sourcePath.getProtoFiles().size())
+            .sum())
+        .addArgument(sourcePaths::size)
+        .log();
+
     return sourcePaths;
   }
 
