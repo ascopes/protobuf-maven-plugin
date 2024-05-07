@@ -12,6 +12,7 @@ jobs:
   build-x86_64-crossos:
     name: jdk-${{ matrix.java-version }}/${{ matrix.os-name }}/x86_64
     runs-on: ${{ matrix.os-name }}
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -69,6 +70,7 @@ jobs:
   build-x86_64-linux-oldmaven:
     name: jdk-11/ubuntu-latest/x86_64 (oldest supported Maven)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -100,53 +102,50 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  ###
-  ### Cross arch builds are emporarily disabled due to instability
-  ### in the QEMU versions being used by GitHub runners and/or
-  ### uraimo/run-on-arch-action@v2, which currently result in builds
-  ### deadlocking spuriously on GitHub.
-  ###
+  build-crossarch-linux:
+    name: jdk-17/debian/${{ matrix.arch }}
+    runs-on: ubuntu-latest
 
-  #build-crossarch-linux:
-  #  name: jdk-11/ubuntu-latest/${{ matrix.arch }}
-  #  runs-on: ubuntu-latest
-  #
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      arch: [aarch64, ppc64le, s390x]
-  #
-  #  steps:
-  #    - name: Checkout code
-  #      uses: actions/checkout@v4
-  #
-  #    - name: Build in emulator
-  #      uses: uraimo/run-on-arch-action@v2
-  #      with:
-  #        arch: ${{ matrix.arch }}
-  #        distro: ubuntu_latest
-  #        # Mount /target so that we can pull the coverage results
-  #        dockerRunArgs: '--volume "${PWD}/target:/home/runner/work/target"'
-  #        install: |-
-  #          set -eux
-  #          apt update -q
-  #          apt install -qy openjdk-11-jdk-headless protobuf-compiler
-  #          java -version
-  #          javac -version
-  #          protoc --version
-  #        # Run single threaded in the hope QEMU doesn't deadlock.
-  #        run: ./mvnw -B -T1 verify
-  #
-  #    - name: Publish code coverage
-  #      uses: codecov/codecov-action@v4
-  #      continue-on-error: true
-  #      if: always()
-  #      with:
-  #        token: ${{ secrets.CODECOV_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, ppc64le, s390x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build in emulator
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: bookworm
+          # Mount /target so that we can pull the coverage results
+          dockerRunArgs: '--volume "${PWD}/target:/home/runner/work/target"'
+          install: |-
+            set -eux
+            apt update -q
+            apt install -qy openjdk-17-jdk-headless
+            java -version
+            javac -version
+          # Skip surefire tests as they are not OS specific.
+          run: >-
+            ./mvnw -B verify
+            -Dcheckstyle.skip
+            -Dlicense.skip
+            -Dmaven.test.skip=true
+
+      - name: Publish code coverage
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-pages:
     name: Generate pages
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -160,8 +159,9 @@ jobs:
 
       - name: Build Pages
         shell: bash
-        run: |-
-          ./mvnw -B clean site \
-              -DskipTests \
-              -Dinvoker.skip \
-              -Dcheckstyle.skip
+        run: >-
+            ./mvnw -B site
+            -DskipTests
+            -Dinvoker.skip
+            -Dcheckstyle.skip
+            -Dlicense.skip
