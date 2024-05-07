@@ -16,30 +16,19 @@
 
 package io.github.ascopes.protobufmavenplugin;
 
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
 
 /**
- * Base interface for a parameter that consumes Maven artifact
- * details.
+ * Implementation independent descriptor for an artifact or dependency that can be used in a Maven
+ * Plugin parameter.
  *
  * @author Ashley Scopes
  * @since 1.2.0
  */
-public interface MavenArtifact {
-
-  String getGroupId();
-
-  String getArtifactId();
-
-  String getVersion();
-
-  @Nullable
-  String getType();
-
-  @Nullable
-  String getClassifier();
-
-  @Nullable
-  DependencyResolutionDepth getDependencyResolutionDepth();
+@Immutable
+@Modifiable
+public abstract class MavenDependency implements MavenArtifact {
 }

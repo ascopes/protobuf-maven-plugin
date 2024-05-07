@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.ImmutableMavenArtifact;
+import io.github.ascopes.protobufmavenplugin.ImmutableMavenDependency;
 import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
@@ -116,7 +116,7 @@ public final class ProtocResolver {
       );
     }
 
-    var artifact = ImmutableMavenArtifact.builder()
+    var artifact = ImmutableMavenDependency.builder()
         .groupId(GROUP_ID)
         .artifactId(ARTIFACT_ID)
         .version(version)

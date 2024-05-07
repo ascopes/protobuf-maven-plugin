@@ -30,7 +30,7 @@ import org.immutables.value.Value.Modifiable;
  * @since 2.0.0
  */
 @Modifiable
-public interface PathProtocPlugin extends OptionalProtocPlugin {
+public abstract class PathProtocPlugin implements OptionalProtocPlugin {
 
-  String getName();
+  public abstract String getName();
 }
