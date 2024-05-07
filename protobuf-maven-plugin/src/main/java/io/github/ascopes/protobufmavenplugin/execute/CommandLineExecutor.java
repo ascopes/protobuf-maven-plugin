@@ -41,7 +41,7 @@ public final class CommandLineExecutor {
   }
 
   public boolean execute(List<String> args) throws IOException {
-    log.info("Calling protoc with the following command line: {}", Shlex.quoteShellArgs(args));
+    log.info("Calling protoc with the following command line:\n{}", Shlex.quoteShellArgs(args));
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
