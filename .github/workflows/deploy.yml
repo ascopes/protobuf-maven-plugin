@@ -116,8 +116,15 @@ jobs:
       - name: Generate site
         if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
         run: |-
-          git fetch --tags origin "v${release_version}"
-          git checkout FETCH_HEAD
+          # Skip checkout if we didn't promote anything, as this enables us to
+          # regenerate docs with bugfixes after the release if needed.
+          if [[ ${{ inputs.skip-maven-central-staging }} = true ]]; then
+            ./mvnw version:set -DnewVersion="${release_version}"
+          else
+            git fetch --tags origin "v${release_version}"
+            git checkout FETCH_HEAD
+          fi
+
           ./mvnw site -DskipTests -Dinvoker.skip -Dcheckstyle.skip
 
       - name: Upload site
