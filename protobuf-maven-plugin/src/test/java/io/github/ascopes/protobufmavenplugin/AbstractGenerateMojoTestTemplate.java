@@ -415,7 +415,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
     void whenImportDependenciesNullExpectEmptyListInRequest(
-        List<MavenArtifactBean> plugins
+        List<MavenDependencyBean> plugins
     ) throws Throwable {
       // Given
       mojo.importDependencies = plugins;
@@ -434,7 +434,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void whenImportDependenciesProvidedExpectPluginsInRequest() throws Throwable {
       // Given
-      List<MavenArtifactBean> plugins = mock();
+      List<MavenDependencyBean> plugins = mock();
       mojo.importDependencies = plugins;
 
       // When
@@ -681,7 +681,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
     void whenSourceDependenciesNullExpectEmptyListInRequest(
-        List<MavenArtifactBean> dependencies
+        List<MavenDependencyBean> dependencies
     ) throws Throwable {
       // Given
       mojo.sourceDependencies = dependencies;
@@ -700,7 +700,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void whenSourceDependenciesProvidedExpectDependenciesInRequest() throws Throwable {
       // Given
-      List<MavenArtifactBean> plugins = mock();
+      List<MavenDependencyBean> plugins = mock();
       mojo.sourceDependencies = plugins;
 
       // When

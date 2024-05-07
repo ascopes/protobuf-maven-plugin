@@ -31,14 +31,13 @@ import org.jspecify.annotations.Nullable;
  */
 @Immutable
 @Modifiable
-@SuppressWarnings("immutables:subtype")
-public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
+public abstract class MavenProtocPlugin implements MavenArtifact, ProtocPlugin {
 
-  // Do not allow Immutables to allow us to specify this attribute.
   @Derived
-  @Override
   @Nullable
-  default DependencyResolutionDepth getDependencyResolutionDepth() {
+  @Override
+  public DependencyResolutionDepth getDependencyResolutionDepth() {
+    // We never allow this to be specified for protoc plugins.
     return null;
   }
 }
