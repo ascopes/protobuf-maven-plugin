@@ -102,5 +102,5 @@ Maven 4.0-compatible release as soon as possible.
 
 ## Contributing
 
-Since this is a new project, any contributions are always welcome! This includes contributing 
-integration test cases or reporting issues. Any input is greatly appreciated.
+Any input is greatly appreciated and welcome. Be it raising issues for bugs or confusing behaviour,
+or raising PRs!
