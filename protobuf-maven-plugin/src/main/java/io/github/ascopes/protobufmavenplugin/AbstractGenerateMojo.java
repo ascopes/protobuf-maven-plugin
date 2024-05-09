@@ -49,6 +49,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
+  private static final String DEFAULT_FALSE = "false";
+  private static final String DEFAULT_TRUE = "true";
+  private static final String DEFAULT_TRANSITIVE = "TRANSITIVE";
+  private static final String PROTOBUF_COMPILER_VERSION = "protobuf.compiler.version";
+  private static final String PROTOBUF_SKIP = "protobuf.skip";
+  
   private final Logger log;
   
   public AbstractGenerateMojo() {
@@ -207,7 +213,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.2.0
    */
-  @Parameter(defaultValue = "TRANSITIVE")
+  @Parameter(defaultValue = DEFAULT_TRANSITIVE)
   DependencyResolutionDepth dependencyResolutionDepth;
 
   /**
@@ -220,7 +226,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.5.0
    */
-  @Parameter(defaultValue = "true")
+  @Parameter(defaultValue = DEFAULT_TRUE)
   boolean failOnMissingSources;
 
   /**
@@ -231,7 +237,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.0.0
    */
-  @Parameter(defaultValue = "true")
+  @Parameter(defaultValue = DEFAULT_TRUE)
   boolean failOnMissingTargets;
 
   /**
@@ -242,7 +248,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean fatalWarnings;
 
   /**
@@ -254,7 +260,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.2.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean ignoreProjectDependencies;
 
   /**
@@ -342,7 +348,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean liteOnly;
 
   /**
@@ -389,7 +395,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(required = true, property = "protobuf.compiler.version")
+  @Parameter(required = true, property = PROTOBUF_COMPILER_VERSION)
   String protocVersion;
 
   /**
@@ -401,7 +407,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.5.0
    */
-  @Parameter(defaultValue = "true")
+  @Parameter(defaultValue = DEFAULT_TRUE)
   boolean registerAsCompilationRoot;
 
   /**
@@ -409,7 +415,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.0.0
    */
-  @Parameter(defaultValue = "false", property = "protobuf.skip")
+  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_SKIP)
   boolean skip;
 
   /**
@@ -466,7 +472,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean cppEnabled;
 
   /**
@@ -474,7 +480,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean csharpEnabled;
 
   /**
@@ -485,7 +491,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.1.1
    */
-  @Parameter(defaultValue = "true")
+  @Parameter(defaultValue = DEFAULT_TRUE)
   boolean javaEnabled;
 
   /**
@@ -496,7 +502,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean kotlinEnabled;
 
   /**
@@ -504,7 +510,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean objcEnabled;
 
   /**
@@ -512,7 +518,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean phpEnabled;
 
   /**
@@ -523,7 +529,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean pythonEnabled;
 
   /**
@@ -535,7 +541,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean pythonStubsEnabled;
 
   /**
@@ -543,7 +549,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean rubyEnabled;
 
   /**
@@ -551,7 +557,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = "false")
+  @Parameter(defaultValue = DEFAULT_FALSE)
   boolean rustEnabled;
 
   ///
@@ -669,7 +675,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private String protocVersion() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
-    var overriddenVersion = System.getProperty("protobuf.compiler.version");
+    var overriddenVersion = System.getProperty(PROTOBUF_COMPILER_VERSION);
     requireNonNull(protocVersion, "protocVersion has not been set");
     return requireNonNullElse(overriddenVersion, protocVersion);
   }
