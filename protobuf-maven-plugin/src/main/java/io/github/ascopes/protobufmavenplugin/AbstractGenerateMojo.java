@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
+import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generate.ImmutableGenerationRequest;
@@ -606,7 +607,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       log.info("Plugin execution is skipped");
       return;
     }
-
+    
     var enabledLanguages = Language.setBuilder()
         .addIf(cppEnabled, Language.CPP)
         .addIf(csharpEnabled, Language.C_SHARP)
@@ -663,21 +664,25 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   private Collection<Path> sourceDirectories() {
-    if (sourceDirectories == null || sourceDirectories.isEmpty()) {
-      return List.of(defaultSourceDirectory());
-    }
-
-    return sourceDirectories.stream()
+    var transformedSourceDirectories = Optional.ofNullable(sourceDirectories)
+        .filter(not(Collection::isEmpty))
+        .stream()
+        .flatMap(Collection::stream)
         .map(File::toPath)
         .collect(Collectors.toList());
+
+    return transformedSourceDirectories.isEmpty()
+        ? List.of(defaultSourceDirectory())
+        : transformedSourceDirectories;
   }
 
   private String protocVersion() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty(PROTOBUF_COMPILER_VERSION);
-    requireNonNull(protocVersion, "protocVersion has not been set");
-    return requireNonNullElse(overriddenVersion, protocVersion);
+    return overriddenVersion == null
+        ? requireNonNull(protocVersion, "protocVersion has not been set")
+        : overriddenVersion;
   }
 
   private <T> List<T> nonNullList(@Nullable List<T> list) {
