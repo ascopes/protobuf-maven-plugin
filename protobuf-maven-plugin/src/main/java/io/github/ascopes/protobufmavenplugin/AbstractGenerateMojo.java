@@ -49,7 +49,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
-  private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
+  private final Logger log;
+  
+  public AbstractGenerateMojo() {
+    // Use the implementation class to mark the logger.
+    log = LoggerFactory.getLogger(getClass());
+  }
 
   ///
   /// MOJO dependencies.
