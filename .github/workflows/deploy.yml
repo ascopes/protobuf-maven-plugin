@@ -61,6 +61,12 @@ jobs:
           server-password: OSSRH_TOKEN
           gpg-passphrase: GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+      
+      - name: Configure Git
+        if: ${{ ! inputs.skip-maven-central-staging }}
+        run: |-
+          git config user.name '${{ github.actor }}'
+          git config user.email '${{ github.actor }}@users.noreply.github.com'
 
       - name: Determine release version details
         run: |-
@@ -77,18 +83,17 @@ jobs:
             release_version='${{ inputs.version }}'
           fi
           echo "release_version=${release_version}" >> "${GITHUB_ENV}"
+            
+      - name: Build and run tests
+        if: ${{ ! inputs.dry-run }}
+        run: ./mvnw clean verify
 
-      - name: Configure Git
-        if: ${{ ! inputs.skip-maven-central-staging }}
-        run: |-
-          git config user.name '${{ github.actor }}'
-          git config user.email '${{ github.actor }}@users.noreply.github.com'
-
-      - name: Create staging release
+      - name: Create staging release on Nexus
         if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           ./mvnw -B -e \
               -DdryRun='${{ inputs.dry-run }}' \
+              -Darguments=-DskipTests \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
@@ -123,6 +128,8 @@ jobs:
           else
             git fetch --tags origin "v${release_version}"
             git checkout FETCH_HEAD
+            # Attempt to re-generate the coverage reports.
+            ./mvnw test integration-test
           fi
 
           ./mvnw site -DskipTests -Dinvoker.skip -Dcheckstyle.skip

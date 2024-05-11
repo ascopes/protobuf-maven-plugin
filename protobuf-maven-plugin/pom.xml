@@ -220,6 +220,13 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
 
+        <configuration>
+          <excludes>
+            <!-- Exclude the generated Help Mojo. -->
+            <exclude>**/*HelpMojo.*</exclude>
+          </excludes>
+        </configuration>
+
         <executions>
           <execution>
             <id>prepare-coverage-agent-surefire</id>
@@ -236,7 +243,7 @@
               <goal>prepare-agent-integration</goal>
             </goals>
             <configuration>
-              <!-- Append to ensure multiple invoker test calls are included -->
+              <!-- Append to ensure multiple invoker test calls are included. -->
               <append>true</append>
               <!-- Ensure `${invoker.mavenOpts}` is set in the invoker.properties as well
                   if maven.argLine is overridden. -->
@@ -247,14 +254,106 @@
 
           <execution>
             <id>generate-coverage-reports</id>
+            <phase>verify</phase>
             <goals>
               <goal>report</goal>
               <goal>report-integration</goal>
-              <goal>report-aggregate</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <!-- Compile src/main/site and generate the goals site pages. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>${maven-invoker-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <!-- Generate source documentation listings. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <configuration>
+          <doclint>all,-missing</doclint>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <!-- Used to generate source code cross-references with other reporting plugins. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>${maven-jxr-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <!-- Compile src/main/site and generate the goals site pages. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-report-plugin</artifactId>
+        <version>${maven-plugin-report-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <!-- Report unit test results. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <!-- Report coverage. -->
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+
+        <configuration>
+          <excludes>
+            <!-- Exclude the generated Help Mojo. -->
+            <exclude>**/*HelpMojo.*</exclude>
+          </excludes>
+        </configuration>
+
+        <reportSets>
+          <reportSet>
+            <id>coverage</id>
+            <reports>
+              <report>report</report>
+              <report>report-integration</report>
+              <report>report-aggregate</report>
+            </reports>
+            <configuration>
+              <dataFileIncludes>
+                <dataFileIncludes>**/jacoco*.exec</dataFileIncludes>
+              </dataFileIncludes>
+              <includeCurrentProject>true</includeCurrentProject>
+            </configuration>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <profiles>
+    <profile>
+      <id>invoker-debug</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-invoker-plugin</artifactId>
+              <version>${maven-invoker-plugin.version}</version>
+              <configuration>
+                <invokerPropertiesFile>invoker-debug.properties</invokerPropertiesFile>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
 </project>
