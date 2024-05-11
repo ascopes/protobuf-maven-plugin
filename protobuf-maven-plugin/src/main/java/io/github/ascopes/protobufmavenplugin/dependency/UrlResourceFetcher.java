@@ -26,7 +26,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class UrlResourceFetcher {
 
-  private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(30);
+  private static final int TIMEOUT = 30_000;
   private static final String USER_AGENT = "User-Agent";
   private static final Logger log = LoggerFactory.getLogger(UrlResourceFetcher.class);
 
@@ -75,41 +74,29 @@ public final class UrlResourceFetcher {
 
     try {
       var conn = url.openConnection();
-      conn.setConnectTimeout((int) CONNECT_TIMEOUT.toMillis());
-      conn.setReadTimeout((int) CONNECT_TIMEOUT.toMillis());
+      conn.setConnectTimeout(TIMEOUT);
+      conn.setReadTimeout(TIMEOUT);
       conn.setAllowUserInteraction(false);
-      conn.setDoOutput(false);
       conn.setRequestProperty(USER_AGENT, userAgent());
-      conn.setUseCaches(true);
 
       log.debug("Connecting to '{}' to copy resources to '{}'", url, targetFile);
-
       conn.connect();
 
-      try (var responseBody = conn.getInputStream()) {
-        copyToFile(responseBody, targetFile);
+      try (
+          var responseStream = conn.getInputStream();
+          var fileStream = new BufferedOutputStream(Files.newOutputStream(targetFile))
+      ) {
+        responseStream.transferTo(fileStream);
+        log.info("Copied {} to {}", url, targetFile);
+        return Optional.of(targetFile);
+
       } catch (FileNotFoundException ex) {
+        log.debug("Resource at {} was not found", url);
         return Optional.empty();
       }
 
-      log.info("Copied {} to {}", url, targetFile);
-
     } catch (IOException ex) {
-      throw failedToCopy(url, targetFile, ex);
-    }
-
-    return Optional.of(targetFile);
-  }
-
-  private ResolutionException failedToCopy(URL source, Path destination, Exception cause) {
-    return new ResolutionException(
-        "Failed to copy '" + source + "' to '" + destination + "'", cause
-    );
-  }
-
-  private void copyToFile(InputStream inputStream, Path file) throws IOException {
-    try (var fileStream = new BufferedOutputStream(Files.newOutputStream(file))) {
-      inputStream.transferTo(fileStream);
+      throw new ResolutionException("Failed to copy '" + url + "' to '" + targetFile + "'", ex);
     }
   }
 
