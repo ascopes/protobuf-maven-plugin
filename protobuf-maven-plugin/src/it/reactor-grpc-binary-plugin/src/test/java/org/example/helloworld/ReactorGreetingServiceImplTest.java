@@ -23,15 +23,18 @@ import io.grpc.ServerBuilder;
 import org.junit.jupiter.api.Test;
 
 class ReactorGreetingServiceImplTest {
+  // keep unique to each test to prevent concurrency issues.
+  private static final int PORT = 10_001;
+
   @Test
   void greetingServiceWorksAsExpected() throws Throwable {
     // Given
     var service = new ReactorGreetingServiceImpl();
     var server = ServerBuilder
-        .forPort(8080)
+        .forPort(PORT)
         .addService(service)
         .build();
-    var channel = ManagedChannelBuilder.forAddress("localhost", 8080)
+    var channel = ManagedChannelBuilder.forAddress("localhost", PORT)
         .usePlaintext()
         .build();
     var stub = ReactorGreetingServiceGrpc.newReactorStub(channel);
