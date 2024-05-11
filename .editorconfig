@@ -289,7 +289,6 @@ ij_xml_space_after_tag_name = false
 ij_xml_space_around_equals_in_attribute = false
 ij_xml_space_inside_empty_tag = false
 ij_xml_text_wrap = normal
-ij_xml_use_custom_settings = true
 
 [{*.bash,*.sh,*.zsh}]
 ij_shell_binary_ops_start_line = false

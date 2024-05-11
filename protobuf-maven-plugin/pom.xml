@@ -23,7 +23,6 @@
     <groupId>io.github.ascopes</groupId>
     <artifactId>protobuf-maven-plugin-parent</artifactId>
     <version>2.0.3-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>protobuf-maven-plugin</artifactId>

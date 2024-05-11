@@ -17,7 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.generate;
 
 import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.UrlProtocPlugin;
@@ -43,7 +43,7 @@ public interface GenerationRequest {
 
   Collection<Language> getEnabledLanguages();
 
-  Collection<? extends MavenArtifact> getImportDependencies();
+  Collection<? extends MavenDependency> getImportDependencies();
 
   Collection<Path> getImportPaths();
 
@@ -53,7 +53,7 @@ public interface GenerationRequest {
 
   String getProtocVersion();
 
-  Collection<? extends MavenArtifact> getSourceDependencies();
+  Collection<? extends MavenDependency> getSourceDependencies();
 
   Collection<Path> getSourceRoots();
 
