@@ -5,6 +5,9 @@ target/
 .idea/
 *.iml
 
+# VSCode
+.vscode/
+
 # JVM agent descriptors
 .attach*
 
