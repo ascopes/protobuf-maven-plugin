@@ -174,12 +174,14 @@ public final class BinaryPluginResolver {
         continue;
       }
 
-      resolver.resolve(plugin).ifPresentOrElse(
-          resolvedPlugins::add,
-          () -> log.info("Skipping unresolved missing plugin {}", plugin)
-      );
+      resolver.resolve(plugin)
+          .ifPresentOrElse(resolvedPlugins::add, this::skipUnresolvedPlugin);
     }
     return resolvedPlugins;
+  }
+
+  private void skipUnresolvedPlugin(ProtocPlugin plugin) {
+    log.info("Skipping unresolved missing plugin {}", plugin);
   }
 
   private void makeExecutable(Path path) throws ResolutionException {
