@@ -16,13 +16,13 @@
 
 package io.github.ascopes.protobufmavenplugin.protoc;
 
-import io.github.ascopes.protobufmavenplugin.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.ImmutableMavenDependency;
-import io.github.ascopes.protobufmavenplugin.dependency.MavenDependencyPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.PlatformClassifierFactory;
-import io.github.ascopes.protobufmavenplugin.dependency.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.dependency.SystemPathBinaryResolver;
-import io.github.ascopes.protobufmavenplugin.dependency.UrlResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyPathResolver;
+import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
+import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.dependencies.SystemPathBinaryResolver;
+import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.IOException;

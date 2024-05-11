@@ -24,8 +24,7 @@ import java.util.function.Function;
  * <p>Losely based on Python's {@code shlex} module.
  *
  * <p>This is far from perfect but should work in the majority of use cases
- * to ensure scripts do not interpret special characters in paths in strange
- * and unexpected ways.
+ * to ensure scripts do not interpret special characters in paths in strange and unexpected ways.
  *
  * <p>Long lines will be split up with line continuations.
  *

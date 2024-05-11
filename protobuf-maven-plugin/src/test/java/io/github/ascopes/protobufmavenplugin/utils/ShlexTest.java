@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 @DisplayName("Shlex tests")
 class ShlexTest {
+
   @DisplayName("quoteShellArgs(Iterable) returns the expected value")
   @MethodSource("quoteShellArgsTestCases")
   @ParameterizedTest(name = "quoteShellArgs({0}) returns <{1}>")

@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public @interface UsesSystemProperties {
 
   class Extension implements BeforeEachCallback, AfterEachCallback {
+
     private final Logger log = LoggerFactory.getLogger(Extension.class);
     private volatile Properties properties;
 

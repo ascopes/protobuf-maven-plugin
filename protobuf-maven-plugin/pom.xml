@@ -178,7 +178,7 @@
               <goal>helpmojo</goal>
             </goals>
             <configuration>
-              <helpPackageName>io.github.ascopes.protobufmavenplugin</helpPackageName>
+              <helpPackageName>io.github.ascopes.protobufmavenplugin.mojo</helpPackageName>
             </configuration>
           </execution>
         </executions>

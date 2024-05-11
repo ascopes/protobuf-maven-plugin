@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 public final class TestFileSystem implements Closeable {
+
   private static final Logger log = LoggerFactory.getLogger(TestFileSystem.class);
 
   private final FileSystem fileSystem;
@@ -100,7 +101,7 @@ public final class TestFileSystem implements Closeable {
   public void changePermissions(
       Path file,
       Consumer<Set<PosixFilePermission>> modifier
-  )  {
+  ) {
     unchecked(() -> {
       // Wrap in a hashset so that we guarantee we can modify the result.
       var permissions = new HashSet<>(Files.getPosixFilePermissions(file));
@@ -154,10 +155,12 @@ public final class TestFileSystem implements Closeable {
   }
 
   private interface IoExceptionThrowableSupplier<T> {
+
     T run() throws IOException;
   }
 
   private interface IoExceptionThrowableProcedure {
+
     void run() throws IOException;
   }
 }
