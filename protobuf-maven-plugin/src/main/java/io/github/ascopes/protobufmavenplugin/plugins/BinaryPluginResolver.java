@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
@@ -99,13 +98,8 @@ public final class BinaryPluginResolver {
 
     log.debug("Resolving Maven protoc plugin {}", plugin);
 
-    // Only one dependency should ever be returned here.
-    var path = dependencyResolver.resolveOne(plugin, DependencyResolutionDepth.DIRECT)
-        .iterator()
-        .next();
-
+    var path = dependencyResolver.resolveJust(plugin);
     makeExecutable(path);
-
     return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 

@@ -69,11 +69,10 @@ public final class MavenDependencyPathResolver {
     this.artifactHandler = artifactHandler;
   }
 
-  public Collection<Path> resolveOne(
-      MavenArtifact mavenArtifact,
-      DependencyResolutionDepth dependencyResolutionDepth
-  ) throws ResolutionException {
-    return resolveAll(List.of(mavenArtifact), dependencyResolutionDepth);
+  public Path resolveJust(MavenArtifact mavenArtifact) throws ResolutionException {
+    return resolveAll(List.of(mavenArtifact), DependencyResolutionDepth.DIRECT)
+        .iterator()
+        .next();
   }
 
   public Collection<Path> resolveAll(

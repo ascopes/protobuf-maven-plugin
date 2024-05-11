@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.protoc;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
@@ -124,11 +123,7 @@ public final class ProtocResolver {
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
-    // First result is all we care about as it is the direct dependency.
-    var path = dependencyResolver.resolveOne(artifact, DependencyResolutionDepth.DIRECT)
-        .iterator()
-        .next();
-
+    var path = dependencyResolver.resolveJust(artifact);
     return Optional.of(path);
   }
 }
