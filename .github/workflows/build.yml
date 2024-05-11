@@ -128,12 +128,10 @@ jobs:
             apt install -qy openjdk-17-jdk-headless
             java -version
             javac -version
-          # Skip surefire tests as they are not OS specific.
           run: >-
             ./mvnw -B verify
             -Dcheckstyle.skip
             -Dlicense.skip
-            -Dmaven.test.skip=true
 
       - name: Publish code coverage
         uses: codecov/codecov-action@v4
