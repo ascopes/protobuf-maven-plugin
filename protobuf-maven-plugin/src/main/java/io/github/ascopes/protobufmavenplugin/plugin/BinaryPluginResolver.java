@@ -110,8 +110,8 @@ public final class BinaryPluginResolver {
         .next();
 
     makeExecutable(path);
-    var resolvedPlugin = createResolvedProtocPlugin(plugin, path);
-    return Optional.of(resolvedPlugin);
+
+    return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
   private Optional<ResolvedProtocPlugin> resolvePathPlugin(
@@ -175,13 +175,13 @@ public final class BinaryPluginResolver {
       }
 
       resolver.resolve(plugin)
-          .ifPresentOrElse(resolvedPlugins::add, this::skipUnresolvedPlugin);
+          .ifPresentOrElse(resolvedPlugins::add, skipUnresolvedPlugin(plugin));
     }
     return resolvedPlugins;
   }
 
-  private void skipUnresolvedPlugin(ProtocPlugin plugin) {
-    log.info("Skipping unresolved missing plugin {}", plugin);
+  private Runnable skipUnresolvedPlugin(ProtocPlugin plugin) {
+    return () -> log.info("Skipping unresolved missing plugin {}", plugin);
   }
 
   private void makeExecutable(Path path) throws ResolutionException {
