@@ -86,7 +86,12 @@ jobs:
             
       - name: Build and run tests
         if: ${{ ! inputs.dry-run }}
-        run: ./mvnw clean verify site
+        run: |-
+          # Install protoc so those integration tests also run. This increases the reported
+          # coverage on the generated site to a more accurate value.
+          sudo apt update -q
+          sudo apt install protobuf-compiler -qy
+          ./mvnw clean verify site
 
       - name: Create staging release on Nexus
         if: ${{ ! inputs.skip-maven-central-staging }}
