@@ -105,8 +105,7 @@ public class AetherMavenArtifactPathResolver {
         artifact.getVersion()
     );
 
-    // Ok to log as info, as we only do this for plugins, not dependencies.
-    log.info("Resolving artifact {}", artifact);
+    log.info("Resolving artifact {}", aetherArtifact);
 
     var artifactRequest = new ArtifactRequest(aetherArtifact, remoteRepositories, null);
 
