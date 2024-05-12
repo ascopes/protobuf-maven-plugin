@@ -17,11 +17,11 @@
 package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.IOException;
@@ -48,7 +48,7 @@ public final class ProtocResolver {
   private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
   private final HostSystem hostSystem;
-  private final MavenDependencyPathResolver dependencyResolver;
+  private final AetherMavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
@@ -56,13 +56,13 @@ public final class ProtocResolver {
   @Inject
   public ProtocResolver(
       HostSystem hostSystem,
-      MavenDependencyPathResolver dependencyResolver,
+      AetherMavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
   ) {
     this.hostSystem = hostSystem;
-    this.dependencyResolver = dependencyResolver;
+    this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
@@ -123,7 +123,6 @@ public final class ProtocResolver {
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
-    var path = dependencyResolver.resolveJust(artifact);
-    return Optional.of(path);
+    return Optional.of(artifactPathResolver.resolveArtifact(artifact));
   }
 }

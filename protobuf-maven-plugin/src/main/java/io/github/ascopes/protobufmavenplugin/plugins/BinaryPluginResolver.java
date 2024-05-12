@@ -16,11 +16,11 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
@@ -43,19 +43,19 @@ public final class BinaryPluginResolver {
 
   private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
-  private final MavenDependencyPathResolver dependencyResolver;
+  private final AetherMavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
   public BinaryPluginResolver(
-      MavenDependencyPathResolver dependencyResolver,
+      AetherMavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
   ) {
-    this.dependencyResolver = dependencyResolver;
+    this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
@@ -98,7 +98,7 @@ public final class BinaryPluginResolver {
 
     log.debug("Resolving Maven protoc plugin {}", plugin);
 
-    var path = dependencyResolver.resolveJust(plugin);
+    var path = artifactPathResolver.resolveArtifact(plugin);
     makeExecutable(path);
     return Optional.of(createResolvedProtocPlugin(plugin, path));
   }

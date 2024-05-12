@@ -43,8 +43,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 @Mojo(
     name = "generate-test",
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
-    requiresDependencyCollection = ResolutionScope.TEST,
-    requiresDependencyResolution = ResolutionScope.TEST,
+    requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
+    requiresDependencyResolution = ResolutionScope.NONE,
     requiresOnline = true,
     threadSafe = true
 )
