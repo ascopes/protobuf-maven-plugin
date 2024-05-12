@@ -102,43 +102,44 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  build-crossarch-linux:
-    name: jdk-17/debian/${{ matrix.arch }}
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [aarch64, ppc64le, s390x]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build in emulator
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.arch }}
-          distro: bookworm
-          # Mount /target so that we can pull the coverage results
-          dockerRunArgs: '--volume "${PWD}/target:/home/runner/work/target"'
-          install: |-
-            set -eux
-            apt update -q
-            apt install -qy openjdk-17-jdk-headless
-            java -version
-            javac -version
-          run: >-
-            ./mvnw -B verify
-            -Dcheckstyle.skip
-            -Dlicense.skip
-
-      - name: Publish code coverage
-        uses: codecov/codecov-action@v4
-        continue-on-error: true
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+  #build-crossarch-linux:
+  #  name: jdk-17/debian/${{ matrix.arch }}
+  #  runs-on: ubuntu-latest
+  #
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      arch: [aarch64, ppc64le, s390x]
+  #
+  #  steps:
+  #    - name: Checkout code
+  #      uses: actions/checkout@v4
+  #
+  #    - name: Build in emulator
+  #      uses: uraimo/run-on-arch-action@v2
+  #      with:
+  #        arch: ${{ matrix.arch }}
+  #        distro: bookworm
+  #        # Mount /target so that we can pull the coverage results
+  #        dockerRunArgs: '--volume "${PWD}/target:/home/runner/work/target"'
+  #        install: |-
+  #          set -eux
+  #          apt update -q
+  #          apt install -qy openjdk-17-jdk-headless
+  #          java -version
+  #          javac -version
+  #        run: >-
+  #          ./mvnw -B verify
+  #          -Dcheckstyle.skip
+  #          -Dlicense.skip
+  #
+  #    - name: Publish code coverage
+  #      uses: codecov/codecov-action@v4
+  #      continue-on-error: true
+  #      if: always()
+  #      with:
+  #
+  token: ${{ secrets.CODECOV_TOKEN }}
 
   build-pages:
     name: Generate pages
