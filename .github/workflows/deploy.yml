@@ -86,14 +86,15 @@ jobs:
             
       - name: Build and run tests
         if: ${{ ! inputs.dry-run }}
-        run: ./mvnw clean verify
+        run: ./mvnw clean verify site
 
       - name: Create staging release on Nexus
         if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           ./mvnw -B -e \
               -DdryRun='${{ inputs.dry-run }}' \
-              -Darguments=-DskipTests \
+              -DskipTests -Dinvoker.skip \
+              -Darguments="-DskipTests -Dinvoker.skip" \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
@@ -117,22 +118,6 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-
-      - name: Generate site
-        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
-        run: |-
-          # Skip checkout if we didn't promote anything, as this enables us to
-          # regenerate docs with bugfixes after the release if needed.
-          if [[ ${{ inputs.skip-maven-central-staging }} = true ]]; then
-            ./mvnw versions:set -DnewVersion="${release_version}"
-          else
-            git fetch --tags origin "v${release_version}"
-            git checkout FETCH_HEAD
-            # Attempt to re-generate the coverage reports.
-            ./mvnw test integration-test
-          fi
-
-          ./mvnw site -DskipTests -Dinvoker.skip -Dcheckstyle.skip
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
