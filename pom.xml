@@ -112,7 +112,7 @@
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-    <license-maven-plugin.version>4.3</license-maven-plugin.version>
+    <license-maven-plugin.version>4.5</license-maven-plugin.version>
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
