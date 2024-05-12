@@ -17,8 +17,8 @@
 package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
@@ -52,17 +52,17 @@ public final class JvmPluginResolver {
   private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
   private final HostSystem hostSystem;
-  private final MavenDependencyPathResolver dependencyResolver;
+  private final AetherMavenArtifactPathResolver artifactPathResolver;
   private final TemporarySpace temporarySpace;
 
   @Inject
   public JvmPluginResolver(
       HostSystem hostSystem,
-      MavenDependencyPathResolver dependencyResolver,
+      AetherMavenArtifactPathResolver artifactPathResolver,
       TemporarySpace temporarySpace
   ) {
     this.hostSystem = hostSystem;
-    this.dependencyResolver = dependencyResolver;
+    this.artifactPathResolver = artifactPathResolver;
     this.temporarySpace = temporarySpace;
   }
 
@@ -110,8 +110,8 @@ public final class JvmPluginResolver {
   ) throws ResolutionException {
 
     // Resolve dependencies first.
-    var dependencyIterator = dependencyResolver
-        .resolveAll(List.of(plugin), DependencyResolutionDepth.TRANSITIVE)
+    var dependencyIterator = artifactPathResolver
+        .resolveDependencies(List.of(plugin), DependencyResolutionDepth.TRANSITIVE, false)
         .iterator();
 
     // First dependency is always the thing we actually want to execute,
