@@ -34,8 +34,8 @@
     <dependency>
       <groupId>com.google.api.grpc</groupId>
       <artifactId>proto-google-common-protos</artifactId>
-      <!-- Purposely use an outdated version here to duplicate the path. -->
-      <version>2.37.0</version>
+      <!-- Purposely use a different version here to duplicate the path. -->
+      <version>2.38.0</version>
     </dependency>
   </dependencies>
 
