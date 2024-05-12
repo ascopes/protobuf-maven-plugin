@@ -41,6 +41,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPluginBean;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
 import java.util.List;
@@ -747,9 +748,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         @TempDir Path someTempDir
     ) throws Throwable {
       // Given
-      var path1 = someTempDir.resolve("foo").resolve("bar");
-      var path2 = someTempDir.resolve("do").resolve("ray");
-      var path3 = someTempDir.resolve("aaa").resolve("bbb");
+      var path1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
+      var path2 = Files.createDirectories(someTempDir.resolve("do").resolve("ray"));
+      var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
 
       mojo.sourceDirectories = List.of(path1.toFile(), path2.toFile(), path3.toFile());
 
@@ -761,6 +762,29 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       verify(mojo.sourceCodeGenerator).generate(captor.capture());
       var actualRequest = captor.getValue();
       assertThat(actualRequest.getSourceRoots()).containsExactly(path1, path2, path3);
+    }
+
+    @DisplayName("missing sourceDirectories are not provided to the generator")
+    @Test
+    void missingSourceDirectoriesAreNotProvidedToTheGenerator(
+        @TempDir Path someTempDir
+    ) throws Throwable {
+      // Given
+      var path1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
+      var path2 = someTempDir.resolve("do").resolve("ray");
+      var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
+      assertThat(path2).doesNotExist();
+
+      mojo.sourceDirectories = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getSourceRoots()).containsExactly(path1, path3);
     }
   }
 
