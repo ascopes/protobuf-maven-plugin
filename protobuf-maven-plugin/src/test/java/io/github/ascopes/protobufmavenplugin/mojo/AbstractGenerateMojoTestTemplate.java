@@ -723,7 +723,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Nested
   class SourceDirectoriesTest {
 
-    @DisplayName("when sourceDirectories is null, expect an empty list in the request")
+    @DisplayName("when sourceDirectories is null, expect the default path in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
     void whenSourceDirectoriesNullExpectDefaultValueInRequest(
@@ -731,6 +731,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     ) throws Throwable {
       // Given
       mojo.sourceDirectories = sourceDirectories;
+      Files.createDirectories(expectedDefaultSourceDirectory());
 
       // When
       mojo.execute();

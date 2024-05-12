@@ -674,6 +674,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .stream()
         .flatMap(Collection::stream)
         .map(File::toPath)
+        .collect(Collectors.toList());
+
+    var finalDirectories = transformedSourceDirectories.isEmpty()
+        ? List.of(defaultSourceDirectory())
+        : transformedSourceDirectories;
+
+    return finalDirectories.stream()
         .filter(path -> {
           if (Files.notExists(path)) {
             log.warn("Ignoring source directory {} as it does not appear to exist", path);
@@ -682,10 +689,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
           return true;
         })
         .collect(Collectors.toList());
-
-    return transformedSourceDirectories.isEmpty()
-        ? List.of(defaultSourceDirectory())
-        : transformedSourceDirectories;
   }
 
   private String protocVersion() {
