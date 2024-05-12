@@ -138,8 +138,7 @@ jobs:
   #      continue-on-error: true
   #      if: always()
   #      with:
-  #
-  token: ${{ secrets.CODECOV_TOKEN }}
+  #        token: ${{ secrets.CODECOV_TOKEN }}
 
   build-pages:
     name: Generate pages
