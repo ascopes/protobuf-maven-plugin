@@ -85,8 +85,8 @@ public final class SourceCodeGenerator {
     final var protocPath = discoverProtocPath(request);
 
     final var resolvedPlugins = discoverPlugins(request);
-    final var importPaths = discoverImportPaths(request);
     final var sourcePaths = discoverCompilableSources(request);
+    final var importPaths = discoverImportPaths(sourcePaths, request);
 
     if (sourcePaths.isEmpty()) {
       if (request.isFailOnMissingSources()) {
@@ -173,17 +173,24 @@ public final class SourceCodeGenerator {
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(
+      Collection<ProtoFileListing> sourcePathListings,
       GenerationRequest request
   ) throws IOException, ResolutionException {
-    var artifacts = concat(request.getImportDependencies(), request.getSourceDependencies());
     var artifactPaths = artifactPathResolver.resolveDependencies(
-        artifacts,
+        request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
         !request.isIgnoreProjectDependencies()
     );
-    var importPaths = request.getImportPaths();
 
-    return protoListingResolver.createProtoFileListings(concat(artifactPaths, importPaths));
+    var importPathListings = protoListingResolver
+        .createProtoFileListings(concat(request.getImportPaths(), artifactPaths));
+
+    // Use the source paths here as well and use them first to give them precedence. This works
+    // around GH-172 where we can end up with different versions on the import and source paths
+    // depending on how dependency conflicts arise.
+    return Stream.concat(sourcePathListings.stream(), importPathListings.stream())
+        .distinct()
+        .collect(Collectors.toList());
   }
 
   private Collection<ProtoFileListing> discoverCompilableSources(
