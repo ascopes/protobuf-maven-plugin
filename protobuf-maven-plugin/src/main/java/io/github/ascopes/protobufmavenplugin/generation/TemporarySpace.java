@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public final class TemporarySpace {
 
   private static final String FRAG = "protobuf-maven-plugin";
-
   private static final Logger log = LoggerFactory.getLogger(TemporarySpace.class);
 
   private final MavenProject mavenProject;
@@ -46,9 +45,11 @@ public final class TemporarySpace {
   }
 
   public Path createTemporarySpace(String... bits) {
-    var baseDir = Path.of(mavenProject.getBuild().getDirectory()).resolve(FRAG);
-
-    var dir = reduce(baseDir, bits);
+    var dir = Path.of(mavenProject.getBuild().getDirectory()).resolve(FRAG);
+    for (var bit : bits) {
+      dir = dir.resolve(bit);
+    }
+    
     log.debug("Creating temporary directory at '{}' if it does not already exist...", dir);
 
     // This should be concurrent-safe as it will not break if the directory already exists unless
@@ -58,13 +59,5 @@ public final class TemporarySpace {
     } catch (IOException ex) {
       throw new UncheckedIOException("Failed to create temporary directory!", ex);
     }
-  }
-
-  private Path reduce(Path base, String... bits) {
-    var path = base;
-    for (var bit : bits) {
-      path = path.resolve(bit);
-    }
-    return path;
   }
 }
