@@ -32,6 +32,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPluginBean;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -673,6 +674,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .stream()
         .flatMap(Collection::stream)
         .map(File::toPath)
+        .filter(path -> {
+          if (Files.notExists(path)) {
+            log.warn("Ignoring source directory {} as it does not appear to exist", path);
+            return false;
+          }
+          return true;
+        })
         .collect(Collectors.toList());
 
     return transformedSourceDirectories.isEmpty()
