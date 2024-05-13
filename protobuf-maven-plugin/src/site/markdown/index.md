@@ -489,7 +489,7 @@ executable name instead:
 </plugin>
 ```
 
-Each `binarPathPlugin` can take an optional `options` parameter which will
+Each `binaryPathPlugin` can take an optional `options` parameter which will
 be passed as an option to the plugin if specified.
 
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
