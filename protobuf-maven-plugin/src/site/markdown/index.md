@@ -515,7 +515,7 @@ specific file system path:
         <url>file:///opt/protoc/protoc-gen-grpc-java</url>
       </binaryUrlPlugin>
       <binaryUrlPlugin>
-        <url>ftp://company-server.internal/some-other-plugin.exe
+        <url>ftp://company-server.internal/some-other-plugin.exe</url>
       </binaryUrlPlugin>
       <binaryUrlPlugin>
         <url>https://some-website.net/downloads/my-cool-protoc-plugin.exe</url>
