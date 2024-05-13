@@ -59,6 +59,8 @@ public interface GenerationRequest {
 
   SourceRootRegistrar getSourceRootRegistrar();
 
+  boolean isEmbedSourcesInClassOutputs();
+
   boolean isFailOnMissingSources();
 
   boolean isFailOnMissingTargets();

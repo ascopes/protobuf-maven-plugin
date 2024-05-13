@@ -144,6 +144,11 @@ public final class SourceCodeGenerator {
     }
 
     registerSourceRoots(request);
+
+    if (request.isEmbedSourcesInClassOutputs()) {
+      embedSourcesInClassOutputs(request.getSourceRootRegistrar(), sourcePaths);
+    }
+
     return true;
   }
 
@@ -250,6 +255,19 @@ public final class SourceCodeGenerator {
       registrar.registerSourceRoot(mavenSession, directory);
     } else {
       log.debug("Not registering {} as a compilation root", directory);
+    }
+  }
+
+  private void embedSourcesInClassOutputs(
+      SourceRootRegistrar registrar,
+      Collection<ProtoFileListing> listings
+  ) throws ResolutionException {
+    for (var listing : listings) {
+      try {
+        registrar.embedListing(mavenSession, listing);
+      } catch (IOException ex) {
+        throw new ResolutionException("Failed to embed " + listing.getProtoFilesRoot(), ex);
+      }
     }
   }
 

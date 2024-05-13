@@ -223,6 +223,19 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   DependencyResolutionDepth dependencyResolutionDepth;
 
   /**
+   * Set whether to attach all compiled protobuf sources to the output of this
+   * Maven project so that they are included in any generated JAR.
+   *
+   * <p>Note that if you are using dependencies as sources, then those will also
+   * be attached, and may have license implications. Therefore, this will default
+   * to {@code false}.
+   *
+   * @since 2.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean embedSourcesInClassOutputs;
+
+  /**
    * Whether to fail on missing sources.
    *
    * <p>If no sources are detected, it is usually a sign that this plugin
@@ -638,6 +651,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
             .stream()
             .map(File::toPath)
             .collect(Collectors.toList()))
+        .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
         .isFailOnMissingSources(failOnMissingSources)
         .isFailOnMissingTargets(failOnMissingTargets)
         .isFatalWarnings(fatalWarnings)
