@@ -61,12 +61,19 @@ jobs:
           server-password: OSSRH_TOKEN
           gpg-passphrase: GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-      
+
       - name: Configure Git
         if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           git config user.name '${{ github.actor }}'
           git config user.email '${{ github.actor }}@users.noreply.github.com'
+
+      - name: Install dependencies
+        run: |-
+          # Install protoc so those integration tests also run. This increases the reported
+          # coverage on the generated site to a more accurate value.
+          sudo apt update -q
+          sudo apt install protobuf-compiler -qy
 
       - name: Determine release version details
         run: |-
@@ -83,23 +90,17 @@ jobs:
             release_version='${{ inputs.version }}'
           fi
           echo "release_version=${release_version}" >> "${GITHUB_ENV}"
-            
+
       - name: Build and run tests
         if: ${{ ! inputs.dry-run }}
-        run: |-
-          # Install protoc so those integration tests also run. This increases the reported
-          # coverage on the generated site to a more accurate value.
-          sudo apt update -q
-          sudo apt install protobuf-compiler -qy
-          ./mvnw clean verify site
+        run: ./mvnw clean verify
 
       - name: Create staging release on Nexus
         if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           ./mvnw -B -e \
               -DdryRun='${{ inputs.dry-run }}' \
-              -DskipTests -Dinvoker.skip \
-              -Darguments="-DskipTests -Dinvoker.skip" \
+              -Darguments=-DskipTests \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
@@ -123,6 +124,22 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+
+      - name: Generate site
+        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
+        run: |-
+          # Skip checkout if we didn't promote anything, as this enables us to
+          # regenerate docs with bugfixes after the release if needed.
+          if [[ ${{ inputs.skip-maven-central-staging }} = true ]]; then
+            ./mvnw versions:set -DnewVersion="${release_version}"
+          else
+            git fetch --tags origin "v${release_version}"
+            git checkout FETCH_HEAD
+            # Attempt to re-generate the coverage reports.
+            ./mvnw test integration-test
+          fi
+
+          ./mvnw site -DskipTests -Dinvoker.skip -Dcheckstyle.skip
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
