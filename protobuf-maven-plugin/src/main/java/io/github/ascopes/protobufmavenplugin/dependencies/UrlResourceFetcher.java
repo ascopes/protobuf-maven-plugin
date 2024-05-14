@@ -100,9 +100,13 @@ public final class UrlResourceFetcher {
   }
 
   private String userAgent() {
-    return "protobuf-maven-plugin/" + getClass().getPackage().getImplementationVersion()
-        + " Apache-Maven/" + Maven.class.getPackage().getImplementationVersion()
-        + " Java/" + Runtime.version().toString();
+    return "io.github.ascopes.protobuf-maven-plugin/" + version(getClass())
+        + " org.apache.maven/" + version(Maven.class)
+        + " (Java " + Runtime.version().toString() + ")";
+  }
+
+  private String version(Class<?> cls) {
+    return cls.getPackage().getImplementationVersion();
   }
 
   private Path targetFile(URL url, String extension) {
