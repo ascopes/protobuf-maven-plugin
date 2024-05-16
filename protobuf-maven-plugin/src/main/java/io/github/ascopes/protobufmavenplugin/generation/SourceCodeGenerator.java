@@ -195,7 +195,7 @@ public final class SourceCodeGenerator {
     // depending on how dependency conflicts arise.
     return Stream.concat(sourcePathListings.stream(), importPathListings.stream())
         .distinct()
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private Collection<ProtoFileListing> discoverCompilableSources(
@@ -276,6 +276,6 @@ public final class SourceCodeGenerator {
   private static <T> List<T> concat(Collection<? extends T>... collections) {
     return Stream.of(collections)
         .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
   }
 }

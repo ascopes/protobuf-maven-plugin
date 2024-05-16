@@ -64,7 +64,7 @@ public final class HostSystem {
             .map(FileUtils::normalize)
             .distinct()
             .filter(Files::isDirectory)
-            .collect(Collectors.toList()));
+            .collect(Collectors.toUnmodifiableList()));
     pathExt = tokenizeFilePath(
         environmentVariables.getOrDefault("PATHEXT", ""),
         extensions -> extensions

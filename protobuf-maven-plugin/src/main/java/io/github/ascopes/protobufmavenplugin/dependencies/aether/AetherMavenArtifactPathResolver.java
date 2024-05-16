@@ -141,7 +141,7 @@ public class AetherMavenArtifactPathResolver {
               includeProjectDependencies ? getProjectDependencies() : Stream.of(),
               artifacts.stream().map(createDependency(defaultDependencyResolutionDepth))
           )
-          .collect(Collectors.toList());
+          .collect(Collectors.toUnmodifiableList());
 
       log.debug(
           "Attempting to resolve the following dependencies in this pass: {}",
@@ -157,7 +157,7 @@ public class AetherMavenArtifactPathResolver {
           .map(ArtifactResult::getArtifact)
           .map(Artifact::getFile)
           .map(File::toPath)
-          .collect(Collectors.toList());
+          .collect(Collectors.toUnmodifiableList());
 
     } catch (DependencyResolutionException ex) {
       throw new ResolutionException("Failed to resolve dependencies", ex);
@@ -218,7 +218,7 @@ public class AetherMavenArtifactPathResolver {
             null,
             null
         ))
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
 
     return new Dependency(
         artifact,

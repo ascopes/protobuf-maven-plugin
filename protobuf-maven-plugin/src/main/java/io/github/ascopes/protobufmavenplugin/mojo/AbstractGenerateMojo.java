@@ -650,7 +650,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .importPaths(nonNullList(importPaths)
             .stream()
             .map(File::toPath)
-            .collect(Collectors.toList()))
+            .collect(Collectors.toUnmodifiableList()))
         .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
         .isFailOnMissingSources(failOnMissingSources)
         .isFailOnMissingTargets(failOnMissingTargets)
@@ -688,7 +688,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .stream()
         .flatMap(Collection::stream)
         .map(File::toPath)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
 
     var finalDirectories = transformedSourceDirectories.isEmpty()
         ? List.of(defaultSourceDirectory())
@@ -702,7 +702,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
           }
           return true;
         })
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private String protocVersion() {

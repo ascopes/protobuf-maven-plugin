@@ -125,7 +125,7 @@ public final class ProtoSourceResolver implements AutoCloseable {
         .distinct()
         .map(this::submitProtoFileListingTask)
         // Terminal operation to ensure all are scheduled prior to joining.
-        .collect(Collectors.toList())
+        .collect(Collectors.toUnmodifiableList())
         .forEach(task -> {
           try {
             task.get().ifPresent(results::add);
