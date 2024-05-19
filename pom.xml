@@ -102,7 +102,6 @@
     <immutables.version>2.10.1</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.2</junit.version>
-    <kotlin.version>1.9.24</kotlin.version>
     <maven-core.version>3.9.6</maven-core.version>
     <maven-plugin-annotations.version>3.13.0</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.6</maven-plugin-api.version>
@@ -187,15 +186,6 @@
         <groupId>org.immutables</groupId>
         <artifactId>value</artifactId>
         <version>${immutables.version}</version>
-      </dependency>
-
-      <dependency>
-        <!-- Used for integration tests that invoke the Kotlin compiler only. -->
-        <groupId>org.jetbrains.kotlin</groupId>
-        <artifactId>kotlin-bom</artifactId>
-        <version>${kotlin.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
       </dependency>
 
       <dependency>
@@ -535,29 +525,6 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco-maven-plugin.version}</version>
-        </plugin>
-
-        <plugin>
-          <!-- Used in integration tests only. -->
-          <groupId>org.jetbrains.kotlin</groupId>
-          <artifactId>kotlin-maven-plugin</artifactId>
-          <version>${kotlin.version}</version>
-
-          <executions>
-            <execution>
-              <id>compile</id>
-              <goals>
-                <goal>compile</goal>
-              </goals>
-            </execution>
-
-            <execution>
-              <id>test-compile</id>
-              <goals>
-                <goal>test-compile</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
