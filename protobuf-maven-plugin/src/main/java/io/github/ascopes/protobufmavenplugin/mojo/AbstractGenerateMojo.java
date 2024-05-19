@@ -628,10 +628,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
             .enabledLanguages(enabledLanguages)
             .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
             .importDependencies(nonNullList(importDependencies))
-            .importPaths(
-                nonNullList(importPaths).stream()
-                    .map(File::toPath)
-                    .collect(Collectors.toUnmodifiableList()))
+            .importPaths(importPaths())
             .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
             .isFailOnMissingSources(failOnMissingSources)
             .isFailOnMissingTargets(failOnMissingTargets)
@@ -684,6 +681,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
               }
               return true;
             })
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  private Collection<Path> importPaths() {
+    return nonNullList(importPaths).stream()
+        .map(File::toPath)
         .collect(Collectors.toUnmodifiableList());
   }
 
