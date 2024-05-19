@@ -70,8 +70,7 @@ public final class SourceCodeGenerator {
       BinaryPluginResolver binaryPluginResolver,
       JvmPluginResolver jvmPluginResolver,
       ProtoSourceResolver protoListingResolver,
-      CommandLineExecutor commandLineExecutor
-  ) {
+      CommandLineExecutor commandLineExecutor) {
     this.mavenSession = mavenSession;
     this.artifactPathResolver = artifactPathResolver;
     this.protocResolver = protocResolver;
@@ -90,8 +89,9 @@ public final class SourceCodeGenerator {
 
     if (sourcePaths.isEmpty()) {
       if (request.isFailOnMissingSources()) {
-        log.error("No protobuf sources found. If this is unexpected, check your "
-            + "configuration and try again.");
+        log.error(
+            "No protobuf sources found. If this is unexpected, check your "
+                + "configuration and try again.");
         return false;
       } else {
         log.warn("No protobuf sources found; nothing to do!");
@@ -101,8 +101,9 @@ public final class SourceCodeGenerator {
 
     if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()) {
       if (request.isFailOnMissingTargets()) {
-        log.error("No languages are enabled and no plugins found, check your "
-            + "configuration and try again.");
+        log.error(
+            "No languages are enabled and no plugins found, check your "
+                + "configuration and try again.");
         return false;
       } else {
         log.warn("No languages are enabled and no plugins found; nothing to do!");
@@ -112,27 +113,28 @@ public final class SourceCodeGenerator {
 
     createOutputDirectories(request);
 
-    var argLineBuilder = new ArgLineBuilder(protocPath)
-        .fatalWarnings(request.isFatalWarnings())
-        .importPaths(importPaths
-            .stream()
-            .map(ProtoFileListing::getProtoFilesRoot)
-            .collect(Collectors.toCollection(LinkedHashSet::new)))
-        .importPaths(request.getSourceRoots())
-        .plugins(resolvedPlugins, request.getOutputDirectory());
+    var argLineBuilder =
+        new ArgLineBuilder(protocPath)
+            .fatalWarnings(request.isFatalWarnings())
+            .importPaths(
+                importPaths.stream()
+                    .map(ProtoFileListing::getProtoFilesRoot)
+                    .collect(Collectors.toCollection(LinkedHashSet::new)))
+            .importPaths(request.getSourceRoots())
+            .plugins(resolvedPlugins, request.getOutputDirectory());
 
-    request.getEnabledLanguages()
-        .forEach(language -> argLineBuilder.generateCodeFor(
-            language,
-            request.getOutputDirectory(),
-            request.isLiteEnabled()
-        ));
+    request
+        .getEnabledLanguages()
+        .forEach(
+            language ->
+                argLineBuilder.generateCodeFor(
+                    language, request.getOutputDirectory(), request.isLiteEnabled()));
 
-    var sourceFiles = sourcePaths
-        .stream()
-        .map(ProtoFileListing::getProtoFiles)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    var sourceFiles =
+        sourcePaths.stream()
+            .map(ProtoFileListing::getProtoFiles)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
     if (!logProtocVersion(protocPath)) {
       log.error("Unable to execute protoc. Ensure the binary is compatible for this platform!");
@@ -153,7 +155,8 @@ public final class SourceCodeGenerator {
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
-    return protocResolver.resolve(request.getProtocVersion())
+    return protocResolver
+        .resolve(request.getProtocVersion())
         .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
   }
 
@@ -162,33 +165,27 @@ public final class SourceCodeGenerator {
     return commandLineExecutor.execute(args);
   }
 
-  private Collection<ResolvedProtocPlugin> discoverPlugins(
-      GenerationRequest request
-  ) throws IOException, ResolutionException {
+  private Collection<ResolvedProtocPlugin> discoverPlugins(GenerationRequest request)
+      throws IOException, ResolutionException {
     return concat(
-        binaryPluginResolver
-            .resolveMavenPlugins(request.getBinaryMavenPlugins()),
-        binaryPluginResolver
-            .resolvePathPlugins(request.getBinaryPathPlugins()),
-        binaryPluginResolver
-            .resolveUrlPlugins(request.getBinaryUrlPlugins()),
-        jvmPluginResolver
-            .resolveMavenPlugins(request.getJvmMavenPlugins())
-    );
+        binaryPluginResolver.resolveMavenPlugins(request.getBinaryMavenPlugins()),
+        binaryPluginResolver.resolvePathPlugins(request.getBinaryPathPlugins()),
+        binaryPluginResolver.resolveUrlPlugins(request.getBinaryUrlPlugins()),
+        jvmPluginResolver.resolveMavenPlugins(request.getJvmMavenPlugins()));
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(
-      Collection<ProtoFileListing> sourcePathListings,
-      GenerationRequest request
-  ) throws IOException, ResolutionException {
-    var artifactPaths = artifactPathResolver.resolveDependencies(
-        request.getImportDependencies(),
-        request.getDependencyResolutionDepth(),
-        !request.isIgnoreProjectDependencies()
-    );
+      Collection<ProtoFileListing> sourcePathListings, GenerationRequest request)
+      throws IOException, ResolutionException {
+    var artifactPaths =
+        artifactPathResolver.resolveDependencies(
+            request.getImportDependencies(),
+            request.getDependencyResolutionDepth(),
+            !request.isIgnoreProjectDependencies());
 
-    var importPathListings = protoListingResolver
-        .createProtoFileListings(concat(request.getImportPaths(), artifactPaths));
+    var importPathListings =
+        protoListingResolver.createProtoFileListings(
+            concat(request.getImportPaths(), artifactPaths));
 
     // Use the source paths here as well and use them first to give them precedence. This works
     // around GH-172 where we can end up with different versions on the import and source paths
@@ -198,31 +195,24 @@ public final class SourceCodeGenerator {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private Collection<ProtoFileListing> discoverCompilableSources(
-      GenerationRequest request
-  ) throws IOException, ResolutionException {
+  private Collection<ProtoFileListing> discoverCompilableSources(GenerationRequest request)
+      throws IOException, ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
-    var sourcePathsListings = protoListingResolver
-        .createProtoFileListings(request.getSourceRoots());
+    var sourcePathsListings =
+        protoListingResolver.createProtoFileListings(request.getSourceRoots());
 
-    var sourceDependencies = artifactPathResolver.resolveDependencies(
-        request.getSourceDependencies(),
-        request.getDependencyResolutionDepth(),
-        false
-    );
+    var sourceDependencies =
+        artifactPathResolver.resolveDependencies(
+            request.getSourceDependencies(), request.getDependencyResolutionDepth(), false);
 
-    var sourceDependencyListings = protoListingResolver
-        .createProtoFileListings(sourceDependencies);
+    var sourceDependencyListings = protoListingResolver.createProtoFileListings(sourceDependencies);
 
     var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
 
     log.info(
         "Generating source code for {} protobuf file(s) from {} file tree(s)",
-        sourcePaths.stream()
-            .mapToInt(sourcePath -> sourcePath.getProtoFiles().size())
-            .sum(),
-        sourcePaths.size()
-    );
+        sourcePaths.stream().mapToInt(sourcePath -> sourcePath.getProtoFiles().size()).sum(),
+        sourcePaths.size());
 
     return sourcePaths;
   }
@@ -237,11 +227,13 @@ public final class SourceCodeGenerator {
     // edge case entirely.
     FileUtils.getFileExtension(directory)
         .filter(".jar"::equalsIgnoreCase)
-        .ifPresent(ext -> {
-          throw new IllegalArgumentException(
-              "The output directory '" + directory
-                  + "' cannot be a path with a JAR file extension");
-        });
+        .ifPresent(
+            ext -> {
+              throw new IllegalArgumentException(
+                  "The output directory '"
+                      + directory
+                      + "' cannot be a path with a JAR file extension");
+            });
 
     Files.createDirectories(directory);
   }
@@ -259,9 +251,8 @@ public final class SourceCodeGenerator {
   }
 
   private void embedSourcesInClassOutputs(
-      SourceRootRegistrar registrar,
-      Collection<ProtoFileListing> listings
-  ) throws ResolutionException {
+      SourceRootRegistrar registrar, Collection<ProtoFileListing> listings)
+      throws ResolutionException {
     for (var listing : listings) {
       try {
         registrar.embedListing(mavenSession, listing);

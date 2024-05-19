@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Definition of Maven MOJOs that make up this plugin.
- */
+/** Definition of Maven MOJOs that make up this plugin. */
 package io.github.ascopes.protobufmavenplugin.mojo;

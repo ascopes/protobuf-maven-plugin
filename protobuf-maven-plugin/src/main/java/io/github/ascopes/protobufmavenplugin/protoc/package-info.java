@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Integration with and management of {@code protoc} itself.
- */
+/** Integration with and management of {@code protoc} itself. */
 package io.github.ascopes.protobufmavenplugin.protoc;

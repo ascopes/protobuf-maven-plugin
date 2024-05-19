@@ -73,16 +73,15 @@ public class AetherMavenArtifactPathResolver {
   public AetherMavenArtifactPathResolver(
       MavenSession mavenSession,
       RepositorySystem repositorySystem,
-      ArtifactHandler artifactHandler
-  ) {
+      ArtifactHandler artifactHandler) {
     this.mavenSession = mavenSession;
     this.repositorySystem = repositorySystem;
     this.artifactHandler = artifactHandler;
 
     var defaultRepositorySession = mavenSession.getRepositorySession();
     repositorySession = new ProtobufMavenPluginRepositorySession(defaultRepositorySession);
-    remoteRepositories = RepositoryUtils
-        .toRepos(mavenSession.getProjectBuildingRequest().getRemoteRepositories());
+    remoteRepositories =
+        RepositoryUtils.toRepos(mavenSession.getProjectBuildingRequest().getRemoteRepositories());
 
     log.debug("Injected artifact handler {}", artifactHandler);
     log.debug("Detected remote repositories as {}", remoteRepositories);
@@ -97,20 +96,21 @@ public class AetherMavenArtifactPathResolver {
    */
   public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
     var repositorySession = mavenSession.getRepositorySession();
-    var aetherArtifact = new DefaultArtifact(
-        artifact.getGroupId(),
-        artifact.getArtifactId(),
-        Optional.ofNullable(artifact.getClassifier()).orElseGet(artifactHandler::getClassifier),
-        Optional.ofNullable(artifact.getType()).orElseGet(artifactHandler::getExtension),
-        artifact.getVersion()
-    );
+    var aetherArtifact =
+        new DefaultArtifact(
+            artifact.getGroupId(),
+            artifact.getArtifactId(),
+            Optional.ofNullable(artifact.getClassifier()).orElseGet(artifactHandler::getClassifier),
+            Optional.ofNullable(artifact.getType()).orElseGet(artifactHandler::getExtension),
+            artifact.getVersion());
 
     log.info("Resolving artifact {}", aetherArtifact);
 
     var artifactRequest = new ArtifactRequest(aetherArtifact, remoteRepositories, null);
 
     try {
-      return repositorySystem.resolveArtifact(repositorySession, artifactRequest)
+      return repositorySystem
+          .resolveArtifact(repositorySession, artifactRequest)
           .getArtifact()
           .getFile()
           .toPath();
@@ -123,35 +123,34 @@ public class AetherMavenArtifactPathResolver {
   /**
    * Resolve all given dependencies based on their resolution depth semantics.
    *
-   * @param artifacts                        the artifacts to resolve.
+   * @param artifacts the artifacts to resolve.
    * @param defaultDependencyResolutionDepth the project default dependency resolution depth.
-   * @param includeProjectDependencies       whether to also resolve project dependencies and return
-   *                                         them in the result.
+   * @param includeProjectDependencies whether to also resolve project dependencies and return them
+   *     in the result.
    * @return the paths to each resolved artifact.
    * @throws ResolutionException if resolution failed in the backend.
    */
   public Collection<Path> resolveDependencies(
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,
-      boolean includeProjectDependencies
-  ) throws ResolutionException {
+      boolean includeProjectDependencies)
+      throws ResolutionException {
     try {
-      var dependenciesToResolve = Stream
-          .concat(
-              includeProjectDependencies ? getProjectDependencies() : Stream.of(),
-              artifacts.stream().map(createDependency(defaultDependencyResolutionDepth))
-          )
-          .collect(Collectors.toUnmodifiableList());
+      var dependenciesToResolve =
+          Stream.concat(
+                  includeProjectDependencies ? getProjectDependencies() : Stream.of(),
+                  artifacts.stream().map(createDependency(defaultDependencyResolutionDepth)))
+              .collect(Collectors.toUnmodifiableList());
 
       log.debug(
           "Attempting to resolve the following dependencies in this pass: {}",
-          dependenciesToResolve
-      );
+          dependenciesToResolve);
 
       var collectRequest = new CollectRequest(dependenciesToResolve, null, remoteRepositories);
       var dependencyRequest = new DependencyRequest(collectRequest, null);
 
-      return repositorySystem.resolveDependencies(repositorySession, dependencyRequest)
+      return repositorySystem
+          .resolveDependencies(repositorySession, dependencyRequest)
           .getArtifactResults()
           .stream()
           .map(ArtifactResult::getArtifact)
@@ -165,9 +164,7 @@ public class AetherMavenArtifactPathResolver {
   }
 
   private Stream<Dependency> getProjectDependencies() {
-    return mavenSession.getCurrentProject().getDependencies()
-        .stream()
-        .map(this::createDependency);
+    return mavenSession.getCurrentProject().getDependencies().stream().map(this::createDependency);
   }
 
   private Artifact createArtifact(MavenArtifact artifact) {
@@ -176,22 +173,20 @@ public class AetherMavenArtifactPathResolver {
         artifact.getArtifactId(),
         effectiveClassifier(artifact.getClassifier()),
         effectiveExtension(artifact.getType()),
-        artifact.getVersion()
-    );
+        artifact.getVersion());
   }
 
   private Function<MavenArtifact, Dependency> createDependency(
-      DependencyResolutionDepth defaultDependencyResolutionDepth
-  ) {
+      DependencyResolutionDepth defaultDependencyResolutionDepth) {
     return mavenArtifact -> {
-      var effectiveDependencyResolutionDepth = requireNonNullElse(
-          mavenArtifact.getDependencyResolutionDepth(),
-          defaultDependencyResolutionDepth
-      );
+      var effectiveDependencyResolutionDepth =
+          requireNonNullElse(
+              mavenArtifact.getDependencyResolutionDepth(), defaultDependencyResolutionDepth);
 
-      var exclusions = effectiveDependencyResolutionDepth == DependencyResolutionDepth.DIRECT
-          ? List.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
-          : List.<Exclusion>of();
+      var exclusions =
+          effectiveDependencyResolutionDepth == DependencyResolutionDepth.DIRECT
+              ? List.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
+              : List.<Exclusion>of();
 
       var artifact = createArtifact(mavenArtifact);
 
@@ -199,33 +194,25 @@ public class AetherMavenArtifactPathResolver {
     };
   }
 
-  private Dependency createDependency(
-      org.apache.maven.model.Dependency mavenDependency
-  ) {
-    var artifact = new DefaultArtifact(
-        mavenDependency.getGroupId(),
-        mavenDependency.getArtifactId(),
-        effectiveClassifier(mavenDependency.getClassifier()),
-        effectiveExtension(mavenDependency.getType()),
-        mavenDependency.getVersion()
-    );
+  private Dependency createDependency(org.apache.maven.model.Dependency mavenDependency) {
+    var artifact =
+        new DefaultArtifact(
+            mavenDependency.getGroupId(),
+            mavenDependency.getArtifactId(),
+            effectiveClassifier(mavenDependency.getClassifier()),
+            effectiveExtension(mavenDependency.getType()),
+            mavenDependency.getVersion());
 
-    var exclusions = mavenDependency.getExclusions()
-        .stream()
-        .map(mavenExclusion -> new Exclusion(
-            mavenExclusion.getGroupId(),
-            mavenExclusion.getArtifactId(),
-            null,
-            null
-        ))
-        .collect(Collectors.toUnmodifiableList());
+    var exclusions =
+        mavenDependency.getExclusions().stream()
+            .map(
+                mavenExclusion ->
+                    new Exclusion(
+                        mavenExclusion.getGroupId(), mavenExclusion.getArtifactId(), null, null))
+            .collect(Collectors.toUnmodifiableList());
 
     return new Dependency(
-        artifact,
-        mavenDependency.getScope(),
-        mavenDependency.isOptional(),
-        exclusions
-    );
+        artifact, mavenDependency.getScope(), mavenDependency.isOptional(), exclusions);
   }
 
   @Nullable

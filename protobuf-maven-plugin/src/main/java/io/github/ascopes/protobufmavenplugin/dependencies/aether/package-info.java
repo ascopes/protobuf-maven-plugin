@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Interoperability with Eclipse Aether for underlying dependency and artifact resolution.
- */
+/** Interoperability with Eclipse Aether for underlying dependency and artifact resolution. */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;

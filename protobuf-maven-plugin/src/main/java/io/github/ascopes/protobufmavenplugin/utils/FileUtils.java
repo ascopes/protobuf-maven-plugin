@@ -50,9 +50,7 @@ public final class FileUtils {
 
     // -1 means no extension, 0 means the file name starts with a dot (e.g. `.gitignore'),
     // so we don't want to extract a file extension from that.
-    return lastDotIndex <= 0
-        ? fileName
-        : fileName.substring(0, lastDotIndex);
+    return lastDotIndex <= 0 ? fileName : fileName.substring(0, lastDotIndex);
   }
 
   public static Optional<String> getFileExtension(Path path) {
@@ -61,21 +59,18 @@ public final class FileUtils {
 
     // -1 means no extension, 0 means the file name starts with a dot (e.g. `.gitignore'),
     // so we don't want to extract a file extension from that.
-    return lastDotIndex <= 0
-        ? Optional.empty()
-        : Optional.of(fileName.substring(lastDotIndex));
+    return lastDotIndex <= 0 ? Optional.empty() : Optional.of(fileName.substring(lastDotIndex));
   }
 
   public static FileSystemProvider getFileSystemProvider(String scheme) {
-    return FileSystemProvider
-        .installedProviders()
-        .stream()
+    return FileSystemProvider.installedProviders().stream()
         .filter(provider -> provider.getScheme().equalsIgnoreCase(scheme))
         .peek(provider -> log.debug("Found {} file system provider {}", scheme, provider))
         .findFirst()
-        .orElseThrow(() -> new FileSystemNotFoundException(
-            "No file system provider for " + scheme + " was found"
-        ));
+        .orElseThrow(
+            () ->
+                new FileSystemNotFoundException(
+                    "No file system provider for " + scheme + " was found"));
   }
 
   public static void makeExecutable(Path file) throws IOException {

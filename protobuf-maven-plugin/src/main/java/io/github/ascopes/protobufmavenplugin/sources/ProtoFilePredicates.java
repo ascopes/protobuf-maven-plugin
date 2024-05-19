@@ -32,8 +32,7 @@ public final class ProtoFilePredicates {
   }
 
   public static boolean isProtoFile(Path file) {
-    return Files.isRegularFile(file) && FileUtils.getFileExtension(file)
-        .filter(".proto"::equalsIgnoreCase)
-        .isPresent();
+    return Files.isRegularFile(file)
+        && FileUtils.getFileExtension(file).filter(".proto"::equalsIgnoreCase).isPresent();
   }
 }

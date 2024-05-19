@@ -60,7 +60,7 @@ from this script, including AssertJ, JUnit, etc.
 
 In addition, the following identifiers will be made available:
 
-| Identifier            | Type           | Description                                        |
+|      Identifier       |      Type      |                    Description                     |
 |-----------------------|----------------|----------------------------------------------------|
 | `basedir`             | `java.io.File` | The directory the IT project is being called from. |
 | `localRepositoryPath` | `java.io.File` | The absolute path to the local Maven repository.   |

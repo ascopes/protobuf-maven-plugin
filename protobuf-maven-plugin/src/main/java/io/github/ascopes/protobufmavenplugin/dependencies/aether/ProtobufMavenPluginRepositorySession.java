@@ -28,8 +28,7 @@ import org.eclipse.aether.RepositorySystemSession;
  * @author Ashley Scopes
  * @since 2.0.3
  */
-final class ProtobufMavenPluginRepositorySession
-    extends AbstractForwardingRepositorySystemSession {
+final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepositorySystemSession {
 
   private final RepositorySystemSession delegate;
 

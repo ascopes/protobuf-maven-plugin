@@ -50,8 +50,7 @@ public @interface UsesSystemProperties {
     public void beforeEach(ExtensionContext extensionContext) {
       log.info(
           "Replacing system properties with empty map for duration of test in {}",
-          extensionContext.getTestMethod()
-      );
+          extensionContext.getTestMethod());
       properties = System.getProperties();
       System.setProperties(new Properties());
     }
@@ -61,8 +60,7 @@ public @interface UsesSystemProperties {
       System.setProperties(properties);
       log.info(
           "Restored original system properties since completion of test in {}",
-          extensionContext.getTestMethod()
-      );
+          extensionContext.getTestMethod());
     }
   }
 }

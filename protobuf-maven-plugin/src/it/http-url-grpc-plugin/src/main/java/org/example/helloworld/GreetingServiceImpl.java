@@ -21,9 +21,8 @@ import io.grpc.stub.StreamObserver;
 public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImplBase {
   @Override
   public void greet(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
-    var response = GreetingResponse.newBuilder()
-        .setText("Hello, " + request.getName() + "!")
-        .build();
+    var response =
+        GreetingResponse.newBuilder().setText("Hello, " + request.getName() + "!").build();
 
     responseObserver.onNext(response);
     responseObserver.onCompleted();

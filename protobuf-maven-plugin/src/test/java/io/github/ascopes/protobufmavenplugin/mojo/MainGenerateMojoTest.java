@@ -35,7 +35,9 @@ class MainGenerateMojoTest extends AbstractGenerateMojoTestTemplate<MainGenerate
 
   @Override
   Path expectedDefaultSourceDirectory() {
-    return mojo.mavenProject.getBasedir().toPath()
+    return mojo.mavenProject
+        .getBasedir()
+        .toPath()
         .resolve("src")
         .resolve("main")
         .resolve("protobuf");

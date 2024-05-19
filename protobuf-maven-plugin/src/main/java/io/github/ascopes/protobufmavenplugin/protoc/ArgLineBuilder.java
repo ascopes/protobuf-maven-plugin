@@ -116,10 +116,7 @@ public final class ArgLineBuilder {
 
     @Override
     public void addArgsTo(List<String> list) {
-      var flag = "--" + language.getFlagName() + "_out"
-          + "="
-          + (lite ? "lite:" : "")
-          + outputPath;
+      var flag = "--" + language.getFlagName() + "_out" + "=" + (lite ? "lite:" : "") + outputPath;
 
       list.add(flag);
     }
@@ -141,7 +138,8 @@ public final class ArgLineBuilder {
       // to inject this flag to be consistent.
       list.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
       list.add("--" + plugin.getId() + "_out=" + outputPath);
-      plugin.getOptions()
+      plugin
+          .getOptions()
           .map(options -> "--" + plugin.getId() + "_opt=" + options)
           .ifPresent(list::add);
     }

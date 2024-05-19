@@ -35,7 +35,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-
 /**
  * @author Ashley Scopes
  */
@@ -48,43 +47,33 @@ class FileUtilsTest {
     // Given
     var cwd = Path.of("");
 
-    var somethingOrOther = cwd
-        .resolve("foo")
-        .resolve("bar")
-        .resolve("baz")
-        .resolve("..")
-        .resolve("..")
-        .resolve("bork");
+    var somethingOrOther =
+        cwd.resolve("foo")
+            .resolve("bar")
+            .resolve("baz")
+            .resolve("..")
+            .resolve("..")
+            .resolve("bork");
 
-    var expectedResult = cwd
-        .normalize()
-        .toAbsolutePath()
-        .resolve("foo")
-        .resolve("bork");
+    var expectedResult = cwd.normalize().toAbsolutePath().resolve("foo").resolve("bork");
 
     // When
     var actualResult = FileUtils.normalize(somethingOrOther);
 
     // Then
-    assertThat(actualResult)
-        .isNormalized()
-        .isAbsolute()
-        .isEqualTo(expectedResult);
+    assertThat(actualResult).isNormalized().isAbsolute().isEqualTo(expectedResult);
   }
 
   @DisplayName(".getFileNameWithoutExtension(Path) returns the expected result")
   @CsvSource({
-      "foo.bar,    foo",
-      "foo.BAR,    foo",
-      "    x.y,      x",
-      " .yzabc, .yzabc",
+    "foo.bar,    foo",
+    "foo.BAR,    foo",
+    "    x.y,      x",
+    " .yzabc, .yzabc",
   })
   @ParameterizedTest(name = ".getFileNameWithoutExtension(\".../{0}\") returns \"{1}\"")
   void getFileNameWithoutExtensionReturnsTheExpectedValue(
-      String fileName,
-      String expected,
-      @TempDir Path tempDir
-  ) {
+      String fileName, String expected, @TempDir Path tempDir) {
     // Given
     var someFile = tempDir.resolve(fileName);
 
@@ -97,18 +86,15 @@ class FileUtilsTest {
 
   @DisplayName(".getFileExtension(Path) returns the expected result")
   @CsvSource({
-      "foo.bar,   .bar",
-      "foo.BAR,   .BAR",
-      "    x.y,     .y",
-      " .yzabc,       ",
-      "      '',      ",
+    "foo.bar,   .bar",
+    "foo.BAR,   .BAR",
+    "    x.y,     .y",
+    " .yzabc,       ",
+    "      '',      ",
   })
   @ParameterizedTest(name = ".getFileExtension(\".../{0}\") returns \"{1}\"")
   void getFileExtensionReturnsTheExpectedValue(
-      String fileName,
-      @Nullable String expected,
-      @TempDir Path tempDir
-  ) {
+      String fileName, @Nullable String expected, @TempDir Path tempDir) {
     // Given
     var someFile = tempDir.resolve(fileName);
 
@@ -116,8 +102,7 @@ class FileUtilsTest {
     var actual = FileUtils.getFileExtension(someFile);
 
     // Then
-    assertThat(actual.orElse(null))
-        .isEqualTo(expected);
+    assertThat(actual.orElse(null)).isEqualTo(expected);
   }
 
   @DisplayName(".getFileSystemProvider(String) returns the file system provider")
@@ -125,8 +110,7 @@ class FileUtilsTest {
   @ParameterizedTest(name = "for scheme \"{0}\"")
   void getFileSystemProviderReturnsTheFileSystemProvider(String scheme) {
     // Then
-    assertThatNoException()
-        .isThrownBy(() -> FileUtils.getFileSystemProvider(scheme));
+    assertThatNoException().isThrownBy(() -> FileUtils.getFileSystemProvider(scheme));
 
     // Then
     assertThat(FileUtils.getFileSystemProvider(scheme).getScheme()).isEqualToIgnoringCase(scheme);
@@ -162,9 +146,7 @@ class FileUtilsTest {
       FileUtils.makeExecutable(file);
 
       // Then
-      assertThat(file)
-          .isRegularFile()
-          .isExecutable();
+      assertThat(file).isRegularFile().isExecutable();
     }
   }
 
@@ -179,17 +161,14 @@ class FileUtilsTest {
       FileUtils.makeExecutable(file);
 
       // Then
-      assertThat(file)
-          .isRegularFile()
-          .isExecutable();
+      assertThat(file).isRegularFile().isExecutable();
     }
   }
 
   @DisplayName(".changeRelativePath produces the expected result on the same file system")
   @Test
-  void changeRelativePathProducesTheExpectedResultOnTheSameFileSystem(
-      @TempDir Path tempDir
-  ) throws IOException {
+  void changeRelativePathProducesTheExpectedResultOnTheSameFileSystem(@TempDir Path tempDir)
+      throws IOException {
     // Given
     var dir1 = tempDir.resolve("foo").resolve("bar").resolve("baz");
     var dir2 = tempDir.resolve("do").resolve("ray").resolve("me");
@@ -201,18 +180,15 @@ class FileUtilsTest {
     var actualPath = FileUtils.changeRelativePath(dir2, dir1, existingPath);
 
     // Then
-    assertThat(actualPath)
-        .isEqualTo(dir2.resolve("some").resolve("file.txt"));
+    assertThat(actualPath).isEqualTo(dir2.resolve("some").resolve("file.txt"));
   }
 
   @DisplayName(".changeRelativePath produces the expected result across file systems")
   @Test
   void changeRelativePathProducesTheExpectedResultAcrossFileSystems() throws IOException {
     // Given
-    try (
-        var fs1 = TestFileSystem.linux();
-        var fs2 = TestFileSystem.windows()
-    ) {
+    try (var fs1 = TestFileSystem.linux();
+        var fs2 = TestFileSystem.windows()) {
       var dir1 = fs1.getRoot().resolve("foo").resolve("bar").resolve("baz");
       var dir2 = fs2.getRoot().resolve("do").resolve("ray").resolve("me");
       var existingPath = dir1.resolve("some").resolve("file.txt");
@@ -223,8 +199,7 @@ class FileUtilsTest {
       var actualPath = FileUtils.changeRelativePath(dir2, dir1, existingPath);
 
       // Then
-      assertThat(actualPath)
-          .isEqualTo(dir2.resolve("some").resolve("file.txt"));
+      assertThat(actualPath).isEqualTo(dir2.resolve("some").resolve("file.txt"));
     }
   }
 }
