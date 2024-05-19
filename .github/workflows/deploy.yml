@@ -139,7 +139,7 @@ jobs:
             ./mvnw test integration-test
           fi
 
-          ./mvnw site -DskipTests -Dinvoker.skip -Dcheckstyle.skip
+          ./mvnw site -DskipTests -Dinvoker.skip
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3

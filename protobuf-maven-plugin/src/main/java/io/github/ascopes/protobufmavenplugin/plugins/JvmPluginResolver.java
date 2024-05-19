@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Wraps a JVM-based plugin invocation using an OS-native script that calls Java.
  *
- * <p>This script can be marked as executable and passed to the {@code protoc} invocation
- * as a path to ensure the script gets called correctly. By doing this, we avoid the need to build
- * OS-native executables during the protobuf compilation process.
+ * <p>This script can be marked as executable and passed to the {@code protoc} invocation as a path
+ * to ensure the script gets called correctly. By doing this, we avoid the need to build OS-native
+ * executables during the protobuf compilation process.
  *
  * @author Ashley Scopes
  */
@@ -59,16 +59,14 @@ public final class JvmPluginResolver {
   public JvmPluginResolver(
       HostSystem hostSystem,
       AetherMavenArtifactPathResolver artifactPathResolver,
-      TemporarySpace temporarySpace
-  ) {
+      TemporarySpace temporarySpace) {
     this.hostSystem = hostSystem;
     this.artifactPathResolver = artifactPathResolver;
     this.temporarySpace = temporarySpace;
   }
 
   public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> plugins
-  ) throws IOException, ResolutionException {
+      Collection<? extends MavenProtocPlugin> plugins) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
       if (plugin.isSkip()) {
@@ -81,38 +79,35 @@ public final class JvmPluginResolver {
     return resolvedPlugins;
   }
 
-  private ResolvedProtocPlugin resolve(
-      MavenProtocPlugin plugin
-  ) throws IOException, ResolutionException {
+  private ResolvedProtocPlugin resolve(MavenProtocPlugin plugin)
+      throws IOException, ResolutionException {
 
     log.debug(
         "Resolving JVM-based Maven protoc plugin {} and generating OS-specific boostrap scripts",
-        plugin
-    );
+        plugin);
 
     var pluginId = pluginIdDigest(plugin);
     var argLine = resolveAndBuildArgLine(plugin);
 
-    var scriptPath = hostSystem.isProbablyWindows()
-        ? writeWindowsBatchScript(pluginId, argLine)
-        : writeShellScript(pluginId, argLine);
+    var scriptPath =
+        hostSystem.isProbablyWindows()
+            ? writeWindowsBatchScript(pluginId, argLine)
+            : writeShellScript(pluginId, argLine);
 
-    return ImmutableResolvedProtocPlugin
-        .builder()
+    return ImmutableResolvedProtocPlugin.builder()
         .id(pluginId)
         .path(scriptPath)
         .options(plugin.getOptions())
         .build();
   }
 
-  private List<String> resolveAndBuildArgLine(
-      MavenProtocPlugin plugin
-  ) throws ResolutionException {
+  private List<String> resolveAndBuildArgLine(MavenProtocPlugin plugin) throws ResolutionException {
 
     // Resolve dependencies first.
-    var dependencyIterator = artifactPathResolver
-        .resolveDependencies(List.of(plugin), DependencyResolutionDepth.TRANSITIVE, false)
-        .iterator();
+    var dependencyIterator =
+        artifactPathResolver
+            .resolveDependencies(List.of(plugin), DependencyResolutionDepth.TRANSITIVE, false)
+            .iterator();
 
     // First dependency is always the thing we actually want to execute,
     // so is guaranteed to be present. Marked as final to avoid checkstyle complaining
@@ -134,8 +129,7 @@ public final class JvmPluginResolver {
 
   private String buildClasspath(Iterator<Path> paths) {
     // Expectation: at least one path is in the iterator.
-    var sb = new StringBuilder()
-        .append(paths.next());
+    var sb = new StringBuilder().append(paths.next());
 
     while (paths.hasNext()) {
       sb.append(":").append(paths.next());
@@ -152,30 +146,19 @@ public final class JvmPluginResolver {
     return temporarySpace.createTemporarySpace("plugins", "jvm");
   }
 
-  private Path writeWindowsBatchScript(
-      String pluginId,
-      List<String> argLine
-  ) throws IOException {
+  private Path writeWindowsBatchScript(String pluginId, List<String> argLine) throws IOException {
     var fullScriptPath = resolvePluginScriptPath().resolve(pluginId + ".bat");
 
-    var script = "@echo off\r\n"
-        + Shlex.quoteBatchArgs(argLine)
-        + "\r\n";
+    var script = "@echo off\r\n" + Shlex.quoteBatchArgs(argLine) + "\r\n";
 
     Files.writeString(fullScriptPath, script, StandardCharsets.ISO_8859_1);
     return fullScriptPath;
   }
 
-  private Path writeShellScript(
-      String pluginId,
-      List<String> argLine
-  ) throws IOException {
+  private Path writeShellScript(String pluginId, List<String> argLine) throws IOException {
     var fullScriptPath = resolvePluginScriptPath().resolve(pluginId + ".sh");
 
-    var script = "#!/usr/bin/env sh\n"
-        + "set -eu\n"
-        + Shlex.quoteShellArgs(argLine)
-        + "\n";
+    var script = "#!/usr/bin/env sh\n" + "set -eu\n" + Shlex.quoteShellArgs(argLine) + "\n";
 
     Files.writeString(fullScriptPath, script, StandardCharsets.UTF_8);
     FileUtils.makeExecutable(fullScriptPath);

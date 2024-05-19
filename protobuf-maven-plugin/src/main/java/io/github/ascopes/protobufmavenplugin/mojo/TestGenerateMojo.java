@@ -25,18 +25,17 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Generate source code from protobuf files for use in tests.
  *
- * <p>Unlike the {@code generate} goal, these sources will only be visible
- * to tests, and will not be included in any final JAR of the project main sources.
+ * <p>Unlike the {@code generate} goal, these sources will only be visible to tests, and will not be
+ * included in any final JAR of the project main sources.
  *
- * <p>Any project dependencies using the {@code compile}, {@code provided},
- * {@code system}, or {@code test} scopes will be made available to import from protobuf sources.
+ * <p>Any project dependencies using the {@code compile}, {@code provided}, {@code system}, or
+ * {@code test} scopes will be made available to import from protobuf sources.
  *
- * <p>By default, sources will be read from {@code src/test/protobuf},
- * and generated sources will be written to {@code target/generated-test-sources/protobuf}.
+ * <p>By default, sources will be read from {@code src/test/protobuf}, and generated sources will be
+ * written to {@code target/generated-test-sources/protobuf}.
  *
- * <p>Generally, you won't need to use this. It can be useful in some more
- * specific use cases where you are only using the protobuf definitions within the context of a
- * test.
+ * <p>Generally, you won't need to use this. It can be useful in some more specific use cases where
+ * you are only using the protobuf definitions within the context of a test.
  *
  * @author Ashley Scopes
  */
@@ -46,8 +45,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresDependencyResolution = ResolutionScope.NONE,
     requiresOnline = true,
-    threadSafe = true
-)
+    threadSafe = true)
 public final class TestGenerateMojo extends AbstractGenerateMojo {
 
   @Override
@@ -57,10 +55,7 @@ public final class TestGenerateMojo extends AbstractGenerateMojo {
 
   @Override
   Path defaultSourceDirectory() {
-    return mavenProject.getBasedir().toPath()
-        .resolve("src")
-        .resolve("test")
-        .resolve("protobuf");
+    return mavenProject.getBasedir().toPath().resolve("src").resolve("test").resolve("protobuf");
   }
 
   @Override

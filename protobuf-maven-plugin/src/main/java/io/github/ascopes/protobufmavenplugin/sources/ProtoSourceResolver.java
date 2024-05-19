@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Component that can index and resolve proto files in a file tree.
  *
- * <p>In addition, it can discover proto files within archives. These results will be
- * extracted to a location within the Maven build directory to enable {@code protoc} and other
- * plugins to be able to view them without needing access to the Java NIO file system APIs.
+ * <p>In addition, it can discover proto files within archives. These results will be extracted to a
+ * location within the Maven build directory to enable {@code protoc} and other plugins to be able
+ * to view them without needing access to the Java NIO file system APIs.
  *
  * <p>This object maintains an internal work stealing thread pool to enable performing IO
  * concurrently. This should be closed when shutting down this application to prevent leaking
@@ -95,29 +95,27 @@ public final class ProtoSourceResolver implements AutoCloseable {
       return stream
           .filter(ProtoFilePredicates::isProtoFile)
           .peek(protoFile -> log.debug("Found proto file in root {}: {}", path, protoFile))
-          .collect(Collectors.collectingAndThen(
-              // Terminal operation, means we do not return a closed stream
-              // by mistake.
-              Collectors.toCollection(LinkedHashSet::new),
-              Optional::of
-          ))
+          .collect(
+              Collectors.collectingAndThen(
+                  // Terminal operation, means we do not return a closed stream
+                  // by mistake.
+                  Collectors.toCollection(LinkedHashSet::new), Optional::of))
           .filter(not(Set::isEmpty))
-          .map(protoFiles -> ImmutableProtoFileListing
-              .builder()
-              .addAllProtoFiles(protoFiles)
-              .protoFilesRoot(path)
-              .build());
+          .map(
+              protoFiles ->
+                  ImmutableProtoFileListing.builder()
+                      .addAllProtoFiles(protoFiles)
+                      .protoFilesRoot(path)
+                      .build());
     }
   }
 
-  public Collection<ProtoFileListing> createProtoFileListings(
-      Collection<Path> originalPaths
-  ) throws IOException {
+  public Collection<ProtoFileListing> createProtoFileListings(Collection<Path> originalPaths)
+      throws IOException {
     var results = new LinkedHashSet<ProtoFileListing>();
     var exceptions = new ArrayList<Exception>();
 
-    originalPaths
-        .stream()
+    originalPaths.stream()
         // GH-132: Normalize to ensure different paths to the same file do not
         //   get duplicated across more than one extraction site.
         .map(FileUtils::normalize)
@@ -126,19 +124,20 @@ public final class ProtoSourceResolver implements AutoCloseable {
         .map(this::submitProtoFileListingTask)
         // Terminal operation to ensure all are scheduled prior to joining.
         .collect(Collectors.toUnmodifiableList())
-        .forEach(task -> {
-          try {
-            task.get().ifPresent(results::add);
-          } catch (ExecutionException | InterruptedException ex) {
-            exceptions.add(ex);
-          }
-        });
+        .forEach(
+            task -> {
+              try {
+                task.get().ifPresent(results::add);
+              } catch (ExecutionException | InterruptedException ex) {
+                exceptions.add(ex);
+              }
+            });
 
     if (!exceptions.isEmpty()) {
       var causeIterator = exceptions.iterator();
-      var ex = new IOException(
-          "Failed to discover protobuf sources in some locations", causeIterator.next()
-      );
+      var ex =
+          new IOException(
+              "Failed to discover protobuf sources in some locations", causeIterator.next());
       causeIterator.forEachRemaining(ex::addSuppressed);
       throw ex;
     }

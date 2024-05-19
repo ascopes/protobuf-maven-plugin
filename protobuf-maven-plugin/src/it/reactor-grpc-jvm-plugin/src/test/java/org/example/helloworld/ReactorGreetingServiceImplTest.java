@@ -27,23 +27,15 @@ class ReactorGreetingServiceImplTest {
   void greetingServiceWorksAsExpected() throws Throwable {
     // Given
     var service = new ReactorGreetingServiceImpl();
-    var server = ServerBuilder
-        .forPort(8080)
-        .addService(service)
-        .build();
-    var channel = ManagedChannelBuilder.forAddress("localhost", 8080)
-        .usePlaintext()
-        .build();
+    var server = ServerBuilder.forPort(8080).addService(service).build();
+    var channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
     var stub = ReactorGreetingServiceGrpc.newReactorStub(channel);
 
     try {
       server.start();
 
       // When
-      var request = GreetingRequest
-          .newBuilder()
-          .setName("Dave")
-          .build();
+      var request = GreetingRequest.newBuilder().setName("Dave").build();
       var response = stub.greet(request).block();
 
       // Then

@@ -16,7 +16,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.ascopes</groupId>
@@ -57,7 +59,7 @@
     </developer>
   </developers>
 
-  <contributors />
+  <contributors/>
 
   <distributionManagement>
     <repository>
@@ -90,8 +92,7 @@
   <scm>
     <url>https://github.com/ascopes/protobuf-maven-plugin</url>
     <connection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</connection>
-    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin
-    </developerConnection>
+    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -114,7 +115,6 @@
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     <license-maven-plugin.version>4.5</license-maven-plugin.version>
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-    <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <maven-gpg-plugin.version>3.2.1</maven-gpg-plugin.version>
     <maven-install-plugin.version>3.1.2</maven-install-plugin.version>
@@ -130,9 +130,9 @@
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
+    <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
 
     <!-- Plugin dependencies -->
-    <checkstyle.version>10.16.0</checkstyle.version>
     <maven-surefire-junit5-tree-reporter.version>1.2.1</maven-surefire-junit5-tree-reporter.version>
 
     <!-- Other stuff -->
@@ -234,18 +234,16 @@
     <!-- Plugins to run on all subprojects implicitly. -->
     <plugins>
       <plugin>
+        <!-- Code formatter. -->
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
         <!-- This is an aggregate so only needs to be applied once. -->
         <groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <inherited>false</inherited>
-      </plugin>
-
-      <plugin>
-        <!-- This has no option for aggregation but derived projects must specify the
-            relativePath attribute so that locations of the checkstyle config file resolve
-            correctly from the parent in ITs -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
 
       <plugin>
@@ -257,6 +255,78 @@
     <!-- Management for optional plugins. -->
     <pluginManagement>
       <plugins>
+        <plugin>
+          <!-- Code formatter. -->
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless-maven-plugin.version}</version>
+
+          <configuration>
+            <!-- See https://github.com/diffplug/spotless/tree/main/plugin-maven for usage. -->
+
+            <groovy>
+              <importOrder>
+                <order>,\#</order>
+              </importOrder>
+              <includes>
+                <include>src/**/*.groovy</include>
+              </includes>
+              <!-- Disabled because it messes up license headers. -->
+              <!--<removeSemicolons/>-->
+            </groovy>
+
+            <java>
+              <formatAnnotations />
+              <googleJavaFormat>
+                <formatJavadoc>true</formatJavadoc>
+                <reflowLongStrings>true</reflowLongStrings>
+                <reorderImports>true</reorderImports>
+                <style>GOOGLE</style>
+              </googleJavaFormat>
+
+              <includes>
+                <include>src/**/*.java</include>
+              </includes>
+            </java>
+
+            <kotlin>
+              <includes>
+                <include>src/**/*.kt</include>
+              </includes>
+            </kotlin>
+
+            <markdown>
+              <flexmark/>
+              <includes>
+                <include>**/*.md</include>
+              </includes>
+            </markdown>
+
+            <pom/>
+
+            <yaml>
+              <includes>
+                <include>*.yaml</include>
+                <include>*.yml</include>
+                <include>.github/**/*.yaml</include>
+                <include>.github/**/*.yml</include>
+                <include>src/**/*.yaml</include>
+                <include>src/**/*.yml</include>
+              </includes>
+            </yaml>
+          </configuration>
+
+          <executions>
+            <execution>
+              <id>validate-code-style</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
         <plugin>
           <!-- Enforces our license header and allows adding it automatically to code. -->
           <groupId>com.mycila</groupId>
@@ -308,42 +378,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>${maven-assembly-plugin.version}</version>
-        </plugin>
-
-        <plugin>
-          <!-- Checking style of code matches the Google code style. -->
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${maven-checkstyle-plugin.version}</version>
-
-          <configuration>
-            <configLocation>.mvn/checkstyle/checkstyle.xml</configLocation>
-            <consoleOutput>true</consoleOutput>
-            <failsOnError>true</failsOnError>
-            <includeResources>true</includeResources>
-            <sourceDirectories>${project.basedir}/src</sourceDirectories>
-            <suppressionsLocation>.mvn/checkstyle/suppressions.xml</suppressionsLocation>
-            <violationSeverity>info</violationSeverity>
-          </configuration>
-
-          <executions>
-            <execution>
-              <id>check-code-style</id>
-              <phase>validate</phase>
-              <goals>
-                <goal>check</goal>
-              </goals>
-            </execution>
-          </executions>
-
-          <dependencies>
-            <dependency>
-              <!-- Force the usage of checkstyle v10 rather than v8.28 -->
-              <groupId>com.puppycrawl.tools</groupId>
-              <artifactId>checkstyle</artifactId>
-              <version>${checkstyle.version}</version>
-            </dependency>
-          </dependencies>
         </plugin>
 
         <plugin>
@@ -451,7 +485,8 @@
               This block is needed to show @DisplayName and @ParameterizedTest
               in reports with the provided names.
             -->
-            <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
+            <statelessTestsetReporter
+              implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
               <disable>false</disable>
               <version>3.0</version>
               <usePhrasedFileName>false</usePhrasedFileName>
@@ -459,7 +494,8 @@
               <usePhrasedTestCaseClassName>true</usePhrasedTestCaseClassName>
               <usePhrasedTestCaseMethodName>true</usePhrasedTestCaseMethodName>
             </statelessTestsetReporter>
-            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+            <statelessTestsetInfoReporter
+              implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
               <disable>false</disable>
               <printStacktraceOnError>true</printStacktraceOnError>
               <printStacktraceOnFailure>true</printStacktraceOnFailure>

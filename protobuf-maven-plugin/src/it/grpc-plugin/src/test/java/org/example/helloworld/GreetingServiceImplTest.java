@@ -27,23 +27,15 @@ class GreetingServiceImplTest {
   void greetingServiceWorksAsExpected() throws Throwable {
     // Given
     var service = new GreetingServiceImpl();
-    var server = ServerBuilder
-        .forPort(8080)
-        .addService(service)
-        .build();
-    var channel = ManagedChannelBuilder.forAddress("localhost", 8080)
-        .usePlaintext()
-        .build();
+    var server = ServerBuilder.forPort(8080).addService(service).build();
+    var channel = ManagedChannelBuilder.forAddress("localhost", 8080).usePlaintext().build();
     var stub = GreetingServiceGrpc.newBlockingStub(channel);
 
     try {
       server.start();
 
       // When
-      var request = GreetingRequest
-          .newBuilder()
-          .setName("Ashley")
-          .build();
+      var request = GreetingRequest.newBuilder().setName("Ashley").build();
       var response = stub.greet(request);
 
       // Then

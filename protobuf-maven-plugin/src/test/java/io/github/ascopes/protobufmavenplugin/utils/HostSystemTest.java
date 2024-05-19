@@ -36,7 +36,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-
 /**
  * @author Ashley Scopes
  */
@@ -77,29 +76,29 @@ class HostSystemTest {
 
   @DisplayName(".isProbablyLinux() returns true if the OS is probably Linux")
   @CsvSource({
-      "              LINUX,  true",
-      "              Linux,  true",
-      "              linux,  true",
-      "            FreeBSD, false",
-      "            OpenBSD, false",
-      "               OS/2, false",
-      "            Solaris, false",
-      "              SunOS, false",
-      "               Irix, false",
-      "             OS/400, false",
-      "              HP-UX, false",
-      "                AIX, false",
-      "      Mac OS X 10.0, false",
-      "     Mac OS X 10.15, false",
-      "        Mac OS X 11, false",
-      "        Mac OS X 12, false",
-      "        Mac OS X 13, false",
-      "          Windows 7, false",
-      "          Windows 8, false",
-      "        Windows 8.1, false",
-      "         Windows 10, false",
-      "         Windows 11, false",
-      "Windows Server 2019, false",
+    "              LINUX,  true",
+    "              Linux,  true",
+    "              linux,  true",
+    "            FreeBSD, false",
+    "            OpenBSD, false",
+    "               OS/2, false",
+    "            Solaris, false",
+    "              SunOS, false",
+    "               Irix, false",
+    "             OS/400, false",
+    "              HP-UX, false",
+    "                AIX, false",
+    "      Mac OS X 10.0, false",
+    "     Mac OS X 10.15, false",
+    "        Mac OS X 11, false",
+    "        Mac OS X 12, false",
+    "        Mac OS X 13, false",
+    "          Windows 7, false",
+    "          Windows 8, false",
+    "        Windows 8.1, false",
+    "         Windows 10, false",
+    "         Windows 11, false",
+    "Windows Server 2019, false",
   })
   @ParameterizedTest(name = "returns {1} on {0}")
   void isProbablyLinuxReturnsTrueIfTheOsIsProbablyLinux(String osName, boolean expectedResult) {
@@ -118,29 +117,29 @@ class HostSystemTest {
 
   @DisplayName(".isProbablyMacOs() returns true if the OS is probably Mac OS")
   @CsvSource({
-      "              LINUX, false",
-      "              Linux, false",
-      "              linux, false",
-      "            FreeBSD, false",
-      "            OpenBSD, false",
-      "               OS/2, false",
-      "            Solaris, false",
-      "              SunOS, false",
-      "               Irix, false",
-      "             OS/400, false",
-      "              HP-UX, false",
-      "                AIX, false",
-      "      Mac OS X 10.0,  true",
-      "     Mac OS X 10.15,  true",
-      "        Mac OS X 11,  true",
-      "        Mac OS X 12,  true",
-      "        Mac OS X 13,  true",
-      "          Windows 7, false",
-      "          Windows 8, false",
-      "        Windows 8.1, false",
-      "         Windows 10, false",
-      "         Windows 11, false",
-      "Windows Server 2019, false",
+    "              LINUX, false",
+    "              Linux, false",
+    "              linux, false",
+    "            FreeBSD, false",
+    "            OpenBSD, false",
+    "               OS/2, false",
+    "            Solaris, false",
+    "              SunOS, false",
+    "               Irix, false",
+    "             OS/400, false",
+    "              HP-UX, false",
+    "                AIX, false",
+    "      Mac OS X 10.0,  true",
+    "     Mac OS X 10.15,  true",
+    "        Mac OS X 11,  true",
+    "        Mac OS X 12,  true",
+    "        Mac OS X 13,  true",
+    "          Windows 7, false",
+    "          Windows 8, false",
+    "        Windows 8.1, false",
+    "         Windows 10, false",
+    "         Windows 11, false",
+    "Windows Server 2019, false",
   })
   @ParameterizedTest(name = "returns {1} on {0}")
   void isProbablyMacOsReturnsTrueIfTheOsIsProbablyMacOs(String osName, boolean expectedResult) {
@@ -159,29 +158,29 @@ class HostSystemTest {
 
   @DisplayName(".isProbablyWindows() returns true if the OS is probably Windows")
   @CsvSource({
-      "              LINUX, false",
-      "              Linux, false",
-      "              linux, false",
-      "            FreeBSD, false",
-      "            OpenBSD, false",
-      "               OS/2, false",
-      "            Solaris, false",
-      "              SunOS, false",
-      "               Irix, false",
-      "             OS/400, false",
-      "              HP-UX, false",
-      "                AIX, false",
-      "      Mac OS X 10.0, false",
-      "     Mac OS X 10.15, false",
-      "        Mac OS X 11, false",
-      "        Mac OS X 12, false",
-      "        Mac OS X 13, false",
-      "          Windows 7,  true",
-      "          Windows 8,  true",
-      "        Windows 8.1,  true",
-      "         Windows 10,  true",
-      "         Windows 11,  true",
-      "Windows Server 2019,  true",
+    "              LINUX, false",
+    "              Linux, false",
+    "              linux, false",
+    "            FreeBSD, false",
+    "            OpenBSD, false",
+    "               OS/2, false",
+    "            Solaris, false",
+    "              SunOS, false",
+    "               Irix, false",
+    "             OS/400, false",
+    "              HP-UX, false",
+    "                AIX, false",
+    "      Mac OS X 10.0, false",
+    "     Mac OS X 10.15, false",
+    "        Mac OS X 11, false",
+    "        Mac OS X 12, false",
+    "        Mac OS X 13, false",
+    "          Windows 7,  true",
+    "          Windows 8,  true",
+    "        Windows 8.1,  true",
+    "         Windows 10,  true",
+    "         Windows 11,  true",
+    "Windows Server 2019,  true",
   })
   @ParameterizedTest(name = "returns {1} on {0}")
   void isProbablyWindowsReturnsTrueIfTheOsIsProbablyWindows(String osName, boolean expectedResult) {
@@ -202,16 +201,13 @@ class HostSystemTest {
   @DisabledOnOs({OS.WINDOWS, OS.OTHER})
   @DisplayName(".isProbablyAndroidTermux() returns true if running in Termux")
   @CsvSource({
-      " true, /data/data/com.termux/home,  true",
-      "false, /data/data/com.termux/home, false",
-      " true,          /foo/bar/baz/bork, false",
+    " true, /data/data/com.termux/home,  true",
+    "false, /data/data/com.termux/home, false",
+    " true,          /foo/bar/baz/bork, false",
   })
   @ParameterizedTest(name = "expect {2} when isProbablyLinux is {0} and the directory is {1}")
   void isProbablyAndroidTermuxReturnsTrueIfRunningInTermux(
-      boolean isProbablyLinux,
-      String workingDirectory,
-      boolean expectedResult
-  ) {
+      boolean isProbablyLinux, String workingDirectory, boolean expectedResult) {
     // Given
     var hostSystemBean = mock(HostSystem.class);
     when(hostSystemBean.isProbablyLinux()).thenReturn(isProbablyLinux);
@@ -219,8 +215,7 @@ class HostSystemTest {
     when(hostSystemBean.isProbablyAndroidTermux()).thenCallRealMethod();
 
     // Then
-    assertThat(hostSystemBean.isProbablyAndroidTermux())
-        .isEqualTo(expectedResult);
+    assertThat(hostSystemBean.isProbablyAndroidTermux()).isEqualTo(expectedResult);
   }
 
   @DisplayName(".getWorkingDirectory() returns the working directory")
@@ -249,13 +244,19 @@ class HostSystemTest {
     var nonExistingDir1 = tempDir.resolve("foo").resolve("bork");
     var nonExistingDir2 = tempDir.resolve("lorem").resolve("ipsum");
 
-    var path = existingDir1.normalize().toAbsolutePath() + File.pathSeparator
-        + existingDir2.normalize().toAbsolutePath() + File.pathSeparator
-        + existingDir3.normalize().toAbsolutePath() + File.pathSeparator
-        + nonExistingDir1.normalize().toAbsolutePath() + File.pathSeparator
-        + nonExistingDir2.normalize().toAbsolutePath() + File.pathSeparator
-        // Empty path that gets ignored at the end to test sanitising the inputs.
-        + File.pathSeparator;
+    var path =
+        existingDir1.normalize().toAbsolutePath()
+            + File.pathSeparator
+            + existingDir2.normalize().toAbsolutePath()
+            + File.pathSeparator
+            + existingDir3.normalize().toAbsolutePath()
+            + File.pathSeparator
+            + nonExistingDir1.normalize().toAbsolutePath()
+            + File.pathSeparator
+            + nonExistingDir2.normalize().toAbsolutePath()
+            + File.pathSeparator
+            // Empty path that gets ignored at the end to test sanitising the inputs.
+            + File.pathSeparator;
 
     var env = Map.of("PATH", path);
     var properties = new Properties();
@@ -291,11 +292,17 @@ class HostSystemTest {
   void getSystemPathExtensionsReturnsExtensionsCaseInsensitiveWhenSet() {
     // Given
 
-    var pathExt = ".foo" + File.pathSeparator
-        + ".bar" + File.pathSeparator
-        + ".BAZ" + File.pathSeparator
-        + ".baz" + File.pathSeparator
-        + "  .bork  " + File.pathSeparator;
+    var pathExt =
+        ".foo"
+            + File.pathSeparator
+            + ".bar"
+            + File.pathSeparator
+            + ".BAZ"
+            + File.pathSeparator
+            + ".baz"
+            + File.pathSeparator
+            + "  .bork  "
+            + File.pathSeparator;
 
     var env = Map.of("PATHEXT", pathExt);
     var properties = new Properties();
@@ -305,8 +312,6 @@ class HostSystemTest {
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
 
     // Then
-    assertThat(actualPathExt)
-        .hasSize(4)
-        .contains(".foo", ".bar", ".baz", ".bork", ".BORK");
+    assertThat(actualPathExt).hasSize(4).contains(".foo", ".bar", ".baz", ".bork", ".BORK");
   }
 }

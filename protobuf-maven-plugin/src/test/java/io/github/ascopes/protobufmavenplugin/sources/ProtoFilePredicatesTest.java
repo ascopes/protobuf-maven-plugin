@@ -25,7 +25,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-
 /**
  * @author Ashley Scopes
  */
@@ -33,12 +32,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 class ProtoFilePredicatesTest {
 
   @DisplayName("Expect isProtoFile to return true if a file with a '*.proto' extension")
-  @ValueSource(strings = {
-      "foo/bar/baz/file.proto",
-      "beep/boop/thing.PROTO",
-      "do/ray/me/fah.pRoTo",
-      "file-in-root.proto",
-  })
+  @ValueSource(
+      strings = {
+        "foo/bar/baz/file.proto",
+        "beep/boop/thing.PROTO",
+        "do/ray/me/fah.pRoTo",
+        "file-in-root.proto",
+      })
   @ParameterizedTest(name = "\"{0}\" is a valid proto file")
   void expectIsProtoFileTrueIfFileWithProtoExtension(String pathString) {
     try (var fs = linux()) {
@@ -46,18 +46,18 @@ class ProtoFilePredicatesTest {
       var path = fs.givenFileExists(pathString);
 
       // Then
-      assertThat(ProtoFilePredicates.isProtoFile(path))
-          .isTrue();
+      assertThat(ProtoFilePredicates.isProtoFile(path)).isTrue();
     }
   }
 
   @DisplayName("Expect isProtoFile to return true if a file symlink with a '*.proto' extension")
-  @ValueSource(strings = {
-      "foo/bar/baz/file.proto",
-      "beep/boop/thing.PROTO",
-      "do/ray/me/fah.pRoTo",
-      "file-in-root.proto",
-  })
+  @ValueSource(
+      strings = {
+        "foo/bar/baz/file.proto",
+        "beep/boop/thing.PROTO",
+        "do/ray/me/fah.pRoTo",
+        "file-in-root.proto",
+      })
   @ParameterizedTest(name = "\"{0}\" is a valid proto file")
   void expectIsProtoFileTrueIfFileSymlinkWithProtoExtension(String pathString) {
     try (var fs = linux()) {
@@ -66,18 +66,18 @@ class ProtoFilePredicatesTest {
       var linkPath = fs.givenSymbolicLinkExists(realPath, pathString);
 
       // Then
-      assertThat(ProtoFilePredicates.isProtoFile(linkPath))
-          .isTrue();
+      assertThat(ProtoFilePredicates.isProtoFile(linkPath)).isTrue();
     }
   }
 
   @DisplayName("Expect isProtoFile to return false if a file with a '*.proto' extension")
-  @ValueSource(strings = {
-      "foo/bar/baz/dir.proto",
-      "beep/boop/thing.PROTO",
-      "do/ray/me/fah.pRoTo",
-      "dir-in-root.proto",
-  })
+  @ValueSource(
+      strings = {
+        "foo/bar/baz/dir.proto",
+        "beep/boop/thing.PROTO",
+        "do/ray/me/fah.pRoTo",
+        "dir-in-root.proto",
+      })
   @ParameterizedTest(name = "\"{0}\" is not a valid proto file")
   void expectIsProtoFileFalseIfDirectoryWithProtoExtension(String pathString) {
     try (var fs = linux()) {
@@ -85,26 +85,26 @@ class ProtoFilePredicatesTest {
       var path = fs.givenDirectoryExists(pathString);
 
       // Then
-      assertThat(ProtoFilePredicates.isProtoFile(path))
-          .isFalse();
+      assertThat(ProtoFilePredicates.isProtoFile(path)).isFalse();
     }
   }
 
   @DisplayName("Expect isProtoFile to return false if a file without a '*.proto' extension")
-  @ValueSource(strings = {
-      "file.txt",
-      "FILE.TXT",
-      "file",
-      "FILE",
-      "proto.txt",
-      "PROTO.TXT",
-      ".proto.gz",
-      ".PROTO.GZ",
-      "file.proto.gz",
-      "file.PROTO.GZ",
-      "file.protobuf",
-      "file.PROTOBUF",
-  })
+  @ValueSource(
+      strings = {
+        "file.txt",
+        "FILE.TXT",
+        "file",
+        "FILE",
+        "proto.txt",
+        "PROTO.TXT",
+        ".proto.gz",
+        ".PROTO.GZ",
+        "file.proto.gz",
+        "file.PROTO.GZ",
+        "file.protobuf",
+        "file.PROTOBUF",
+      })
   @ParameterizedTest(name = "\"{0}\" is not a valid proto file")
   void expectIsProtoFileFalseIfFileWithoutProtoExtension(String pathString) {
     try (var fs = linux()) {
@@ -112,30 +112,30 @@ class ProtoFilePredicatesTest {
       var path = fs.givenFileExists(pathString);
 
       // Then
-      assertThat(ProtoFilePredicates.isProtoFile(path))
-          .isFalse();
+      assertThat(ProtoFilePredicates.isProtoFile(path)).isFalse();
     }
   }
 
   @DisplayName("Expect isProtoFile to return false if the file does not exist")
-  @ValueSource(strings = {
-      "file.txt",
-      "FILE.TXT",
-      "file",
-      "FILE",
-      "proto.txt",
-      "PROTO.TXT",
-      ".proto.gz",
-      ".PROTO.GZ",
-      "file.proto.gz",
-      "file.PROTO.GZ",
-      "file.protobuf",
-      "file.PROTOBUF",
-      "foo/bar/baz/file.proto",
-      "beep/boop/thing.PROTO",
-      "do/ray/me/fah.pRoTo",
-      "file-in-root.proto",
-  })
+  @ValueSource(
+      strings = {
+        "file.txt",
+        "FILE.TXT",
+        "file",
+        "FILE",
+        "proto.txt",
+        "PROTO.TXT",
+        ".proto.gz",
+        ".PROTO.GZ",
+        "file.proto.gz",
+        "file.PROTO.GZ",
+        "file.protobuf",
+        "file.PROTOBUF",
+        "foo/bar/baz/file.proto",
+        "beep/boop/thing.PROTO",
+        "do/ray/me/fah.pRoTo",
+        "file-in-root.proto",
+      })
   @ParameterizedTest(name = "\"{0}\" is not a valid proto file")
   void expectIsProtoFileFalseIfFileDoesNotExist(String pathString) throws IOException {
     try (var fs = linux()) {
@@ -145,8 +145,7 @@ class ProtoFilePredicatesTest {
       Files.delete(path);
 
       // Then
-      assertThat(ProtoFilePredicates.isProtoFile(path))
-          .isFalse();
+      assertThat(ProtoFilePredicates.isProtoFile(path)).isFalse();
     }
   }
 }

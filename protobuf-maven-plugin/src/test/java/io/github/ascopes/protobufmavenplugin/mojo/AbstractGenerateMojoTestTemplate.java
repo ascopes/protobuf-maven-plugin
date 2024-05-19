@@ -68,30 +68,21 @@ import org.mockito.quality.Strictness;
 
 abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> {
 
-  @TempDir
-  Path tempDir;
+  @TempDir Path tempDir;
 
   A mojo;
 
   @BeforeEach
   void setUp() throws Throwable {
     // Final vars to disable checkstyle complaints.
-    final var mockBuild = mock(
-        Build.class,
-        withSettings().strictness(Strictness.LENIENT)
-    );
-    final var mavenProject = mock(
-        MavenProject.class,
-        withSettings().strictness(Strictness.LENIENT)
-    );
+    final var mockBuild = mock(Build.class, withSettings().strictness(Strictness.LENIENT));
+    final var mavenProject =
+        mock(MavenProject.class, withSettings().strictness(Strictness.LENIENT));
     final var sourceCodeGenerator = sourceCodeGenerator(true);
 
-    when(mockBuild.getDirectory())
-        .thenReturn(tempDir.toString());
-    when(mavenProject.getBuild())
-        .thenReturn(mockBuild);
-    when(mavenProject.getBasedir())
-        .thenReturn(tempDir.toFile());
+    when(mockBuild.getDirectory()).thenReturn(tempDir.toString());
+    when(mavenProject.getBuild()).thenReturn(mockBuild);
+    when(mavenProject.getBasedir()).thenReturn(tempDir.toFile());
 
     mojo = newInstance();
     mojo.sourceCodeGenerator = sourceCodeGenerator;
@@ -115,24 +106,21 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @Test
     void sourceRootRegistrarIsTheExpectedValue() {
       // Then
-      assertThat(newInstance().sourceRootRegistrar())
-          .isEqualTo(expectedSourceRootRegistrar());
+      assertThat(newInstance().sourceRootRegistrar()).isEqualTo(expectedSourceRootRegistrar());
     }
 
     @DisplayName("the default source directory is the expected path")
     @Test
     void defaultSourceDirectoryIsTheExpectedPath() {
       // Given
-      assertThat(mojo.defaultSourceDirectory())
-          .isEqualTo(expectedDefaultSourceDirectory());
+      assertThat(mojo.defaultSourceDirectory()).isEqualTo(expectedDefaultSourceDirectory());
     }
 
     @DisplayName("the default output directory is the expected path")
     @Test
     void defaultOutputDirectoryIsTheExpectedPath() {
       // Then
-      assertThat(mojo.defaultOutputDirectory())
-          .isEqualTo(expectedDefaultOutputDirectory());
+      assertThat(mojo.defaultOutputDirectory()).isEqualTo(expectedDefaultOutputDirectory());
     }
   }
 
@@ -165,8 +153,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       mojo.sourceCodeGenerator = sourceCodeGenerator(true);
 
       // Then
-      assertThatNoException()
-          .isThrownBy(() -> mojo.execute());
+      assertThatNoException().isThrownBy(() -> mojo.execute());
     }
 
     @DisplayName("a MojoExecutionException is raised when the sourceCodeGenerator returns false")
@@ -185,9 +172,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("a MojoFailureException is raised when the sourceCodeGenerator raises")
     @ValueSource(classes = {IOException.class, ResolutionException.class})
     @ParameterizedTest(name = "of type {0}")
-    void mojoFailureExceptionRaisedWhenSourceCodeGeneratorRaises(
-        Class<Throwable> causeType
-    ) throws Throwable {
+    void mojoFailureExceptionRaisedWhenSourceCodeGeneratorRaises(Class<Throwable> causeType)
+        throws Throwable {
       // Given
       var message = "some message blah blah " + someText();
       var exceptionCause = causeType.getConstructor(String.class).newInstance(message);
@@ -211,9 +197,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when binaryMavenPlugins is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenBinaryMavenPluginsNullExpectEmptyListInRequest(
-        List<MavenProtocPluginBean> plugins
-    ) throws Throwable {
+    void whenBinaryMavenPluginsNullExpectEmptyListInRequest(List<MavenProtocPluginBean> plugins)
+        throws Throwable {
       // Given
       mojo.binaryMavenPlugins = plugins;
 
@@ -252,9 +237,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when binaryPathPlugins is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenBinaryPathPluginsNullExpectEmptyListInRequest(
-        List<PathProtocPluginBean> plugins
-    ) throws Throwable {
+    void whenBinaryPathPluginsNullExpectEmptyListInRequest(List<PathProtocPluginBean> plugins)
+        throws Throwable {
       // Given
       mojo.binaryPathPlugins = plugins;
 
@@ -293,9 +277,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when binaryUrlPlugins is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenBinaryUrlPluginsNullExpectEmptyListInRequest(
-        List<UrlProtocPluginBean> plugins
-    ) throws Throwable {
+    void whenBinaryUrlPluginsNullExpectEmptyListInRequest(List<UrlProtocPluginBean> plugins)
+        throws Throwable {
       // Given
       mojo.binaryUrlPlugins = plugins;
 
@@ -335,8 +318,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @EnumSource(DependencyResolutionDepth.class)
     @ParameterizedTest(name = "for {0}")
     void dependencyResolutionDepthIsSetToSpecifiedValue(
-        DependencyResolutionDepth dependencyResolutionDepth
-    ) throws Throwable {
+        DependencyResolutionDepth dependencyResolutionDepth) throws Throwable {
       mojo.dependencyResolutionDepth = dependencyResolutionDepth;
 
       // When
@@ -420,9 +402,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when importDependencies is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenImportDependenciesNullExpectEmptyListInRequest(
-        List<MavenDependencyBean> plugins
-    ) throws Throwable {
+    void whenImportDependenciesNullExpectEmptyListInRequest(List<MavenDependencyBean> plugins)
+        throws Throwable {
       // Given
       mojo.importDependencies = plugins;
 
@@ -477,9 +458,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
     @DisplayName("when importPaths is provided, expect the paths in the request")
     @Test
-    void whenImportPathsProvidedExpectPathsInRequest(
-        @TempDir Path someTempDir
-    ) throws Throwable {
+    void whenImportPathsProvidedExpectPathsInRequest(@TempDir Path someTempDir) throws Throwable {
       // Given
       var path1 = someTempDir.resolve("foo").resolve("bar");
       var path2 = someTempDir.resolve("do").resolve("ray");
@@ -505,9 +484,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when jvmMavenPlugins is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenJvmMavenPluginsNullExpectEmptyListInRequest(
-        List<MavenProtocPluginBean> plugins
-    ) throws Throwable {
+    void whenJvmMavenPluginsNullExpectEmptyListInRequest(List<MavenProtocPluginBean> plugins)
+        throws Throwable {
       // Given
       mojo.jvmMavenPlugins = plugins;
 
@@ -565,8 +543,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   class OutputDirectoryTest {
 
     @DisplayName(
-        "when outputDirectory is not provided, expect the default output directory to be used"
-    )
+        "when outputDirectory is not provided, expect the default output directory to be used")
     @Test
     void whenOutputDirectoryNotProvidedExpectDefaultOutputDirectoryToBeUsed() throws Throwable {
       // Given
@@ -587,8 +564,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when outputDirectory is provided, expect the provided directory to be used")
     @Test
     void whenOutputDirectoryProvidedExpectProvidedDirectoryToBeUsed(
-        @TempDir Path expectedOutputDirectory
-    ) throws Throwable {
+        @TempDir Path expectedOutputDirectory) throws Throwable {
       // Given
       mojo.outputDirectory = expectedOutputDirectory.toFile();
 
@@ -685,9 +661,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when sourceDependencies is null, expect an empty list in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenSourceDependenciesNullExpectEmptyListInRequest(
-        List<MavenDependencyBean> dependencies
-    ) throws Throwable {
+    void whenSourceDependenciesNullExpectEmptyListInRequest(List<MavenDependencyBean> dependencies)
+        throws Throwable {
       // Given
       mojo.sourceDependencies = dependencies;
 
@@ -726,9 +701,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     @DisplayName("when sourceDirectories is null, expect the default path in the request")
     @NullAndEmptySource
     @ParameterizedTest(name = "when {0}")
-    void whenSourceDirectoriesNullExpectDefaultValueInRequest(
-        List<File> sourceDirectories
-    ) throws Throwable {
+    void whenSourceDirectoriesNullExpectDefaultValueInRequest(List<File> sourceDirectories)
+        throws Throwable {
       // Given
       mojo.sourceDirectories = sourceDirectories;
       Files.createDirectories(expectedDefaultSourceDirectory());
@@ -745,9 +719,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
     @DisplayName("when sourceDirectories is provided, expect the paths in the request")
     @Test
-    void whenSourceDirectoriesProvidedExpectPathsInRequest(
-        @TempDir Path someTempDir
-    ) throws Throwable {
+    void whenSourceDirectoriesProvidedExpectPathsInRequest(@TempDir Path someTempDir)
+        throws Throwable {
       // Given
       var path1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
       var path2 = Files.createDirectories(someTempDir.resolve("do").resolve("ray"));
@@ -767,9 +740,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
     @DisplayName("missing sourceDirectories are not provided to the generator")
     @Test
-    void missingSourceDirectoriesAreNotProvidedToTheGenerator(
-        @TempDir Path someTempDir
-    ) throws Throwable {
+    void missingSourceDirectoriesAreNotProvidedToTheGenerator(@TempDir Path someTempDir)
+        throws Throwable {
       // Given
       var path1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
       var path2 = someTempDir.resolve("do").resolve("ray");
@@ -793,10 +765,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @MethodSource("languageEnablingCases")
   @ParameterizedTest(name = "when {0}, then expect {2} to be enabled")
   void languagesAreEnabledAndDisabledAsExpected(
-      String description,
-      Consumer<A> languageConfigurer,
-      Set<Language> expectedEnabledLanguages
-  ) throws Throwable {
+      String description, Consumer<A> languageConfigurer, Set<Language> expectedEnabledLanguages)
+      throws Throwable {
     // Given
     languageConfigurer.accept(mojo);
 
@@ -830,47 +800,46 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         // Combined cases
         arguments(
             "Java and Kotlin",
-            consumer(a -> {
-              a.javaEnabled = true;
-              a.kotlinEnabled = true;
-            }),
-            EnumSet.of(Language.JAVA, Language.KOTLIN)
-        ),
+            consumer(
+                a -> {
+                  a.javaEnabled = true;
+                  a.kotlinEnabled = true;
+                }),
+            EnumSet.of(Language.JAVA, Language.KOTLIN)),
         arguments(
             "Python and PYI",
-            consumer(a -> {
-              a.pythonEnabled = true;
-              a.pythonStubsEnabled = true;
-            }),
-            EnumSet.of(Language.PYTHON, Language.PYI)
-        ),
+            consumer(
+                a -> {
+                  a.pythonEnabled = true;
+                  a.pythonStubsEnabled = true;
+                }),
+            EnumSet.of(Language.PYTHON, Language.PYI)),
         arguments(
             "C++, C#, Rust, and ObjC",
-            consumer(a -> {
-              a.cppEnabled = true;
-              a.csharpEnabled = true;
-              a.objcEnabled = true;
-              a.rustEnabled = true;
-            }),
-            EnumSet.of(Language.CPP, Language.C_SHARP, Language.OBJECTIVE_C, Language.RUST)
-        ),
+            consumer(
+                a -> {
+                  a.cppEnabled = true;
+                  a.csharpEnabled = true;
+                  a.objcEnabled = true;
+                  a.rustEnabled = true;
+                }),
+            EnumSet.of(Language.CPP, Language.C_SHARP, Language.OBJECTIVE_C, Language.RUST)),
         arguments(
             "all languages",
-            consumer(a -> {
-              a.cppEnabled = true;
-              a.csharpEnabled = true;
-              a.javaEnabled = true;
-              a.kotlinEnabled = true;
-              a.objcEnabled = true;
-              a.phpEnabled = true;
-              a.pythonEnabled = true;
-              a.pythonStubsEnabled = true;
-              a.rubyEnabled = true;
-              a.rustEnabled = true;
-            }),
-            EnumSet.allOf(Language.class)
-        )
-    );
+            consumer(
+                a -> {
+                  a.cppEnabled = true;
+                  a.csharpEnabled = true;
+                  a.javaEnabled = true;
+                  a.kotlinEnabled = true;
+                  a.objcEnabled = true;
+                  a.phpEnabled = true;
+                  a.pythonEnabled = true;
+                  a.pythonStubsEnabled = true;
+                  a.rubyEnabled = true;
+                  a.rustEnabled = true;
+                }),
+            EnumSet.allOf(Language.class)));
   }
 
   static Consumer<AbstractGenerateMojo> consumer() {
@@ -884,22 +853,16 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   }
 
   static SourceCodeGenerator sourceCodeGenerator(boolean result) throws Throwable {
-    var sourceCodeGenerator = mock(
-        SourceCodeGenerator.class,
-        withSettings().strictness(Strictness.LENIENT)
-    );
-    when(sourceCodeGenerator.generate(any()))
-        .thenReturn(result);
+    var sourceCodeGenerator =
+        mock(SourceCodeGenerator.class, withSettings().strictness(Strictness.LENIENT));
+    when(sourceCodeGenerator.generate(any())).thenReturn(result);
     return sourceCodeGenerator;
   }
 
   static SourceCodeGenerator erroringSourceCodeGenerator(Throwable cause) throws Throwable {
-    var sourceCodeGenerator = mock(
-        SourceCodeGenerator.class,
-        withSettings().strictness(Strictness.LENIENT)
-    );
-    when(sourceCodeGenerator.generate(any()))
-        .thenThrow(cause);
+    var sourceCodeGenerator =
+        mock(SourceCodeGenerator.class, withSettings().strictness(Strictness.LENIENT));
+    when(sourceCodeGenerator.generate(any())).thenThrow(cause);
     return sourceCodeGenerator;
   }
 }

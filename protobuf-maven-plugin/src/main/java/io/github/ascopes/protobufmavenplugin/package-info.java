@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-/**
- * A modern Maven plugin for generating source code from Protocol Buffers
- * sources.
- */
+/** A modern Maven plugin for generating source code from Protocol Buffers sources. */
 @NullMarked
 @Style(
     beanFriendlyModifiables = true,
@@ -33,8 +30,7 @@
     passAnnotations = Nullable.class,
     optionalAcceptNullable = true,
     typeModifiable = "*Bean",
-    validationMethod = ValidationMethod.MANDATORY_ONLY
-)
+    validationMethod = ValidationMethod.MANDATORY_ONLY)
 package io.github.ascopes.protobufmavenplugin;
 
 import org.immutables.value.Value.Immutable;

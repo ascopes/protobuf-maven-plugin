@@ -88,7 +88,10 @@ jobs:
         run: |-
           # Use -T1 here as the plugins emit warnings about thread safety if we use the
           # default concurrency settings for the project.
-          version=3.8.2
+          version=$(./mvnw help:evaluate -B -T1 -q \
+              -Dexpression='project.prerequisites.maven' \
+              -DforceStdout \
+              -pl protobuf-maven-plugin)
           ./mvnw -T1 -B wrapper:wrapper -Dmaven="${version}"
 
       - name: Build and test
@@ -101,44 +104,6 @@ jobs:
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  #build-crossarch-linux:
-  #  name: jdk-17/debian/${{ matrix.arch }}
-  #  runs-on: ubuntu-latest
-  #
-  #  strategy:
-  #    fail-fast: false
-  #    matrix:
-  #      arch: [aarch64, ppc64le, s390x]
-  #
-  #  steps:
-  #    - name: Checkout code
-  #      uses: actions/checkout@v4
-  #
-  #    - name: Build in emulator
-  #      uses: uraimo/run-on-arch-action@v2
-  #      with:
-  #        arch: ${{ matrix.arch }}
-  #        distro: bookworm
-  #        # Mount /target so that we can pull the coverage results
-  #        dockerRunArgs: '--volume "${PWD}/target:/home/runner/work/target"'
-  #        install: |-
-  #          set -eux
-  #          apt update -q
-  #          apt install -qy openjdk-17-jdk-headless
-  #          java -version
-  #          javac -version
-  #        run: >-
-  #          ./mvnw -B verify
-  #          -Dcheckstyle.skip
-  #          -Dlicense.skip
-  #
-  #    - name: Publish code coverage
-  #      uses: codecov/codecov-action@v4
-  #      continue-on-error: true
-  #      if: always()
-  #      with:
-  #        token: ${{ secrets.CODECOV_TOKEN }}
 
   build-pages:
     name: Generate pages
@@ -157,9 +122,4 @@ jobs:
 
       - name: Build Pages
         shell: bash
-        run: >-
-            ./mvnw -B site
-            -DskipTests
-            -Dinvoker.skip
-            -Dcheckstyle.skip
-            -Dlicense.skip
+        run: ./mvnw -B site -DskipTests -Dinvoker.skip

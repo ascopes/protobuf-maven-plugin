@@ -18,7 +18,7 @@ import java.nio.file.Path
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-def classesDir = baseDirectory.resolve("target/classes")
+Path classesDir = baseDirectory.resolve("target/classes")
 def expectedFiles = [
     "helloworld.proto",
     "org/example/message.proto",

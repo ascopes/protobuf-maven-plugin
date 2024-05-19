@@ -43,10 +43,7 @@ class ProtobufTest {
   @Test
   void generatedProtobufSourcesAreValid() throws Throwable {
     // Given
-    var expectedGreetingRequest = GreetingRequest
-        .newBuilder()
-        .setName("Ashley")
-        .build();
+    var expectedGreetingRequest = GreetingRequest.newBuilder().setName("Ashley").build();
 
     // When
     var baos = new ByteArrayOutputStream();
