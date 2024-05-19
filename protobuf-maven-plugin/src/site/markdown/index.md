@@ -530,11 +530,14 @@ specific file system path:
 
 Any protocols supported by your JRE should be able to be used here, including:
 
-- `file://`
-- `http://`
-- `https://`
-- `ftp://`
-- `jar://`
+- `file:`
+- `http:`
+- `https:`
+- `ftp:`
+- `jar:` - this also works for ZIP files, and can be used to dereference files within the archive,
+  e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip!/plugin.exe`,
+  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
+  and internally extract `plugin.exe` from that archive.
 
 Each `binaryUrlPlugin` can take an optional `options` parameter which will
 be passed as an option to the plugin if specified.
