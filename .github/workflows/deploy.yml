@@ -3,28 +3,13 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      dry-run:
-        description: "Run the steps without deploying anything"
+      skip-maven-release:
+        description: "Skip Maven release steps"
         default: false
         type: boolean
 
-      skip-maven-central-staging:
-        description: "Skip the Maven Central staging steps"
-        default: false
-        type: boolean
-
-      skip-maven-central-promotion:
-        description: "Skip the Maven Central promotion steps"
-        default: false
-        type: boolean
-
-      skip-site-publication:
-        description: "Skip the site publication steps"
-        default: false
-        type: boolean
-
-      skip-github-release:
-        description: "Skip the GitHub release creation steps"
+      skip-nexus-promotion:
+        description: "Skip Nexus promotion steps"
         default: false
         type: boolean
 
@@ -63,7 +48,6 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Configure Git
-        if: ${{ ! inputs.skip-maven-central-staging }}
         run: |-
           git config user.name '${{ github.actor }}'
           git config user.email '${{ github.actor }}@users.noreply.github.com'
@@ -91,15 +75,11 @@ jobs:
           fi
           echo "release_version=${release_version}" >> "${GITHUB_ENV}"
 
-      - name: Build and run tests
-        if: ${{ ! inputs.dry-run }}
-        run: ./mvnw clean verify
-
-      - name: Create staging release on Nexus
-        if: ${{ ! inputs.skip-maven-central-staging }}
+      - name: Deploy as staging to Nexus
+        if: ${{ ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
-              -DdryRun='${{ inputs.dry-run }}' \
+              -DdryRun=false \
               -Darguments=-DskipTests \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
@@ -111,8 +91,14 @@ jobs:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Promote staging release
-        if: ${{ ! inputs.dry-run && ! inputs.skip-maven-central-promotion }}
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        if: ${{ ! inputs.skip-maven-release }}
+        with:
+          path: protobuf-maven-plugin/target/site
+
+      - name: Promote Nexus staging release
+        if: ${{ ! inputs.skip-nexus-promotion }}
         run: |-
           ./scripts/close-nexus-repos.sh \
               -u "${OSSRH_USERNAME}" \
@@ -125,37 +111,14 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
-      - name: Generate site
-        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
-        run: |-
-          # Skip checkout if we didn't promote anything, as this enables us to
-          # regenerate docs with bugfixes after the release if needed.
-          if [[ ${{ inputs.skip-maven-central-staging }} = true ]]; then
-            ./mvnw versions:set -DnewVersion="${release_version}"
-          else
-            git fetch --tags origin "v${release_version}"
-            git checkout FETCH_HEAD
-            # Attempt to re-generate the coverage reports.
-            ./mvnw test integration-test
-          fi
-
-          ./mvnw site -DskipTests -Dinvoker.skip
-
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
-        with:
-          path: protobuf-maven-plugin/target/site
-
-      - name: Deploy site
-        if: ${{ ! inputs.dry-run && ! inputs.skip-site-publication }}
-        uses: actions/deploy-pages@v4
-
       - name: Create GitHub Release
-        if: ${{ ! inputs.dry-run && ! inputs.skip-github-release }}
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ env.release_version }}
           name: v${{ env.release_version }}
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy site
+        uses: actions/deploy-pages@v4
+        if: ${{ ! inputs.skip-maven-release }}

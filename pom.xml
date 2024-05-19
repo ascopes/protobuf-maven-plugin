@@ -454,6 +454,7 @@
           <configuration>
             <goals>deploy</goals>
             <releaseProfiles>gpg</releaseProfiles>
+            <preparationGoals>clean verify site</preparationGoals>
           </configuration>
         </plugin>
 
