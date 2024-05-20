@@ -21,4 +21,53 @@ Path baseDirectory = basedir.toPath().toAbsolutePath()
 Path generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
 Path classesDir = baseDirectory.resolve("target/classes")
 
+List<String> expectedGeneratedSources = [
+  "org/example/helloworld/GreetingRequest.scala",
+  "org/example/helloworld/GreetingResponse.scala",
+  "org/example/helloworld/GreetingServiceGrpc.scala",
+  "org/example/helloworld/HelloworldProto.scala",
+]
+
+List<String> expectedCompiledClasses = [
+  "org/example/helloworld/HelloworldProto\$.class",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingServiceBlockingClient.class",
+  "org/example/helloworld/HelloworldProto.class",
+  "org/example/helloworld/HelloworldProto.tasty",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingServiceBlockingStub\$.class",
+  "org/example/helloworld/GreetingRequest\$.class",
+  "org/example/helloworld/GreetingResponse.tasty",
+  "org/example/helloworld/GreetingResponse\$.class",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingService\$.class",
+  "org/example/helloworld/GreetingServiceImpl.tasty",
+  "org/example/helloworld/GreetingServiceGrpc.class",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingServiceStub.class",
+  "org/example/helloworld/GreetingServiceGrpc\$.class",
+  "org/example/helloworld/GreetingResponse\$GreetingResponseLens.class",
+  "org/example/helloworld/GreetingServiceGrpc.tasty",
+  "org/example/helloworld/GreetingResponse.class",
+  "org/example/helloworld/GreetingRequest.class",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingServiceBlockingStub.class",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingServiceStub\$.class",
+  "org/example/helloworld/GreetingServiceImpl.class",
+  "org/example/helloworld/GreetingRequest\$GreetingRequestLens.class",
+  "org/example/helloworld/GreetingRequest.tasty",
+  "org/example/helloworld/GreetingServiceGrpc\$GreetingService.class",
+]
+
+assertThat(generatedSourcesDir).isDirectory()
+
+assertThat(classesDir).isDirectory()
+
+expectedGeneratedSources.forEach {
+  assertThat(generatedSourcesDir.resolve(it))
+      .exists()
+      .isNotEmptyFile()
+}
+
+expectedCompiledClasses.forEach {
+  assertThat(classesDir.resolve(it))
+      .exists()
+      .isNotEmptyFile()
+}
+
 return true
