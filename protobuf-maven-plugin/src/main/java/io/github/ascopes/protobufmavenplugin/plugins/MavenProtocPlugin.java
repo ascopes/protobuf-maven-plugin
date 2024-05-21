@@ -23,6 +23,7 @@ import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
+
 /**
  * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
  * repository.

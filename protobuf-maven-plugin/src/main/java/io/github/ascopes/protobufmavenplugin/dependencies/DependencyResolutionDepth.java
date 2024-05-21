@@ -24,9 +24,13 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
  */
 public enum DependencyResolutionDepth {
 
-  /** Resolve all transitive dependencies. */
+  /**
+   * Resolve all transitive dependencies.
+   */
   TRANSITIVE,
 
-  /** Only resolve direct dependencies that were explicitly included. */
+  /**
+   * Only resolve direct dependencies that were explicitly included.
+   */
   DIRECT,
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // Only execute on x86 Linux systems, as the URL we test against is CPU and OS specific.
 if (System.getProperty("os.name").equalsIgnoreCase("Linux")) {
   if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) {

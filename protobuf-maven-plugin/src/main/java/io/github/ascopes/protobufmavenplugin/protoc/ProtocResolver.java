@@ -59,7 +59,8 @@ public final class ProtocResolver {
       AetherMavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
-      UrlResourceFetcher urlResourceFetcher) {
+      UrlResourceFetcher urlResourceFetcher
+  ) {
     this.hostSystem = hostSystem;
     this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
@@ -72,15 +73,17 @@ public final class ProtocResolver {
       throw new IllegalArgumentException(
           "Cannot use LATEST for the protobuf.compiler.version. "
               + "Google has not released linear versions in the past, meaning that "
-              + "using LATEST will have unexpected behaviour.");
+              + "using LATEST will have unexpected behaviour."
+      );
     }
 
     if (version.equalsIgnoreCase("PATH")) {
       return systemPathResolver.resolve(EXECUTABLE_NAME);
     }
 
-    var path =
-        version.contains(":") ? resolveFromUrl(version) : resolveFromMavenRepositories(version);
+    var path = version.contains(":")
+        ? resolveFromUrl(version)
+        : resolveFromMavenRepositories(version);
 
     if (path.isPresent()) {
       try {
@@ -108,17 +111,17 @@ public final class ProtocResolver {
               + "running the detected protoc binary from Maven central. If this is "
               + "an issue, install the protoc compiler manually from your package "
               + "manager (apt update && apt install protobuf), and then invoke "
-              + "Maven with the -Dprotobuf.compiler.version=PATH flag.");
+              + "Maven with the -Dprotobuf.compiler.version=PATH flag."
+      );
     }
 
-    var artifact =
-        ImmutableMavenDependency.builder()
-            .groupId(GROUP_ID)
-            .artifactId(ARTIFACT_ID)
-            .version(version)
-            .type("exe")
-            .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
-            .build();
+    var artifact = ImmutableMavenDependency.builder()
+        .groupId(GROUP_ID)
+        .artifactId(ARTIFACT_ID)
+        .version(version)
+        .type("exe")
+        .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
+        .build();
 
     return Optional.of(artifactPathResolver.resolveArtifact(artifact));
   }

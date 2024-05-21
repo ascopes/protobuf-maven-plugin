@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import org.jspecify.annotations.Nullable;
 
+
 /**
  * Base interface for a parameter that consumes Maven artifact details.
  *
@@ -32,9 +33,12 @@ public interface MavenArtifact {
 
   String getVersion();
 
-  @Nullable String getType();
+  @Nullable
+  String getType();
 
-  @Nullable String getClassifier();
+  @Nullable
+  String getClassifier();
 
-  @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
+  @Nullable
+  DependencyResolutionDepth getDependencyResolutionDepth();
 }

@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-/** Shared internal components. */
+/**
+ * Shared internal components.
+ */
 package io.github.ascopes.protobufmavenplugin.utils;

@@ -60,7 +60,9 @@ public final class UrlResourceFetcher {
 
   private Optional<Path> handleFileSystemUrl(URL url) throws ResolutionException {
     try {
-      return Optional.of(url.toURI()).map(Path::of).filter(Files::exists);
+      return Optional.of(url.toURI())
+          .map(Path::of)
+          .filter(Files::exists);
     } catch (URISyntaxException ex) {
       throw new ResolutionException("Failed to resolve '" + url + "' due to malformed syntax", ex);
     }
@@ -79,8 +81,10 @@ public final class UrlResourceFetcher {
       log.debug("Connecting to '{}' to copy resources to '{}'", url, targetFile);
       conn.connect();
 
-      try (var responseStream = conn.getInputStream();
-          var fileStream = new BufferedOutputStream(Files.newOutputStream(targetFile))) {
+      try (
+          var responseStream = conn.getInputStream();
+          var fileStream = new BufferedOutputStream(Files.newOutputStream(targetFile))
+      ) {
         responseStream.transferTo(fileStream);
         log.info("Copied {} to {}", url, targetFile);
         return Optional.of(targetFile);
@@ -96,13 +100,9 @@ public final class UrlResourceFetcher {
   }
 
   private String userAgent() {
-    return "io.github.ascopes.protobuf-maven-plugin/"
-        + version(getClass())
-        + " org.apache.maven/"
-        + version(Maven.class)
-        + " (Java "
-        + Runtime.version().toString()
-        + ")";
+    return "io.github.ascopes.protobuf-maven-plugin/" + version(getClass())
+        + " org.apache.maven/" + version(Maven.class)
+        + " (Java " + Runtime.version().toString() + ")";
   }
 
   private String version(Class<?> cls) {
@@ -113,7 +113,9 @@ public final class UrlResourceFetcher {
     var digest = Digests.sha1(url.toExternalForm());
     var path = url.getPath();
     var lastSlash = path.lastIndexOf('/');
-    var fileName = lastSlash < 0 ? digest : path.substring(lastSlash + 1) + "-" + digest;
+    var fileName = lastSlash < 0
+        ? digest
+        : path.substring(lastSlash + 1) + "-" + digest;
 
     return temporarySpace
         .createTemporarySpace("url", url.getProtocol())

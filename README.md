@@ -67,7 +67,7 @@ and  examples are present [in the integration tests](https://github.com/ascopes/
 
 ## Why do we need _another_ plugin?
 
-At the time of starting this project, the two most-used Maven plugins had not seen regular
+At the time of starting this project, the two most-used Maven plugins had not seen regular 
 updates/releases for the best part of 3 years. This presented me with an issue in the team I work in,
 as Maven 4.x is slowly approaching, and the existing plugins are not Maven 4.0 compatible. Without
 the guarantee of work being done on the existing projects, there was a big risk that we'd be unable
@@ -76,7 +76,7 @@ to use Maven 4.0 when it is finally released.
 Another issue was that some of the existing plugins did not handle Apple Silicon on Apple Macs
 correctly, leading to annoying issues when building.
 
-Finally, the plugin we made use of relied on regular updates to pull in new versions of
+Finally, the plugin we made use of relied on regular updates to pull in new versions of 
 `protoc`. Since this was not happening, we were losing the benefits from any of the newer versions
 of `protoc` that were released. We were also seeing an increasing number of build warnings due to
 deprecated method calls being made by the older generated code.
@@ -87,7 +87,7 @@ to generate these sources, but then you have to worry about how you make the `pr
 
 Rather than allowing us to be blocked indefinitely by these issues, I decided to write a new plugin
 from scratch with a focus on simplicity and the ability to work across as many platforms and
-use-cases as possible.
+use-cases as possible. 
 
 This plugin can download the required version of `protoc` for your platform automatically from your
 Maven repository. Use Nexus or Artifactory rather than Maven Central? No problem. It will work

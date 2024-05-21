@@ -49,7 +49,9 @@ public final class SystemPathBinaryResolver {
   public Optional<Path> resolve(String name) throws ResolutionException {
     log.debug("Looking for executable matching name '{}' on the path", name);
 
-    var predicate = hostSystem.isProbablyWindows() ? isMatchWindows(name) : isMatchPosix(name);
+    var predicate = hostSystem.isProbablyWindows()
+        ? isMatchWindows(name)
+        : isMatchPosix(name);
 
     var result = Optional.<Path>empty();
 
@@ -72,17 +74,19 @@ public final class SystemPathBinaryResolver {
   private Predicate<Path> isMatchWindows(String name) {
     log.debug("Using Windows path matching strategy");
     return path -> {
-      var matchesName = FileUtils.getFileNameWithoutExtension(path).equalsIgnoreCase(name);
-      var matchesExtension =
-          FileUtils.getFileExtension(path)
-              .filter(hostSystem.getSystemPathExtensions()::contains)
-              .isPresent();
+      var matchesName = FileUtils.getFileNameWithoutExtension(path)
+          .equalsIgnoreCase(name);
+      var matchesExtension = FileUtils
+          .getFileExtension(path)
+          .filter(hostSystem.getSystemPathExtensions()::contains)
+          .isPresent();
 
       log.debug(
           "Path '{}' (WINDOWS) matches name = {}, matches executable extension = {}",
           path,
           matchesName,
-          matchesExtension);
+          matchesExtension
+      );
 
       return matchesName && matchesExtension;
     };
@@ -98,7 +102,8 @@ public final class SystemPathBinaryResolver {
           "Path '{}' (POSIX) matches name = {}, matches executable flag = {}",
           path,
           matchesName,
-          matchesExecutableFlag);
+          matchesExecutableFlag
+      );
 
       return matchesName && matchesExecutableFlag;
     };

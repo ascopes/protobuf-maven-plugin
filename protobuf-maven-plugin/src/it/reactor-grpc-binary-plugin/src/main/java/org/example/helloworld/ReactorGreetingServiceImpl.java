@@ -21,7 +21,8 @@ import reactor.core.publisher.Mono;
 public class ReactorGreetingServiceImpl extends ReactorGreetingServiceGrpc.GreetingServiceImplBase {
   @Override
   public Mono<GreetingResponse> greet(Mono<GreetingRequest> request) {
-    return request.map(
-        body -> GreetingResponse.newBuilder().setText("Hello, " + body.getName() + "!").build());
+    return request.map(body -> GreetingResponse.newBuilder()
+            .setText("Hello, " + body.getName() + "!")
+            .build());
   }
 }

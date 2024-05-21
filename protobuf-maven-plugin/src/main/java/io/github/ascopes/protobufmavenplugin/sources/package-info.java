@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-/** Detection and management of input Protocol Buffer sources. */
+/**
+ * Detection and management of input Protocol Buffer sources.
+ */
 package io.github.ascopes.protobufmavenplugin.sources;

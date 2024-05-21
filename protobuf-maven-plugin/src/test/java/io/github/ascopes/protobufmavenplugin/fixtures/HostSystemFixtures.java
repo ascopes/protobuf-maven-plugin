@@ -39,43 +39,35 @@ public final class HostSystemFixtures {
   }
 
   public static HostSystemMockConfigurer linux() {
-    return namedConfigurer(
-        "Linux",
-        hs -> {
-          when(hs.isProbablyLinux()).thenReturn(true);
-          when(hs.isProbablyMacOs()).thenReturn(false);
-          when(hs.isProbablyWindows()).thenReturn(false);
-        });
+    return namedConfigurer("Linux", hs -> {
+      when(hs.isProbablyLinux()).thenReturn(true);
+      when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablyWindows()).thenReturn(false);
+    });
   }
 
   public static HostSystemMockConfigurer macOs() {
-    return namedConfigurer(
-        "Mac OS",
-        hs -> {
-          when(hs.isProbablyLinux()).thenReturn(false);
-          when(hs.isProbablyMacOs()).thenReturn(true);
-          when(hs.isProbablyWindows()).thenReturn(false);
-        });
+    return namedConfigurer("Mac OS", hs -> {
+      when(hs.isProbablyLinux()).thenReturn(false);
+      when(hs.isProbablyMacOs()).thenReturn(true);
+      when(hs.isProbablyWindows()).thenReturn(false);
+    });
   }
 
   public static HostSystemMockConfigurer windows() {
-    return namedConfigurer(
-        "Windows",
-        hs -> {
-          when(hs.isProbablyLinux()).thenReturn(false);
-          when(hs.isProbablyMacOs()).thenReturn(false);
-          when(hs.isProbablyWindows()).thenReturn(true);
-        });
+    return namedConfigurer("Windows", hs -> {
+      when(hs.isProbablyLinux()).thenReturn(false);
+      when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablyWindows()).thenReturn(true);
+    });
   }
 
   public static HostSystemMockConfigurer otherOs() {
-    return namedConfigurer(
-        "an unknown OS",
-        hs -> {
-          when(hs.isProbablyLinux()).thenReturn(false);
-          when(hs.isProbablyMacOs()).thenReturn(false);
-          when(hs.isProbablyWindows()).thenReturn(false);
-        });
+    return namedConfigurer("an unknown OS", hs -> {
+      when(hs.isProbablyLinux()).thenReturn(false);
+      when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablyWindows()).thenReturn(false);
+    });
   }
 
   @FunctionalInterface
@@ -84,17 +76,17 @@ public final class HostSystemFixtures {
     void configure(HostSystem mock);
 
     default HostSystemMockConfigurer and(HostSystemMockConfigurer second) {
-      return namedConfigurer(
-          this + " and " + second,
-          hs -> {
-            configure(hs);
-            second.configure(hs);
-          });
+      return namedConfigurer(this + " and " + second, hs -> {
+        configure(hs);
+        second.configure(hs);
+      });
     }
   }
 
   private static HostSystemMockConfigurer namedConfigurer(
-      String description, HostSystemMockConfigurer configurer) {
+      String description,
+      HostSystemMockConfigurer configurer
+  ) {
     return new HostSystemMockConfigurer() {
       @Override
       public void configure(HostSystem mock) {

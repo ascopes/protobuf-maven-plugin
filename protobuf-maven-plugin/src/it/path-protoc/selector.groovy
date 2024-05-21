@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // Only execute this test if the user has protoc installed on their
 // PATH and it is successfully executable.
 try {

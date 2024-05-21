@@ -53,7 +53,8 @@ public final class BinaryPluginResolver {
       AetherMavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
-      UrlResourceFetcher urlResourceFetcher) {
+      UrlResourceFetcher urlResourceFetcher
+  ) {
     this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
@@ -61,23 +62,28 @@ public final class BinaryPluginResolver {
   }
 
   public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> plugins) throws ResolutionException {
+      Collection<? extends MavenProtocPlugin> plugins
+  ) throws ResolutionException {
     return resolveAll(plugins, this::resolveMavenPlugin);
   }
 
   public Collection<ResolvedProtocPlugin> resolvePathPlugins(
-      Collection<? extends PathProtocPlugin> plugins) throws ResolutionException {
+      Collection<? extends PathProtocPlugin> plugins
+  ) throws ResolutionException {
     return resolveAll(plugins, this::resolvePathPlugin);
   }
 
   public Collection<ResolvedProtocPlugin> resolveUrlPlugins(
-      Collection<? extends UrlProtocPlugin> plugins) throws ResolutionException {
+      Collection<? extends UrlProtocPlugin> plugins
+  ) throws ResolutionException {
     return resolveAll(plugins, this::resolveUrlPlugin);
   }
 
-  private Optional<ResolvedProtocPlugin> resolveMavenPlugin(MavenProtocPlugin plugin)
-      throws ResolutionException {
-    var pluginBuilder = ImmutableMavenProtocPlugin.builder().from(plugin);
+  private Optional<ResolvedProtocPlugin> resolveMavenPlugin(
+      MavenProtocPlugin plugin
+  ) throws ResolutionException {
+    var pluginBuilder = ImmutableMavenProtocPlugin.builder()
+        .from(plugin);
 
     if (plugin.getClassifier() == null) {
       var classifier = platformClassifierFactory.getClassifier(plugin.getArtifactId());
@@ -97,8 +103,9 @@ public final class BinaryPluginResolver {
     return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
-  private Optional<ResolvedProtocPlugin> resolvePathPlugin(PathProtocPlugin plugin)
-      throws ResolutionException {
+  private Optional<ResolvedProtocPlugin> resolvePathPlugin(
+      PathProtocPlugin plugin
+  ) throws ResolutionException {
 
     log.debug("Resolving Path protoc plugin {}", plugin);
 
@@ -108,17 +115,16 @@ public final class BinaryPluginResolver {
       return Optional.empty();
     }
 
-    var path =
-        maybePath.orElseThrow(
-            () ->
-                new ResolutionException(
-                    "No plugin named " + plugin.getName() + " was found on the system path"));
+    var path = maybePath.orElseThrow(() -> new ResolutionException(
+        "No plugin named " + plugin.getName() + " was found on the system path"
+    ));
 
     return Optional.of(createResolvedProtocPlugin(plugin, path));
   }
 
-  private Optional<ResolvedProtocPlugin> resolveUrlPlugin(UrlProtocPlugin plugin)
-      throws ResolutionException {
+  private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
+      UrlProtocPlugin plugin
+  ) throws ResolutionException {
 
     log.debug("Resolving URL protoc plugin {}", plugin);
 
@@ -128,9 +134,9 @@ public final class BinaryPluginResolver {
       return Optional.empty();
     }
 
-    var path =
-        maybePath.orElseThrow(
-            () -> new ResolutionException("Plugin at " + plugin.getUrl() + " does not exist"));
+    var path = maybePath.orElseThrow(() -> new ResolutionException(
+        "Plugin at " + plugin.getUrl() + " does not exist"
+    ));
 
     makeExecutable(path);
 
@@ -138,7 +144,8 @@ public final class BinaryPluginResolver {
   }
 
   private ResolvedProtocPlugin createResolvedProtocPlugin(ProtocPlugin plugin, Path path) {
-    return ImmutableResolvedProtocPlugin.builder()
+    return ImmutableResolvedProtocPlugin
+        .builder()
         .id(Digests.sha1(path.toString()))
         .path(path)
         .options(plugin.getOptions())
@@ -146,7 +153,9 @@ public final class BinaryPluginResolver {
   }
 
   private <P extends ProtocPlugin> Collection<ResolvedProtocPlugin> resolveAll(
-      Collection<? extends P> plugins, Resolver<? super P> resolver) throws ResolutionException {
+      Collection<? extends P> plugins,
+      Resolver<? super P> resolver
+  ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
       if (plugin.isSkip()) {
@@ -154,7 +163,8 @@ public final class BinaryPluginResolver {
         continue;
       }
 
-      resolver.resolve(plugin).ifPresentOrElse(resolvedPlugins::add, skipUnresolvedPlugin(plugin));
+      resolver.resolve(plugin)
+          .ifPresentOrElse(resolvedPlugins::add, skipUnresolvedPlugin(plugin));
     }
     return resolvedPlugins;
   }

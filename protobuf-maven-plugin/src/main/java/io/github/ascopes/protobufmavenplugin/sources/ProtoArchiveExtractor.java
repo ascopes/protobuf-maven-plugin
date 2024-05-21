@@ -77,11 +77,11 @@ public final class ProtoArchiveExtractor {
         targetFiles.add(targetFile);
       }
 
-      var listing =
-          ImmutableProtoFileListing.builder()
-              .addAllProtoFiles(targetFiles)
-              .protoFilesRoot(extractionRoot)
-              .build();
+      var listing = ImmutableProtoFileListing
+          .builder()
+          .addAllProtoFiles(targetFiles)
+          .protoFilesRoot(extractionRoot)
+          .build();
 
       return Optional.of(listing);
     }
@@ -91,10 +91,11 @@ public final class ProtoArchiveExtractor {
     try (var stream = Files.walk(archiveRootPath)) {
       return stream
           .filter(ProtoFilePredicates::isProtoFile)
-          .peek(
-              protoFile ->
-                  log.debug(
-                      "Found proto file {} in archive {}", protoFile.toUri(), archiveRootPath))
+          .peek(protoFile -> log.debug(
+              "Found proto file {} in archive {}",
+              protoFile.toUri(),
+              archiveRootPath
+          ))
           .collect(Collectors.toUnmodifiableList());
     }
   }

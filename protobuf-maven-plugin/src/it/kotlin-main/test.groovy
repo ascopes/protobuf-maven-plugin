@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat
 
 Path baseDirectory = basedir.toPath().toAbsolutePath()
 Path generatedSourcesDir = baseDirectory.resolve("target/generated-sources/protobuf")
-Path classesDir = baseDirectory.resolve("target/classes")
+def classesDir = baseDirectory.resolve("target/classes")
 def expectedGeneratedJavaFiles = [
     "org/example/helloworld/Helloworld",
     "org/example/helloworld/GreetingRequest",

@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-/** Management of source code generation requests. */
+/**
+ * Management of source code generation requests.
+ */
 package io.github.ascopes.protobufmavenplugin.generation;

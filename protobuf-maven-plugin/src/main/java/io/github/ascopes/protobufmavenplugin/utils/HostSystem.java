@@ -57,22 +57,18 @@ public final class HostSystem {
     operatingSystem = properties.getProperty("os.name", "");
     cpuArchitecture = properties.getProperty("os.arch", "");
     workingDirectory = FileUtils.normalize(Path.of(""));
-    path =
-        tokenizeFilePath(
-            environmentVariables.getOrDefault("PATH", ""),
-            paths ->
-                paths
-                    .map(Path::of)
-                    .map(FileUtils::normalize)
-                    .distinct()
-                    .filter(Files::isDirectory)
-                    .collect(Collectors.toUnmodifiableList()));
-    pathExt =
-        tokenizeFilePath(
-            environmentVariables.getOrDefault("PATHEXT", ""),
-            extensions ->
-                extensions.collect(
-                    Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
+    path = tokenizeFilePath(
+        environmentVariables.getOrDefault("PATH", ""),
+        paths -> paths
+            .map(Path::of)
+            .map(FileUtils::normalize)
+            .distinct()
+            .filter(Files::isDirectory)
+            .collect(Collectors.toUnmodifiableList()));
+    pathExt = tokenizeFilePath(
+        environmentVariables.getOrDefault("PATHEXT", ""),
+        extensions -> extensions
+            .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
   }
 
   public String getOperatingSystem() {
@@ -114,7 +110,9 @@ public final class HostSystem {
 
   private static <T> T tokenizeFilePath(String rawValue, Function<Stream<String>, T> mapper) {
     try (var scanner = new Scanner(rawValue).useDelimiter(File.pathSeparator)) {
-      var stream = scanner.tokens().map(String::trim).filter(not(String::isBlank));
+      var stream = scanner.tokens()
+          .map(String::trim)
+          .filter(not(String::isBlank));
 
       return mapper.apply(stream);
     }

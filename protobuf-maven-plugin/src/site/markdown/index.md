@@ -4,7 +4,7 @@ The Protobuf Maven Plugin is a modern Maven plugin that attempts to reduce the h
 integrate Protobuf compilation into your build process.
 
 Unlike existing Protobuf integrations, this plugin is able to pull the desired version of
-`protoc` directly from Google's releases on Maven Central. This means you do not need to update
+`protoc` directly from Google's releases on Maven Central. This means you do not need to update 
 the version of this plugin to be able to pull in a newer version of `protoc` when it is released.
 
 If your system is not directly supported by Google in the `protoc` releases they supply, you can
@@ -17,12 +17,12 @@ In addition to generating Java sources, this plugin can also generate Kotlin sou
 
 # Bugs and feature requests
 
-Please raise any bugs or feature requests on
+Please raise any bugs or feature requests on 
 [the GitHub project for this plugin](https://github.com/ascopes/protobuf-maven-plugin/issues).
 
 # Detailed examples
 
-If you need detailed working examples to use as reference, then the
+If you need detailed working examples to use as reference, then the 
 [integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it)
 are a great place to start, since they are full working Maven projects.
 
@@ -85,9 +85,9 @@ the `$PATH`-based `protoc` binary on their system (documented later in this page
 ## Dependencies
 
 It is worth noting that you will need to include the `protobuf-java` dependency
-for the generated Java code to actually compile.
+for the generated Java code to actually compile. 
 
-Ideally, you should use the same version for `protobuf-java` as you do for the
+Ideally, you should use the same version for `protobuf-java` as you do for the 
 `protocVersion` parameter. Doing this with a shared property will also allow tools
 like Dependabot to keep the compiler version up-to-date automatically.
 
@@ -433,7 +433,7 @@ covered by the protoc executable, you can add custom plugins to your build.
 
 ### Binary plugins
 
-Binary plugins are OS-specific executables that are passed to `protoc` directly, and are the
+Binary plugins are OS-specific executables that are passed to `protoc` directly, and are the 
 standard way of handling plugins with `protoc`.
 
 #### Binary plugins from Maven Central
@@ -494,12 +494,12 @@ be passed as an option to the plugin if specified.
 
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
 individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
-cannot be resolved on the system path. This is useful for specific cases where resources may only be available
+cannot be resolved on the system path. This is useful for specific cases where resources may only be available 
 during CI builds but do not prevent the application being built locally.
 
 #### Binary plugins from specific locations
 
-In some situations, you may wish to download plugins directly from a URL or run them from a
+In some situations, you may wish to download plugins directly from a URL or run them from a 
 specific file system path:
 
 ```xml
@@ -585,12 +585,12 @@ dependencies to execute.
 Each `jvmMavenPlugin` can take an optional `options` parameter which will
 be passed as an option to the plugin if specified.
 
-Currently, you are required to be able to execute `*.bat` files on Windows, or have
+Currently, you are required to be able to execute `*.bat` files on Windows, or have 
 `sh` available on the system `$PATH` for any other platform.
 
 ### Mixing plugins
 
-Multiple plugins can be provided if needed. For example, if you are using the
+Multiple plugins can be provided if needed. For example, if you are using the 
 [Salesforce Reactor GRPC libraries](https://github.com/salesforce/reactive-grpc/tree/master),
 then you can provide the following:
 
@@ -620,4 +620,3 @@ then you can provide the following:
   ...
 </plugin>
 ```
-

@@ -34,6 +34,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+
 /**
  * @author Ashley Scopes
  */
@@ -44,7 +45,9 @@ class PlatformClassifierFactoryTest {
   @MethodSource("validClassifierCases")
   @ParameterizedTest(name = "for system {0}, expect classifier {1}")
   void getClassifierReturnsExpectedResultsOnValidSystems(
-      HostSystemMockConfigurer configurer, String expectedClassifier) {
+      HostSystemMockConfigurer configurer,
+      String expectedClassifier
+  ) {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
@@ -61,7 +64,9 @@ class PlatformClassifierFactoryTest {
   @DisplayName(".getClassifier(...) raises an exception for unknown systems")
   @MethodSource("invalidClassifierCases")
   @ParameterizedTest(name = "when {0}, then expect an exception")
-  void getClassifierRaisesAnExceptionForUnknownSystems(HostSystemMockConfigurer configurer) {
+  void getClassifierRaisesAnExceptionForUnknownSystems(
+      HostSystemMockConfigurer configurer
+  ) {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
@@ -72,7 +77,8 @@ class PlatformClassifierFactoryTest {
     assertThatThrownBy(() -> factory.getClassifier(artifactId))
         .isInstanceOf(UnsupportedOperationException.class)
         .hasMessageMatching(
-            "No '[^']+' binary is available for reported OS '[^']+' and CPU architecture '[^']+'");
+            "No '[^']+' binary is available for reported OS '[^']+' and CPU architecture '[^']+'"
+        );
   }
 
   static Stream<Arguments> validClassifierCases() {
@@ -89,7 +95,8 @@ class PlatformClassifierFactoryTest {
         arguments(windows().and(arch("amd64")), "windows-x86_64"),
         arguments(windows().and(arch("x86_64")), "windows-x86_64"),
         arguments(windows().and(arch("x86")), "windows-x86_32"),
-        arguments(windows().and(arch("x86_32")), "windows-x86_32"));
+        arguments(windows().and(arch("x86_32")), "windows-x86_32")
+    );
   }
 
   static Stream<HostSystemMockConfigurer> invalidClassifierCases() {
@@ -105,6 +112,8 @@ class PlatformClassifierFactoryTest {
         otherOs().and(arch("ppc64le")),
         otherOs().and(arch("s390")),
         otherOs().and(arch("zarch_64")),
-        otherOs().and(arch("some unknown CPU arch")));
+        otherOs().and(arch("some unknown CPU arch"))
+    );
   }
+
 }

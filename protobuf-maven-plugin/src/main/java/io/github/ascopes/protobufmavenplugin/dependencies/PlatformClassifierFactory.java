@@ -90,10 +90,12 @@ public final class PlatformClassifierFactory {
       }
     }
 
-    var message =
-        String.format(
-            "No '%s' binary is available for reported OS '%s' and CPU architecture '%s'",
-            binaryName, rawOs, rawArch);
+    var message = String.format(
+        "No '%s' binary is available for reported OS '%s' and CPU architecture '%s'",
+        binaryName,
+        rawOs,
+        rawArch
+    );
 
     // TODO: throw ResolutionException here instead.
     throw new UnsupportedOperationException(message);

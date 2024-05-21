@@ -80,7 +80,9 @@ public enum Language {
     }
 
     public EnumSet<Language> build() {
-      return values.isEmpty() ? EnumSet.noneOf(Language.class) : EnumSet.copyOf(values);
+      return values.isEmpty()
+          ? EnumSet.noneOf(Language.class)
+          : EnumSet.copyOf(values);
     }
   }
 }

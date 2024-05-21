@@ -33,19 +33,24 @@ import org.slf4j.LoggerFactory;
 /**
  * Strategy for registration of sources with the Maven project.
  *
- * <p>This cannot be extended outside of the predefined strategies that already exist in this class.
+ * <p>This cannot be extended outside of the predefined strategies
+ * that already exist in this class.
  *
  * @author Ashley Scopes
  */
 public final class SourceRootRegistrar {
 
-  public static final SourceRootRegistrar MAIN =
-      new SourceRootRegistrar(
-          "main", MavenProject::addCompileSourceRoot, Build::getOutputDirectory);
+  public static final SourceRootRegistrar MAIN = new SourceRootRegistrar(
+      "main",
+      MavenProject::addCompileSourceRoot,
+      Build::getOutputDirectory
+  );
 
-  public static final SourceRootRegistrar TEST =
-      new SourceRootRegistrar(
-          "test", MavenProject::addTestCompileSourceRoot, Build::getTestOutputDirectory);
+  public static final SourceRootRegistrar TEST = new SourceRootRegistrar(
+      "test",
+      MavenProject::addTestCompileSourceRoot,
+      Build::getTestOutputDirectory
+  );
 
   private static final Logger log = LoggerFactory.getLogger(SourceRootRegistrar.class);
 
@@ -56,7 +61,8 @@ public final class SourceRootRegistrar {
   private SourceRootRegistrar(
       String name,
       BiConsumer<MavenProject, String> sourceRootRegistrar,
-      Function<Build, String> classOutputDirectoryGetter) {
+      Function<Build, String> classOutputDirectoryGetter
+  ) {
     this.name = name;
     this.sourceRootRegistrar = sourceRootRegistrar;
     this.classOutputDirectoryGetter = classOutputDirectoryGetter;
@@ -69,14 +75,17 @@ public final class SourceRootRegistrar {
 
   public void embedListing(MavenSession session, ProtoFileListing listing) throws IOException {
     log.info("Embedding sources from {} in {} class outputs", listing.getProtoFilesRoot(), this);
-    var targetDirectory =
-        classOutputDirectoryGetter.andThen(Path::of).apply(session.getCurrentProject().getBuild());
+    var targetDirectory = classOutputDirectoryGetter.andThen(Path::of)
+        .apply(session.getCurrentProject().getBuild());
 
     // TODO: extract this logic out to FileUtils and use both here and in the archive extractor
     // as it can be refactored into common code.
     for (var sourceFile : listing.getProtoFiles()) {
-      var targetFile =
-          FileUtils.changeRelativePath(targetDirectory, listing.getProtoFilesRoot(), sourceFile);
+      var targetFile = FileUtils.changeRelativePath(
+          targetDirectory,
+          listing.getProtoFilesRoot(),
+          sourceFile
+      );
       Files.createDirectories(targetFile.getParent());
       Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
     }

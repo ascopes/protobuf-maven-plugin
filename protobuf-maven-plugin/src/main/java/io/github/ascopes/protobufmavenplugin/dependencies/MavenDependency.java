@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 
+
 /**
  * Implementation independent descriptor for an artifact or dependency that can be used in a Maven
  * Plugin parameter.
@@ -28,4 +29,5 @@ import org.immutables.value.Value.Modifiable;
  */
 @Immutable
 @Modifiable
-public abstract class MavenDependency implements MavenArtifact {}
+public abstract class MavenDependency implements MavenArtifact {
+}

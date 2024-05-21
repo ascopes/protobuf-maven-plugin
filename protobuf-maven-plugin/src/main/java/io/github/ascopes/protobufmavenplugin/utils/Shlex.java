@@ -23,8 +23,8 @@ import java.util.function.Function;
  *
  * <p>Losely based on Python's {@code shlex} module.
  *
- * <p>This is far from perfect but should work in the majority of use cases to ensure scripts do not
- * interpret special characters in paths in strange and unexpected ways.
+ * <p>This is far from perfect but should work in the majority of use cases
+ * to ensure scripts do not interpret special characters in paths in strange and unexpected ways.
  *
  * <p>Long lines will be split up with line continuations.
  *
@@ -48,7 +48,10 @@ public final class Shlex {
   }
 
   private static String quote(
-      Iterable<String> args, Function<String, String> quoter, String continuation) {
+      Iterable<String> args,
+      Function<String, String> quoter,
+      String continuation
+  ) {
     var iter = args.iterator();
 
     if (!iter.hasNext()) {
@@ -147,15 +150,14 @@ public final class Shlex {
   private static boolean isSafe(String arg) {
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
-      var safe =
-          'A' <= c && c <= 'Z'
-              || 'a' <= c && c <= 'z'
-              || '0' <= c && c <= '9'
-              || c == '-'
-              || c == '/'
-              || c == '_'
-              || c == '.'
-              || c == '=';
+      var safe = 'A' <= c && c <= 'Z'
+          || 'a' <= c && c <= 'z'
+          || '0' <= c && c <= '9'
+          || c == '-'
+          || c == '/'
+          || c == '_'
+          || c == '.'
+          || c == '=';
 
       if (!safe) {
         return false;

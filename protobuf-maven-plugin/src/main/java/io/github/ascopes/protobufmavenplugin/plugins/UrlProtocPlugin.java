@@ -19,11 +19,12 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 import java.net.URL;
 import org.immutables.value.Value.Modifiable;
 
+
 /**
  * Implementation independent descriptor for a protoc plugin that can be resolved from a URL.
  *
- * <p>URL-based plugins can be marked as optional if they should be skipped when the resource is
- * unable to be resolved.
+ * <p>URL-based plugins can be marked as optional if they should be
+ * skipped when the resource is unable to be resolved.
  *
  * @author Ashley Scopes
  * @since 2.0.0

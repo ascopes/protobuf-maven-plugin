@@ -37,29 +37,26 @@ import org.mockito.quality.Strictness;
 @DisplayName("TemporarySpace tests")
 class TemporarySpaceTest {
 
-  @TempDir Path tempDir;
+  @TempDir
+  Path tempDir;
 
   TemporarySpace temporarySpace;
 
   @BeforeEach
   void setUp() {
-    var mavenProject =
-        mock(
-            MavenProject.class,
-            withSettings()
-                .strictness(Strictness.LENIENT)
-                .defaultAnswer(Answers.RETURNS_SMART_NULLS));
+    var mavenProject = mock(MavenProject.class, withSettings()
+        .strictness(Strictness.LENIENT)
+        .defaultAnswer(Answers.RETURNS_SMART_NULLS));
 
-    var mavenBuild =
-        mock(
-            Build.class,
-            withSettings()
-                .strictness(Strictness.LENIENT)
-                .defaultAnswer(Answers.RETURNS_SMART_NULLS));
+    var mavenBuild = mock(Build.class, withSettings()
+        .strictness(Strictness.LENIENT)
+        .defaultAnswer(Answers.RETURNS_SMART_NULLS));
 
-    when(mavenProject.getBuild()).thenReturn(mavenBuild);
+    when(mavenProject.getBuild())
+        .thenReturn(mavenBuild);
 
-    when(mavenBuild.getDirectory()).thenReturn(tempDir.toAbsolutePath().toString());
+    when(mavenBuild.getDirectory())
+        .thenReturn(tempDir.toAbsolutePath().toString());
 
     temporarySpace = new TemporarySpace(mavenProject);
   }
@@ -75,13 +72,12 @@ class TemporarySpaceTest {
 
     // Then
     assertThat(actualPath)
-        .isEqualTo(
-            tempDir
-                .resolve("protobuf-maven-plugin")
-                .resolve("foo")
-                .resolve("bar")
-                .resolve("baz")
-                .resolve(id))
+        .isEqualTo(tempDir
+            .resolve("protobuf-maven-plugin")
+            .resolve("foo")
+            .resolve("bar")
+            .resolve("baz")
+            .resolve(id))
         .isDirectory();
   }
 
@@ -90,19 +86,20 @@ class TemporarySpaceTest {
   void nothingHappensIfTheTemporaryDirectoryAlreadyExists() throws IOException {
     // Given
     var id = UUID.randomUUID().toString();
-    var existingPath =
-        tempDir
-            .resolve("protobuf-maven-plugin")
-            .resolve("foo")
-            .resolve("bar")
-            .resolve("baz")
-            .resolve(id);
+    var existingPath = tempDir
+        .resolve("protobuf-maven-plugin")
+        .resolve("foo")
+        .resolve("bar")
+        .resolve("baz")
+        .resolve(id);
     Files.createDirectories(existingPath);
 
     // When
     var actualPath = temporarySpace.createTemporarySpace("foo", "bar", "baz", id);
 
     // Then
-    assertThat(actualPath).isEqualTo(existingPath).isDirectory();
+    assertThat(actualPath)
+        .isEqualTo(existingPath)
+        .isDirectory();
   }
 }

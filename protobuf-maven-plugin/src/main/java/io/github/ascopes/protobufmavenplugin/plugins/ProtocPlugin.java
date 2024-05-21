@@ -26,7 +26,8 @@ import org.jspecify.annotations.Nullable;
  */
 public interface ProtocPlugin {
 
-  @Nullable String getOptions();
+  @Nullable
+  String getOptions();
 
   default boolean isSkip() {
     return false;

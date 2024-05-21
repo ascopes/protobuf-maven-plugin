@@ -55,14 +55,13 @@ public final class TestFileSystem implements Closeable {
   }
 
   public Path givenDirectoryExists(Path root, String... bits) {
-    return unchecked(
-        () -> {
-          var dir = reduce(root, bits);
-          Files.createDirectories(dir);
-          log.debug("Created directory '{}'", dir.toUri());
-          makeOwnerReadWrite(dir);
-          return dir;
-        });
+    return unchecked(() -> {
+      var dir = reduce(root, bits);
+      Files.createDirectories(dir);
+      log.debug("Created directory '{}'", dir.toUri());
+      makeOwnerReadWrite(dir);
+      return dir;
+    });
   }
 
   public Path givenDirectoryExists(String... bits) {
@@ -70,15 +69,14 @@ public final class TestFileSystem implements Closeable {
   }
 
   public Path givenFileExists(Path root, String... bits) {
-    return unchecked(
-        () -> {
-          var file = reduce(root, bits);
-          Files.createDirectories(file.getParent());
-          Files.createFile(file);
-          log.debug("Created file '{}'", file.toUri());
-          makeOwnerReadWrite(file);
-          return file;
-        });
+    return unchecked(() -> {
+      var file = reduce(root, bits);
+      Files.createDirectories(file.getParent());
+      Files.createFile(file);
+      log.debug("Created file '{}'", file.toUri());
+      makeOwnerReadWrite(file);
+      return file;
+    });
   }
 
   public Path givenFileExists(String... bits) {
@@ -90,37 +88,36 @@ public final class TestFileSystem implements Closeable {
   }
 
   public Path givenSymbolicLinkExists(Path target, Path root, String... bits) {
-    return unchecked(
-        () -> {
-          var source = reduce(root, bits);
-          Files.createDirectories(source.getParent());
-          Files.createSymbolicLink(source, target);
-          log.debug("Created symlink '{}' pointing to '{}'", source.toUri(), target.toUri());
-          makeOwnerReadWrite(source);
-          return source;
-        });
+    return unchecked(() -> {
+      var source = reduce(root, bits);
+      Files.createDirectories(source.getParent());
+      Files.createSymbolicLink(source, target);
+      log.debug("Created symlink '{}' pointing to '{}'", source.toUri(), target.toUri());
+      makeOwnerReadWrite(source);
+      return source;
+    });
   }
 
-  public void changePermissions(Path file, Consumer<Set<PosixFilePermission>> modifier) {
-    unchecked(
-        () -> {
-          // Wrap in a hashset so that we guarantee we can modify the result.
-          var permissions = new HashSet<>(Files.getPosixFilePermissions(file));
-          modifier.accept(permissions);
-          Files.setPosixFilePermissions(file, permissions);
-        });
+  public void changePermissions(
+      Path file,
+      Consumer<Set<PosixFilePermission>> modifier
+  ) {
+    unchecked(() -> {
+      // Wrap in a hashset so that we guarantee we can modify the result.
+      var permissions = new HashSet<>(Files.getPosixFilePermissions(file));
+      modifier.accept(permissions);
+      Files.setPosixFilePermissions(file, permissions);
+    });
   }
 
   private void makeOwnerReadWrite(Path path) {
     try {
-      changePermissions(
-          path,
-          perms -> {
-            perms.clear();
-            perms.add(PosixFilePermission.OWNER_READ);
-            perms.add(PosixFilePermission.OWNER_WRITE);
-            log.debug("Updated permissions for path '{}'", path.toUri());
-          });
+      changePermissions(path, perms -> {
+        perms.clear();
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        log.debug("Updated permissions for path '{}'", path.toUri());
+      });
     } catch (UnsupportedOperationException ex) {
       // Ignore.
     }

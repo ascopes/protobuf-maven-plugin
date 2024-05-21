@@ -23,8 +23,8 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.Exclusion;
 
 /**
- * Dependency traverser that can detect a wildcard exclusion that is used to flag an artifact with a
- * {@link DependencyResolutionDepth#DIRECT} dependency resolution depth.
+ * Dependency traverser that can detect a wildcard exclusion that is used to flag an artifact
+ * with a {@link DependencyResolutionDepth#DIRECT} dependency resolution depth.
  *
  * <p>For all other purposes, this delegates to the default implementation.
  *

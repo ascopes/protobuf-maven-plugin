@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-/** Management of {@code protoc} plugins. */
+/**
+ * Management of {@code protoc} plugins.
+ */
 package io.github.ascopes.protobufmavenplugin.plugins;

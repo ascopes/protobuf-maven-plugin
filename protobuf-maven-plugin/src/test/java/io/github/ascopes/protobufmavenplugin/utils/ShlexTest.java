@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+
 /**
  * @author Ashley Scopes
  */
@@ -88,7 +89,14 @@ class ShlexTest {
         arguments(list("foo\tbar", "baz"), "'foo'$'\\t''bar' baz"),
         arguments(
             list("a".repeat(100), "b".repeat(100), "c".repeat(100)),
-            String.join(" \\\n    ", "a".repeat(100), "b".repeat(100), "c".repeat(100))));
+            String.join(
+                " \\\n    ",
+                "a".repeat(100),
+                "b".repeat(100),
+                "c".repeat(100)
+            )
+        )
+    );
   }
 
   static Stream<Arguments> quoteBatchArgsTestCases() {
@@ -120,7 +128,14 @@ class ShlexTest {
         arguments(list("100% complete", "0% incomplete"), "100%%^ complete 0%%^ incomplete"),
         arguments(
             list("a".repeat(100), "b".repeat(100), "c".repeat(100)),
-            String.join(" ^\r\n    ", "a".repeat(100), "b".repeat(100), "c".repeat(100))));
+            String.join(
+                " ^\r\n    ",
+                "a".repeat(100),
+                "b".repeat(100),
+                "c".repeat(100)
+            )
+        )
+    );
   }
 
   private static List<String> list(String... args) {

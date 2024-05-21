@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-/** Dependency management and analysis. */
+/**
+ * Dependency management and analysis.
+ */
 package io.github.ascopes.protobufmavenplugin.dependencies;

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+
 /**
  * @author Ashley Scopes
  */
@@ -32,13 +33,13 @@ class DigestsTest {
 
   @DisplayName("sha1(String) returns the expected unpadded url-safe base64 string")
   @CsvSource({
-    "           foobarbaz, X1UT-IIv2-UUWvM7ZNjZcNz5XG4",
-    "      /src/main/java, R4yHFYpaVvKy0Ckbl9gOpNRrw4I",
-    "            ./protoc, NZCHAZ9FTJa3iMDRcYSq0_lc1kw",
-    // Tests that the output is urlsafe. Test case was generated via bruteforce
-    // across random ascii strings until a match containing both - and _ was
-    // found.
-    "EsWoyIWuIcpMltIOJJAv, zYwfI-X_k4pk__DriohLNCpAHbU",
+      "           foobarbaz, X1UT-IIv2-UUWvM7ZNjZcNz5XG4",
+      "      /src/main/java, R4yHFYpaVvKy0Ckbl9gOpNRrw4I",
+      "            ./protoc, NZCHAZ9FTJa3iMDRcYSq0_lc1kw",
+      // Tests that the output is urlsafe. Test case was generated via bruteforce
+      // across random ascii strings until a match containing both - and _ was
+      // found.
+      "EsWoyIWuIcpMltIOJJAv, zYwfI-X_k4pk__DriohLNCpAHbU",
   })
   @ParameterizedTest(name = "sha1(\"{0}\") returns \"{1}\"")
   void sha1ReturnsExpectedUnpaddedUrlSafeBase64String(String input, String expected) {
@@ -52,6 +53,7 @@ class DigestsTest {
   @Test
   void sha1RaisesIllegalArgumentExceptionOnError() {
     // Then
-    assertThatThrownBy(() -> Digests.sha1(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> Digests.sha1(null))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 }
