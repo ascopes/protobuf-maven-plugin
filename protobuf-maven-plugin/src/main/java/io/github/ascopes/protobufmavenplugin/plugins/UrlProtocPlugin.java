@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import java.net.URL;
 import org.immutables.value.Value.Modifiable;
 
 
@@ -32,5 +31,7 @@ import org.immutables.value.Value.Modifiable;
 @Modifiable
 public abstract class UrlProtocPlugin implements OptionalProtocPlugin {
 
-  public abstract URL getUrl();
+  // Kept as a String to defer parsing URLs until all SPIs have been loaded
+  // in the current classloader. Was java.net.URL prior to v2.1.1
+  public abstract String getUrl();
 }

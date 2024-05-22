@@ -21,6 +21,7 @@ import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -52,20 +53,25 @@ public final class UrlResourceFetcher {
     this.temporarySpace = temporarySpace;
   }
 
-  public Optional<Path> fetchFileFromUrl(URL url, String extension) throws ResolutionException {
-    return url.getProtocol().equalsIgnoreCase("file")
-        ? handleFileSystemUrl(url)
-        : handleOtherUrl(url, extension);
-  }
-
-  private Optional<Path> handleFileSystemUrl(URL url) throws ResolutionException {
+  public Optional<Path> fetchFileFromUrl(String url, String extension) throws ResolutionException {
     try {
-      return Optional.of(url.toURI())
-          .map(Path::of)
-          .filter(Files::exists);
-    } catch (URISyntaxException ex) {
+      // We defer parsing the URL until now otherwise we cannot
+      // guarantee that our custom SPIs for URLStreamHandlerProvider
+      // types are loaded by the classloader. Without deferring, Maven
+      // will mark URLs as being invalid prior to us being called.
+      var parsedUrl = new URL(url);
+      return parsedUrl.getProtocol().equalsIgnoreCase("file")
+          ? handleFileSystemUrl(parsedUrl)
+          : handleOtherUrl(parsedUrl, extension);
+    } catch (MalformedURLException | URISyntaxException ex) {
       throw new ResolutionException("Failed to resolve '" + url + "' due to malformed syntax", ex);
     }
+  }
+
+  private Optional<Path> handleFileSystemUrl(URL url) throws URISyntaxException {
+    return Optional.of(url.toURI())
+        .map(Path::of)
+        .filter(Files::exists);
   }
 
   private Optional<Path> handleOtherUrl(URL url, String extension) throws ResolutionException {

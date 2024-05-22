@@ -25,7 +25,6 @@ import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArti
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -82,7 +81,7 @@ public final class ProtocResolver {
     }
 
     var path = version.contains(":")
-        ? resolveFromUrl(version)
+        ? urlResourceFetcher.fetchFileFromUrl(version, ".exe")
         : resolveFromMavenRepositories(version);
 
     if (path.isPresent()) {
@@ -94,14 +93,6 @@ public final class ProtocResolver {
     }
 
     return path;
-  }
-
-  private Optional<Path> resolveFromUrl(String url) throws ResolutionException {
-    try {
-      return urlResourceFetcher.fetchFileFromUrl(new URL(url), ".exe");
-    } catch (IOException ex) {
-      throw new ResolutionException(ex.getMessage(), ex);
-    }
   }
 
   private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
