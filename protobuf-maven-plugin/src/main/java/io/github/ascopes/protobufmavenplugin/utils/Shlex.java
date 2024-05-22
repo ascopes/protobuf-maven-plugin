@@ -91,6 +91,9 @@ public final class Shlex {
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       switch (c) {
+        case '\\':
+          sb.append("\\\\");
+          break;
         case '\'':
           sb.append("'\"'\"'");
           break;
