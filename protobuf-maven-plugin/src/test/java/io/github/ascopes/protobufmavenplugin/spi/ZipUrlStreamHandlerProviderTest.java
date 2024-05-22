@@ -29,6 +29,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -67,6 +69,9 @@ class ZipUrlStreamHandlerProviderTest {
     assertThat(handler).isNull();
   }
 
+  // File paths break on Windows due to their style when using the Path
+  // API directly, so ignore on there for now.
+  @DisabledOnOs(OS.WINDOWS)
   @DisplayName("ZIP contents can be read correctly via the registered SPI")
   @Test
   void zipContentsCanBeReadCorrectlyViaRegisteredSpi() throws IOException {
