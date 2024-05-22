@@ -534,10 +534,10 @@ Any protocols supported by your JRE should be able to be used here, including:
 - `http:`
 - `https:`
 - `ftp:`
-- `jar:` - this also works for ZIP files, and can be used to dereference files within the archive,
-  e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip!/plugin.exe`,
-  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
-  and internally extract `plugin.exe` from that archive.
+- `zip:`, e.g. `zip:file:///path/to/file.zip!/bin/protoc-gen-foo` which would read
+  `/bin/protoc-gen-foo` from the ZIP at `/path/to/file.zip`.
+- `jar:`, e.g. `jar:file:///path/to/file.jar!/bin/protoc-gen-foo` which would read
+  `/bin/protoc-gen-foo` from the JAR at `/path/to/file.jar`.
 
 Each `binaryUrlPlugin` can take an optional `options` parameter which will
 be passed as an option to the plugin if specified.
@@ -548,8 +548,8 @@ cannot be resolved. This is useful for specific cases where resources may only b
 prevent the application being built locally. If set to optional, then any "not found" response provided by
 the underlying URL protocol will be ignored.
 
-This is not recommended outside specific use cases, and care should be taken to ensure the
-legitimacy and security of any URLs being provided prior to adding them.
+Remember that it is up to you to ensure the legitimacy of the URLs that you are
+reading. Where possible, prefer the use of Maven-based resources instead.
 
 Providing authentication details or proxy details is not supported at this time.
 

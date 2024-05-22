@@ -98,6 +98,7 @@
   <properties>
     <!-- Dependencies -->
     <assertj.version>3.25.3</assertj.version>
+    <auto-service.version>1.1.1</auto-service.version>
     <immutables.version>2.10.1</immutables.version>
     <jspecify.version>0.3.0</jspecify.version>
     <junit.version>5.10.2</junit.version>
@@ -149,6 +150,12 @@
         <groupId>com.github.marschall</groupId>
         <artifactId>memoryfilesystem</artifactId>
         <version>${memoryfilesystem.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.auto.service</groupId>
+        <artifactId>auto-service</artifactId>
+        <version>${auto-service.version}</version>
       </dependency>
 
       <dependency>
