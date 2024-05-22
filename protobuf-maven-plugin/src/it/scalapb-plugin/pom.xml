@@ -88,7 +88,7 @@
 
           <binaryUrlPlugins>
             <binaryUrlPlugin>
-              <url>jar:https://github.com/scalapb/ScalaPB/releases/download/v0.11.15/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
+              <url>zip:https://github.com/scalapb/ScalaPB/releases/download/v0.11.15/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
               <options>flat_package,grpc</options>
             </binaryUrlPlugin>
           </binaryUrlPlugins>
