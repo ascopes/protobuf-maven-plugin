@@ -34,7 +34,7 @@
         "use strict";
 
         function initSyntaxHighlighting() {
-          hljs.configure({languages: ["java"]});
+          hljs.configure({languages: ["clojure", "groovy", "java", "kotlin", "protobuf", "scala", "xml"]});
           hljs.highlightAll();
         }
 
