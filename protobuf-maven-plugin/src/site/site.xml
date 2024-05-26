@@ -61,6 +61,10 @@
         <ribbonOrientation>right</ribbonOrientation>
         <ribbonColor>red</ribbonColor>
       </gitHub>
+
+      <googleSearch>
+        <sitesearch/>
+      </googleSearch>
     </fluidoSkin>
   </custom>
 
