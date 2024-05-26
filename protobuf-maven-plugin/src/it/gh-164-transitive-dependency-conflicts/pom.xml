@@ -43,7 +43,7 @@
 
   <properties>
     <protobuf.version>3.25.3</protobuf.version>
-    <proto-google-common-protos.version>2.38.0</proto-google-common-protos.version>
+    <proto-google-common-protos.version>2.39.1</proto-google-common-protos.version>
   </properties>
 
   <dependencyManagement>
