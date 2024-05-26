@@ -33,7 +33,8 @@ import org.eclipse.aether.graph.Exclusion;
  */
 final class WildcardAwareDependencyTraverser implements DependencyTraverser {
 
-  public static Exclusion WILDCARD_EXCLUSION = new Exclusion("*", "*", "*", "*");
+  static Exclusion WILDCARD_EXCLUSION = new Exclusion("*", "*", "*", "*");
+
   private final DependencyTraverser delegate;
 
   WildcardAwareDependencyTraverser(DependencyTraverser delegate) {
