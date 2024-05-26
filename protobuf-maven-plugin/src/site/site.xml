@@ -21,7 +21,7 @@
   xsi:schemaLocation="https://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd">
 
   <bannerLeft>
-    <image src="images/banner.png" style="border-radius: 0.5em;"/>
+    <image src="images/banner.jpg" style="border-radius: 0.5em;"/>
   </bannerLeft>
 
   <body>
