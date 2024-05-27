@@ -179,23 +179,23 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>For example:
    * <pre>{@code
-   *   <binaryUrlPlugins>
-   *     <!-- FTP resource -->
-   *     <binaryUrlPlugin>
-   *       <url>ftp://myorganisation.org/protoc/plugins/myplugin.exe</url>
-   *     </binaryUrlPlugin>
+   * <binaryUrlPlugins>
+   *   <!-- FTP resource -->
+   *   <binaryUrlPlugin>
+   *     <url>ftp://myorganisation.org/protoc/plugins/myplugin.exe</url>
+   *   </binaryUrlPlugin>
    *
-   *     <!-- HTTP resource with custom options-->
-   *     <binaryUrlPlugin>
-   *       <url>https://myorganisation.org/protoc/plugins/myplugin2.exe</url>
-   *       <options>foo=bar,baz=bork</options>
-   *     </binaryUrlPlugin>
+   *   <!-- HTTP resource with custom options-->
+   *   <binaryUrlPlugin>
+   *     <url>https://myorganisation.org/protoc/plugins/myplugin2.exe</url>
+   *     <options>foo=bar,baz=bork</options>
+   *   </binaryUrlPlugin>
    *
-   *     <!-- HTTP resource that is a ZIP holding the binary we want. -->
-   *     <binaryUrlPlugin>
-   *       <url>jar:https://myorganisation.org/protoc/plugins/myplugin3.zip!/protoc-gen-something.exe</url>
-   *     </binaryUrlPlugin>
-   *   </binaryUrlPlugins>
+   *   <!-- HTTP resource that is a ZIP holding the binary we want. -->
+   *   <binaryUrlPlugin>
+   *     <url>jar:https://myorganisation.org/protoc/plugins/myplugin3.zip!/protoc-gen-something.exe</url>
+   *   </binaryUrlPlugin>
+   * </binaryUrlPlugins>
    * }</pre>
    *
    * <p>Objects support the following attributes:
