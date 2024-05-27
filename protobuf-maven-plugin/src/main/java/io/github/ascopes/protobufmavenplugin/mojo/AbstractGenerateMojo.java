@@ -141,12 +141,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   </binaryPathPlugin>
    *   <binaryPathPlugin>
    *     <name>protoc-gen-something-else</name>
-   *     <options>foo=bar</options>
+   *     <options>foo=bar,baz=bork</options>
    *   </binaryPathPlugin>
    * </binaryPathPlugins>
    * }</pre>
-   *
-   * <p>Prior to v2.0.0, this attribute was a list of strings.
    *
    * <p>Objects support the following attributes:
    *
@@ -176,20 +174,29 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
    * </ul>
    *
+   * <p>Additionally, the {@code jar} protocol can be used with any of the above to
+   * enable extracting a file from a JAR or ZIP and using it directly.
+   *
    * <p>For example:
    * <pre>{@code
    *   <binaryUrlPlugins>
+   *     <!-- FTP resource -->
    *     <binaryUrlPlugin>
    *       <url>ftp://myorganisation.org/protoc/plugins/myplugin.exe</url>
    *     </binaryUrlPlugin>
+   *
+   *     <!-- HTTP resource with custom options-->
    *     <binaryUrlPlugin>
-   *       <url>ftp://myorganisation.org/protoc/plugins/myplugin2.exe</url>
-   *       <options>foo=bar</options>
+   *       <url>https://myorganisation.org/protoc/plugins/myplugin2.exe</url>
+   *       <options>foo=bar,baz=bork</options>
+   *     </binaryUrlPlugin>
+   *
+   *     <!-- HTTP resource that is a ZIP holding the binary we want. -->
+   *     <binaryUrlPlugin>
+   *       <url>jar:https://myorganisation.org/protoc/plugins/myplugin3.zip!/protoc-gen-something.exe</url>
    *     </binaryUrlPlugin>
    *   </binaryUrlPlugins>
    * }</pre>
-   *
-   * <p>Prior to v2.0.0, this attribute was a list of URLs.
    *
    * <p>Objects support the following attributes:
    *
@@ -391,7 +398,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
-   * <p>As of v0.4.0, you can also specify a URL that points to:
+   * <p>You can also specify a URL that points to:
    *
    * <ul>
    *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
@@ -406,11 +413,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * version specified in the POM. Termux users in particular will find
    * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
    * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
-   *
-   * <p>Prior to v2.0.0, this parameter was named {@code protoc.version} when specified on the
-   * commandline via JVM properties. This has been changed in v2.0.0 to
-   * {@code protobuf.compiler.version} for consistency and to reduce naming collisions with
-   * user-specified properties.
    *
    * @since 0.0.1
    */
