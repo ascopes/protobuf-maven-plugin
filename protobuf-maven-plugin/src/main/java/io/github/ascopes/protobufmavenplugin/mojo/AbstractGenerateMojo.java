@@ -696,7 +696,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     return finalDirectories.stream()
         .filter(path -> {
           if (Files.notExists(path)) {
-            log.warn("Ignoring source directory {} as it does not appear to exist", path);
+            log.info("Ignoring source directory {} as it does not appear to exist", path);
             return false;
           }
           return true;
