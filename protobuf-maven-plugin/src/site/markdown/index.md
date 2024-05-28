@@ -52,7 +52,7 @@ do is provide the version of `protoc` to use.
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>4.26.1</protocVersion>
+    <protocVersion>4.27.0</protocVersion>
   </configuration>
 
   <executions>
