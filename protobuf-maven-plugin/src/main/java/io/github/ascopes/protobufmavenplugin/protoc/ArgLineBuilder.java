@@ -93,10 +93,6 @@ public final class ArgLineBuilder {
     return this;
   }
 
-  public List<String> version() {
-    return List.of(protocPath.toString(), "--version");
-  }
-
   private interface Target {
 
     void addArgsTo(List<String> list);
