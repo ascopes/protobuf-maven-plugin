@@ -134,11 +134,6 @@ public final class SourceCodeGenerator {
         .flatMap(Collection::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
-    if (!logProtocVersion(protocPath)) {
-      log.error("Unable to execute protoc. Ensure the binary is compatible for this platform!");
-      return false;
-    }
-
     if (!commandLineExecutor.execute(argLineBuilder.compile(sourceFiles))) {
       return false;
     }
@@ -155,11 +150,6 @@ public final class SourceCodeGenerator {
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
     return protocResolver.resolve(request.getProtocVersion())
         .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
-  }
-
-  private boolean logProtocVersion(Path protocPath) throws IOException {
-    var args = new ArgLineBuilder(protocPath).version();
-    return commandLineExecutor.execute(args);
   }
 
   private Collection<ResolvedProtocPlugin> discoverPlugins(
