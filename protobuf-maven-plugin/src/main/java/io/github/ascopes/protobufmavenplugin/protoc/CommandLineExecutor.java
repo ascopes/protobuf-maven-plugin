@@ -17,9 +17,13 @@
 package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.utils.Shlex;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -45,7 +49,6 @@ public final class CommandLineExecutor {
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
-    procBuilder.inheritIO();
 
     try {
       return run(procBuilder);
@@ -60,8 +63,16 @@ public final class CommandLineExecutor {
   private boolean run(ProcessBuilder procBuilder) throws InterruptedException, IOException {
     var startTimeNs = System.nanoTime();
     var proc = procBuilder.start();
+
+    var stdoutThread = redirectOutput(proc.getInputStream(), line -> log.info(">| {}", line));
+    var stderrThread = redirectOutput(proc.getErrorStream(), line -> log.warn(">| {}", line));
+
     var exitCode = proc.waitFor();
     var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
+
+    // Ensure we've flushed the logs through before continuing.
+    stdoutThread.join();
+    stderrThread.join();
 
     if (exitCode == 0) {
       log.info("Protoc returned exit code 0 (success) after {}ms", elapsedTimeMs);
@@ -70,5 +81,25 @@ public final class CommandLineExecutor {
       log.error("Protoc returned exit code {} (error) after {}ms", exitCode, elapsedTimeMs);
       return false;
     }
+  }
+
+  private Thread redirectOutput(InputStream stream, Consumer<String> logger) {
+    // We shouldn't need to flag to these threads to stop as they should immediately
+    // terminate once the input streams are closed.
+    var thread = new Thread(() -> {
+      String line;
+      try (var reader = new BufferedReader(new InputStreamReader(stream))) {
+        while ((line = reader.readLine()) != null) {
+          logger.accept(line.stripTrailing());
+        }
+      } catch (IOException ex) {
+        log.error("Stream error, output will be discarded", ex);
+      }
+    });
+
+    thread.setDaemon(true);
+    thread.setName("protoc output redirector thread for " + stream);
+    thread.start();
+    return thread;
   }
 }
