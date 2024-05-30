@@ -64,8 +64,8 @@ public final class CommandLineExecutor {
     var startTimeNs = System.nanoTime();
     var proc = procBuilder.start();
 
-    var stdoutThread = redirectOutput(proc.getInputStream(), line -> log.info(">| {}", line));
-    var stderrThread = redirectOutput(proc.getErrorStream(), line -> log.warn(">| {}", line));
+    var stdoutThread = redirectOutput(proc.getInputStream(), line -> log.info("[OUT] {}", line));
+    var stderrThread = redirectOutput(proc.getErrorStream(), line -> log.warn("[ERR] {}", line));
 
     var exitCode = proc.waitFor();
     var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
