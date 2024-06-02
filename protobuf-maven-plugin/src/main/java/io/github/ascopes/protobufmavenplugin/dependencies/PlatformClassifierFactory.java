@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -28,6 +29,28 @@ import javax.inject.Named;
 @Named
 public final class PlatformClassifierFactory {
 
+  private static final Map<String, String> LINUX_MAPPING = Map.of(
+      "aarch64", "linux-aarch_64",
+      "amd64", "linux-x86_64",
+      "ppc64", "linux-ppcle_64",
+      "ppc64le", "linux-ppcle_64",
+      "s390x", "linux-s390_64",
+      "zarch_64", "linux-s390_64"
+  );
+
+  private static final Map<String, String> MAC_OS_MAPPING = Map.of(
+      "aarch64", "osx-aarch_64",
+      "amd64", "osx-x86_64",
+      "x86_64", "osx-x86_64"
+  );
+
+  private static final Map<String, String> WINDOWS_MAPPING = Map.of(
+      "amd64", "windows-x86_64",
+      "x86", "windows-x86_32",
+      "x86_32", "windows-x86_32",
+      "x86_64", "windows-x86_64"
+  );
+
   private final HostSystem hostSystem;
 
   @Inject
@@ -36,60 +59,25 @@ public final class PlatformClassifierFactory {
   }
 
   public String getClassifier(String binaryName) throws ResolutionException {
-    var rawOs = hostSystem.getOperatingSystem();
-    var rawArch = hostSystem.getCpuArchitecture();
-
+    Map<String, String> osMapping;
     if (hostSystem.isProbablyLinux()) {
-      switch (rawArch) {
-        case "ppc64le":
-        case "ppc64":
-          return "linux-ppcle_64";
-
-        case "s390x":
-        case "zarch_64":
-          return "linux-s390_64";
-
-        case "aarch64":
-          return "linux-aarch_64";
-
-        case "amd64":
-          return "linux-x86_64";
-
-        default:
-          // Fall-over
-          break;
-      }
-
+      osMapping = LINUX_MAPPING;
     } else if (hostSystem.isProbablyMacOs()) {
-      switch (rawArch) {
-        case "aarch64":
-          return "osx-aarch_64";
-
-        case "amd64":
-        case "x86_64":
-          return "osx-x86_64";
-
-        default:
-          // Fall-over
-          break;
-      }
-
+      osMapping = MAC_OS_MAPPING;
     } else if (hostSystem.isProbablyWindows()) {
-      switch (rawArch) {
-        case "amd64":
-        case "x86_64":
-          return "windows-x86_64";
-
-        case "x86":
-        case "x86_32":
-          return "windows-x86_32";
-
-        default:
-          // Fall-over
-          break;
-      }
+      osMapping = WINDOWS_MAPPING;
+    } else {
+      osMapping = Map.of();
     }
 
+    var rawArch = hostSystem.getCpuArchitecture();
+    var classifier = osMapping.get(rawArch);
+
+    if (classifier != null) {
+      return classifier;
+    }
+
+    var rawOs = hostSystem.getOperatingSystem();
     throw new ResolutionException(
         "No '" + binaryName + "' binary is available for reported OS '"
             + rawOs + "' and CPU architecture '" + rawArch + "'"
