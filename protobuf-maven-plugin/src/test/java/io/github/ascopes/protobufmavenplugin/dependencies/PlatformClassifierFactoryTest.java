@@ -47,7 +47,7 @@ class PlatformClassifierFactoryTest {
   void getClassifierReturnsExpectedResultsOnValidSystems(
       HostSystemMockConfigurer configurer,
       String expectedClassifier
-  ) {
+  ) throws ResolutionException {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
@@ -75,7 +75,7 @@ class PlatformClassifierFactoryTest {
 
     // Then
     assertThatThrownBy(() -> factory.getClassifier(artifactId))
-        .isInstanceOf(UnsupportedOperationException.class)
+        .isInstanceOf(ResolutionException.class)
         .hasMessageMatching(
             "No '[^']+' binary is available for reported OS '[^']+' and CPU architecture '[^']+'"
         );
