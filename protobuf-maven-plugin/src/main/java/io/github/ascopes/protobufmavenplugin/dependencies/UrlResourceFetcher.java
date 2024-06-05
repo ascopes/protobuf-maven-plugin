@@ -42,7 +42,14 @@ import org.slf4j.LoggerFactory;
 public final class UrlResourceFetcher {
 
   private static final int TIMEOUT = 30_000;
-  private static final String USER_AGENT = "User-Agent";
+  private static final String USER_AGENT_HEADER = "User-Agent";
+  private static final String USER_AGENT_VALUE = String.format(
+      "io.github.ascopes.protobuf-maven-plugin/%s org.apache.maven/%s (Java %s)",
+      UrlResourceFetcher.class.getPackage().getImplementationVersion(),
+      Maven.class.getPackage().getImplementationVersion(),
+      Runtime.version().toString()
+  );
+
   private static final Logger log = LoggerFactory.getLogger(UrlResourceFetcher.class);
 
   private final TemporarySpace temporarySpace;
@@ -76,7 +83,7 @@ public final class UrlResourceFetcher {
       conn.setConnectTimeout(TIMEOUT);
       conn.setReadTimeout(TIMEOUT);
       conn.setAllowUserInteraction(false);
-      conn.setRequestProperty(USER_AGENT, userAgent());
+      conn.setRequestProperty(USER_AGENT_HEADER, USER_AGENT_VALUE);
 
       log.debug("Connecting to '{}' to copy resources to '{}'", url, targetFile);
       conn.connect();
@@ -97,16 +104,6 @@ public final class UrlResourceFetcher {
     } catch (IOException ex) {
       throw new ResolutionException("Failed to copy '" + url + "' to '" + targetFile + "'", ex);
     }
-  }
-
-  private String userAgent() {
-    return "io.github.ascopes.protobuf-maven-plugin/" + version(getClass())
-        + " org.apache.maven/" + version(Maven.class)
-        + " (Java " + Runtime.version().toString() + ")";
-  }
-
-  private String version(Class<?> cls) {
-    return cls.getPackage().getImplementationVersion();
   }
 
   private Path targetFile(URL url, String extension) {
