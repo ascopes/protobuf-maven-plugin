@@ -18,12 +18,16 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static java.util.function.Predicate.not;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.SortedSet;
@@ -83,17 +87,22 @@ public final class HostSystem {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("linux");
   }
 
+  public boolean isProbablyAndroid() {
+    if (isProbablyLinux()) {
+      return call("uname", "-o")
+          .filter("android"::equalsIgnoreCase)
+          .isPresent();
+    }
+
+    return false;
+  }
+
   public boolean isProbablyMacOs() {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("mac os");
   }
 
   public boolean isProbablyWindows() {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("windows");
-  }
-
-  public boolean isProbablyAndroidTermux() {
-    return isProbablyLinux()
-        && getWorkingDirectory().toString().startsWith("/data/data/com.termux/");
   }
 
   public Path getWorkingDirectory() {
@@ -106,6 +115,34 @@ public final class HostSystem {
 
   public SortedSet<String> getSystemPathExtensions() {
     return pathExt;
+  }
+
+  /**
+   * Run a command internally, and return the first line of the standard output.
+   *
+   * <p>If the program does not exist or some IO issue occurs, then an empty optional
+   * is returned.
+   *
+   * <p>This is visible for testing only.
+   *
+   * @param args the command arguments.
+   * @return the first line of stdout, or an empty optional if execution failed or no output
+   *     stream was available.
+   */
+  Optional<String> call(String... args) {
+    var procBuilder = new ProcessBuilder(args);
+    procBuilder.environment().putAll(System.getenv());
+
+    try {
+      var proc = procBuilder.start();
+      try (var reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+        return Optional.ofNullable(reader.readLine()).map(String::trim);
+      } finally {
+        proc.destroyForcibly();
+      }
+    } catch (IOException ex) {
+      return Optional.empty();
+    }
   }
 
   private static <T> T tokenizeFilePath(String rawValue, Function<Stream<String>, T> mapper) {

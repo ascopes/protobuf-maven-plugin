@@ -18,8 +18,12 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -35,7 +42,8 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
+import org.mockito.Answers;
+import org.mockito.quality.Strictness;
 
 /**
  * @author Ashley Scopes
@@ -198,29 +206,54 @@ class HostSystemTest {
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
-  // Avoid non-UNIX path declarations as it messes up our test data.
-  @DisabledOnOs({OS.WINDOWS, OS.OTHER})
-  @DisplayName(".isProbablyAndroidTermux() returns true if running in Termux")
+  @DisplayName(".isProbablyAndroid() returns the expected results")
   @CsvSource({
-      " true, /data/data/com.termux/home,  true",
-      "false, /data/data/com.termux/home, false",
-      " true,          /foo/bar/baz/bork, false",
+      " true,  android,  true",
+      " true,  AnDrOid,  true",
+      " true,   Fedora, false",
+      " true,       '', false",
+      " true,         , false",
+      "false,  android, false",
+      "false,  AnDrOid, false",
+      "false,   Fedora, false",
+      "false,       '', false",
+      "false,         , false",
   })
-  @ParameterizedTest(name = "expect {2} when isProbablyLinux is {0} and the directory is {1}")
-  void isProbablyAndroidTermuxReturnsTrueIfRunningInTermux(
+  @ParameterizedTest(
+      name = "when .isProbablyLinux() returns {0} and .call('uname', '-o') returns <{1}>, "
+         + "expect {2}"
+  )
+  void isProbablyAndroidReturnsTheExpectedResults(
       boolean isProbablyLinux,
-      String workingDirectory,
+      @Nullable String unameOutput,
       boolean expectedResult
   ) {
     // Given
-    var hostSystemBean = mock(HostSystem.class);
-    when(hostSystemBean.isProbablyLinux()).thenReturn(isProbablyLinux);
-    when(hostSystemBean.getWorkingDirectory()).thenReturn(Path.of(workingDirectory));
-    when(hostSystemBean.isProbablyAndroidTermux()).thenCallRealMethod();
+    var hostSystemBean = mock(HostSystem.class, withSettings().strictness(Strictness.LENIENT));
+    when(hostSystemBean.isProbablyLinux())
+        .thenReturn(isProbablyLinux);
+    when(hostSystemBean.call(any(String[].class)))
+        .thenReturn(Optional.ofNullable(unameOutput));
+    when(hostSystemBean.isProbablyAndroid())
+        .thenCallRealMethod();
+
+    // When
+    var actualResult = hostSystemBean.isProbablyAndroid();
 
     // Then
-    assertThat(hostSystemBean.isProbablyAndroidTermux())
-        .isEqualTo(expectedResult);
+    assertThat(actualResult).isEqualTo(expectedResult);
+
+    // Needed to ensure we observed the initial call we tested, otherwise
+    // failure for verification of no further interactions will not work.
+    verify(hostSystemBean).isProbablyAndroid();
+    verify(hostSystemBean).isProbablyLinux();
+
+    if (isProbablyLinux) {
+      verify(hostSystemBean).call("uname", "-o");
+      verifyNoMoreInteractions(hostSystemBean);
+    } else {
+      verifyNoMoreInteractions(hostSystemBean);
+    }
   }
 
   @DisplayName(".getWorkingDirectory() returns the working directory")
@@ -308,5 +341,37 @@ class HostSystemTest {
     assertThat(actualPathExt)
         .hasSize(4)
         .contains(".foo", ".bar", ".baz", ".bork", ".BORK");
+  }
+
+  @DisabledOnOs({OS.WINDOWS, OS.OTHER})
+  @DisplayName(".call(<command>) returns the expected output when successful")
+  @Test
+  void callReturnsTheExpectedOutputWhenSuccessful() {
+    // Given
+    var hostSystemBean = new HostSystem();
+
+    // When
+    var result = hostSystemBean.call("/bin/echo", "Hello, World");
+
+    // Then
+    assertThat(result)
+        .isPresent()
+        .get()
+        .isEqualTo("Hello, World");
+  }
+
+  @DisplayName(".call(<command>) returns the expected output when failed")
+  @Test
+  void callReturnsTheExpectedOutputWhenFailed() {
+    // Given
+    var hostSystemBean = new HostSystem();
+    var nonExistantProgramName = UUID.randomUUID() + ".exe";
+
+    // When
+    var result = hostSystemBean.call(nonExistantProgramName, "--version");
+
+    // Then
+    assertThat(result)
+        .isNotPresent();
   }
 }

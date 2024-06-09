@@ -105,13 +105,13 @@ public final class ProtocResolver {
   }
 
   private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
-    if (hostSystem.isProbablyAndroidTermux()) {
+    if (hostSystem.isProbablyAndroid()) {
       log.warn(
-          "It looks like you are using Termux on Android. You may encounter issues "
-              + "running the detected protoc binary from Maven central. If this is "
-              + "an issue, install the protoc compiler manually from your package "
-              + "manager (apt update && apt install protobuf), and then invoke "
-              + "Maven with the -Dprotobuf.compiler.version=PATH flag."
+          "It looks like you are using Android! Android is known to be missing "
+              + "system calls for Linux that the official protoc binaries rely on "
+              + "to work. If you encounter issues, run Maven again with the "
+              + "-Dprotobuf.compiler.version=PATH flag to rerun with the version "
+              + "of protoc that is on your $PATH."
       );
     }
 
