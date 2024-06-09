@@ -108,15 +108,6 @@
         <artifactId>scala-maven-plugin</artifactId>
         <version>${scala-maven-plugin.version}</version>
 
-        <configuration>
-          <args>
-            <!-- Rewrite generated protobuf sources to remove warnings... -->
-            <arg>-rewrite</arg>
-            <arg>-source</arg>
-            <arg>3.4-migration</arg>
-          </args>
-        </configuration>
-
         <executions>
           <execution>
             <goals>
