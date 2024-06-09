@@ -33,7 +33,7 @@
 
   <properties>
     <grpc.version>1.64.0</grpc.version>
-    <protobuf.version>4.27.0</protobuf.version>
+    <protobuf.version>4.27.1</protobuf.version>
     <scala.version>3.4.2</scala.version>
     <scalapb.version>0.11.15</scalapb.version>
     <scala-maven-plugin.version>4.9.1</scala-maven-plugin.version>

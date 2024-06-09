@@ -33,7 +33,7 @@
 
   <properties>
     <kotlin.version>1.9.24</kotlin.version>
-    <protobuf.version>4.27.0</protobuf.version>
+    <protobuf.version>4.27.1</protobuf.version>
   </properties>
 
   <dependencyManagement>
