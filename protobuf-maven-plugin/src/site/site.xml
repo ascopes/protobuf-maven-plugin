@@ -51,7 +51,11 @@
       <item name="Usage" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
     </menu>
-    <menu ref="reports"/>
+    <menu ref="reports">
+      <!-- We include this alongside JaCoCo as we run this against
+           multiple platforms as part of CI. -->
+      <item name="Coverage (multiplatform)" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
+    </menu>
   </body>
 
   <custom>
