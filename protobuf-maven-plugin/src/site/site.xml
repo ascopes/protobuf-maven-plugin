@@ -65,6 +65,7 @@
         <sitesearch/>
       </googleSearch>
 
+      <profile>production</profile>
       <skipGenerationDate>true</skipGenerationDate>
     </fluidoSkin>
   </custom>
