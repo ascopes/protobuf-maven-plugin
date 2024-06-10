@@ -61,12 +61,6 @@
 
   <custom>
     <fluidoSkin>
-      <gitHub>
-        <projectId>ascopes/protobuf-maven-plugin</projectId>
-        <ribbonOrientation>right</ribbonOrientation>
-        <ribbonColor>red</ribbonColor>
-      </gitHub>
-
       <googleSearch>
         <sitesearch/>
       </googleSearch>
