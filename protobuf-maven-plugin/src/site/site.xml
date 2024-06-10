@@ -64,6 +64,8 @@
       <googleSearch>
         <sitesearch/>
       </googleSearch>
+
+      <skipGenerationDate>true</skipGenerationDate>
     </fluidoSkin>
   </custom>
 
