@@ -47,24 +47,26 @@
       ]]>
     </head>
 
-    <menu name="Getting Started">
+    <menu name="Documentation">
       <item name="Usage" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
+    </menu>
+    <menu name="External Links">
+      <item name="Cross-platform coverage (codecov.io)" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
+      <item name="GitHub" href="https://github.com/ascopes/protobuf-maven-plugin"/>
+      <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
     </menu>
     <menu ref="reports"/>
   </body>
 
   <custom>
     <fluidoSkin>
-      <gitHub>
-        <projectId>ascopes/protobuf-maven-plugin</projectId>
-        <ribbonOrientation>right</ribbonOrientation>
-        <ribbonColor>red</ribbonColor>
-      </gitHub>
-
       <googleSearch>
         <sitesearch/>
       </googleSearch>
+
+      <profile>production</profile>
+      <skipGenerationDate>true</skipGenerationDate>
     </fluidoSkin>
   </custom>
 

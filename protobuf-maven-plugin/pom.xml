@@ -371,17 +371,50 @@
 
         <reportSets>
           <reportSet>
-            <id>coverage</id>
+            <id>coverage-unit</id>
             <reports>
               <report>report</report>
+            </reports>
+            <configuration>
+              <includeCurrentProject>true</includeCurrentProject>
+              <footer>
+                  This only contains coverage for the platform the artifact was built
+                  from. Please refer to the codecov.io link on the project for full
+                  cross-platform coverage.
+              </footer>
+              <title>${project.name} - unit test coverage</title>
+            </configuration>
+          </reportSet>
+
+          <reportSet>
+            <id>coverage-integration</id>
+            <reports>
               <report>report-integration</report>
+            </reports>
+            <configuration>
+              <includeCurrentProject>true</includeCurrentProject>
+              <footer>
+                  This only contains coverage for the platform the artifact was built
+                  from. Please refer to the codecov.io link on the project for full
+                  cross-platform coverage.
+              </footer>
+              <title>${project.name} - integration test coverage</title>
+            </configuration>
+          </reportSet>
+
+          <reportSet>
+            <id>coverage-all</id>
+            <reports>
               <report>report-aggregate</report>
             </reports>
             <configuration>
-              <dataFileIncludes>
-                <dataFileIncludes>**/jacoco*.exec</dataFileIncludes>
-              </dataFileIncludes>
               <includeCurrentProject>true</includeCurrentProject>
+              <footer>
+                  This only contains coverage for the platform the artifact was built
+                  from. Please refer to the codecov.io link on the project for full
+                  cross-platform coverage.
+              </footer>
+              <title>${project.name} - aggregate coverage</title>
             </configuration>
           </reportSet>
         </reportSets>
