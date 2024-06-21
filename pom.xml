@@ -38,7 +38,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>https://github.com/ascopes/protobuf-maven-plugin/blob/main/LICENSE.txt</url>
+      <url>https://raw.githubusercontent.com/ascopes/protobuf-maven-plugin/main/LICENSE.txt</url>
     </license>
   </licenses>
 
