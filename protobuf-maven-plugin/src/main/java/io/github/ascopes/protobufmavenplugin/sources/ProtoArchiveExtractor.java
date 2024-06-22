@@ -50,12 +50,15 @@ public final class ProtoArchiveExtractor {
     this.temporarySpace = temporarySpace;
   }
 
-  public Optional<ProtoFileListing> extractProtoFiles(Path zipPath) throws IOException {
+  public Optional<ProtoFileListing> extractProtoFiles(
+      Path zipPath,
+      ProtoFileFilter filter
+  ) throws IOException {
     var modifiedTime = Files.getLastModifiedTime(zipPath);
 
     try (var vfs = openZip(zipPath)) {
       var vfsRoot = vfs.getRootDirectories().iterator().next();
-      var sourceFiles = findProtoFilesInArchive(vfsRoot);
+      var sourceFiles = findProtoFilesInArchive(vfsRoot, filter);
 
       if (sourceFiles.isEmpty()) {
         return Optional.empty();
@@ -90,10 +93,13 @@ public final class ProtoArchiveExtractor {
     }
   }
 
-  private Collection<Path> findProtoFilesInArchive(Path archiveRootPath) throws IOException {
+  private Collection<Path> findProtoFilesInArchive(
+      Path archiveRootPath,
+      ProtoFileFilter filter
+  ) throws IOException {
     try (var stream = Files.walk(archiveRootPath)) {
       return stream
-          .filter(ProtoFilePredicates::isProtoFile)
+          .filter(filePath -> filter.matches(archiveRootPath, filePath))
           .peek(protoFile -> log.debug(
               "Found proto file {} in archive {}",
               protoFile.toUri(),

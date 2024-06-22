@@ -24,6 +24,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
+import io.github.ascopes.protobufmavenplugin.sources.ProtoFileFilter;
 import io.github.ascopes.protobufmavenplugin.sources.ProtoFileListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProtoSourceResolver;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
@@ -177,8 +178,12 @@ public final class SourceCodeGenerator {
         !request.isIgnoreProjectDependencies()
     );
 
-    var importPathListings = protoListingResolver
-        .createProtoFileListings(concat(request.getImportPaths(), artifactPaths));
+    var filter = new ProtoFileFilter();
+
+    var importPathListings = protoListingResolver.createProtoFileListings(
+        concat(request.getImportPaths(), artifactPaths),
+        filter
+    );
 
     // Use the source paths here as well and use them first to give them precedence. This works
     // around GH-172 where we can end up with different versions on the import and source paths
@@ -192,8 +197,13 @@ public final class SourceCodeGenerator {
       GenerationRequest request
   ) throws IOException, ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
-    var sourcePathsListings = protoListingResolver
-        .createProtoFileListings(request.getSourceRoots());
+
+    var filter = new ProtoFileFilter(request.getIncludes(), request.getExcludes());
+
+    var sourcePathsListings = protoListingResolver.createProtoFileListings(
+        request.getSourceRoots(),
+        filter
+    );
 
     var sourceDependencies = artifactPathResolver.resolveDependencies(
         request.getSourceDependencies(),
@@ -201,8 +211,10 @@ public final class SourceCodeGenerator {
         false
     );
 
-    var sourceDependencyListings = protoListingResolver
-        .createProtoFileListings(sourceDependencies);
+    var sourceDependencyListings = protoListingResolver.createProtoFileListings(
+        sourceDependencies,
+        filter
+    );
 
     var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
 

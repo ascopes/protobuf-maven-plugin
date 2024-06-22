@@ -58,6 +58,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private static final String DEFAULT_FALSE = "false";
   private static final String DEFAULT_TRUE = "true";
   private static final String DEFAULT_TRANSITIVE = "TRANSITIVE";
+
+  private static final String PROTOBUF_COMPILER_EXCLUDES = "protobuf.compiler.excludes";
+  private static final String PROTOBUF_COMPILER_INCLUDES = "protobuf.compiler.includes";
   private static final String PROTOBUF_COMPILER_VERSION = "protobuf.compiler.version";
   private static final String PROTOBUF_SKIP = "protobuf.skip";
 
@@ -243,6 +246,38 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean embedSourcesInClassOutputs;
 
   /**
+   * Source paths to exclude from compilation.
+   *
+   * <p>This can be used to limit what is compiled by {@code protoc}.
+   *
+   * <p>Each entry is treated as a glob pattern, and is applied to the path of each discovered
+   * compilation candidate file, relative to the {@code sourceDirectory} or {@code sourceDependency}
+   * that provides them.
+   *
+   * <p>If a file matches <strong>any</strong> of these patterns, it is automatically excluded.
+   *
+   * <p>If not provided, then the default is to not exclude anything.
+   *
+   * <p>For example, if you wanted to not compile files named {@code user.proto},
+   * {@code message.proto}, or {@code service.proto}, you could use the following
+   * configuration.
+   *
+   * <pre>{@code
+   * <excludes>
+   *   <exclude>**\/user.proto</exclude>
+   *   <exclude>**\/message.proto</exclude>
+   *   <exclude>**\/service.proto</exclude>
+   * </excludes>
+   * }</pre>
+   *
+   * <p>Use {@code includes} if you wish to instead include files for compilation.
+   *
+   * @since 2.2.0
+   */
+  @Parameter(property = PROTOBUF_COMPILER_EXCLUDES)
+  @Nullable List<String> excludes;
+
+  /**
    * Whether to fail on missing sources.
    *
    * <p>If no sources are detected, it is usually a sign that this plugin
@@ -323,6 +358,38 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable List<File> importPaths;
+
+  /**
+   * Source paths to include in compilation.
+   *
+   * <p>This can be used to limit what is compiled by {@code protoc}.
+   *
+   * <p>Each entry is treated as a glob pattern, and is applied to the path of each discovered
+   * compilation candidate file, relative to the {@code sourceDirectory} or {@code sourceDependency}
+   * that provides them.
+   *
+   * <p>If a file matches <strong>any</strong> of these patterns, it is automatically included.
+   *
+   * <p>If not provided, then the default is to allow any Protobuf source file.
+   *
+   * <p>For example, if you only wanted to compile files named {@code user.proto},
+   * {@code message.proto}, or {@code service.proto}, you could use the following
+   * configuration.
+   *
+   * <pre>{@code
+   * <includes>
+   *   <include>**\/user.proto</include>
+   *   <include>**\/message.proto</include>
+   *   <include>**\/service.proto</include>
+   * </includes>
+   * }</pre>
+   *
+   * <p>Use {@code excludes} if you wish to instead omit files from compilation.
+   *
+   * @since 2.2.0
+   */
+  @Parameter(property = PROTOBUF_COMPILER_INCLUDES)
+  @Nullable List<String> includes;
 
   /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
@@ -647,9 +714,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .dependencyResolutionDepth(dependencyResolutionDepth)
         .enabledLanguages(enabledLanguages)
+        .excludes(nonNullList(excludes))
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
         .importDependencies(nonNullList(importDependencies))
         .importPaths(importPaths())
+        .includes(nonNullList(includes))
         .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
         .isFailOnMissingSources(failOnMissingSources)
         .isFailOnMissingTargets(failOnMissingTargets)

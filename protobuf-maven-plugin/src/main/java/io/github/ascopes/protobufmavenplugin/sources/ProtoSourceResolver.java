@@ -59,20 +59,23 @@ public final class ProtoSourceResolver {
     this.protoArchiveExtractor = protoArchiveExtractor;
   }
 
-  public Optional<ProtoFileListing> createProtoFileListing(Path path) throws IOException {
-    if (!Files.exists(path)) {
-      log.debug("Skipping lookup in path {} as it does not exist", path);
+  public Optional<ProtoFileListing> createProtoFileListing(
+      Path rootPath,
+      ProtoFileFilter filter
+  ) throws IOException {
+    if (!Files.exists(rootPath)) {
+      log.debug("Skipping lookup in path {} as it does not exist", rootPath);
       return Optional.empty();
     }
 
-    if (Files.isRegularFile(path)) {
-      return protoArchiveExtractor.extractProtoFiles(path);
+    if (Files.isRegularFile(rootPath)) {
+      return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
     }
 
-    try (var stream = Files.walk(path)) {
+    try (var stream = Files.walk(rootPath)) {
       return stream
-          .filter(ProtoFilePredicates::isProtoFile)
-          .peek(protoFile -> log.debug("Found proto file in root {}: {}", path, protoFile))
+          .filter(filePath -> filter.matches(rootPath, filePath))
+          .peek(protoFile -> log.debug("Found proto file in root {}: {}", rootPath, protoFile))
           .collect(Collectors.collectingAndThen(
               // Terminal operation, means we do not return a closed stream
               // by mistake.
@@ -83,25 +86,26 @@ public final class ProtoSourceResolver {
           .map(protoFiles -> ImmutableProtoFileListing
               .builder()
               .addAllProtoFiles(protoFiles)
-              .protoFilesRoot(path)
+              .protoFilesRoot(rootPath)
               .build());
     }
   }
 
   public Collection<ProtoFileListing> createProtoFileListings(
-      Collection<Path> originalPaths
+      Collection<Path> rootPaths,
+      ProtoFileFilter filter
   ) {
-    return originalPaths
+    return rootPaths
         .stream()
         // GH-132: Normalize to ensure different paths to the same file do not
         //   get duplicated across more than one extraction site.
         .map(FileUtils::normalize)
         // GH-132: Avoid running multiple times on the same location.
         .distinct()
-        .map(path -> concurrentExecutor.submit(() -> createProtoFileListing(path)))
+        .map(path -> concurrentExecutor.submit(() -> createProtoFileListing(path, filter)))
         .collect(concurrentExecutor.awaiting())
         .stream()
         .flatMap(Optional::stream)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
   }
 }
