@@ -254,6 +254,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * compilation candidate file, relative to the {@code sourceDirectory} or {@code sourceDependency}
    * that provides them.
    *
+   * <p>See <a href="https://docs.oracle.com/en%2Fjava%2Fjavase%2F11%2Fdocs%2Fapi%2F%2F/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)">
+   * {@code java.nio.file.FileSystem#getPathMatcher}</a> for full details of the supported syntax
+   * within glob patterns.
+   *
    * <p>If a file matches <strong>any</strong> of these patterns, it is automatically excluded.
    *
    * <p>If not provided, then the default is to not exclude anything.
@@ -262,8 +266,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code message.proto}, or {@code service.proto}, you could use the following
    * configuration.
    *
-   * <pre><code>
-   * &lt;excludes&gt;
+   * <pre><code>&lt;excludes&gt;
    *   &lt;exclude&gt;**&#47;user.proto&lt;/exclude&gt;
    *   &lt;exclude&gt;**&#47;message.proto&lt;/exclude&gt;
    *   &lt;exclude&gt;**&#47;service.proto&lt;/exclude&gt;
@@ -366,7 +369,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Each entry is treated as a glob pattern, and is applied to the path of each discovered
    * compilation candidate file, relative to the {@code sourceDirectory} or {@code sourceDependency}
-   * that provides them.
+   * that provides them
+   *
+   * <p>See <a href="https://docs.oracle.com/en%2Fjava%2Fjavase%2F11%2Fdocs%2Fapi%2F%2F/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)">
+   * {@code java.nio.file.FileSystem#getPathMatcher}</a> for full details of the supported syntax
+   * within glob patterns.
    *
    * <p>If a file matches <strong>any</strong> of these patterns, it is automatically included.
    *
@@ -376,9 +383,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code message.proto}, or {@code service.proto}, you could use the following
    * configuration.
    *
-   * <pre><code>
-   * &lt;includes&gt;
-   *   &lt;include&gt;**&#47;user.proto&lt;`/include&gt;
+   * <pre><code>&lt;includes&gt;
+   *   &lt;include&gt;**&#47;user.proto&lt;/include&gt;
    *   &lt;include&gt;**&#47;message.proto&lt;/include&gt;
    *   &lt;include&gt;**&#47;service.proto&lt;/include&gt;
    * &lt;/includes&gt;
