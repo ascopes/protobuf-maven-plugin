@@ -135,11 +135,17 @@
     <checkstyle.version>10.17.0</checkstyle.version>
     <maven-surefire-junit5-tree-reporter.version>1.2.1</maven-surefire-junit5-tree-reporter.version>
 
-    <!-- Other stuff -->
+    <!--
+        - Force bytebuddy experimental support for some exotic platforms.
+        - Enable trace logs for our code for diagnostics.
+        - Enable the loading of dynamic agents to remove warnings about ByteBuddy loading
+          itself at runtime which now are raised as of Java 22.
+    -->
     <argLine>
       -Xshare:off
       -Dnet.bytebuddy.experimental=true
       -Dorg.slf4j.simpleLogger.log.io.github.ascopes=TRACE
+      -XX:+EnableDynamicAgentLoading
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
