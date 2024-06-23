@@ -262,13 +262,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code message.proto}, or {@code service.proto}, you could use the following
    * configuration.
    *
-   * <pre>{@code
-   * <excludes>
-   *   <exclude>**\/user.proto</exclude>
-   *   <exclude>**\/message.proto</exclude>
-   *   <exclude>**\/service.proto</exclude>
-   * </excludes>
-   * }</pre>
+   * <pre><code>
+   * &lt;excludes&gt;
+   *   &lt;exclude&gt;**&#47;user.proto&lt;/exclude&gt;
+   *   &lt;exclude&gt;**&#47;message.proto&lt;/exclude&gt;
+   *   &lt;exclude&gt;**&#47;service.proto&lt;/exclude&gt;
+   * &lt;/excludes&gt;
+   * </code></pre>
    *
    * <p>Use {@code includes} if you wish to instead include files for compilation.
    *
@@ -376,13 +376,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code message.proto}, or {@code service.proto}, you could use the following
    * configuration.
    *
-   * <pre>{@code
-   * <includes>
-   *   <include>**\/user.proto</include>
-   *   <include>**\/message.proto</include>
-   *   <include>**\/service.proto</include>
-   * </includes>
-   * }</pre>
+   * <pre><code>
+   * &lt;includes&gt;
+   *   &lt;include&gt;**&#47;user.proto&lt;`/include&gt;
+   *   &lt;include&gt;**&#47;message.proto&lt;/include&gt;
+   *   &lt;include&gt;**&#47;service.proto&lt;/include&gt;
+   * &lt;/includes&gt;
+   * </code></pre>
    *
    * <p>Use {@code excludes} if you wish to instead omit files from compilation.
    *
