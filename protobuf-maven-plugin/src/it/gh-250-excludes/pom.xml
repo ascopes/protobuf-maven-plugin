@@ -54,8 +54,8 @@
           <protocVersion>${protobuf.version}</protocVersion>
 
           <excludes>
-            <include>**/channel.proto</include>
-            <include>**/message.proto</include>
+            <exclude>**/channel.proto</exclude>
+            <exclude>**/message.proto</exclude>
           </excludes>
         </configuration>
 
