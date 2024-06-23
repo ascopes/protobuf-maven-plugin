@@ -20,6 +20,7 @@ import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -50,11 +51,9 @@ public final class ProtoArchiveExtractor {
   }
 
   public Optional<ProtoFileListing> extractProtoFiles(Path zipPath) throws IOException {
-    // Impl note: unlike other constructors, calling this multiple times on the same path
-    // will open multiple file system objects. Other constructors do not appear to do this,
-    // so would not be thread-safe for concurrent plugin executions.
-    try (var vfs = FileUtils.getFileSystemProvider("jar").newFileSystem(zipPath, Map.of())) {
+    var modifiedTime = Files.getLastModifiedTime(zipPath);
 
+    try (var vfs = openZip(zipPath)) {
       var vfsRoot = vfs.getRootDirectories().iterator().next();
       var sourceFiles = findProtoFilesInArchive(vfsRoot);
 
@@ -74,6 +73,10 @@ public final class ProtoArchiveExtractor {
         // We have to do this on each iteration to ensure the directory hierarchy exists.
         Files.createDirectories(targetFile.getParent());
         Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+
+        // Retain the timestamp of the archive to produce reproducible builds.
+        Files.setLastModifiedTime(targetFile, modifiedTime);
+
         targetFiles.add(targetFile);
       }
 
@@ -98,6 +101,14 @@ public final class ProtoArchiveExtractor {
           ))
           .collect(Collectors.toUnmodifiableList());
     }
+  }
+
+  private FileSystem openZip(Path path) throws IOException {
+    // Impl note: unlike other constructors, calling this multiple times on the same path
+    // will open multiple file system objects. Other constructors do not appear to do this,
+    // so would not be thread-safe for concurrent plugin executions.
+    return FileUtils.getFileSystemProvider("jar")
+        .newFileSystem(path, Map.of());
   }
 
   private Path getExtractionRoot() {
