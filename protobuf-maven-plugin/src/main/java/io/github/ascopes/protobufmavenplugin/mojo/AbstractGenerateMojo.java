@@ -108,7 +108,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>If you have a Java-based plugin that does not distribute a native
    * executable, or are using a more obscure system architecture, then using a
-   * {@code jvmMavenPlugin} may be more preferrable.
+   * {@code jvmMavenPlugin} may be more preferable.
    *
    * <p>Objects support the following attributes:
    *
