@@ -10,7 +10,7 @@ you will find that the official releases of `protoc` by Google only support main
 architectures and operating systems. These are listed below:
 
 <table>
-  <thead>o
+  <thead>
     <tr>
       <th>Operating system</th>
       <th>Supported CPU architectures</th>
