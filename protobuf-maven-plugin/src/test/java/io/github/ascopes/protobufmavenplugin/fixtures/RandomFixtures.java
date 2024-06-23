@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.fixtures;
 
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -25,11 +26,17 @@ import java.util.UUID;
  */
 public final class RandomFixtures {
 
+  private static final Random random = new Random();
+
   private RandomFixtures() {
     // Static-only class.
   }
 
   public static String someText() {
     return UUID.randomUUID().toString();
+  }
+
+  public static int someInt() {
+    return random.nextInt();
   }
 }
