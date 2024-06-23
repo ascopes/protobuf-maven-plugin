@@ -18,22 +18,16 @@ package io.github.ascopes.protobufmavenplugin.sources;
 
 import static java.util.function.Predicate.not;
 
+import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -46,39 +40,23 @@ import org.slf4j.LoggerFactory;
  * extracted to a location within the Maven build directory to enable {@code protoc} and other
  * plugins to be able to view them without needing access to the Java NIO file system APIs.
  *
- * <p>This object maintains an internal work stealing thread pool to enable performing IO
- * concurrently. This should be closed when shutting down this application to prevent leaking
- * resources.
- *
  * @author Ashley Scopes
  */
 @Named
-public final class ProtoSourceResolver implements AutoCloseable {
+public final class ProtoSourceResolver {
 
   private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
 
+  private final ConcurrentExecutor concurrentExecutor;
   private final ProtoArchiveExtractor protoArchiveExtractor;
-  private final ExecutorService executorService;
 
   @Inject
-  public ProtoSourceResolver(ProtoArchiveExtractor protoArchiveExtractor) {
-    var concurrency = Runtime.getRuntime().availableProcessors() * 8;
+  public ProtoSourceResolver(
+      ConcurrentExecutor concurrentExecutor,
+      ProtoArchiveExtractor protoArchiveExtractor
+  ) {
+    this.concurrentExecutor = concurrentExecutor;
     this.protoArchiveExtractor = protoArchiveExtractor;
-    executorService = Executors.newWorkStealingPool(concurrency);
-  }
-
-  @PreDestroy
-  @SuppressWarnings({"auto-closeable", "ResultOfMethodCallIgnored"})
-  @Override
-  public void close() {
-    log.debug("Shutting down executor service");
-    executorService.shutdown();
-    try {
-      executorService.awaitTermination(10, TimeUnit.SECONDS);
-    } catch (InterruptedException ex) {
-      log.warn("Shutdown was interrupted and will be aborted", ex);
-      Thread.currentThread().interrupt();
-    }
   }
 
   public Optional<ProtoFileListing> createProtoFileListing(Path path) throws IOException {
@@ -112,44 +90,18 @@ public final class ProtoSourceResolver implements AutoCloseable {
 
   public Collection<ProtoFileListing> createProtoFileListings(
       Collection<Path> originalPaths
-  ) throws IOException {
-    var results = new LinkedHashSet<ProtoFileListing>();
-    var exceptions = new ArrayList<Exception>();
-
-    originalPaths
+  ) {
+    return originalPaths
         .stream()
         // GH-132: Normalize to ensure different paths to the same file do not
         //   get duplicated across more than one extraction site.
         .map(FileUtils::normalize)
         // GH-132: Avoid running multiple times on the same location.
         .distinct()
-        .map(this::submitProtoFileListingTask)
-        // Terminal operation to ensure all are scheduled prior to joining.
-        .collect(Collectors.toUnmodifiableList())
-        .forEach(task -> {
-          try {
-            task.get().ifPresent(results::add);
-          } catch (ExecutionException | InterruptedException ex) {
-            exceptions.add(ex);
-          }
-        });
-
-    if (!exceptions.isEmpty()) {
-      var causeIterator = exceptions.iterator();
-      var ex = new IOException(
-          "Failed to discover protobuf sources in some locations", causeIterator.next()
-      );
-      causeIterator.forEachRemaining(ex::addSuppressed);
-      throw ex;
-    }
-
-    return results;
-  }
-
-  private FutureTask<Optional<ProtoFileListing>> submitProtoFileListingTask(Path path) {
-    log.debug("Searching for proto files in '{}' asynchronously...", path);
-    var task = new FutureTask<>(() -> createProtoFileListing(path));
-    executorService.submit(task);
-    return task;
+        .map(path -> concurrentExecutor.submit(() -> createProtoFileListing(path)))
+        .collect(concurrentExecutor.awaiting())
+        .stream()
+        .flatMap(Optional::stream)
+        .collect(Collectors.toList());
   }
 }
