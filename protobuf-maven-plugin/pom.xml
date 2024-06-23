@@ -293,13 +293,6 @@
   <reporting>
     <plugins>
       <plugin>
-        <!-- Compile src/main/site and generate the goals site pages. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <version>${maven-invoker-plugin.version}</version>
-      </plugin>
-
-      <plugin>
         <!-- Generate source documentation listings. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -352,76 +345,6 @@
               <report>scm</report>
               <report>summary</report>
             </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-
-      <plugin>
-        <!-- Report unit test results. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>${maven-surefire-plugin.version}</version>
-      </plugin>
-
-      <plugin>
-        <!-- Report coverage. -->
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-
-        <configuration>
-          <excludes>
-            <!-- Exclude the generated Help Mojo. -->
-            <exclude>**/*HelpMojo.*</exclude>
-          </excludes>
-        </configuration>
-
-        <reportSets>
-          <reportSet>
-            <id>coverage-unit</id>
-            <reports>
-              <report>report</report>
-            </reports>
-            <configuration>
-              <includeCurrentProject>true</includeCurrentProject>
-              <footer>
-                  This only contains coverage for the platform the artifact was built
-                  from. Please refer to the codecov.io link on the project for full
-                  cross-platform coverage.
-              </footer>
-              <title>${project.name} - unit test coverage</title>
-            </configuration>
-          </reportSet>
-
-          <reportSet>
-            <id>coverage-integration</id>
-            <reports>
-              <report>report-integration</report>
-            </reports>
-            <configuration>
-              <includeCurrentProject>true</includeCurrentProject>
-              <footer>
-                  This only contains coverage for the platform the artifact was built
-                  from. Please refer to the codecov.io link on the project for full
-                  cross-platform coverage.
-              </footer>
-              <title>${project.name} - integration test coverage</title>
-            </configuration>
-          </reportSet>
-
-          <reportSet>
-            <id>coverage-all</id>
-            <reports>
-              <report>report-aggregate</report>
-            </reports>
-            <configuration>
-              <includeCurrentProject>true</includeCurrentProject>
-              <footer>
-                  This only contains coverage for the platform the artifact was built
-                  from. Please refer to the codecov.io link on the project for full
-                  cross-platform coverage.
-              </footer>
-              <title>${project.name} - aggregate coverage</title>
-            </configuration>
           </reportSet>
         </reportSets>
       </plugin>
