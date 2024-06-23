@@ -35,7 +35,7 @@ jobs:
         run: ./mvnw -B versions:set -DnewVersion="${{ inputs.version }}"
 
       - name: Build the site
-        run: ./mvnw -B clean verify site
+        run: ./mvnw -B clean site -Dmaven.test.skip -Dinvoker.skip -Dcheckstyle.skip
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3

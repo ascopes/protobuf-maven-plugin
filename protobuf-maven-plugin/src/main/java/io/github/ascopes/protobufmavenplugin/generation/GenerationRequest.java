@@ -23,6 +23,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPlugin;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -43,9 +44,13 @@ public interface GenerationRequest {
 
   Collection<Language> getEnabledLanguages();
 
+  List<String> getExcludes();
+
   Collection<? extends MavenDependency> getImportDependencies();
 
   Collection<Path> getImportPaths();
+
+  List<String> getIncludes();
 
   Collection<? extends MavenProtocPlugin> getJvmMavenPlugins();
 
