@@ -1,0 +1,14 @@
+*                text eol=lf
+*.cmd            text eol=crlf
+*.jpg            binary
+*.png            binary
+
+# Don't bother including these in archives.
+.gitattributes   export-ignore
+.gitkeep         export-ignore
+.keep            export-ignore
+
+# Help git-diff render these correctly
+*.groovy         diff=java
+*.scala          diff=java
+
