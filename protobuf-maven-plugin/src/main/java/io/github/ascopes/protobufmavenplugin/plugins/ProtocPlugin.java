@@ -21,13 +21,15 @@ import org.jspecify.annotations.Nullable;
 /**
  * Base interface for a Protoc plugin reference.
  *
+ * <p>Plugins can be marked as skippable, but by default will not be
+ * skipped.
+ *
  * @author Ashley Scopes
  * @since 2.0.0
  */
 public interface ProtocPlugin {
 
-  @Nullable
-  String getOptions();
+  @Nullable String getOptions();
 
   default boolean isSkip() {
     return false;

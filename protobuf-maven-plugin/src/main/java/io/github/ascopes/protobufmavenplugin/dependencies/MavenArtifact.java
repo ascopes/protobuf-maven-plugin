@@ -33,12 +33,9 @@ public interface MavenArtifact {
 
   String getVersion();
 
-  @Nullable
-  String getType();
+  @Nullable String getType();
 
-  @Nullable
-  String getClassifier();
+  @Nullable String getClassifier();
 
-  @Nullable
-  DependencyResolutionDepth getDependencyResolutionDepth();
+  @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
 }

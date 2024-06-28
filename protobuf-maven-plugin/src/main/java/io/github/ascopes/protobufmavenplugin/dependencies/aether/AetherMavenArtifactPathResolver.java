@@ -228,8 +228,7 @@ public class AetherMavenArtifactPathResolver {
     );
   }
 
-  @Nullable
-  private String effectiveClassifier(@Nullable String classifier) {
+  private @Nullable String effectiveClassifier(@Nullable String classifier) {
     return Optional.ofNullable(classifier).orElseGet(artifactHandler::getClassifier);
   }
 

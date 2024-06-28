@@ -36,9 +36,8 @@ import org.jspecify.annotations.Nullable;
 public abstract class MavenProtocPlugin implements MavenArtifact, ProtocPlugin {
 
   @Derived
-  @Nullable
   @Override
-  public DependencyResolutionDepth getDependencyResolutionDepth() {
+  public @Nullable DependencyResolutionDepth getDependencyResolutionDepth() {
     // We never allow this to be specified for protoc plugins.
     return null;
   }

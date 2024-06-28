@@ -23,6 +23,8 @@ import org.immutables.value.Value.Immutable;
 /**
  * Model that holds details about a resolved protoc plugin.
  *
+ * <p>Only used internally, never exposed via the plugin API to users.
+ *
  * @author Ashley Scopes
  */
 @Immutable
