@@ -79,7 +79,8 @@ public class AetherMavenArtifactPathResolver {
       ArtifactHandler artifactHandler
   ) {
     repositorySession = new ProtobufMavenPluginRepositorySession(
-        mavenSession.getRepositorySession());
+        mavenSession.getRepositorySession()
+    );
 
     this.mavenSession = mavenSession;
     this.repositorySystem = repositorySystem;
@@ -129,7 +130,7 @@ public class AetherMavenArtifactPathResolver {
    * Resolve all given dependencies based on their resolution depth semantics.
    *
    * @param artifacts                        the artifacts to resolve.
-   * @param defaultDependencyResolutionDepth the project default dependency resolution depth.\
+   * @param defaultDependencyResolutionDepth the project default dependency resolution depth.
    * @param includeProjectDependencies       whether to also resolve project dependencies and return
    *                                         them in the result.
    * @return the paths to each resolved artifact.
