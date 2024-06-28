@@ -26,7 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
@@ -54,15 +54,16 @@ public final class HostSystem {
 
   @Inject
   public HostSystem() {
-    this(System.getProperties(), System.getenv());
+    // GH-271: Use System.getenv(String) for retrieving case insensitive environment variables
+    this(System.getProperties(), System::getenv);
   }
 
-  public HostSystem(Properties properties, Map<String, String> environmentVariables) {
+  public HostSystem(Properties properties, Function<String, String> envProvider) {
     operatingSystem = properties.getProperty("os.name", "");
     cpuArchitecture = properties.getProperty("os.arch", "");
     workingDirectory = FileUtils.normalize(Path.of(""));
     path = tokenizeFilePath(
-        environmentVariables.getOrDefault("PATH", ""),
+        Objects.requireNonNullElse(envProvider.apply("PATH"), ""),
         paths -> paths
             .map(Path::of)
             .map(FileUtils::normalize)
@@ -70,7 +71,7 @@ public final class HostSystem {
             .filter(Files::isDirectory)
             .collect(Collectors.toUnmodifiableList()));
     pathExt = tokenizeFilePath(
-        environmentVariables.getOrDefault("PATHEXT", ""),
+        Objects.requireNonNullElse(envProvider.apply("PATHEXT"), ""),
         extensions -> extensions
             .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
   }
