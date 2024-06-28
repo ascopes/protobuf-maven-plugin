@@ -37,6 +37,8 @@ import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.ArtifactType;
+import org.eclipse.aether.artifact.ArtifactTypeRegistry;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
@@ -65,6 +67,7 @@ public class AetherMavenArtifactPathResolver {
 
   private final MavenSession mavenSession;
   private final ArtifactHandler artifactHandler;
+  private final ArtifactTypeRegistry artifactTypeRegistry;
   private final RepositorySystem repositorySystem;
   private final RepositorySystemSession repositorySession;
   private final List<RemoteRepository> remoteRepositories;
@@ -75,12 +78,14 @@ public class AetherMavenArtifactPathResolver {
       RepositorySystem repositorySystem,
       ArtifactHandler artifactHandler
   ) {
+    repositorySession = new ProtobufMavenPluginRepositorySession(
+        mavenSession.getRepositorySession());
+
     this.mavenSession = mavenSession;
     this.repositorySystem = repositorySystem;
+    artifactTypeRegistry = repositorySession.getArtifactTypeRegistry();
     this.artifactHandler = artifactHandler;
 
-    var defaultRepositorySession = mavenSession.getRepositorySession();
-    repositorySession = new ProtobufMavenPluginRepositorySession(defaultRepositorySession);
     remoteRepositories = RepositoryUtils
         .toRepos(mavenSession.getProjectBuildingRequest().getRemoteRepositories());
 
@@ -124,7 +129,7 @@ public class AetherMavenArtifactPathResolver {
    * Resolve all given dependencies based on their resolution depth semantics.
    *
    * @param artifacts                        the artifacts to resolve.
-   * @param defaultDependencyResolutionDepth the project default dependency resolution depth.
+   * @param defaultDependencyResolutionDepth the project default dependency resolution depth.\
    * @param includeProjectDependencies       whether to also resolve project dependencies and return
    *                                         them in the result.
    * @return the paths to each resolved artifact.
@@ -174,8 +179,8 @@ public class AetherMavenArtifactPathResolver {
     return new DefaultArtifact(
         artifact.getGroupId(),
         artifact.getArtifactId(),
-        effectiveClassifier(artifact.getClassifier()),
-        effectiveExtension(artifact.getType()),
+        classifierOrDefault(artifact.getClassifier()),
+        extensionOrDefault(artifact.getType()),  // MavenArtifact types <-> Aether extensions
         artifact.getVersion()
     );
   }
@@ -205,9 +210,10 @@ public class AetherMavenArtifactPathResolver {
     var artifact = new DefaultArtifact(
         mavenDependency.getGroupId(),
         mavenDependency.getArtifactId(),
-        effectiveClassifier(mavenDependency.getClassifier()),
-        effectiveExtension(mavenDependency.getType()),
-        mavenDependency.getVersion()
+        classifierOrDefault(mavenDependency.getClassifier()),
+        null,  // Inferred
+        mavenDependency.getVersion(),
+        extensionToType(mavenDependency.getType())
     );
 
     var exclusions = mavenDependency.getExclusions()
@@ -228,14 +234,34 @@ public class AetherMavenArtifactPathResolver {
     );
   }
 
-  private @Nullable String effectiveClassifier(@Nullable String classifier) {
-    return Optional.ofNullable(classifier).orElseGet(artifactHandler::getClassifier);
+  private @Nullable String classifierOrDefault(@Nullable String classifier) {
+    // .getClassifier can return null in this case to imply a default classifier to Aether.
+    return Optional.ofNullable(classifier)
+        .orElseGet(artifactHandler::getClassifier);
   }
 
-  private String effectiveExtension(@Nullable String extension) {
+  private @Nullable ArtifactType extensionToType(@Nullable String extension) {
+    if (extension == null) {
+      extension = requireNonNullElse(artifactHandler.getExtension(), "jar");
+    }
+
+    var type = artifactTypeRegistry.get(extension);
+    log.debug(
+        "Resolved extension {} to Aether type (classifier: {}, type: {}, id: {}, properties: {})",
+        extension,
+        type.getClassifier(),
+        type.getExtension(),
+        type.getId(),
+        type.getProperties()
+    );
+    return type;
+  }
+
+  private String extensionOrDefault(@Nullable String extension) {
     // We have to provide a sensible default here if it isn't provided by the artifact
-    // handler, otherwise we fall over in a heap. Not entirely sure why this doesn't matter
-    // for classifiers...
+    // handler, otherwise we fall over in a heap because Maven implicitly infers this information
+    // whereas Aether does not. For some reason, this is mandatory whereas classifiers can be
+    // totally inferred if null.
     return Optional.ofNullable(extension)
         .or(() -> Optional.ofNullable(artifactHandler.getExtension()))
         .orElse("jar");
