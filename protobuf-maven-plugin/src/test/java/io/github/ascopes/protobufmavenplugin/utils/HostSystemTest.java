@@ -61,7 +61,7 @@ class HostSystemTest {
     properties.put("os.name", osName);
 
     // When
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // Then
     assertThat(hostSystemBean.getOperatingSystem()).isEqualTo(osName);
@@ -77,7 +77,7 @@ class HostSystemTest {
     properties.put("os.arch", cpuArch);
 
     // When
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // Then
     assertThat(hostSystemBean.getCpuArchitecture()).isEqualTo(cpuArch);
@@ -115,7 +115,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = new HashMap<String, String>();
     properties.put("os.name", osName);
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
     var actualResult = hostSystemBean.isProbablyLinux();
@@ -156,7 +156,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = new HashMap<String, String>();
     properties.put("os.name", osName);
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
     var actualResult = hostSystemBean.isProbablyMacOs();
@@ -197,7 +197,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = new HashMap<String, String>();
     properties.put("os.name", osName);
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
     var actualResult = hostSystemBean.isProbablyWindows();
@@ -293,7 +293,7 @@ class HostSystemTest {
     var env = Map.of("PATH", path);
     var properties = new Properties();
 
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
     var actualPath = hostSystemBean.getSystemPath();
@@ -310,7 +310,7 @@ class HostSystemTest {
     // Given
     var env = Map.of("ANYTHING_EXCEPT", "PATHEXT");
     var properties = new Properties();
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
@@ -332,7 +332,7 @@ class HostSystemTest {
 
     var env = Map.of("PATHEXT", pathExt);
     var properties = new Properties();
-    var hostSystemBean = new HostSystem(properties, env);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
