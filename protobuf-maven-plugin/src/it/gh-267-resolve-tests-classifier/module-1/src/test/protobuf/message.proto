@@ -16,15 +16,12 @@
 
 syntax = "proto3";
 
-package channels;
-
-import "message.proto";
+package messages;
 
 option java_multiple_files = true;
 option java_package = "org.example";
 
-message Channel {
+message Message {
   string id = 1;
-  string name = 2;
-  repeated messages.Message messages = 3;
+  string content = 2;
 }

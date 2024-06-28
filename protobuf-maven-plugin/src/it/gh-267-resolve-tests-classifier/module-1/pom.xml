@@ -30,7 +30,18 @@
   <artifactId>module-1</artifactId>
 
   <build>
+    <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/protobuf</directory>
+      </testResource>
+    </testResources>
+
     <plugins>
+      <plugin>
+        <groupId>io.github.ascopes</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>

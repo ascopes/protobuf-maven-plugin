@@ -58,6 +58,7 @@
           <version>@project.version@</version>
 
           <configuration>
+            <embedSourcesInClassOutputs>true</embedSourcesInClassOutputs>
             <protocVersion>${protobuf.version}</protocVersion>
           </configuration>
 
