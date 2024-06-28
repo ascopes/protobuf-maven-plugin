@@ -119,8 +119,7 @@ public final class SourceCodeGenerator {
             .stream()
             .map(ProtoFileListing::getProtoFilesRoot)
             .collect(Collectors.toCollection(LinkedHashSet::new)))
-        .importPaths(request.getSourceRoots())
-        .plugins(resolvedPlugins, request.getOutputDirectory());
+        .importPaths(request.getSourceRoots());
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(
@@ -128,6 +127,9 @@ public final class SourceCodeGenerator {
             request.getOutputDirectory(),
             request.isLiteEnabled()
         ));
+
+    // GH-269: Add the plugins after the enabled languages to support generated code injection
+    argLineBuilder.plugins(resolvedPlugins, request.getOutputDirectory());
 
     var sourceFiles = sourcePaths
         .stream()
