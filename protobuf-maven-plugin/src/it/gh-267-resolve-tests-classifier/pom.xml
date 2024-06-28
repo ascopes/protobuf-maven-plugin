@@ -28,7 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
-  <groupId>gh-267-resolver</groupId>
+  <groupId>gh-267-resolve-tests-classifier</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 
