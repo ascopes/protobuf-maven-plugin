@@ -85,7 +85,7 @@ jobs:
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
               -Dtag="v${release_version}" \
-              release:prepare release:perform
+              clean install release:prepare release:perform
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}

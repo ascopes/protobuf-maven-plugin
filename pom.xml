@@ -422,6 +422,9 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven-release-plugin.version}</version>
           <configuration>
+            <!-- Don't test when making the tag, as we've already tested
+                 by this point. -->
+            <arguments>-Dmaven.test.skip -Dinvoker.skip</arguments>
             <goals>deploy</goals>
             <releaseProfiles>gpg</releaseProfiles>
             <preparationGoals>clean verify site</preparationGoals>
