@@ -383,6 +383,15 @@ as `PATH`.
 </plugin>
 ```
 
+On Linux, MacOS, and other POSIX-like operating systems, this will read the `$PATH` environment
+variable and search for a binary named `protoc` case-sensitively. The executable **MUST** be
+executable by the current user (i.e. `chomd +x /path/to/protoc`), otherwise it will be ignored.
+
+On Windows, this will respect the `%PATH%` environment variable (case insensitive). The path will
+be searched for files where their name matches `protoc` case-insensitively, ignoring the file
+extension. The file extension must match one of the extensions specified in the `%PATHEXT%`
+environment variable. The above example would match `protoc.EXE` on Windows, as an example.
+
 ### Using protoc from a specific path
 
 You may wish to run `protoc` from a specific path on your file system. If you need to do this,
@@ -496,6 +505,16 @@ You can also mark these plugins as being optional by setting `<optional>true</op
 individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
 cannot be resolved on the system path. This is useful for specific cases where resources may only be available 
 during CI builds but do not prevent the application being built locally.
+
+On Linux, MacOS, and other POSIX-like operating systems, this will read the `$PATH` environment
+variable and search for a binary named the given name case-sensitively. The executable **MUST** be
+executable by the current user (i.e. `chomd +x /path/to/binary`), otherwise it will be ignored.
+
+On Windows, this will respect the `%PATH%` environment variable (case insensitive). The path will
+be searched for files where their name matches the binary case-insensitively, ignoring the file
+extension. The file extension must match one of the extensions specified in the `%PATHEXT%`
+environment variable. The above example would therefore match `protoc-gen-grpc-java.EXE` on Windows,
+as an example.
 
 #### Binary plugins from specific locations
 
