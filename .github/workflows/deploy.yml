@@ -75,7 +75,10 @@ jobs:
           fi
           echo "release_version=${release_version}" >> "${GITHUB_ENV}"
 
-      - name: Deploy as staging to Nexus
+      - name: Build and test
+        run: ./mvnw -B -e clean verify
+
+      - name: Deploy staging to Nexus
         if: ${{ ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
@@ -89,7 +92,20 @@ jobs:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Promote Nexus staging release
+      - name: Abort and rollback staging release
+        if: ${{ failure() && ! inputs.skip-maven-release }}
+        run: |-
+          ./mvnw -B -e \
+              -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
+              -DreleaseVersion="${release_version}" \
+              -Dtag="v${release_version}" \
+              release:rollback
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Promote staging to Maven Central
         if: ${{ ! inputs.skip-nexus-promotion }}
         run: |-
           ./scripts/close-nexus-repos.sh \
@@ -102,19 +118,6 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-
-      - name: Abort and rollback release
-        if: ${{ failure() && ! inputs.skip-maven-release }}
-        run: |-
-          ./mvnw -B -e \
-              -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
-              -DreleaseVersion="${release_version}" \
-              -Dtag="v${release_version}" \
-              release:rollback
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
@@ -135,4 +138,3 @@ jobs:
 
       - name: Deploy site
         uses: actions/deploy-pages@v4
-        if: ${{ ! inputs.skip-maven-release }}
