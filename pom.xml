@@ -427,7 +427,7 @@
             <arguments>-Dmaven.test.skip -Dinvoker.skip</arguments>
             <goals>deploy</goals>
             <releaseProfiles>gpg</releaseProfiles>
-            <preparationGoals>clean verify site</preparationGoals>
+            <preparationGoals>clean verify</preparationGoals>
           </configuration>
         </plugin>
 
