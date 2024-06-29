@@ -79,8 +79,6 @@ jobs:
         if: ${{ ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
-              -DdryRun=false \
-              -Darguments=-DskipTests \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
@@ -90,12 +88,6 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        if: ${{ ! inputs.skip-maven-release }}
-        with:
-          path: protobuf-maven-plugin/target/site
 
       - name: Promote Nexus staging release
         if: ${{ ! inputs.skip-nexus-promotion }}
@@ -111,6 +103,19 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
+      - name: Abort and rollback release
+        if: ${{ failure() && ! inputs.skip-nexus-promotion }}
+        run: |-
+          ./mvnw -B -e \
+              -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
+              -DreleaseVersion="${release_version}" \
+              -Dtag="v${release_version}" \
+              release:rollback
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
@@ -118,6 +123,12 @@ jobs:
           name: v${{ env.release_version }}
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        if: ${{ ! inputs.skip-maven-release }}
+        with:
+          path: protobuf-maven-plugin/target/site
 
       - name: Deploy site
         uses: actions/deploy-pages@v4
