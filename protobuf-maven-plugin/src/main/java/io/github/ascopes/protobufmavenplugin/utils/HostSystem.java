@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A bean that exposes information about the underlying platform and the context of the invocation.
@@ -45,6 +47,8 @@ import javax.inject.Named;
  */
 @Named
 public final class HostSystem {
+
+  private static final Logger log = LoggerFactory.getLogger(HostSystem.class);
 
   private final String operatingSystem;
   private final String cpuArchitecture;
@@ -60,8 +64,13 @@ public final class HostSystem {
 
   public HostSystem(Properties properties, Function<String, String> envProvider) {
     operatingSystem = properties.getProperty("os.name", "");
+    log.debug("Reported OS is {}", operatingSystem);
+
     cpuArchitecture = properties.getProperty("os.arch", "");
+    log.debug("Reported CPU architecture is {}", cpuArchitecture);
+
     workingDirectory = FileUtils.normalize(Path.of(""));
+
     path = tokenizeFilePath(
         Objects.requireNonNullElse(envProvider.apply("PATH"), ""),
         paths -> paths
@@ -70,10 +79,13 @@ public final class HostSystem {
             .distinct()
             .filter(Files::isDirectory)
             .collect(Collectors.toUnmodifiableList()));
+    log.debug("Parsed PATH environment variable to {}", path);
+
     pathExt = tokenizeFilePath(
         Objects.requireNonNullElse(envProvider.apply("PATHEXT"), ""),
         extensions -> extensions
             .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
+    log.debug("Parsed PATHEXT environment variable to {}", pathExt);
   }
 
   public String getOperatingSystem() {
@@ -134,6 +146,8 @@ public final class HostSystem {
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
 
+    log.debug("Invoking command in subprocess {}", String.join(" ", args));
+
     try {
       var proc = procBuilder.start();
       try (var reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
@@ -142,6 +156,7 @@ public final class HostSystem {
         proc.destroyForcibly();
       }
     } catch (IOException ex) {
+      log.debug("Ignoring exception caught while executing subprocess", ex);
       return Optional.empty();
     }
   }
