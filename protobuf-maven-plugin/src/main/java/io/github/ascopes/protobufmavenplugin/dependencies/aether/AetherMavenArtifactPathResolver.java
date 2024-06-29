@@ -25,7 +25,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,7 +40,6 @@ import org.eclipse.aether.artifact.ArtifactType;
 import org.eclipse.aether.artifact.ArtifactTypeRegistry;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
-import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
@@ -87,8 +85,9 @@ public class AetherMavenArtifactPathResolver {
     artifactTypeRegistry = repositorySession.getArtifactTypeRegistry();
     this.artifactHandler = artifactHandler;
 
-    remoteRepositories = RepositoryUtils
-        .toRepos(mavenSession.getProjectBuildingRequest().getRemoteRepositories());
+    // Convert the Maven ArtifactRepositories into Aether RemoteRepositories
+    var artifactRepositories = mavenSession.getProjectBuildingRequest().getRemoteRepositories();
+    remoteRepositories = RepositoryUtils.toRepos(artifactRepositories);
 
     log.debug("Injected artifact handler {}", artifactHandler);
     log.debug("Detected remote repositories as {}", remoteRepositories);
@@ -106,8 +105,8 @@ public class AetherMavenArtifactPathResolver {
     var aetherArtifact = new DefaultArtifact(
         artifact.getGroupId(),
         artifact.getArtifactId(),
-        Optional.ofNullable(artifact.getClassifier()).orElseGet(artifactHandler::getClassifier),
-        Optional.ofNullable(artifact.getType()).orElseGet(artifactHandler::getExtension),
+        classifierOrDefault(artifact.getClassifier()),
+        extensionOrDefault(artifact.getType()),
         artifact.getVersion()
     );
 
@@ -170,7 +169,7 @@ public class AetherMavenArtifactPathResolver {
     }
   }
 
-  private Stream<Dependency> getProjectDependencies() {
+  private Stream<org.eclipse.aether.graph.Dependency> getProjectDependencies() {
     return mavenSession.getCurrentProject().getDependencies()
         .stream()
         .map(this::createDependency);
@@ -186,7 +185,7 @@ public class AetherMavenArtifactPathResolver {
     );
   }
 
-  private Function<MavenArtifact, Dependency> createDependency(
+  private Function<MavenArtifact, org.eclipse.aether.graph.Dependency> createDependency(
       DependencyResolutionDepth defaultDependencyResolutionDepth
   ) {
     return mavenArtifact -> {
@@ -201,20 +200,20 @@ public class AetherMavenArtifactPathResolver {
 
       var artifact = createArtifact(mavenArtifact);
 
-      return new Dependency(artifact, "compile", false, exclusions);
+      return new org.eclipse.aether.graph.Dependency(artifact, "compile", false, exclusions);
     };
   }
 
-  private Dependency createDependency(
+  private org.eclipse.aether.graph.Dependency createDependency(
       org.apache.maven.model.Dependency mavenDependency
   ) {
     var artifact = new DefaultArtifact(
         mavenDependency.getGroupId(),
         mavenDependency.getArtifactId(),
         classifierOrDefault(mavenDependency.getClassifier()),
-        null,  // Inferred
+        null,  // Inferred elsewhere.
         mavenDependency.getVersion(),
-        extensionToType(mavenDependency.getType())
+        extensionToType(mavenDependency.getType())  // MavenArtifact types <-> Aether extensions
     );
 
     var exclusions = mavenDependency.getExclusions()
@@ -222,12 +221,12 @@ public class AetherMavenArtifactPathResolver {
         .map(mavenExclusion -> new Exclusion(
             mavenExclusion.getGroupId(),
             mavenExclusion.getArtifactId(),
-            null,
-            null
+            null,  // Any
+            null   // Any
         ))
         .collect(Collectors.toUnmodifiableList());
 
-    return new Dependency(
+    return new org.eclipse.aether.graph.Dependency(
         artifact,
         mavenDependency.getScope(),
         mavenDependency.isOptional(),
@@ -237,8 +236,10 @@ public class AetherMavenArtifactPathResolver {
 
   private @Nullable String classifierOrDefault(@Nullable String classifier) {
     // .getClassifier can return null in this case to imply a default classifier to Aether.
-    return Optional.ofNullable(classifier)
-        .orElseGet(artifactHandler::getClassifier);
+    if (classifier == null) {
+      classifier = artifactHandler.getClassifier();
+    }
+    return classifier;
   }
 
   private @Nullable ArtifactType extensionToType(@Nullable String extension) {
@@ -263,8 +264,9 @@ public class AetherMavenArtifactPathResolver {
     // handler, otherwise we fall over in a heap because Maven implicitly infers this information
     // whereas Aether does not. For some reason, this is mandatory whereas classifiers can be
     // totally inferred if null.
-    return Optional.ofNullable(extension)
-        .or(() -> Optional.ofNullable(artifactHandler.getExtension()))
-        .orElse("jar");
+    if (extension == null) {
+      extension = requireNonNullElse(artifactHandler.getExtension(), "jar");
+    }
+    return extension;
   }
 }
