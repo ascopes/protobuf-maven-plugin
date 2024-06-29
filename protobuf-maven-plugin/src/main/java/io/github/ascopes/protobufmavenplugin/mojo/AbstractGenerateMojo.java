@@ -160,6 +160,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       property - optional.</li>
    * </ul>
    *
+   * <p>On Linux, Mac OS, and other POSIX-like systems, resolution looks for an executable
+   * binary matching the exact name in any directory in the {@code $PATH} environment variable.
+   *
+   * <p>On Windows, the case-insensitive {@code %PATH%} environment variable is searched for an
+   * executable that matches the name, ignoring case and any file extension. The file
+   * extension is expected to match any extension in the {@code %PATHEXT%} environment variable.
+   *
    * @since 2.0.0
    */
   @Parameter
@@ -486,6 +493,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * version specified in the POM. Termux users in particular will find
    * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
    * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
+   *
+   *
+   * <p>Path resolution on Linux, Mac OS, and other POSIX-like systems, resolution looks
+   * for an executable binary matching the exact name in any directory in the {@code $PATH}
+   * environment variable.
+   *
+   * <p>Path resolution on Windows, the case-insensitive {@code %PATH%} environment variable is
+   * searched for an executable that matches the name, ignoring case and any file extension.
+   * The file extension is expected to match any extension in the {@code %PATHEXT%} environment
+   * variable.
    *
    * @since 0.0.1
    */
