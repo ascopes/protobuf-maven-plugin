@@ -83,7 +83,7 @@ jobs:
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
               -Dtag="v${release_version}" \
-              clean install release:prepare release:perform
+              release:prepare release:perform
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
@@ -104,7 +104,7 @@ jobs:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Abort and rollback release
-        if: ${{ failure() && ! inputs.skip-nexus-promotion }}
+        if: ${{ failure() && ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
@@ -118,15 +118,18 @@ jobs:
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
+        if:  ${{ ! inputs.skip-nexus-promotion }}
         with:
           tag: v${{ env.release_version }}
           name: v${{ env.release_version }}
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate site
+        run: ./mvnw site -B -e -DskipTests -Dinvoker.skip
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
-        if: ${{ ! inputs.skip-maven-release }}
         with:
           path: protobuf-maven-plugin/target/site
 
