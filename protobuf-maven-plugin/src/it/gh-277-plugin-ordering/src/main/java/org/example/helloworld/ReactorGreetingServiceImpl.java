@@ -14,27 +14,15 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.plugins;
+package org.example.helloworld;
 
-import java.nio.file.Path;
-import java.util.Optional;
-import org.immutables.value.Value.Immutable;
+import reactor.core.publisher.Mono;
 
-/**
- * Model that holds details about a resolved protoc plugin.
- *
- * <p>Only used internally, never exposed via the plugin API to users.
- *
- * @author Ashley Scopes
- */
-@Immutable
-public interface ResolvedProtocPlugin {
-
-  Path getPath();
-
-  String getId();
-
-  Optional<String> getOptions();
-
-  int getOrder();
+public class ReactorGreetingServiceImpl extends ReactorGreetingServiceGrpc.GreetingServiceImplBase {
+  @Override
+  public Mono<GreetingResponse> greet(Mono<GreetingRequest> request) {
+    return request.map(body -> GreetingResponse.newBuilder()
+            .setText("Hello, " + body.getName() + "!")
+            .build());
+  }
 }

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -158,7 +159,7 @@ public final class SourceCodeGenerator {
   private Collection<ResolvedProtocPlugin> discoverPlugins(
       GenerationRequest request
   ) throws IOException, ResolutionException {
-    return concat(
+    var plugins = concat(
         binaryPluginResolver
             .resolveMavenPlugins(request.getBinaryMavenPlugins()),
         binaryPluginResolver
@@ -168,6 +169,12 @@ public final class SourceCodeGenerator {
         jvmPluginResolver
             .resolveMavenPlugins(request.getJvmMavenPlugins())
     );
+
+    // Sort by precedence then by initial order (sort is stable which guarantees this property).
+    return plugins
+        .stream()
+        .sorted(Comparator.comparingInt(ResolvedProtocPlugin::getOrder))
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private Collection<ProtoFileListing> discoverImportPaths(
