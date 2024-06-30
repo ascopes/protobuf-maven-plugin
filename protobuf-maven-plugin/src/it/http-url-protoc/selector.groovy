@@ -15,7 +15,7 @@
  */
 
 // Only execute on x86 Linux systems, as the URL we test against is CPU and OS specific.
-if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) {
+if (!System.getProperty("os.arch").equalsIgnoreCase("amd64")) {
   println("Skipping this test case as the system is not x86_64")
   return false
 } else if (!System.getProperty("os.name").equalsIgnoreCase("Linux")) {
