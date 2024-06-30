@@ -13,20 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// Only execute this test if the user has protoc installed on their
-// PATH and it is successfully executable.
-try {
-  println("Checking if protoc is on the system path...")
-  int exitCode = "protoc --version".execute().waitFor()
-
-  if (exitCode == 0) {
-    return true
-  } else {
-    println("Skipping this test: protoc system binary exited with code ${exitCode}")
-    return false
-  }
-} catch (IOException ex) {
-  println("Skipping this test. ${ex.getClass().getName()}: ${ex.getMessage()}")
-  return false
-}
