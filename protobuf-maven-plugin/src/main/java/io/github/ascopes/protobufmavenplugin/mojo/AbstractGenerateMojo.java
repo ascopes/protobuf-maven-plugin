@@ -123,6 +123,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code classifier} - the artifact classifier - optional</li>
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
+   *   <li>{@code order} - an integer order to run the plugins in. Defaults
+   *       to 100,000. Higher numbers run later than lower numbers.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
@@ -155,6 +157,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code name} - the name of the binary to resolve.</li>
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
+   *   <li>{@code order} - an integer order to run the plugins in. Defaults
+   *       to 100,000. Higher numbers run later than lower numbers.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
@@ -214,6 +218,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code url} - the URL to resolve.</li>
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
+   *   <li>{@code order} - an integer order to run the plugins in. Defaults
+   *       to 100,000. Higher numbers run later than lower numbers.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>

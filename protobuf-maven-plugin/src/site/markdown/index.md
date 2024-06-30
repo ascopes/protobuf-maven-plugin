@@ -440,6 +440,38 @@ Providing authentication details or proxy details is not supported at this time.
 If you wish to generate GRPC stubs, or outputs for other languages like Scala that are not already
 covered by the protoc executable, you can add custom plugins to your build.
 
+### Common options
+
+Each plugin is defined as an XML object with various attributes. Many depend on the type of plugin
+you are adding (see the sections below), but all plugins share some common attributes:
+
+- `options` - a string value that can be passed to the plugin as a parameter. Defaults to being
+  unspecified.
+- `order` - an integer that controls the plugin execution order relative to other plugins.
+  Smaller numbers make plugins run before those with larger numbers. Defaults to `100000`, meaning
+  you can place plugins before or after those that do not define an order if you wish.
+- `skip` - a boolean that, when true, skips the execution of the plugin entierly. Defaults to
+  `false`.
+
+### Defining plugins in the parent POM
+
+You can define plugins in a parent POM and child projects will inherit it.
+
+By default, if you define the plugin in the parent and the child POM, Maven will merge the
+definitions together.
+
+If you wish for plugins in the child POM to be appended to the list in the parent POM, you can
+add the `combine.children="append"` XML attribute to the parent POM elements:
+
+```xml
+<binaryMavenPlugins combine.children="append">
+  ...
+</binaryMavenPlugins>
+```
+
+You can alternatively use `combine.self="override"` if you want child POMs to totally replace
+anything defined in the parent.
+
 ### Binary plugins
 
 Binary plugins are OS-specific executables that are passed to `protoc` directly, and are the 
@@ -471,9 +503,6 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
 </plugin>
 ```
 
-Each `binaryMavenPlugin` can take an optional `options` parameter which will
-be passed as an option to the plugin if specified.
-
 #### Binary plugins from the system path
 
 If you instead wish to read the executable from the system `$PATH`, then you can specify an
@@ -497,9 +526,6 @@ executable name instead:
   ...
 </plugin>
 ```
-
-Each `binaryPathPlugin` can take an optional `options` parameter which will
-be passed as an option to the plugin if specified.
 
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
 individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
@@ -558,9 +584,6 @@ Any protocols supported by your JRE should be able to be used here, including:
   which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
   and internally extract `plugin.exe` from that archive.
 
-Each `binaryUrlPlugin` can take an optional `options` parameter which will
-be passed as an option to the plugin if specified.
-
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
 individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
 cannot be resolved. This is useful for specific cases where resources may only be available during CI builds but do not
@@ -600,9 +623,6 @@ dependencies to execute.
   ...
 </plugin>
 ```
-
-Each `jvmMavenPlugin` can take an optional `options` parameter which will
-be passed as an option to the plugin if specified.
 
 Currently, you are required to be able to execute `*.bat` files on Windows, or have 
 `sh` available on the system `$PATH` for any other platform.

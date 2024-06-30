@@ -102,6 +102,7 @@ public final class JvmPluginResolver {
         .id(pluginId)
         .path(scriptPath)
         .options(plugin.getOptions())
+        .order(plugin.getOrder())
         .build();
   }
 

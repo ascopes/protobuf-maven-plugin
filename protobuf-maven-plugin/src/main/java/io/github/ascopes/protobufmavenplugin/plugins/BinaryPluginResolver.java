@@ -149,6 +149,7 @@ public final class BinaryPluginResolver {
         .id(Digests.sha1(path.toString()))
         .path(path)
         .options(plugin.getOptions())
+        .order(plugin.getOrder())
         .build();
   }
 
