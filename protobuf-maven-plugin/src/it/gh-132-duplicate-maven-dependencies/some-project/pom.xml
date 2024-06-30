@@ -30,7 +30,7 @@
   <artifactId>some-project</artifactId>
 
   <properties>
-    <protobuf.version>4.27.1</protobuf.version>
+    <protobuf.version>4.27.2</protobuf.version>
   </properties>
 
   <dependencies>
