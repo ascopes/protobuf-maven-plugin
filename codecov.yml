@@ -10,5 +10,5 @@ codecov:
 
 comment:
   layout: "diff, flags, files"
-  behavior: default
+  behavior: once
   require_changes: false
