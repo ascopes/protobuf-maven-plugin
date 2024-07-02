@@ -3,12 +3,11 @@ coverage:
   precision: 2
 
 codecov:
-  notify:
-    wait_for_ci: true
   require_ci_to_pass: true
   strict_yaml_branch: main
 
 comment:
+  after_n_builds: 7  # based on the build matrix in the GH workflow
   layout: "diff, flags, files"
   behavior: once
   require_changes: false
