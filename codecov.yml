@@ -7,7 +7,7 @@ codecov:
   strict_yaml_branch: main
 
 comment:
+  after_n_builds: 7  # based on the build matrix in the GH workflow
   layout: "diff, flags, files"
-  behavior: default
-  require_changes: true
-
+  behavior: once
+  require_changes: false
