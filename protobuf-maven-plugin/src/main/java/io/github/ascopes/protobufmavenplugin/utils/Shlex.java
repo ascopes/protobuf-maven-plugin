@@ -128,7 +128,6 @@ public final class Shlex {
         case '%':
           sb.append("%%");
           break;
-        case '\\':
         case '"':
         case '\'':
         case ' ':

@@ -106,7 +106,7 @@ class ShlexTest {
         arguments(list("/usr/bin/env", "protoc"), "/usr/bin/env protoc"),
         arguments(list("foo bar", "baz"), "foo^ bar baz"),
         arguments(list("foo bar", "baz", "bork qux"), "foo^ bar baz bork^ qux"),
-        arguments(list("foo\\bar", "baz"), "foo^\\bar baz"),
+        arguments(list("foo\\bar", "baz"), "foo\\bar baz"),
         arguments(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"), "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
         arguments(list("abcdefghijklmnopqrstuvwxyz"), "abcdefghijklmnopqrstuvwxyz"),
         arguments(list("0123456789"), "0123456789"),
@@ -114,7 +114,7 @@ class ShlexTest {
         arguments(list("."), "."),
         arguments(list("/"), "/"),
         arguments(list("="), "="),
-        arguments(list("\\"), "^\\"),
+        arguments(list("\\"), "\\"),  // Don't expect this one to be escaped
         arguments(list("\""), "^\""),
         arguments(list("'"), "^'"),
         arguments(list(" "), "^ "),
