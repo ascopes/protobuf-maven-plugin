@@ -2,10 +2,10 @@
 ###
 ### Update the project version based upon criteria.
 ###
-
+### Author: Ashley Scopes
+###
 set -o errexit
 set -o nounset
-
 [[ -n ${DEBUG+undef} ]] && set -o xtrace
 
 function usage() {

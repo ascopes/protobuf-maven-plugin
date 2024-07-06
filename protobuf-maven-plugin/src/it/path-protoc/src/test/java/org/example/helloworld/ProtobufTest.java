@@ -37,7 +37,7 @@ class ProtobufTest {
     } while (superClass != null);
 
     // Then
-    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessageV3"));
+    assertTrue(superClasses.contains("com.google.protobuf.GeneratedMessage"));
   }
 
   @Test
