@@ -2,7 +2,8 @@
 ###
 ### Runs a web server hosting the generated site locally.
 ###
-
+### Author: Ashley Scopes
+###
 set -o errexit
 set -o xtrace
 

@@ -31,30 +31,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Install protoc onto the PATH so that we can test PATH resolution.
-      - name: Install dependencies
+      - name: Install protoc to $PATH
         shell: bash
-        run: |-
-          set -eux
-          case "${{ matrix.os-name }}" in
-            macos-*)
-              # Re-enable once brew updates to protoc 26.1 or newer.
-              #brew install protobuf
-              #protoc --version
-              ;;
-            ubuntu-*)
-              sudo apt update -q
-              sudo apt install protobuf-compiler -qy
-              ;;
-            windows-*)
-              #choco install protoc
-              #protoc --version
-              ;;
-          esac
-
-          java -version
-          javac -version
-          ./mvnw --version
+        run: scripts/install-protoc-to-github-runner.sh
 
       - name: Build and test
         shell: bash
@@ -93,8 +72,13 @@ jobs:
         run: |-
           # Use -T1 here as the plugins emit warnings about thread safety if we use the
           # default concurrency settings for the project.
+          set -eux
           version=3.8.2
           ./mvnw -T1 -B wrapper:wrapper -Dmaven="${version}"
+
+      - name: Install protoc to $PATH
+        shell: bash
+        run: scripts/install-protoc-to-github-runner.sh
 
       - name: Build and test
         shell: bash

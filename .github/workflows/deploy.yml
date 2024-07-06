@@ -52,12 +52,8 @@ jobs:
           git config user.name '${{ github.actor }}'
           git config user.email '${{ github.actor }}@users.noreply.github.com'
 
-      - name: Install dependencies
-        run: |-
-          # Install protoc so those integration tests also run. This increases the reported
-          # coverage on the generated site to a more accurate value.
-          sudo apt update -q
-          sudo apt install protobuf-compiler -qy
+      - name: Install protoc to $PATH
+        run: scripts/install-protoc-to-github-runner.sh
 
       - name: Determine release version details
         run: |-
