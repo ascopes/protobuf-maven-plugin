@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.protoc;
 
+import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.Shlex;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,13 +40,20 @@ public final class CommandLineExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(CommandLineExecutor.class);
 
+  private final HostSystem hostSystem;
+
   @Inject
-  public CommandLineExecutor() {
-    // Nothing to do here.
+  public CommandLineExecutor(HostSystem hostSystem) {
+    this.hostSystem = hostSystem;
   }
 
   public boolean execute(List<String> args) throws IOException {
-    log.info("Calling protoc with the following command line:\n{}", Shlex.quoteShellArgs(args));
+    log.info(
+        "Calling protoc with the following command line:\n{}", 
+        hostSystem.isProbablyWindows()
+            ? Shlex.quoteBatchArgs(args)
+            : Shlex.quoteShellArgs(args)
+    );
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
