@@ -1,4 +1,6 @@
-# Minimum requirements
+# Requirements
+
+## Minimum requirements
 
 This plugin requires that you meet the following requirements at a minimum:
 
@@ -95,35 +97,3 @@ Refer to the `protobufCompiler` parameter documentation on the
 
 You may also try something like `docker buildx` and use a cross-platform container to build
 on the desired platform. Virtual machines are also an option.
-
-### PowerPC Macs
-
-Use a custom build of `protoc` if available.
-
-Refer to the `protobufCompiler` parameter documentation on the
-[goals page](plugin-info.html) for how you can override the binary being used.
-
-### Mainframes from 1980 running in a dark room somewhere
-
-If not on the supported list of operating systems and platforms, and not covered
-by the alternatives above, then you may need to consider a different platform
-to build your applications.
-
-### Quantum computers
-
-As far as I know, Java does not work on a quantum computer, so you are on your own.
-
-### Toasters and Smart Fridges
-
-If they run Linux, you should be covered by the above.
-
-I haven't personally tried building with this plugin on a toaster running NetBSD.
-
-Feel free to contribute documentation.
-
-### Potatos and other vegetables
-
-You should probably consider using a different platform as the acids from the organic
-material will probably make your peripherals sticky. GitHub Codespaces are free to
-use and run in a browser, so give those a try.
-
