@@ -92,7 +92,7 @@ Your best bet is to use a prebuilt version of `protoc` for your platform if prov
 by your package vendor. Alternatively, you could try `binfmt` emulation or QEMU emulation
 and pass the `-Dos.arch=aarch64 -Dos.name=Linux` flag.
 
-Refer to the `protobufCompiler` parameter documentation on the
+Refer to the `protocVersion` parameter documentation on the
 [goals page](plugin-info.html) for how you can override the binary being used.
 
 You may also try something like `docker buildx` and use a cross-platform container to build
