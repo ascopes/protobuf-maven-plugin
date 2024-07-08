@@ -21,7 +21,7 @@
   xsi:schemaLocation="https://maven.apache.org/SITE/2.0.0 https://maven.apache.org/xsd/site-2.0.0.xsd">
 
   <bannerLeft>
-    <image src="images/banner.jpg" style="border-radius: 0.5em;"/>
+    <image src="images/banner.jpg" style="border-radius: 0.5em; max-width: 500px; width: 90vw;"/>
   </bannerLeft>
 
   <body>
@@ -49,11 +49,16 @@
     </head>
 
     <menu name="Documentation">
-      <item name="Usage" href="index.html"/>
+      <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
+      <item name="Usage" href="usage.html"/>
     </menu>
-    <menu name="External Links">
-      <item name="Cross-platform coverage (codecov.io)" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
+    <menu name="User Guides (new)">
+      <item name="Requirements" href="user-guides/requirements.html"/>
+      <item name="Basic Usage" href="user-guides/basic-usage.html"/>
+    </menu>
+    <menu name="Links">
+      <item name="CodeCov" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
       <item name="GitHub" href="https://github.com/ascopes/protobuf-maven-plugin"/>
       <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
     </menu>
@@ -62,12 +67,7 @@
 
   <custom>
     <fluidoSkin>
-      <googleSearch>
-        <sitesearch/>
-      </googleSearch>
-
       <profile>production</profile>
-      <skipGenerationDate>true</skipGenerationDate>
     </fluidoSkin>
   </custom>
 
