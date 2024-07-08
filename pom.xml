@@ -436,6 +436,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
           <version>${maven-site-plugin.version}</version>
+
+          <configuration>
+            <!-- Fixes links pointing to the wrong place. -->
+            <relativizeSiteLinks>false</relativizeSiteLinks>
+            <!-- Strict validation. -->
+            <validate>true</validate>
+          </configuration>
         </plugin>
 
         <plugin>
