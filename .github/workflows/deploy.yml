@@ -3,8 +3,18 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Override deployment version"
+        default: ""
+        type: string
+
       skip-maven-release:
         description: "Skip Maven release steps"
+        default: false
+        type: boolean
+
+      skip-tests:
+        description: "Skip tests"
         default: false
         type: boolean
 
@@ -13,10 +23,10 @@ on:
         default: false
         type: boolean
 
-      version:
-        description: "Override deployment version"
-        default: ""
-        type: string
+      skip-pages:
+        description: "Skip pages"
+        default: false
+        type: boolean
 
 jobs:
   deploy:
@@ -72,6 +82,7 @@ jobs:
           echo "release_version=${release_version}" >> "${GITHUB_ENV}"
 
       - name: Build and test
+        if: ${{ ! inputs.skip-tests }}
         run: ./mvnw -B -e clean verify
 
       - name: Deploy staging to Nexus
@@ -115,7 +126,7 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
-      - name: Create GitHub Release
+      - name: Create GitHub release
         uses: ncipollo/release-action@v1
         if:  ${{ ! inputs.skip-nexus-promotion }}
         with:
@@ -124,13 +135,19 @@ jobs:
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate site
-        run: ./mvnw site -B -e -DskipTests -Dinvoker.skip
+      - name: Generate pages
+        if: ${{ ! inputs.skip-pages }}
+        run: |-
+          # Use the release version for deploying pages
+          ./mvnw -B versions:set -DnewVersion="${release_version}"
+          ./mvnw site -B -e -DskipTests -Dinvoker.skip
 
-      - name: Upload site
+      - name: Upload pages
+        if: ${{ ! inputs.skip-pages }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: protobuf-maven-plugin/target/site
 
-      - name: Deploy site
+      - name: Deploy pages
+        if: ${{ ! inputs.skip-pages }}
         uses: actions/deploy-pages@v4
