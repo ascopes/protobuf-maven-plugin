@@ -70,7 +70,7 @@ official build of `protoc` will rely on. For this reason, you will need to insta
 or build a custom version of `protoc`, such as the one provided on the Termux
 repositories.
 
-Refer to the `protobufCompiler` parameter documentation on the
+Refer to the `protocVersion` parameter documentation on the
 [goals page](plugin-info.html) for how you can override the binary being used.
 
 ### Windows on ARM
