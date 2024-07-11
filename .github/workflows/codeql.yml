@@ -15,7 +15,7 @@ on:
 jobs:
   codeql:
     name: CodeQL analysis (${{ matrix.language }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     concurrency:
       group: codeql-codeql-${{ github.head_ref || github.run_id }}
