@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNullElse;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import java.io.File;
+import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -115,10 +115,10 @@ public class AetherMavenArtifactPathResolver {
     var artifactRequest = new ArtifactRequest(aetherArtifact, remoteRepositories, null);
 
     try {
-      return repositorySystem.resolveArtifact(repositorySession, artifactRequest)
-          .getArtifact()
-          .getFile()
-          .toPath();
+      var resolvedArtifact = repositorySystem
+          .resolveArtifact(repositorySession, artifactRequest)
+          .getArtifact();
+      return determinePath(resolvedArtifact);
 
     } catch (ArtifactResolutionException ex) {
       throw new ResolutionException("Failed to resolve " + aetherArtifact, ex);
@@ -160,8 +160,7 @@ public class AetherMavenArtifactPathResolver {
           .getArtifactResults()
           .stream()
           .map(ArtifactResult::getArtifact)
-          .map(Artifact::getFile)
-          .map(File::toPath)
+          .map(this::determinePath)
           .collect(Collectors.toUnmodifiableList());
 
     } catch (DependencyResolutionException ex) {
@@ -268,5 +267,14 @@ public class AetherMavenArtifactPathResolver {
       extension = requireNonNullElse(artifactHandler.getExtension(), "jar");
     }
     return extension;
+  }
+
+  private Path determinePath(Artifact artifact) {
+    // TODO: when Maven moves to the v2.0.0 resolver API, replace
+    //   this method with calls to Artifact.getPath() directly
+    //   and delete this polyfill method.
+    @SuppressWarnings("deprecation")
+    var path = artifact.getFile().toPath();
+    return FileUtils.normalize(path);
   }
 }
