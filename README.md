@@ -1,8 +1,8 @@
-![Java 11+](https://img.shields.io/badge/Java-11+-blue?logo=openjdk&logoColor=white)
+![Java 11+](https://img.shields.io/badge/Java-11+-red?logo=openjdk&logoColor=white)
 [![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin)](https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin)
-[![Documentation](https://img.shields.io/badge/Documentation-latest-blue?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
+[![Documentation](https://img.shields.io/badge/-Documentation-purple?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
 
 # protobuf-maven-plugin
 
