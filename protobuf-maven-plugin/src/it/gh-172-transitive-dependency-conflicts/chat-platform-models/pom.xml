@@ -27,7 +27,7 @@
     <version>@project.version@</version>
   </parent>
 
-  <artifactId>fancy-project</artifactId>
+  <artifactId>chat-platform-models</artifactId>
   <!-- Purposely skip Java compilation phases -->
   <packaging>pom</packaging>
 
