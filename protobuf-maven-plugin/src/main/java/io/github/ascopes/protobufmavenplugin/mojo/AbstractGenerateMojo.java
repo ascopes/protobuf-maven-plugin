@@ -794,14 +794,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : transformedSourceDirectories;
 
     return finalDirectories.stream()
-        .filter(path -> {
-          if (Files.notExists(path)) {
-            log.info("Ignoring source directory {} as it does not appear to exist", path);
-            return false;
-          }
-          return true;
-        })
+        .filter(this::removeNonExistentSourceDirectory)
         .collect(Collectors.toUnmodifiableList());
+  }
+
+  private boolean removeNonExistentSourceDirectory(Path path) {
+    if (Files.notExists(path)) {
+      log.info("Ignoring source directory {} as it does not appear to exist", path);
+      return false;
+    }
+    return true;
   }
 
   private Collection<Path> importPaths() {
