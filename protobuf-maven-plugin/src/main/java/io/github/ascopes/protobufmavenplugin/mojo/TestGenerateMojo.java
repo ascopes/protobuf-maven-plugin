@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.Set;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -53,6 +54,11 @@ public final class TestGenerateMojo extends AbstractGenerateMojo {
   @Override
   SourceRootRegistrar sourceRootRegistrar() {
     return SourceRootRegistrar.TEST;
+  }
+
+  @Override
+  Set<String> defaultDependencyScopes() {
+    return Set.of("compile", "provided", "system", "test");
   }
 
   @Override

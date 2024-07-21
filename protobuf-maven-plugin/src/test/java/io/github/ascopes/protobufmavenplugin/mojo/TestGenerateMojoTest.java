@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("TestGenerateMojo tests")
@@ -46,5 +47,10 @@ class TestGenerateMojoTest extends AbstractGenerateMojoTestTemplate<TestGenerate
     return Path.of(mojo.mavenProject.getBuild().getDirectory())
         .resolve("generated-test-sources")
         .resolve("protobuf");
+  }
+
+  @Override
+  Set<String> expectedDefaultDependencyScopes() {
+    return Set.of("compile", "provided", "system", "test");
   }
 }

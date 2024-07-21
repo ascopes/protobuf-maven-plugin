@@ -25,6 +25,7 @@ import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,6 +48,7 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +132,7 @@ public class AetherMavenArtifactPathResolver {
    *
    * @param artifacts                        the artifacts to resolve.
    * @param defaultDependencyResolutionDepth the project default dependency resolution depth.
+   * @param dependencyScopes                 the allowed dependency scopes to resolve.
    * @param includeProjectDependencies       whether to also resolve project dependencies and return
    *                                         them in the result.
    * @return the paths to each resolved artifact.
@@ -138,6 +141,7 @@ public class AetherMavenArtifactPathResolver {
   public Collection<Path> resolveDependencies(
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,
+      Set<String> dependencyScopes,
       boolean includeProjectDependencies
   ) throws ResolutionException {
     try {
@@ -153,8 +157,9 @@ public class AetherMavenArtifactPathResolver {
           dependenciesToResolve
       );
 
+      var scopeFilter = new ScopeDependencyFilter(dependencyScopes, null);
       var collectRequest = new CollectRequest(dependenciesToResolve, null, remoteRepositories);
-      var dependencyRequest = new DependencyRequest(collectRequest, null);
+      var dependencyRequest = new DependencyRequest(collectRequest, scopeFilter);
 
       return repositorySystem.resolveDependencies(repositorySession, dependencyRequest)
           .getArtifactResults()
