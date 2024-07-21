@@ -247,14 +247,19 @@ public class AetherMavenArtifactPathResolver {
     }
 
     var type = artifactTypeRegistry.get(extension);
-    log.debug(
-        "Resolved extension {} to Aether type (classifier: {}, type: {}, id: {}, properties: {})",
-        extension,
-        type.getClassifier(),
-        type.getExtension(),
-        type.getId(),
-        type.getProperties()
-    );
+
+    if (type == null) {
+      log.debug("Could not resolve extension {} to any known Aether artifact type", extension);
+    } else {
+      log.debug(
+          "Resolved extension {} to Aether artifact type (classifier: {}, type: {}, id: {}, {})",
+          extension,
+          type.getClassifier(),
+          type.getExtension(),
+          type.getId(),
+          type.getProperties()
+      );
+    }
     return type;
   }
 
