@@ -182,7 +182,7 @@ public class AetherMavenArtifactPathResolver {
       }
 
       // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
-      log.error(
+      log.warn(
           "Error resolving one or more dependencies, dependencies may be missing during "
               + "protobuf compilation! {}", ex.getMessage(), ex
       );
