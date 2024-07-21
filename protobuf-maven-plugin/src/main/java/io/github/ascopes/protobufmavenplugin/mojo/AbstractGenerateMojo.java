@@ -726,7 +726,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       return;
     }
 
-    var enabledLanguages = Language.setBuilder()
+    var enabledLanguages = Language.languageSet()
         .addIf(cppEnabled, Language.CPP)
         .addIf(csharpEnabled, Language.C_SHARP)
         .addIf(javaEnabled, Language.JAVA)

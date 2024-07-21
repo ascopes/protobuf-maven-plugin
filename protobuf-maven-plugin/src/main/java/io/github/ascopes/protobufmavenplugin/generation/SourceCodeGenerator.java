@@ -180,7 +180,7 @@ public final class SourceCodeGenerator {
   private Collection<ProtoFileListing> discoverImportPaths(
       Collection<ProtoFileListing> sourcePathListings,
       GenerationRequest request
-  ) throws IOException, ResolutionException {
+  ) throws ResolutionException {
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
@@ -204,7 +204,7 @@ public final class SourceCodeGenerator {
 
   private Collection<ProtoFileListing> discoverCompilableSources(
       GenerationRequest request
-  ) throws IOException, ResolutionException {
+  ) throws ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
 
     var filter = new ProtoFileFilter(request.getIncludes(), request.getExcludes());

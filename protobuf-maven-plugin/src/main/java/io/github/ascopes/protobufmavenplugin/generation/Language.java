@@ -52,7 +52,7 @@ public enum Language {
     return flagName;
   }
 
-  public static LanguageSetBuilder setBuilder() {
+  public static LanguageSetBuilder languageSet() {
     return new LanguageSetBuilder();
   }
 

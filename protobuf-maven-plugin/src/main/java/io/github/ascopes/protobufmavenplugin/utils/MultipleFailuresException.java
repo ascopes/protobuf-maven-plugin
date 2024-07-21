@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
  * @author Ashley Scopes
  * @since 2.2.0
  */
-public final class MultipleFailuresException extends RuntimeException {
+final class MultipleFailuresException extends RuntimeException {
 
   private MultipleFailuresException(String message, Throwable cause) {
     super(message, cause, true, false);
@@ -38,7 +38,7 @@ public final class MultipleFailuresException extends RuntimeException {
    * @return the wrapper exception.
    * @throws NoSuchElementException if an empty list was provided.
    */
-  public static MultipleFailuresException create(List<? extends Throwable> exceptions) {
+  static MultipleFailuresException create(List<? extends Throwable> exceptions) {
     var causeIterator = exceptions.iterator();
     var ex = new MultipleFailuresException("Multiple failures occurred", causeIterator.next());
     causeIterator.forEachRemaining(ex::addSuppressed);
