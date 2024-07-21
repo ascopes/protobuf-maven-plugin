@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.sources;
 
-
 import java.nio.file.Path;
 import java.util.Set;
 import org.immutables.value.Value.Immutable;

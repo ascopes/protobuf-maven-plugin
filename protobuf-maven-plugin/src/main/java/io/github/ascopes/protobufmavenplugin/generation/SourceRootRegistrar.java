@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Strategy for registration of sources with the Maven project.
  *
- * <p>This cannot be extended outside of the predefined strategies
+ * <p>This cannot be extended outside the predefined strategies
  * that already exist in this class.
  *
  * @author Ashley Scopes
@@ -79,7 +79,7 @@ public final class SourceRootRegistrar {
         .apply(session.getCurrentProject().getBuild());
 
     // TODO: extract this logic out to FileUtils and use both here and in the archive extractor
-    // as it can be refactored into common code.
+    //   as it can be refactored into common code.
     for (var sourceFile : listing.getProtoFiles()) {
       var targetFile = FileUtils.changeRelativePath(
           targetDirectory,

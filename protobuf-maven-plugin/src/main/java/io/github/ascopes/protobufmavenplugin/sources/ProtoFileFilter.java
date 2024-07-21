@@ -47,18 +47,13 @@ public final class ProtoFileFilter {
   public boolean matches(Path relativeRoot, Path file) {
     var relativeFile = relativeRoot.relativize(file);
 
-    var excluded = excludes.isEmpty()
-        ? false
-        : excludes.stream().anyMatch(checking(relativeFile));
+    var excluded = !excludes.isEmpty() && excludes.stream().anyMatch(checking(relativeFile));
 
-    var notIncluded = includes.isEmpty()
-        ? false
-        : includes.stream().noneMatch(checking(relativeFile));
+    var notIncluded = !includes.isEmpty() && includes.stream().noneMatch(checking(relativeFile));
 
     if (excluded || notIncluded) {
       return false;
     }
-
 
     return Files.isRegularFile(file)
         && FileUtils.getFileExtension(file)
