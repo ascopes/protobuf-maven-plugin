@@ -48,7 +48,6 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +156,7 @@ public class AetherMavenArtifactPathResolver {
           dependenciesToResolve
       );
 
-      var scopeFilter = new ScopeDependencyFilter(dependencyScopes, null);
+      var scopeFilter = new ScopeDependencyFilter(dependencyScopes);
       var collectRequest = new CollectRequest(dependenciesToResolve, null, remoteRepositories);
       var dependencyRequest = new DependencyRequest(collectRequest, scopeFilter);
 
