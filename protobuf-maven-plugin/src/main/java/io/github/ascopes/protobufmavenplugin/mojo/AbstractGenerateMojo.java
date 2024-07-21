@@ -37,6 +37,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -244,6 +245,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_TRANSITIVE)
   DependencyResolutionDepth dependencyResolutionDepth;
+
+  /**
+   * The dependency scopes to resolve dependencies for.
+   *
+   * @since 2.4.0
+   */
+  @Parameter
+  @Nullable
+  Set<String> dependencyScopes;
 
   /**
    * Set whether to attach all compiled protobuf sources to the output of this
@@ -714,6 +724,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   abstract Path defaultOutputDirectory();
 
   /**
+   * The default dependency scopes used for resolution.
+   *
+   * @return the set of dependency scopes used for resolution.
+   */
+  abstract Set<String> defaultDependencyScopes();
+
+  /**
    * Execute the plugin and generate sources.
    *
    * @throws MojoExecutionException if execution fails.
@@ -744,6 +761,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .dependencyResolutionDepth(dependencyResolutionDepth)
+        .dependencyScopes(dependencyScopes())
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
@@ -773,6 +791,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       mojoFailureException.initCause(ex);
       throw mojoFailureException;
     }
+  }
+
+  private Set<String> dependencyScopes() {
+    return Optional.ofNullable(dependencyScopes)
+        .filter(not(Collection::isEmpty))
+        .orElseGet(this::defaultDependencyScopes);
   }
 
   private Path outputDirectory() {

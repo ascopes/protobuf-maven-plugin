@@ -24,6 +24,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPlugin;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -41,6 +42,8 @@ public interface GenerationRequest {
   Collection<? extends UrlProtocPlugin> getBinaryUrlPlugins();
 
   DependencyResolutionDepth getDependencyResolutionDepth();
+
+  Set<String> getDependencyScopes();
 
   Collection<Language> getEnabledLanguages();
 

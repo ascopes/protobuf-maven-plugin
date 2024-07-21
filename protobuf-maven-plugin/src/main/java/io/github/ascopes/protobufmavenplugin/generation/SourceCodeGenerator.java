@@ -184,6 +184,7 @@ public final class SourceCodeGenerator {
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
+        request.getDependencyScopes(),
         !request.isIgnoreProjectDependencies()
     );
 
@@ -217,6 +218,7 @@ public final class SourceCodeGenerator {
     var sourceDependencies = artifactPathResolver.resolveDependencies(
         request.getSourceDependencies(),
         request.getDependencyResolutionDepth(),
+        request.getDependencyScopes(),
         false
     );
 

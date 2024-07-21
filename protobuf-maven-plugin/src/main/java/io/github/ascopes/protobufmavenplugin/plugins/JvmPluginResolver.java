@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class JvmPluginResolver {
 
+  private static final Set<String> ALLOWED_SCOPES = Set.of("compile", "runtime", "system");
   private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
   private final HostSystem hostSystem;
@@ -112,7 +114,12 @@ public final class JvmPluginResolver {
 
     // Resolve dependencies first.
     var dependencyIterator = artifactPathResolver
-        .resolveDependencies(List.of(plugin), DependencyResolutionDepth.TRANSITIVE, false)
+        .resolveDependencies(
+            List.of(plugin),
+            DependencyResolutionDepth.TRANSITIVE,
+            ALLOWED_SCOPES,
+            false
+        )
         .iterator();
 
     // First dependency is always the thing we actually want to execute,

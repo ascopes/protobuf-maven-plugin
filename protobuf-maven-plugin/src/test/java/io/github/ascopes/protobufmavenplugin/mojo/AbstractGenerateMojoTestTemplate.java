@@ -44,10 +44,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -106,6 +109,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   abstract Path expectedDefaultSourceDirectory();
 
   abstract Path expectedDefaultOutputDirectory();
+
+  abstract Set<String> expectedDefaultDependencyScopes();
 
   @DisplayName("abstract method implementation tests")
   @Nested
@@ -337,6 +342,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     void dependencyResolutionDepthIsSetToSpecifiedValue(
         DependencyResolutionDepth dependencyResolutionDepth
     ) throws Throwable {
+      // Given
       mojo.dependencyResolutionDepth = dependencyResolutionDepth;
 
       // When
@@ -347,6 +353,50 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       verify(mojo.sourceCodeGenerator).generate(captor.capture());
       var actualRequest = captor.getValue();
       assertThat(actualRequest.getBinaryUrlPlugins()).isEmpty();
+    }
+  }
+
+  @DisplayName("dependencyScopes tests")
+  @Nested
+  class DependencyScopesTest {
+
+    @DisplayName("defaultDependencyScopes() are used when no user provided scopes are present")
+    @NullAndEmptySource
+    @ParameterizedTest(name = "for dependencyScopes = \"{0}\"")
+    void defaultDependencyScopesAreUsedWhenNoUserProvidedScopesArePresent(
+        Set<String> userProvidedDependencyScopes
+    ) throws Throwable {
+      // Given
+      mojo.dependencyScopes = userProvidedDependencyScopes;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getDependencyScopes())
+          .containsExactlyInAnyOrderElementsOf(expectedDefaultDependencyScopes());
+    }
+
+    @DisplayName("User-provided dependencyScopes are used when provided")
+    @MethodSource("io.github.ascopes.protobufmavenplugin.mojo.AbstractGenerateMojoTestTemplate"
+        + "#scopeCombinations")
+    @ParameterizedTest(name = "for {0}")
+    void userProvidedDependencyScopesAreUsedWhenProvided(Set<String> combination) throws Throwable {
+      // Given
+      mojo.dependencyScopes = combination;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getDependencyScopes())
+          .containsExactlyInAnyOrderElementsOf(combination);
     }
   }
 
@@ -901,5 +951,40 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     when(sourceCodeGenerator.generate(any()))
         .thenThrow(cause);
     return sourceCodeGenerator;
+  }
+
+  static Stream<Set<String>> scopeCombinations() {
+    return combinations("compile", "runtime", "test", "provided", "system");
+  }
+
+  @SafeVarargs
+  @SuppressWarnings("vararg")
+  static <T> Stream<Set<T>> combinations(T... items) {
+    if (items.length >= Integer.SIZE) {
+      throw new IllegalArgumentException("Too many items!");
+    }
+
+    var spliterator = new AbstractSpliterator<Set<T>>(items.length, AbstractSpliterator.SIZED) {
+      private final int maxBitField = (1 << items.length) - 1;
+      private int bitfield = 0x0;
+
+      @Override
+      public boolean tryAdvance(Consumer<? super Set<T>> action) {
+        if (bitfield >= maxBitField) {
+          return false;
+        }
+
+        bitfield += 1;
+        var combination = new HashSet<T>();
+        for (var bit = 0; bit < items.length; ++bit) {
+          if ((bitfield & (1 << bit)) > 0) {
+            combination.add(items[bit]);
+          }
+        }
+        action.accept(combination);
+        return true;
+      }
+    };
+    return StreamSupport.stream(spliterator, false);
   }
 }
