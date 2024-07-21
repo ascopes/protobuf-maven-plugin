@@ -69,6 +69,8 @@ public interface GenerationRequest {
 
   boolean isEmbedSourcesInClassOutputs();
 
+  boolean isFailOnInvalidDependencies();
+
   boolean isFailOnMissingSources();
 
   boolean isFailOnMissingTargets();

@@ -135,6 +135,9 @@ public class AetherMavenArtifactPathResolver {
    * @param dependencyScopes                 the allowed dependency scopes to resolve.
    * @param includeProjectDependencies       whether to also resolve project dependencies and return
    *                                         them in the result.
+   * @param failOnInvalidDependencies        if {@code false}, resolution of invalid dependencies
+   *                                         will result in errors being logged, but the build will
+   *                                         not be halted.
    * @return the paths to each resolved artifact.
    * @throws ResolutionException if resolution failed in the backend.
    */
@@ -142,7 +145,8 @@ public class AetherMavenArtifactPathResolver {
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,
       Set<String> dependencyScopes,
-      boolean includeProjectDependencies
+      boolean includeProjectDependencies,
+      boolean failOnInvalidDependencies
   ) throws ResolutionException {
     DependencyResult dependencyResult;
 
@@ -173,14 +177,15 @@ public class AetherMavenArtifactPathResolver {
       // If we didn't get any result, then something more fatal has occurred, so raise.
       dependencyResult = ex.getResult();
 
-      if (dependencyResult == null) {
+      if (dependencyResult == null || failOnInvalidDependencies) {
         throw new ResolutionException("Failed to resolve dependencies", ex);
       }
 
       // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
       log.error(
           "Error resolving one or more dependencies, dependencies may be missing during "
-              + "protobuf compilation! {}", ex.getMessage(), ex);
+              + "protobuf compilation! {}", ex.getMessage(), ex
+      );
     }
 
     return dependencyResult

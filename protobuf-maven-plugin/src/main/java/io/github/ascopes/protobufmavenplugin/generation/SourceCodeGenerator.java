@@ -185,7 +185,8 @@ public final class SourceCodeGenerator {
         request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
         request.getDependencyScopes(),
-        !request.isIgnoreProjectDependencies()
+        !request.isIgnoreProjectDependencies(),
+        request.isFailOnInvalidDependencies()
     );
 
     var filter = new ProtoFileFilter();
@@ -219,7 +220,8 @@ public final class SourceCodeGenerator {
         request.getSourceDependencies(),
         request.getDependencyResolutionDepth(),
         request.getDependencyScopes(),
-        false
+        false,
+        request.isFailOnInvalidDependencies()
     );
 
     var sourceDependencyListings = protoListingResolver.createProtoFileListings(

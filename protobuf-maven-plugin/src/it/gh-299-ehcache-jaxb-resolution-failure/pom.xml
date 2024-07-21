@@ -78,6 +78,7 @@
         <version>@project.version@</version>
 
         <configuration>
+          <ignoreInvalidDependencies>true</ignoreInvalidDependencies>
           <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
