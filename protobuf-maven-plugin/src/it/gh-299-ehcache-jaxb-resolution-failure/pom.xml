@@ -58,7 +58,6 @@
 
       <exclusions>
         <exclusion>
-          <!-- This points to blocked repositories. -->
           <groupId>org.glassfish.jaxb</groupId>
           <artifactId>jaxb-runtime</artifactId>
         </exclusion>
