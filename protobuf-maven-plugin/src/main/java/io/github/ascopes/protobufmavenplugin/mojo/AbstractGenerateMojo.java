@@ -304,6 +304,23 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<String> excludes;
 
   /**
+   * Whether to fail if any invalid direct or transitive dependencies are encountered.
+   *
+   * <p>If {@code true}, the build will be aborted with an error if any invalid dependency is
+   * encountered.
+   *
+   * <p>If {@code false}, then the build will report any invalid dependencies as errors in the logs,
+   * before proceeding with the build. Any invalid dependencies will be discarded.
+   *
+   * <p>Prior to {@code v2.4.0}, any invalid dependencies would result in an error being raised
+   * and the build being aborted. In {@code v2.4.0}, this has been relaxed.
+   *
+   * @since 2.4.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean failOnInvalidDependencies;
+
+  /**
    * Whether to fail on missing sources.
    *
    * <p>If no sources are detected, it is usually a sign that this plugin
@@ -769,6 +786,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .importPaths(importPaths())
         .includes(nonNullList(includes))
         .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
+        .isFailOnInvalidDependencies(failOnInvalidDependencies)
         .isFailOnMissingSources(failOnMissingSources)
         .isFailOnMissingTargets(failOnMissingTargets)
         .isFatalWarnings(fatalWarnings)

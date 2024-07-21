@@ -48,6 +48,7 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.resolution.DependencyResult;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +135,9 @@ public class AetherMavenArtifactPathResolver {
    * @param dependencyScopes                 the allowed dependency scopes to resolve.
    * @param includeProjectDependencies       whether to also resolve project dependencies and return
    *                                         them in the result.
+   * @param failOnInvalidDependencies        if {@code false}, resolution of invalid dependencies
+   *                                         will result in errors being logged, but the build will
+   *                                         not be halted.
    * @return the paths to each resolved artifact.
    * @throws ResolutionException if resolution failed in the backend.
    */
@@ -141,8 +145,11 @@ public class AetherMavenArtifactPathResolver {
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,
       Set<String> dependencyScopes,
-      boolean includeProjectDependencies
+      boolean includeProjectDependencies,
+      boolean failOnInvalidDependencies
   ) throws ResolutionException {
+    DependencyResult dependencyResult;
+
     try {
       var dependenciesToResolve = Stream
           .concat(
@@ -159,17 +166,34 @@ public class AetherMavenArtifactPathResolver {
       var scopeFilter = new ScopeDependencyFilter(dependencyScopes);
       var collectRequest = new CollectRequest(dependenciesToResolve, null, remoteRepositories);
       var dependencyRequest = new DependencyRequest(collectRequest, scopeFilter);
-
-      return repositorySystem.resolveDependencies(repositorySession, dependencyRequest)
-          .getArtifactResults()
-          .stream()
-          .map(ArtifactResult::getArtifact)
-          .map(this::determinePath)
-          .collect(Collectors.toUnmodifiableList());
+      dependencyResult = repositorySystem.resolveDependencies(repositorySession, dependencyRequest);
 
     } catch (DependencyResolutionException ex) {
-      throw new ResolutionException("Failed to resolve dependencies", ex);
+      // GH-299: if this exception is raised, we may still have some results we can use. If this is
+      // the case then resolution only partially failed, so continue for now unless strict
+      // resolution is enabled. We do not fail-fast here anymore (since 2.4.0) as any resolution
+      // errors should be dealt with by the maven-compiler-plugin later on if needed.
+      //
+      // If we didn't get any result, then something more fatal has occurred, so raise.
+      dependencyResult = ex.getResult();
+
+      if (dependencyResult == null || failOnInvalidDependencies) {
+        throw new ResolutionException("Failed to resolve dependencies", ex);
+      }
+
+      // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
+      log.warn(
+          "Error resolving one or more dependencies, dependencies may be missing during "
+              + "protobuf compilation! {}", ex.getMessage(), ex
+      );
     }
+
+    return dependencyResult
+        .getArtifactResults()
+        .stream()
+        .map(ArtifactResult::getArtifact)
+        .map(this::determinePath)
+        .collect(Collectors.toUnmodifiableList());
   }
 
   private Stream<org.eclipse.aether.graph.Dependency> getProjectDependencies() {

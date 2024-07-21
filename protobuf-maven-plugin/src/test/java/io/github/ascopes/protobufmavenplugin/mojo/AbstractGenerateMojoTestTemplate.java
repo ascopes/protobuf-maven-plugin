@@ -395,8 +395,30 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       var captor = ArgumentCaptor.forClass(GenerationRequest.class);
       verify(mojo.sourceCodeGenerator).generate(captor.capture());
       var actualRequest = captor.getValue();
+
       assertThat(actualRequest.getDependencyScopes())
           .containsExactlyInAnyOrderElementsOf(combination);
+    }
+  }
+
+  @DisplayName("failOnInvalidDependencies tests")
+  @Nested
+  class FailOnInvalidDependenciesTest {
+
+    @DisplayName("failOnInvalidDependencies is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void failOnInvalidDependenciesIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.failOnInvalidDependencies = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isFailOnInvalidDependencies()).isEqualTo(value);
     }
   }
 
@@ -953,6 +975,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     return sourceCodeGenerator;
   }
 
+  @SuppressWarnings("unused")  // Used by JUnit, IntelliJ bug is marking as unused.
   static Stream<Set<String>> scopeCombinations() {
     return combinations("compile", "runtime", "test", "provided", "system");
   }
