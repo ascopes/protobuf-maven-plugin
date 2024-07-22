@@ -99,19 +99,6 @@ jobs:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Abort and rollback staging release
-        if: ${{ failure() && ! inputs.skip-maven-release }}
-        run: |-
-          ./mvnw -B -e \
-              -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
-              -DreleaseVersion="${release_version}" \
-              -Dtag="v${release_version}" \
-              release:rollback
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
       - name: Promote staging to Maven Central
         if: ${{ ! inputs.skip-nexus-promotion }}
         run: |-
@@ -125,6 +112,19 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+
+      - name: Abort and rollback staging release
+        if: ${{ failure() && ! inputs.skip-maven-release }}
+        run: |-
+          ./mvnw -B -e \
+              -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
+              -DreleaseVersion="${release_version}" \
+              -Dtag="v${release_version}" \
+              release:rollback
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Create GitHub release
         uses: ncipollo/release-action@v1
