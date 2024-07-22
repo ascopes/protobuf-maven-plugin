@@ -67,40 +67,20 @@ and  examples are present [in the integration tests](https://github.com/ascopes/
 
 ## Why do we need _another_ plugin?
 
-At the time of starting this project, the two most-used Maven plugins had not seen regular 
-updates/releases for the best part of 3 years. This presented me with an issue in the team I work in,
-as Maven 4.x is slowly approaching, and the existing plugins are not Maven 4.0 compatible. Without
-the guarantee of work being done on the existing projects, there was a big risk that we'd be unable
-to use Maven 4.0 when it is finally released.
+At the time of writing, the existing Maven plugins that provide Protobuf support are not kept up to date. This poses a risk for any applications depending on these plugins as they
+are either constrained to outdated versions of Protoc, or are not guaranteed to work in the future.
 
-Another issue was that some of the existing plugins did not handle Apple Silicon on Apple Macs
-correctly, leading to annoying issues when building.
+Maven 4.0 will eventually be released, and many of these existing plugins will not be compatible with the v4.0 API.
 
-Finally, the plugin we made use of relied on regular updates to pull in new versions of 
-`protoc`. Since this was not happening, we were losing the benefits from any of the newer versions
-of `protoc` that were released. We were also seeing an increasing number of build warnings due to
-deprecated method calls being made by the older generated code.
+Some plugins are highly specific to certain CPU architectures as well, which produces issues when using Apple Silicon devices.
 
-Unfortunately, Google appear to mostly use Gradle and Bazel. This means that Maven support has been
-left behind in any innovations and improvements. Right now, the best bet is to use Maven Exec Plugin
-to generate these sources, but then you have to worry about how you make the `protoc` binary available.
+All of these issues lingered over the projects I work on that make use of Protobuf. In an attempt to mediate those issues, I have created this Maven
+plugin with the following requirements:
 
-Rather than allowing us to be blocked indefinitely by these issues, I decided to write a new plugin
-from scratch with a focus on simplicity and the ability to work across as many platforms and
-use-cases as possible. 
-
-This plugin can download the required version of `protoc` for your platform automatically from your
-Maven repository. Use Nexus or Artifactory rather than Maven Central? No problem. It will work
-automatically with any Maven proxy.
-
-If you are using an obscure architecture, or an environment like Termux on Android (yes, people do
-exist who do this), then you are able to make use of a user-installed version of `protoc` from your
-system PATH by passing a single flag to Maven. This means you can still build your application.
-
-Additionally, once Maven 4.0 is released, I will be able to update this to a
-Maven 4.0-compatible release as soon as possible.
-
-## Contributing
-
-Any input is greatly appreciated and welcome. Be it raising issues for bugs or confusing behaviour,
-or raising PRs!
+- It must support for arbitrary versions of Protoc, including those on the system path.
+- It must support invoking binary Protobuf plugins from dependencies, URLs, or the system path.
+- It must support invoking Protobuf plugins that are packaged as JARs, without the need to compile native binaries first.
+- It must support compiling Protobuf sources from archives and from the local filesystem tree.
+- It must be able to allow Protoc to import Protobuf files from other file trees, archives, and JARs transparently.
+- It must be aware of the Maven project dependencies.
+- It must have the ability to be migrated to Maven 4.0 fairly rapidly when the time comes.
