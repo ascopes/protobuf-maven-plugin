@@ -2,9 +2,9 @@ name: Validate configuration
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "**" ]
+    types: [synchronize]
   workflow_call: {}
   workflow_dispatch: {}
 
