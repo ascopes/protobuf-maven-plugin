@@ -2,10 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: ["**"]
-  workflow_call: {}
+  pull_request:
+    types: [synchronize]
   workflow_dispatch: {}
 
 jobs:
