@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 public final class CommandLineExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(CommandLineExecutor.class);
-
   private final HostSystem hostSystem;
 
   @Inject
@@ -48,12 +47,7 @@ public final class CommandLineExecutor {
   }
 
   public boolean execute(List<String> args) throws IOException {
-    log.info(
-        "Calling protoc with the following command line:\n{}", 
-        hostSystem.isProbablyWindows()
-            ? Shlex.quoteBatchArgs(args)
-            : Shlex.quoteShellArgs(args)
-    );
+    reportInvocation(args);
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
@@ -62,18 +56,29 @@ public final class CommandLineExecutor {
       return run(procBuilder);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
-      var newEx = new InterruptedIOException("Compilation was interrupted");
+      var newEx = new InterruptedIOException("Execution was interrupted");
       newEx.initCause(ex);
       throw newEx;
     }
+  }
+
+  private void reportInvocation(List<String> args) {
+    var renderedCommandLine = hostSystem.isProbablyWindows()
+        ? Shlex.quoteBatchArgs(args)
+        : Shlex.quoteShellArgs(args);
+    log.info("Calling protoc with the following invocation:");
+    renderedCommandLine.lines()
+        .map("  "::concat)
+        .map(String::stripTrailing)
+        .forEach(log::info);
   }
 
   private boolean run(ProcessBuilder procBuilder) throws InterruptedException, IOException {
     var startTimeNs = System.nanoTime();
     var proc = procBuilder.start();
 
-    var stdoutThread = redirectOutput(proc.getInputStream(), line -> log.info("[OUT] {}", line));
-    var stderrThread = redirectOutput(proc.getErrorStream(), line -> log.warn("[ERR] {}", line));
+    var stdoutThread = redirectOutput(proc.getInputStream(), log::info);
+    var stderrThread = redirectOutput(proc.getErrorStream(), log::warn);
 
     var exitCode = proc.waitFor();
     var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
@@ -83,10 +88,10 @@ public final class CommandLineExecutor {
     stderrThread.join();
 
     if (exitCode == 0) {
-      log.info("Protoc returned exit code 0 (success) after {}ms", elapsedTimeMs);
+      log.info("protoc returned exit code 0 (success) after {}ms", elapsedTimeMs);
       return true;
     } else {
-      log.error("Protoc returned exit code {} (error) after {}ms", exitCode, elapsedTimeMs);
+      log.error("protoc returned exit code {} (error) after {}ms", exitCode, elapsedTimeMs);
       return false;
     }
   }
