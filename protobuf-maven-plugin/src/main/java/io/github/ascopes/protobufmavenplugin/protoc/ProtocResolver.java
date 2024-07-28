@@ -86,10 +86,17 @@ public final class ProtocResolver {
         : resolveFromMavenRepositories(version);
 
     if (path.isPresent()) {
+      var resolvedPath = path.get();
+  
       try {
-        FileUtils.makeExecutable(path.get());
+        FileUtils.makeExecutable(resolvedPath);
+
       } catch (IOException ex) {
-        throw new ResolutionException("Failed to set executable bit on protoc binary", ex);
+        throw new ResolutionException(
+            "Failed to set executable bit on protoc binary at " + resolvedPath
+                + ": " + ex.getMessage(),
+            ex
+        );
       }
     }
 
@@ -99,8 +106,12 @@ public final class ProtocResolver {
   private Optional<Path> resolveFromUrl(String url) throws ResolutionException {
     try {
       return urlResourceFetcher.fetchFileFromUrl(new URL(url), ".exe");
+
     } catch (IOException ex) {
-      throw new ResolutionException(ex.getMessage(), ex);
+      throw new ResolutionException(
+          "Failed to fetch resource from URL " + url + ": " + ex.getMessage(),
+          ex
+      );
     }
   }
 
@@ -109,9 +120,10 @@ public final class ProtocResolver {
       log.warn(
           "It looks like you are using Android! Android is known to be missing "
               + "system calls for Linux that the official protoc binaries rely on "
-              + "to work. If you encounter issues, run Maven again with the "
-              + "-Dprotobuf.compiler.version=PATH flag to rerun with the version "
-              + "of protoc that is on your $PATH."
+              + "to work correctly. If you encounter issues, run Maven again with the "
+              + "-Dprotobuf.compiler.version=PATH flag to rerun with a custom "
+              + "user-provided version of protoc. If nothing fails, then you can "
+              + "safely ignore this message!"
       );
     }
 
