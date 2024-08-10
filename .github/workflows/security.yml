@@ -25,6 +25,6 @@ jobs:
 
       - name: Submit Dependency Snapshot
         # Pinned until https://github.com/advanced-security/maven-dependency-submission-action/issues/65 is addressed
-        uses: advanced-security/maven-dependency-submission-action@v4.1.0
+        uses: advanced-security/maven-dependency-submission-action@v4.1.1
         with:
           maven-args: -B
