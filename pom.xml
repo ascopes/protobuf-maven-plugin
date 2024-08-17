@@ -123,7 +123,7 @@
     <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
     <maven-jxr-plugin.version>3.4.0</maven-jxr-plugin.version>
     <maven-plugin-plugin.version>3.13.1</maven-plugin-plugin.version>
-    <maven-plugin-report-plugin.version>3.13.1</maven-plugin-report-plugin.version>
+    <maven-plugin-report-plugin.version>3.14.0</maven-plugin-report-plugin.version>
     <maven-project-info-reports-plugin.version>3.6.2</maven-project-info-reports-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <maven-site-plugin.version>4.0.0-M16</maven-site-plugin.version>
