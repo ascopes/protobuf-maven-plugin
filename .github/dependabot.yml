@@ -6,7 +6,8 @@ updates:
     open-pull-requests-limit: 99
     rebase-strategy: "auto"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
+      day: "saturday"
     target-branch: "main"
     assignees:
       - "ascopes"
@@ -19,6 +20,7 @@ updates:
     rebase-strategy: "auto"
     schedule:
       interval: "weekly"
+      day: "saturday"
     target-branch: "main"
     assignees:
       - "ascopes"
