@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.generation;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 
 /**
@@ -64,10 +63,10 @@ public enum Language {
    */
   public static final class LanguageSetBuilder {
 
-    private final ArrayList<Language> values;
+    private final EnumSet<Language> values;
 
     private LanguageSetBuilder() {
-      values = new ArrayList<>(4);
+      values = EnumSet.noneOf(Language.class);
     }
 
     public LanguageSetBuilder addIf(boolean condition, Language language) {
@@ -80,9 +79,7 @@ public enum Language {
     }
 
     public EnumSet<Language> build() {
-      return values.isEmpty()
-          ? EnumSet.noneOf(Language.class)
-          : EnumSet.copyOf(values);
+      return values;
     }
   }
 }
