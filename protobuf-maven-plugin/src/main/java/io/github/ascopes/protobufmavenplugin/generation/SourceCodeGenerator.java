@@ -84,6 +84,8 @@ public final class SourceCodeGenerator {
   }
 
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
+    log.debug("Protobuf GenerationRequest is: {}", request);
+    
     final var protocPath = discoverProtocPath(request);
 
     final var resolvedPlugins = discoverPlugins(request);
@@ -96,7 +98,7 @@ public final class SourceCodeGenerator {
             + "configuration and try again.");
         return false;
       } else {
-        log.warn("No protobuf sources found; nothing to do!");
+        log.warn("No protobuf sources were found. There is nothing to do!");
         return true;
       }
     }
@@ -107,7 +109,7 @@ public final class SourceCodeGenerator {
             + "configuration and try again.");
         return false;
       } else {
-        log.warn("No languages are enabled and no plugins found; nothing to do!");
+        log.warn("No languages are enabled and no plugins were found. There is nothing to do!");
         return true;
       }
     }
@@ -138,7 +140,9 @@ public final class SourceCodeGenerator {
         .flatMap(Collection::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
-    if (!commandLineExecutor.execute(argLineBuilder.compile(sourceFiles))) {
+    var argLine = argLineBuilder.compile(sourceFiles);
+
+    if (!commandLineExecutor.execute(argLine)) {
       return false;
     }
 
@@ -255,7 +259,9 @@ public final class SourceCodeGenerator {
         .ifPresent(ext -> {
           throw new IllegalArgumentException(
               "The output directory '" + directory
-                  + "' cannot be a path with a JAR file extension");
+                  + "' cannot be a path with a JAR file extension, due to "
+                  + "limitations with how protoc operates on file names."
+          );
         });
 
     Files.createDirectories(directory);
@@ -266,7 +272,11 @@ public final class SourceCodeGenerator {
 
     if (request.isRegisterAsCompilationRoot()) {
       var registrar = request.getSourceRootRegistrar();
-      log.debug("Registering {} as {} compilation root", directory, registrar);
+      log.info(
+          "Registering {} as {} compilation root in this Maven project.",
+          directory,
+          registrar
+      );
       registrar.registerSourceRoot(mavenSession, directory);
     } else {
       log.debug("Not registering {} as a compilation root", directory);
@@ -281,7 +291,11 @@ public final class SourceCodeGenerator {
       try {
         registrar.embedListing(mavenSession, listing);
       } catch (IOException ex) {
-        throw new ResolutionException("Failed to embed " + listing.getProtoFilesRoot(), ex);
+        throw new ResolutionException(
+            "Failed to embed " + listing.getProtoFilesRoot() 
+                + " into the class outputs directory",
+            ex
+        );
       }
     }
   }
