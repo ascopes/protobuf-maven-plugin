@@ -272,7 +272,7 @@ public final class SourceCodeGenerator {
 
     if (request.isRegisterAsCompilationRoot()) {
       var registrar = request.getSourceRootRegistrar();
-      log.info(
+      log.debug(
           "Registering {} as {} compilation root in this Maven project.",
           directory,
           registrar
