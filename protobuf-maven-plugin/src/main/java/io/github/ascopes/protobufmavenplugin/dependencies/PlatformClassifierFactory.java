@@ -51,6 +51,8 @@ public final class PlatformClassifierFactory {
       "x86_64", "windows-x86_64"
   );
 
+  private static final Map<String, String> FALLBACK_MAPPING = Map.of();
+
   private final HostSystem hostSystem;
 
   @Inject
@@ -60,14 +62,18 @@ public final class PlatformClassifierFactory {
 
   public String getClassifier(String binaryName) throws ResolutionException {
     Map<String, String> osMapping;
+
     if (hostSystem.isProbablyLinux()) {
       osMapping = LINUX_MAPPING;
+  
     } else if (hostSystem.isProbablyMacOs()) {
       osMapping = MAC_OS_MAPPING;
+  
     } else if (hostSystem.isProbablyWindows()) {
       osMapping = WINDOWS_MAPPING;
+  
     } else {
-      osMapping = Map.of();
+      osMapping = FALLBACK_MAPPING;
     }
 
     var rawArch = hostSystem.getCpuArchitecture();
