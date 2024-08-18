@@ -63,6 +63,9 @@ import org.slf4j.LoggerFactory;
 @Named
 public class AetherMavenArtifactPathResolver {
 
+  private static final String DEFAULT_EXTENSION = "jar";
+  private static final String DEFAULT_SCOPE = "compile";
+
   private static final Logger log = LoggerFactory.getLogger(AetherMavenArtifactPathResolver.class);
 
   private final MavenSession mavenSession;
@@ -112,7 +115,7 @@ public class AetherMavenArtifactPathResolver {
         artifact.getVersion()
     );
 
-    log.info("Resolving artifact {}", aetherArtifact);
+    log.info("Resolving artifact {} from repositories", aetherArtifact);
 
     var artifactRequest = new ArtifactRequest(aetherArtifact, remoteRepositories, null);
 
@@ -123,7 +126,10 @@ public class AetherMavenArtifactPathResolver {
       return determinePath(resolvedArtifact);
 
     } catch (ArtifactResolutionException ex) {
-      throw new ResolutionException("Failed to resolve " + aetherArtifact, ex);
+      throw new ResolutionException(
+          "Failed to resolve artifact " + aetherArtifact + " from repositories",
+          ex
+      );
     }
   }
 
@@ -178,7 +184,7 @@ public class AetherMavenArtifactPathResolver {
       dependencyResult = ex.getResult();
 
       if (dependencyResult == null || failOnInvalidDependencies) {
-        throw new ResolutionException("Failed to resolve dependencies", ex);
+        throw new ResolutionException("Failed to resolve dependencies from repositories", ex);
       }
 
       // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
@@ -227,7 +233,12 @@ public class AetherMavenArtifactPathResolver {
 
       var artifact = createArtifact(mavenArtifact);
 
-      return new org.eclipse.aether.graph.Dependency(artifact, "compile", false, exclusions);
+      return new org.eclipse.aether.graph.Dependency(
+          artifact, 
+          DEFAULT_SCOPE,
+          false,
+          exclusions
+      );
     };
   }
 
@@ -270,10 +281,7 @@ public class AetherMavenArtifactPathResolver {
   }
 
   private @Nullable ArtifactType extensionToType(@Nullable String extension) {
-    if (extension == null) {
-      extension = requireNonNullElse(artifactHandler.getExtension(), "jar");
-    }
-
+    extension = extensionOrDefault(extension);
     var type = artifactTypeRegistry.get(extension);
 
     if (type == null) {
@@ -297,7 +305,7 @@ public class AetherMavenArtifactPathResolver {
     // whereas Aether does not. For some reason, this is mandatory whereas classifiers can be
     // totally inferred if null.
     if (extension == null) {
-      extension = requireNonNullElse(artifactHandler.getExtension(), "jar");
+      extension = requireNonNullElse(artifactHandler.getExtension(), DEFAULT_EXTENSION);
     }
     return extension;
   }
