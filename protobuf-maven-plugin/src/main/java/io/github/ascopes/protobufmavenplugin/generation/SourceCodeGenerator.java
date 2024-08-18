@@ -235,12 +235,14 @@ public final class SourceCodeGenerator {
 
     var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
 
+    var sourceFileCount = sourcePaths.stream()
+        .mapToInt(sourcePath -> sourcePath.getProtoFiles().size())
+        .sum();
+    
     log.info(
-        "Generating source code for {} protobuf file(s) from {} file tree(s)",
-        sourcePaths.stream()
-            .mapToInt(sourcePath -> sourcePath.getProtoFiles().size())
-            .sum(),
-        sourcePaths.size()
+        "Generating source code for {} from {}",
+        pluralize(sourceFileCount, "protobuf file"),
+        pluralize(sourcePaths.size(), "source file tree")
     );
 
     return sourcePaths;
@@ -306,5 +308,11 @@ public final class SourceCodeGenerator {
     return Stream.of(collections)
         .flatMap(Collection::stream)
         .collect(Collectors.toUnmodifiableList());
+  }
+
+  private static String pluralize(int count, String name) {
+    return count == 1
+        ? "1 " + name
+        : count + " " + name + "s";
   }
 }
