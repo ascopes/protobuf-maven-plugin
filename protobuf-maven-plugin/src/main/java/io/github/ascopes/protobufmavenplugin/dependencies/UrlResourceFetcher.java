@@ -16,6 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
+import static java.util.Objects.requireNonNullElse;
+
 import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import java.io.BufferedOutputStream;
@@ -45,7 +47,11 @@ public final class UrlResourceFetcher {
   private static final String USER_AGENT_HEADER = "User-Agent";
   private static final String USER_AGENT_VALUE = String.format(
       "io.github.ascopes.protobuf-maven-plugin/%s org.apache.maven/%s (Java %s)",
-      UrlResourceFetcher.class.getPackage().getImplementationVersion(),
+      requireNonNullElse(
+          // May not be set if we are running within an IDE.
+          UrlResourceFetcher.class.getPackage().getImplementationVersion(),
+          "SNAPSHOT"
+      ),
       Maven.class.getPackage().getImplementationVersion(),
       Runtime.version().toString()
   );
