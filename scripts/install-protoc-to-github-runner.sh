@@ -10,7 +10,7 @@ set -o errexit
 set -o nounset
 [[ -n ${DEBUG+undef} ]] && set -o xtrace
 
-readonly version=4.27.2
+readonly version=4.27.3
 
 case "$(uname)" in
   Linux)

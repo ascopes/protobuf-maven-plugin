@@ -25,7 +25,7 @@ do is provide the version of `protoc` to use.
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>4.27.2</protocVersion>
+    <protocVersion>4.27.3</protocVersion>
   </configuration>
 
   <executions>
@@ -70,7 +70,7 @@ like Dependabot to keep the compiler version up-to-date automatically.
   ...
 
   <properties>
-    <protobuf.version>4.27.2</protobuf.version>
+    <protobuf.version>4.27.3</protobuf.version>
     <protobuf-maven-plugin.version>...</protobuf-maven-plugin.version>
   </properties>
 
