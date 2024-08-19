@@ -32,7 +32,7 @@
   <artifactId>gh-299-ehcache-jaxb-resolution-failure</artifactId>
 
   <properties>
-    <protobuf.version>4.27.2</protobuf.version>
+    <protobuf.version>4.27.3</protobuf.version>
     <ehcache.version>3.10.8</ehcache.version>
   </properties>
 
