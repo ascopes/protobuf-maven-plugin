@@ -756,7 +756,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
-      log.info("Plugin execution is skipped");
+      log.info("Execution of this plugin has been skipped in the configuration");
       return;
     }
 
@@ -813,7 +813,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private Set<String> dependencyScopes() {
     return Optional.ofNullable(dependencyScopes)
-        .filter(not(Collection::isEmpty))
+        .filter(not(Set::isEmpty))
         .orElseGet(this::defaultDependencyScopes);
   }
 
@@ -836,13 +836,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : transformedSourceDirectories;
 
     return finalDirectories.stream()
-        .filter(this::removeNonExistentSourceDirectory)
+        .filter(this::sourceDirectoryExists)
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private boolean removeNonExistentSourceDirectory(Path path) {
+  private boolean sourceDirectoryExists(Path path) {
     if (Files.notExists(path)) {
-      log.info("Ignoring source directory {} as it does not appear to exist", path);
+      log.info("Ignoring source directory {} as it does not appear to actually exist", path);
       return false;
     }
     return true;
