@@ -113,8 +113,15 @@ public final class ProtoArchiveExtractor {
     // Impl note: unlike other constructors, calling this multiple times on the same path
     // will open multiple file system objects. Other constructors do not appear to do this,
     // so would not be thread-safe for concurrent plugin executions.
-    return FileUtils.getFileSystemProvider("jar")
-        .newFileSystem(path, Map.of());
+    try {
+      return FileUtils.getFileSystemProvider("jar")
+          .newFileSystem(path, Map.of());
+
+    } catch (Exception ex) {
+      // The JDK will raise vague exceptions if we try to read something that is not a zip file.
+      // See ZipFileSystemProvider#getZipFileSystem for an example.
+      throw new IOException("Failed to open " + path + " as a valid ZIP/JAR archive", ex);
+    }
   }
 
   private Path getExtractionRoot() {
