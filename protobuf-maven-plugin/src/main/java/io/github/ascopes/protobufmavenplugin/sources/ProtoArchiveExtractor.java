@@ -117,7 +117,7 @@ public final class ProtoArchiveExtractor {
       return FileUtils.getFileSystemProvider("jar")
           .newFileSystem(path, Map.of());
 
-    } catch (RuntimeException ex) {
+    } catch (Exception ex) {
       // The JDK will raise vague exceptions if we try to read something that is not a zip file.
       // See ZipFileSystemProvider#getZipFileSystem for an example.
       throw new IOException("Failed to open " + path + " as a valid ZIP/JAR archive", ex);
