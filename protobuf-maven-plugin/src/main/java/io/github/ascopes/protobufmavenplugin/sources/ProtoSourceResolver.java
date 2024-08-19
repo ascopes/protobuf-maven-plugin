@@ -59,6 +59,24 @@ public final class ProtoSourceResolver {
     this.protoArchiveExtractor = protoArchiveExtractor;
   }
 
+  public Collection<ProtoFileListing> createProtoFileListings(
+      Collection<Path> rootPaths,
+      ProtoFileFilter filter
+  ) {
+    return rootPaths
+        .stream()
+        // GH-132: Normalize to ensure different paths to the same file do not
+        //   get duplicated across more than one extraction site.
+        .map(FileUtils::normalize)
+        // GH-132: Avoid running multiple times on the same location.
+        .distinct()
+        .map(path -> concurrentExecutor.submit(() -> createProtoFileListing(path, filter)))
+        .collect(concurrentExecutor.awaiting())
+        .stream()
+        .flatMap(Optional::stream)
+        .collect(Collectors.toUnmodifiableList());
+  }
+
   public Optional<ProtoFileListing> createProtoFileListing(
       Path rootPath,
       ProtoFileFilter filter
@@ -69,7 +87,7 @@ public final class ProtoSourceResolver {
     }
 
     if (Files.isRegularFile(rootPath)) {
-      return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
+      return createProtoFileListingForArchive(rootPath, filter);
     }
 
     try (var stream = Files.walk(rootPath)) {
@@ -91,21 +109,23 @@ public final class ProtoSourceResolver {
     }
   }
 
-  public Collection<ProtoFileListing> createProtoFileListings(
-      Collection<Path> rootPaths,
+  private Optional<ProtoFileListing> createProtoFileListingForArchive(
+      Path rootPath,
       ProtoFileFilter filter
-  ) {
-    return rootPaths
-        .stream()
-        // GH-132: Normalize to ensure different paths to the same file do not
-        //   get duplicated across more than one extraction site.
-        .map(FileUtils::normalize)
-        // GH-132: Avoid running multiple times on the same location.
-        .distinct()
-        .map(path -> concurrentExecutor.submit(() -> createProtoFileListing(path, filter)))
-        .collect(concurrentExecutor.awaiting())
-        .stream()
-        .flatMap(Optional::stream)
-        .collect(Collectors.toUnmodifiableList());
+  ) throws IOException {
+    var extension = FileUtils.getFileExtension(rootPath)
+          .map(String::toLowerCase)
+          .orElse("<none>");
+
+    switch (extension) {
+      case ".ear":
+      case ".jar":
+      case ".war":
+      case ".zip":
+        return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
+      default:
+        log.debug("Ignoring unknown archive type at {}", rootPath);
+        return Optional.empty();
+    }
   }
 }
