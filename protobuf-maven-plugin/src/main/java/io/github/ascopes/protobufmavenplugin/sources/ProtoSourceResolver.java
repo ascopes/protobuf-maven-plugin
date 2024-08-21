@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class ProtoSourceResolver {
 
+  private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
+
   private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
 
   private final ConcurrentExecutor concurrentExecutor;
@@ -113,19 +115,21 @@ public final class ProtoSourceResolver {
       Path rootPath,
       ProtoFileFilter filter
   ) throws IOException {
-    var extension = FileUtils.getFileExtension(rootPath)
-          .map(String::toLowerCase)
-          .orElse("<none>");
+    // XXX: we do not convert the extension to lowercase, as there
+    //  is some nuanced logic within the ZipFileSystemProvider that appears
+    //  to be case-sensitive.
+    //  See https://github.com/openjdk/jdk/blob/cafb3dc49157daf12c1a0e5d78acca8188c56918/src/jdk.zipfs/share/classes/jdk/nio/zipfs/ZipFileSystemProvider.java#L128
+    var isZip = FileUtils.getFileExtension(rootPath)
+          .filter(ZIP_FILE_EXTENSIONS::contains)
+          .isPresent();
 
-    switch (extension) {
-      case ".ear":
-      case ".jar":
-      case ".war":
-      case ".zip":
-        return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
-      default:
-        log.debug("Ignoring unknown archive type at {}", rootPath);
-        return Optional.empty();
+    // GH-327: We filter out non-zip archives to prevent vague errors if
+    // users include non-zip dependencies such as POMs, which cannot be extracted.
+    if (isZip) {
+      return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
+    } else {
+      log.debug("Ignoring unknown archive type at {}", rootPath);
+      return Optional.empty();
     }
   }
 }
