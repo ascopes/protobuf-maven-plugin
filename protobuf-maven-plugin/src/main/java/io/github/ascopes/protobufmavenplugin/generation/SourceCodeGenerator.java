@@ -118,11 +118,11 @@ public final class SourceCodeGenerator {
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
         .fatalWarnings(request.isFatalWarnings())
-        .importPaths(importPaths
-            .stream()
-            .map(ProtoFileListing::getProtoFilesRoot)
-            .collect(Collectors.toCollection(LinkedHashSet::new)))
-        .importPaths(request.getSourceRoots());
+        .importPaths(
+            importPaths.stream()
+                .map(ProtoFileListing::getProtoFilesRoot)
+                .collect(Collectors.toCollection(LinkedHashSet::new))
+        );
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(
