@@ -39,7 +39,7 @@
   </modules>
 
   <properties>
-    <protobuf.version>4.27.3</protobuf.version>
+    <protobuf.version>4.28.0</protobuf.version>
   </properties>
 
   <dependencyManagement>

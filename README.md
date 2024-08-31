@@ -16,7 +16,7 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>4.27.3</protocVersion>
+    <protocVersion>4.28.0</protocVersion>
 
     <binaryMavenPlugins>
       <binaryMavenPlugin>
