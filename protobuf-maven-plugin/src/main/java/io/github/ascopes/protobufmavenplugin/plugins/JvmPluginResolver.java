@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -129,13 +128,7 @@ public final class JvmPluginResolver {
     // about the distance between declaration and usage.
     final var pluginPath = dependencyIterator.next();
     var args = new ArrayList<String>();
-
-    var javaExecutablePath = Paths.get(
-        System.getProperty("java.home"),
-        "bin",
-        hostSystem.isProbablyWindows() ? "java.exe" : "java"
-    );
-    args.add(javaExecutablePath.toAbsolutePath().toString());
+    args.add(hostSystem.getJavaExecutablePath().toString());
 
     if (dependencyIterator.hasNext()) {
       args.add("-classpath");

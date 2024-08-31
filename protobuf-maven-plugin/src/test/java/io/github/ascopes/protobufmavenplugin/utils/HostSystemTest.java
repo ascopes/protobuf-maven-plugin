@@ -272,6 +272,38 @@ class HostSystemTest {
         .isEqualTo(Path.of("").toAbsolutePath().normalize());
   }
 
+  @DisplayName(".getJavaExecutablePath() returns the Java executable")
+  @CsvSource({
+      " Windows, java.exe",
+      "   Linux,     java",
+      "Mac OS X,     java",
+  })
+  @ParameterizedTest(name = "for {0}, expect {1}")
+  void getJavaExecutablePathReturnsTheJavaExecutable(
+      String osName,
+      String expectedExecutableName
+  ) {
+    // Given
+    var properties = new Properties();
+    var env = new HashMap<String, String>();
+    properties.put("os.name", osName);
+    properties.put("java.home", Path.of("foo", "bar", "baz", "jdk").toString());
+    var hostSystemBean = new HostSystem(properties, env::get);
+
+    // When
+    var actualExecutablePath = hostSystemBean.getJavaExecutablePath();
+
+    // Then
+    var expectedExecutablePath = Path.of("foo", "bar", "baz", "jdk", "bin", expectedExecutableName)
+        .toAbsolutePath()
+        .normalize();
+
+    assertThat(actualExecutablePath)
+        .isNormalized()
+        .isAbsolute()
+        .isEqualTo(expectedExecutablePath);
+  }
+
   @DisplayName(".getSystemPath() returns the existing system paths")
   @Test
   void getSystemPathReturnsTheExistingSystemPaths(@TempDir Path tempDir) throws IOException {
