@@ -39,10 +39,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.jspecify.annotations.Nullable;
@@ -79,13 +79,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The source code generator.
    */
-  @Component
+  @Inject
   SourceCodeGenerator sourceCodeGenerator;
 
   /**
    * The active Maven project.
    */
-  @Component
+  @Inject
   MavenProject mavenProject;
 
   ///
