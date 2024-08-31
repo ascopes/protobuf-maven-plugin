@@ -53,6 +53,7 @@ public final class HostSystem {
   private final String operatingSystem;
   private final String cpuArchitecture;
   private final Path workingDirectory;
+  private final Path javaHome;
   private final Collection<Path> path;
   private final SortedSet<String> pathExt;
 
@@ -70,6 +71,9 @@ public final class HostSystem {
     log.debug("Reported CPU architecture is {}", cpuArchitecture);
 
     workingDirectory = FileUtils.normalize(Path.of(""));
+
+    javaHome = FileUtils.normalize(Path.of(properties.getProperty("java.home", "")));
+    log.debug("Reported java.home is {}", javaHome);
 
     path = tokenizeFilePath(
         Objects.requireNonNullElse(envProvider.apply("PATH"), ""),
@@ -120,6 +124,10 @@ public final class HostSystem {
 
   public Path getWorkingDirectory() {
     return workingDirectory;
+  }
+
+  public Path getJavaExecutablePath() {
+    return javaHome.resolve("bin").resolve(isProbablyWindows() ? "java.exe" : "java");
   }
 
   public Collection<Path> getSystemPath() {
