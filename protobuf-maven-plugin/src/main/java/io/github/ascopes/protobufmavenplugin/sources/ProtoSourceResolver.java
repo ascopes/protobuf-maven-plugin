@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class ProtoSourceResolver {
 
+  private static final Set<String> POM_FILE_EXTENSIONS = Set.of(".pom", ".xml");
   private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
 
   private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
@@ -102,7 +103,7 @@ public final class ProtoSourceResolver {
               Collectors.toCollection(LinkedHashSet::new),
               Optional::of
           ))
-          .filter(not(Set::isEmpty))
+          .filter(not(Collection::isEmpty))
           .map(protoFiles -> ImmutableProtoFileListing
               .builder()
               .addAllProtoFiles(protoFiles)
@@ -119,17 +120,20 @@ public final class ProtoSourceResolver {
     //  is some nuanced logic within the ZipFileSystemProvider that appears
     //  to be case-sensitive.
     //  See https://github.com/openjdk/jdk/blob/cafb3dc49157daf12c1a0e5d78acca8188c56918/src/jdk.zipfs/share/classes/jdk/nio/zipfs/ZipFileSystemProvider.java#L128
-    var isZip = FileUtils.getFileExtension(rootPath)
-          .filter(ZIP_FILE_EXTENSIONS::contains)
-          .isPresent();
+    var fileExtension = FileUtils.getFileExtension(rootPath);
 
     // GH-327: We filter out non-zip archives to prevent vague errors if
     // users include non-zip dependencies such as POMs, which cannot be extracted.
-    if (isZip) {
+    if (fileExtension.filter(ZIP_FILE_EXTENSIONS::contains).isPresent()) {
       return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
-    } else {
-      log.debug("Ignoring unknown archive type at {}", rootPath);
+    }
+
+    if (fileExtension.filter(POM_FILE_EXTENSIONS::contains).isPresent()) {
+      log.debug("Ignoring invalid dependency on potential POM at {}", rootPath);
       return Optional.empty();
     }
+
+    log.warn("Ignoring unknown archive type at {}", rootPath);
+    return Optional.empty();
   }
 }
