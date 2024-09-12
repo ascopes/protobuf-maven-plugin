@@ -30,7 +30,7 @@ import org.immutables.value.Value.Modifiable;
  * @since 2.0.0
  */
 @Modifiable
-public abstract class UrlProtocPlugin implements OptionalProtocPlugin {
+public interface UrlProtocPlugin extends OptionalProtocPlugin {
 
-  public abstract URL getUrl();
+  URL getUrl();
 }
