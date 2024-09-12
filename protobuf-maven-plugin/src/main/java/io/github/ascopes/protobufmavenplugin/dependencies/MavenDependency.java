@@ -29,5 +29,5 @@ import org.immutables.value.Value.Modifiable;
  */
 @Immutable
 @Modifiable
-public abstract class MavenDependency implements MavenArtifact {
+public interface MavenDependency extends MavenArtifact {
 }
