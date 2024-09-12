@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -58,7 +59,8 @@ public final class ConcurrentExecutor {
       var concurrency = Runtime.getRuntime().availableProcessors() * 8;
       log.debug(
           "Falling back to new work-stealing thread pool (concurrency={}, Loom is unavailable)",
-          concurrency
+          concurrency,
+          ex
       );
       executorService = Executors.newWorkStealingPool(concurrency);
     }
@@ -83,7 +85,7 @@ public final class ConcurrentExecutor {
     // likely have far bigger problems to deal with.
     executorService.awaitTermination(10, TimeUnit.SECONDS);
     var remaining = executorService.shutdownNow();
-    log.debug("Shutdown ended, stubborn remaining tasks that will be orphaned: {}", remaining);
+    log.debug("Shutdown ended, stubborn tasks that will be orphaned: {}", remaining);
   }
 
   public <R> FutureTask<R> submit(Callable<R> task) {
@@ -124,7 +126,7 @@ public final class ConcurrentExecutor {
         throw MultipleFailuresException.create(exceptions);
       }
 
-      return results;
+      return Collections.unmodifiableList(results);
 
     } finally {
       // Interrupt anything that didn't complete if we get interrupted on the OS level.
@@ -133,5 +135,4 @@ public final class ConcurrentExecutor {
       }
     }
   }
-
 }
