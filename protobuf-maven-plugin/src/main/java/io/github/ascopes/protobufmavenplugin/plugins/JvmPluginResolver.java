@@ -30,12 +30,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.jar.Manifest;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +113,7 @@ public final class JvmPluginResolver {
 
   private List<String> resolveAndBuildArgLine(
       MavenProtocPlugin plugin
-  ) throws ResolutionException {
+  ) throws ResolutionException, IOException {
 
     // Assumption: this always has at least one item in it, and the first item is the plugin
     // artifact itself.
@@ -124,67 +126,81 @@ public final class JvmPluginResolver {
             true
         );
 
-    var argLineBuilder = Stream.<String>builder();
-    argLineBuilder.add(hostSystem.getJavaExecutablePath().toString());
+    var args = new ArrayList<String>();
+    args.add(hostSystem.getJavaExecutablePath().toString());
+
     var pluginPath = dependencies.get(0);
 
-    if (Files.isDirectory(pluginPath)) {
-      buildArgLineForClassTreePlugin(argLineBuilder, plugin, pluginPath, dependencies);
-    } else {
-      buildArgLineForJarPlugin(argLineBuilder, plugin, pluginPath, dependencies);
-    }
+    // Caveat: we currently ignore the Class-Path JAR manifest entry. Not sure why we would want
+    // to be using that here though, so I am leaving it unimplemented until such a time that someone
+    // requests it.
+    args.add("-classpath");
+    args.add(buildJavaPath(dependencies.iterator()));
 
-    return argLineBuilder.build()
-        .collect(Collectors.toUnmodifiableList());
+    args.add(determineMainClass(plugin, pluginPath));
+
+    return Collections.unmodifiableList(args);
   }
 
-  private void buildArgLineForJarPlugin(
-      Stream.Builder<String> argLineBuilder,
-      MavenProtocPlugin plugin,
-      Path pluginPath,
-      List<Path> dependencies
-  ) {
-    log.debug("Treating JVM plugin at {} as a bundled JAR", pluginPath);
+  private String determineMainClass(MavenProtocPlugin plugin, Path pluginPath) throws IOException {
+    // GH-363: It appears that we have to avoid calling `java -jar` when running JARs as the
+    // classpath argument is totally ignored by Java in this case, meaning no dependencies
+    // get loaded correctly, and we get NoClassDefFoundErrors being raised for non-shaded JARs.
+    // This means we have to explicitly provide the main class entrypoint due to the way we
+    // have to invoke the java executable, and this in turn means we have to do some sniffing
+    // around to make a best-effort guess at what the main class really is... which is not very
+    // fun.
 
     if (plugin.getMainClass() != null) {
-      log.warn("The plugin at {} has been provided with a 'mainClass' attribute, but this is "
-          + "not applicable for packaged JARs. Please remove this argument. This may be promoted "
-          + "to an error in a future release.", pluginPath);
+      // The user provided it explicitly in the configuration, so trust their judgement.
+      log.debug("Using user-provided main class for {}", plugin);
+      return plugin.getMainClass();
     }
 
-    if (dependencies.size() > 1) {
-      argLineBuilder.add("-classpath");
-      argLineBuilder.add(buildJavaPath(dependencies.stream().skip(1)));
+    // If we don't have a JAR, we can't really guess the main class, as Maven will not emit
+    // the MANIFEST.MF directly in a place we can see it. I guess we could try and scrape the
+    // POM of the project but that is likely to be awkward and at best flaky due to the numerous
+    // ways this attribute could be injected into any manifest. Let's just keep it simple for now.
+    if (!Files.isDirectory(pluginPath)) {
+      var mainClass = tryToDetermineMainClassFromJarManifest(pluginPath);
+
+      if (mainClass == null) {
+        // Not my fault! Please provide a Main-Class attribute on the JAR instead...
+        log.warn(
+            "No Main-Class manifest attribute found in {}, this is probably a bug with how that"
+                + " JAR was built",
+            pluginPath
+        );
+      } else {
+        log.debug("Determined main class to be {} from manifest for {}", mainClass, pluginPath);
+        return mainClass;
+      }
     }
 
-    argLineBuilder.add("-jar");
-    argLineBuilder.add(pluginPath.toString());
+    throw new IllegalArgumentException(
+        "No main class was described for "
+            + pluginPath
+            + ", please provide an explicit "
+            + "'mainClass' attribute when configuring the "
+            + plugin.getArtifactId()
+            + " JVM plugin"
+    );
   }
 
-  private void buildArgLineForClassTreePlugin(
-      Stream.Builder<String> argLineBuilder,
-      MavenProtocPlugin plugin,
-      Path pluginPath,
-      List<Path> dependencies
-  ) {
-    log.debug("Treating JVM plugin at {} as an unbundled class tree", pluginPath);
-
-    if (plugin.getMainClass() == null) {
-      throw new IllegalArgumentException(
-          "The plugin at " + pluginPath
-              + " is not a bundled JAR. Please provide the 'mainClass' attribute in "
-              + "the configuration!");
+  private @Nullable String tryToDetermineMainClassFromJarManifest(
+      Path pluginPath
+  ) throws IOException {
+    try (
+        var zip = FileUtils.openZipAsFileSystem(pluginPath);
+        var manifestStream = Files.newInputStream(zip.getPath("META-INF", "MANIFEST.MF"))
+    ) {
+      var manifest = new Manifest(manifestStream);
+      return manifest.getMainAttributes().getValue("Main-Class");
     }
-
-    argLineBuilder.add("-classpath");
-    argLineBuilder.add(buildJavaPath(dependencies.stream()));
-    argLineBuilder.add(plugin.getMainClass());
   }
 
-  private String buildJavaPath(Stream<Path> paths) {
+  private String buildJavaPath(Iterator<Path> iterator) {
     // Expectation: at least one path is in the iterator.
-    var iterator = paths.iterator();
-
     var sb = new StringBuilder()
         .append(iterator.next());
 

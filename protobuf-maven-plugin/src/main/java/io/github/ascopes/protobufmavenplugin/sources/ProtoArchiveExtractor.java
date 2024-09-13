@@ -20,13 +20,11 @@ import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -56,7 +54,7 @@ public final class ProtoArchiveExtractor {
   ) throws IOException {
     var modifiedTime = Files.getLastModifiedTime(zipPath);
 
-    try (var vfs = openZip(zipPath)) {
+    try (var vfs = FileUtils.openZipAsFileSystem(zipPath)) {
       var vfsRoot = vfs.getRootDirectories().iterator().next();
       var sourceFiles = findProtoFilesInArchive(vfsRoot, filter);
 
@@ -106,21 +104,6 @@ public final class ProtoArchiveExtractor {
               archiveRootPath
           ))
           .collect(Collectors.toUnmodifiableList());
-    }
-  }
-
-  private FileSystem openZip(Path path) throws IOException {
-    // Impl note: unlike other constructors, calling this multiple times on the same path
-    // will open multiple file system objects. Other constructors do not appear to do this,
-    // so would not be thread-safe for concurrent plugin executions.
-    try {
-      return FileUtils.getFileSystemProvider("jar")
-          .newFileSystem(path, Map.of());
-
-    } catch (Exception ex) {
-      // The JDK will raise vague exceptions if we try to read something that is not a zip file.
-      // See ZipFileSystemProvider#getZipFileSystem for an example.
-      throw new IOException("Failed to open " + path + " as a valid ZIP/JAR archive", ex);
     }
   }
 

@@ -477,7 +477,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       the fully qualified class name of the plugin entrypoint here. This is
    *       usually only needed if you are creating the JVM plugin within the
    *       same project. If the plugin is an assembled JAR, then this option is
-   *       ignored - optional.</li>
+   *       optional, the {@code Main-Class} manifest entry will be used when
+   *       present if this is not provided.</li>
    * </ul>
    *
    * @since 0.3.0

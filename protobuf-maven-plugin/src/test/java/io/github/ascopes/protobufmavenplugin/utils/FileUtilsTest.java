@@ -16,24 +16,24 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.TestFileSystem;
 import java.io.IOException;
-import java.nio.file.FileSystemNotFoundException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 
 /**
@@ -120,35 +120,6 @@ class FileUtilsTest {
         .isEqualTo(expected);
   }
 
-  @DisplayName(".getFileSystemProvider(String) returns the file system provider")
-  @ValueSource(strings = {"jar", "JAR", "file", "memory"})
-  @ParameterizedTest(name = "for scheme \"{0}\"")
-  void getFileSystemProviderReturnsTheFileSystemProvider(String scheme) {
-    // Then
-    assertThatNoException()
-        .isThrownBy(() -> FileUtils.getFileSystemProvider(scheme));
-
-    // Then
-    assertThat(FileUtils.getFileSystemProvider(scheme).getScheme()).isEqualToIgnoringCase(scheme);
-
-    // Then
-    var firstResult = FileUtils.getFileSystemProvider(scheme);
-    var secondResult = FileUtils.getFileSystemProvider(scheme);
-    assertThat(firstResult).isSameAs(secondResult);
-  }
-
-  @DisplayName(".getFileSystemProvider(String) throws an exception if the provider does not exist")
-  @Test
-  void getFileSystemProviderThrowsExceptionIfTheProviderDoesNotExist() {
-    // Given
-    var scheme = someText();
-
-    // Then
-    assertThatThrownBy(() -> FileUtils.getFileSystemProvider(scheme))
-        .isInstanceOf(FileSystemNotFoundException.class)
-        .hasMessage("No file system provider for %s was found", scheme);
-  }
-
   @DisplayName(".makeExecutable makes the path executable when supported")
   @Test
   void makeExecutableMakesThePathExecutableWhenSupported() throws IOException {
@@ -183,6 +154,49 @@ class FileUtilsTest {
           .isRegularFile()
           .isExecutable();
     }
+  }
+
+  @DisplayName(".openZipAsFileSystem(...) opens a file system for the given ZIP")
+  @Test
+  void openZipAsFileSystemOpensFileSystemForGivenZip(@TempDir Path tempDir) throws IOException {
+    // Given
+    var zipPath = tempDir.resolve("test.zip");
+    try (
+        var os = Files.newOutputStream(zipPath, StandardOpenOption.CREATE_NEW);
+        var zipOs = new ZipOutputStream(os);
+    ) {
+      zipOs.putNextEntry(new ZipEntry("foo/bar/baz.txt"));
+      zipOs.write("Hello, World!".getBytes(StandardCharsets.UTF_8));
+      zipOs.closeEntry();
+    }
+
+    // When
+    try (var zipFs = FileUtils.openZipAsFileSystem(zipPath)) {
+      var rootDir = zipFs.getRootDirectories().iterator().next();
+
+      // Then
+      assertThat(rootDir.resolve("foo").resolve("bar").resolve("baz.txt"))
+          .isRegularFile()
+          .hasContent("Hello, World!");
+    }
+  }
+
+  @DisplayName(".openZipAsFileSystem(...) raises an IOException if the file system fails to open")
+  @SuppressWarnings("resource")
+  @Test
+  void openZipAsFileSystemRaisesIoExceptionIfFileSystemFailsToOpen(
+      @TempDir Path tempDir
+  ) throws IOException {
+    // Given
+    var zipPath = tempDir.resolve("test.zip");
+    Files.writeString(zipPath, "invalid zip file");
+
+    // Then
+    assertThatException()
+        .isThrownBy(() -> FileUtils.openZipAsFileSystem(zipPath))
+        .isInstanceOf(IOException.class)
+        .withCauseInstanceOf(IOException.class)
+        .withMessage("Failed to open %s as a valid ZIP/JAR archive", zipPath);
   }
 
   @DisplayName(".changeRelativePath produces the expected result on the same file system")
