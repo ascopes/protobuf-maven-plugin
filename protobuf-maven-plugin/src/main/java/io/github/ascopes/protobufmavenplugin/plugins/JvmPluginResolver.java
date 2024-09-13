@@ -189,7 +189,7 @@ public final class JvmPluginResolver {
         .append(iterator.next());
 
     while (iterator.hasNext()) {
-      sb.append(":").append(iterator.next());
+      sb.append(hostSystem.getPathSeparator()).append(iterator.next());
     }
 
     return sb.toString();

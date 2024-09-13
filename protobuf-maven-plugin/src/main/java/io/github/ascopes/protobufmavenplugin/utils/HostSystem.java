@@ -19,7 +19,6 @@ package io.github.ascopes.protobufmavenplugin.utils;
 import static java.util.function.Predicate.not;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -33,6 +32,7 @@ import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -52,6 +52,7 @@ public final class HostSystem {
 
   private final String operatingSystem;
   private final String cpuArchitecture;
+  private final String pathSeparator;
   private final Path workingDirectory;
   private final Path javaHome;
   private final Collection<Path> path;
@@ -70,12 +71,15 @@ public final class HostSystem {
     cpuArchitecture = properties.getProperty("os.arch", "");
     log.debug("Reported CPU architecture is {}", cpuArchitecture);
 
+    pathSeparator = properties.getProperty("path.separator", "");
+
     workingDirectory = FileUtils.normalize(Path.of(""));
 
     javaHome = FileUtils.normalize(Path.of(properties.getProperty("java.home", "")));
     log.debug("Reported java.home is {}", javaHome);
 
     path = tokenizeFilePath(
+        pathSeparator,
         Objects.requireNonNullElse(envProvider.apply("PATH"), ""),
         paths -> paths
             .map(Path::of)
@@ -86,6 +90,7 @@ public final class HostSystem {
     log.debug("Parsed PATH environment variable to {}", path);
 
     pathExt = tokenizeFilePath(
+        pathSeparator,
         Objects.requireNonNullElse(envProvider.apply("PATHEXT"), ""),
         extensions -> extensions
             .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
@@ -134,6 +139,10 @@ public final class HostSystem {
     return path;
   }
 
+  public String getPathSeparator() {
+    return pathSeparator;
+  }
+
   public SortedSet<String> getSystemPathExtensions() {
     return pathExt;
   }
@@ -169,8 +178,14 @@ public final class HostSystem {
     }
   }
 
-  private static <T> T tokenizeFilePath(String rawValue, Function<Stream<String>, T> mapper) {
-    try (var scanner = new Scanner(rawValue).useDelimiter(File.pathSeparator)) {
+  private static <T> T tokenizeFilePath(
+      String separator,
+      String rawValue,
+      Function<Stream<String>, T> mapper
+  ) {
+    var separatorRegex = Pattern.quote(separator);
+
+    try (var scanner = new Scanner(rawValue).useDelimiter(separatorRegex)) {
       var stream = scanner.tokens()
           .map(String::trim)
           .filter(not(String::isBlank));

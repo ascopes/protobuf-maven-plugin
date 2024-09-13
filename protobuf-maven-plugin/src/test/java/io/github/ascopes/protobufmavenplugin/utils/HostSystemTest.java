@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -42,13 +41,13 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Answers;
 import org.mockito.quality.Strictness;
 
 /**
  * @author Ashley Scopes
  */
 @DisplayName("HostSystem tests")
+@SuppressWarnings("AssertBetweenInconvertibleTypes")
 class HostSystemTest {
 
   @DisplayName(".getOperatingSystem() returns the operating system")
@@ -56,7 +55,7 @@ class HostSystemTest {
   void getOperatingSystemReturnsTheOperatingSystem() {
     // Given
     var properties = new Properties();
-    var env = new HashMap<String, String>();
+    var env = Map.<String, String>of();
     var osName = someText();
     properties.put("os.name", osName);
 
@@ -72,7 +71,7 @@ class HostSystemTest {
   void getCpuArchitectureReturnsTheCpuArchitecture() {
     // Given
     var properties = new Properties();
-    var env = new HashMap<String, String>();
+    var env = Map.<String, String>of();
     var cpuArch = someText();
     properties.put("os.arch", cpuArch);
 
@@ -113,7 +112,7 @@ class HostSystemTest {
   void isProbablyLinuxReturnsTrueIfTheOsIsProbablyLinux(String osName, boolean expectedResult) {
     // Given
     var properties = new Properties();
-    var env = new HashMap<String, String>();
+    var env = Map.<String, String>of();
     properties.put("os.name", osName);
     var hostSystemBean = new HostSystem(properties, env::get);
 
@@ -154,7 +153,7 @@ class HostSystemTest {
   void isProbablyMacOsReturnsTrueIfTheOsIsProbablyMacOs(String osName, boolean expectedResult) {
     // Given
     var properties = new Properties();
-    var env = new HashMap<String, String>();
+    var env = Map.<String, String>of();
     properties.put("os.name", osName);
     var hostSystemBean = new HostSystem(properties, env::get);
 
@@ -195,7 +194,7 @@ class HostSystemTest {
   void isProbablyWindowsReturnsTrueIfTheOsIsProbablyWindows(String osName, boolean expectedResult) {
     // Given
     var properties = new Properties();
-    var env = new HashMap<String, String>();
+    var env = Map.<String, String>of();
     properties.put("os.name", osName);
     var hostSystemBean = new HostSystem(properties, env::get);
 
@@ -221,7 +220,7 @@ class HostSystemTest {
   })
   @ParameterizedTest(
       name = "when .isProbablyLinux() returns {0} and .call('uname', '-o') returns <{1}>, "
-         + "expect {2}"
+          + "expect {2}"
   )
   void isProbablyAndroidReturnsTheExpectedResults(
       boolean isProbablyLinux,
@@ -285,7 +284,7 @@ class HostSystemTest {
   ) {
     // Given
     var properties = new Properties();
-    var env = new HashMap<String, String>();
+    var env = Map.<String, String>of();
     properties.put("os.name", osName);
     properties.put("java.home", Path.of("foo", "bar", "baz", "jdk").toString());
     var hostSystemBean = new HostSystem(properties, env::get);
@@ -308,22 +307,26 @@ class HostSystemTest {
   @Test
   void getSystemPathReturnsTheExistingSystemPaths(@TempDir Path tempDir) throws IOException {
     // Given
+    // Use OS specific to avoid weirdness with OS path escaping (looking at you, Windows).
+    var pathSeparator = File.pathSeparator;
+
     var existingDir1 = Files.createDirectories(tempDir.resolve("foo").resolve("bar"));
     var existingDir2 = Files.createDirectories(tempDir.resolve("do").resolve("ray"));
     var existingDir3 = Files.createDirectories(tempDir.resolve("xxx"));
     var nonExistingDir1 = tempDir.resolve("foo").resolve("bork");
     var nonExistingDir2 = tempDir.resolve("lorem").resolve("ipsum");
 
-    var path = existingDir1.normalize().toAbsolutePath() + File.pathSeparator
-        + existingDir2.normalize().toAbsolutePath() + File.pathSeparator
-        + existingDir3.normalize().toAbsolutePath() + File.pathSeparator
-        + nonExistingDir1.normalize().toAbsolutePath() + File.pathSeparator
-        + nonExistingDir2.normalize().toAbsolutePath() + File.pathSeparator
+    var path = existingDir1.normalize().toAbsolutePath() + pathSeparator
+        + existingDir2.normalize().toAbsolutePath() + pathSeparator
+        + existingDir3.normalize().toAbsolutePath() + pathSeparator
+        + nonExistingDir1.normalize().toAbsolutePath() + pathSeparator
+        + nonExistingDir2.normalize().toAbsolutePath() + pathSeparator
         // Empty path that gets ignored at the end to test sanitising the inputs.
-        + File.pathSeparator;
+        + pathSeparator;
 
     var env = Map.of("PATH", path);
     var properties = new Properties();
+    properties.put("path.separator", pathSeparator);
 
     var hostSystemBean = new HostSystem(properties, env::get);
 
@@ -334,6 +337,20 @@ class HostSystemTest {
 
     // Expect only the existing directories, and only in the exact order they were specified.
     assertThat(actualPath).containsExactly(existingDir1, existingDir2, existingDir3);
+  }
+
+  @DisplayName(".getPathSeparator() returns the expected platform-specific separator")
+  @Test
+  void getPathSeparatorReturnsTheExpectedPlatformSpecificSeparator() {
+    // Given
+    var env = Map.<String, String>of();
+    var properties = new Properties();
+    properties.setProperty("path.separator", "$!");
+    var hostSystemBean = new HostSystem(properties, env::get);
+
+    // Then
+    assertThat(hostSystemBean.getPathSeparator())
+        .isEqualTo("$!");
   }
 
   @DisplayName(".getSystemPathExtensions() returns empty if the environment variable is unset")
@@ -356,14 +373,15 @@ class HostSystemTest {
   void getSystemPathExtensionsReturnsExtensionsCaseInsensitiveWhenSet() {
     // Given
 
-    var pathExt = ".foo" + File.pathSeparator
-        + ".bar" + File.pathSeparator
-        + ".BAZ" + File.pathSeparator
-        + ".baz" + File.pathSeparator
-        + "  .bork  " + File.pathSeparator;
+    var pathExt = ".foo;"
+        + ".bar;"
+        + ".BAZ;"
+        + ".baz;"
+        + "  .bork;";
 
     var env = Map.of("PATHEXT", pathExt);
     var properties = new Properties();
+    properties.setProperty("path.separator", ";");
     var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
