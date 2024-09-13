@@ -21,8 +21,14 @@ import java.util.stream.Stream
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseProjectDir = basedir.toPath().toAbsolutePath()
-Path protocPluginTargetDir = baseProjectDir.resolve("protoc-plugin", "target")
-Path someProjectTargetDir = baseProjectDir.resolve("some-project", "target")
+Path protocPluginTargetDir = baseProjectDir.resolve("protoc-plugin")
+    .resolve("target")
+Path expectedGeneratedFile = baseProjectDir.resolve("some-project")
+    .resolve("target")
+    .resolve("generated-sources")
+    .resolve("protobuf")
+    .resolve("file-listing.txt")
+
 
 // Verify compilation succeeded but that no JAR was created for the plugin itself.
 assertThat(protocPluginTargetDir).isDirectory()
@@ -33,7 +39,7 @@ try (Stream<Path> fileStream = Files.list(protocPluginTargetDir)) {
 }
 
 // Verify the JVM plugin produced the expected output file
-assertThat(someProjectTargetDir.resolve("generated-sources", "protobuf", "file-listing.txt"))
+assertThat(expectedGeneratedFile)
     .exists()
     .isRegularFile()
     .hasContent("org/example/helloworld.proto")
