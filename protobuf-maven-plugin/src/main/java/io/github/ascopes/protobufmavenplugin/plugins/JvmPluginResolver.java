@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -123,43 +124,61 @@ public final class JvmPluginResolver {
             true
         );
 
-    var args = new ArrayList<String>();
-    args.add(hostSystem.getJavaExecutablePath().toString());
+    var argLineBuilder = Stream.<String>builder();
+    argLineBuilder.add(hostSystem.getJavaExecutablePath().toString());
     var pluginPath = dependencies.get(0);
 
     if (Files.isDirectory(pluginPath)) {
-      log.debug("Treating JVM plugin at {} as an unbundled class tree", pluginPath);
-
-      if (plugin.getMainClass() == null) {
-        throw new IllegalArgumentException(
-            "The plugin at " + pluginPath
-                + " is not a bundled JAR. Please provide the 'mainClass' attribute in "
-                + "the configuration!");
-      }
-
-      args.add("-classpath");
-      args.add(buildJavaPath(dependencies.stream()));
-      args.add(plugin.getMainClass());
-
+      buildArgLineForClassTreePlugin(argLineBuilder, plugin, pluginPath, dependencies);
     } else {
-      log.debug("Treating JVM plugin at {} as a bundled JAR", pluginPath);
-
-      if (plugin.getMainClass() != null) {
-        log.warn("The plugin at {} has been provided with a 'mainClass' attribute, but this is "
-            + "not applicable for packaged JARs. Please remove this argument. This may be promoted "
-            + "to an error in a future release.", pluginPath);
-      }
-
-      if (dependencies.size() > 1) {
-        args.add("-classpath");
-        args.add(buildJavaPath(dependencies.stream().skip(1)));
-      }
-
-      args.add("-jar");
-      args.add(pluginPath.toString());
+      buildArgLineForJarPlugin(argLineBuilder, plugin, pluginPath, dependencies);
     }
 
-    return args;
+    return argLineBuilder.build()
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  private void buildArgLineForJarPlugin(
+      Stream.Builder<String> argLineBuilder,
+      MavenProtocPlugin plugin,
+      Path pluginPath,
+      List<Path> dependencies
+  ) {
+    log.debug("Treating JVM plugin at {} as a bundled JAR", pluginPath);
+
+    if (plugin.getMainClass() != null) {
+      log.warn("The plugin at {} has been provided with a 'mainClass' attribute, but this is "
+          + "not applicable for packaged JARs. Please remove this argument. This may be promoted "
+          + "to an error in a future release.", pluginPath);
+    }
+
+    if (dependencies.size() > 1) {
+      argLineBuilder.add("-classpath");
+      argLineBuilder.add(buildJavaPath(dependencies.stream().skip(1)));
+    }
+
+    argLineBuilder.add("-jar");
+    argLineBuilder.add(pluginPath.toString());
+  }
+
+  private void buildArgLineForClassTreePlugin(
+      Stream.Builder<String> argLineBuilder,
+      MavenProtocPlugin plugin,
+      Path pluginPath,
+      List<Path> dependencies
+  ) {
+    log.debug("Treating JVM plugin at {} as an unbundled class tree", pluginPath);
+
+    if (plugin.getMainClass() == null) {
+      throw new IllegalArgumentException(
+          "The plugin at " + pluginPath
+              + " is not a bundled JAR. Please provide the 'mainClass' attribute in "
+              + "the configuration!");
+    }
+
+    argLineBuilder.add("-classpath");
+    argLineBuilder.add(buildJavaPath(dependencies.stream()));
+    argLineBuilder.add(plugin.getMainClass());
   }
 
   private String buildJavaPath(Stream<Path> paths) {
