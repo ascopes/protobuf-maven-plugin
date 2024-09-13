@@ -41,4 +41,14 @@ public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
     // We never allow this to be specified for protoc plugins.
     return null;
   }
+
+  /**
+   * The main class entrypoint to use if the plugin is not an assembled JAR.
+   *
+   * <p>Ignored in all other cases.
+   *
+   * @return the main class name.
+   * @since 2.5.0
+   */
+  @Nullable String getMainClass();
 }

@@ -147,7 +147,7 @@ public class AetherMavenArtifactPathResolver {
    * @return the paths to each resolved artifact.
    * @throws ResolutionException if resolution failed in the backend.
    */
-  public Collection<Path> resolveDependencies(
+  public List<Path> resolveDependencies(
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,
       Set<String> dependencyScopes,

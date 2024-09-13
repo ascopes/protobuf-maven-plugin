@@ -30,9 +30,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -112,42 +113,83 @@ public final class JvmPluginResolver {
       MavenProtocPlugin plugin
   ) throws ResolutionException {
 
-    // Resolve dependencies first.
-    var dependencyIterator = artifactPathResolver
+    // Assumption: this always has at least one item in it, and the first item is the plugin
+    // artifact itself.
+    var dependencies = artifactPathResolver
         .resolveDependencies(
             List.of(plugin),
             DependencyResolutionDepth.TRANSITIVE,
             ALLOWED_SCOPES,
             false,
             true
-        )
-        .iterator();
+        );
 
-    // First dependency is always the thing we actually want to execute,
-    // so is guaranteed to be present. Marked as final to avoid checkstyle complaining
-    // about the distance between declaration and usage.
-    final var pluginPath = dependencyIterator.next();
-    var args = new ArrayList<String>();
-    args.add(hostSystem.getJavaExecutablePath().toString());
+    var argLineBuilder = Stream.<String>builder();
+    argLineBuilder.add(hostSystem.getJavaExecutablePath().toString());
+    var pluginPath = dependencies.get(0);
 
-    if (dependencyIterator.hasNext()) {
-      args.add("-classpath");
-      args.add(buildClasspath(dependencyIterator));
+    if (Files.isDirectory(pluginPath)) {
+      buildArgLineForClassTreePlugin(argLineBuilder, plugin, pluginPath, dependencies);
+    } else {
+      buildArgLineForJarPlugin(argLineBuilder, plugin, pluginPath, dependencies);
     }
 
-    args.add("-jar");
-    args.add(pluginPath.toString());
-
-    return args;
+    return argLineBuilder.build()
+        .collect(Collectors.toUnmodifiableList());
   }
 
-  private String buildClasspath(Iterator<Path> paths) {
-    // Expectation: at least one path is in the iterator.
-    var sb = new StringBuilder()
-        .append(paths.next());
+  private void buildArgLineForJarPlugin(
+      Stream.Builder<String> argLineBuilder,
+      MavenProtocPlugin plugin,
+      Path pluginPath,
+      List<Path> dependencies
+  ) {
+    log.debug("Treating JVM plugin at {} as a bundled JAR", pluginPath);
 
-    while (paths.hasNext()) {
-      sb.append(":").append(paths.next());
+    if (plugin.getMainClass() != null) {
+      log.warn("The plugin at {} has been provided with a 'mainClass' attribute, but this is "
+          + "not applicable for packaged JARs. Please remove this argument. This may be promoted "
+          + "to an error in a future release.", pluginPath);
+    }
+
+    if (dependencies.size() > 1) {
+      argLineBuilder.add("-classpath");
+      argLineBuilder.add(buildJavaPath(dependencies.stream().skip(1)));
+    }
+
+    argLineBuilder.add("-jar");
+    argLineBuilder.add(pluginPath.toString());
+  }
+
+  private void buildArgLineForClassTreePlugin(
+      Stream.Builder<String> argLineBuilder,
+      MavenProtocPlugin plugin,
+      Path pluginPath,
+      List<Path> dependencies
+  ) {
+    log.debug("Treating JVM plugin at {} as an unbundled class tree", pluginPath);
+
+    if (plugin.getMainClass() == null) {
+      throw new IllegalArgumentException(
+          "The plugin at " + pluginPath
+              + " is not a bundled JAR. Please provide the 'mainClass' attribute in "
+              + "the configuration!");
+    }
+
+    argLineBuilder.add("-classpath");
+    argLineBuilder.add(buildJavaPath(dependencies.stream()));
+    argLineBuilder.add(plugin.getMainClass());
+  }
+
+  private String buildJavaPath(Stream<Path> paths) {
+    // Expectation: at least one path is in the iterator.
+    var iterator = paths.iterator();
+
+    var sb = new StringBuilder()
+        .append(iterator.next());
+
+    while (iterator.hasNext()) {
+      sb.append(":").append(iterator.next());
     }
 
     return sb.toString();
