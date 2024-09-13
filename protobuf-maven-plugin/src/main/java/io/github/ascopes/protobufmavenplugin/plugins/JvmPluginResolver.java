@@ -144,6 +144,12 @@ public final class JvmPluginResolver {
     } else {
       log.debug("Treating JVM plugin at {} as a bundled JAR", pluginPath);
 
+      if (plugin.getMainClass() != null) {
+        log.warn("The plugin at {} has been provided with a 'mainClass' attribute, but this is "
+            + "not applicable for packaged JARs. Please remove this argument. This may be promoted "
+            + "to an error in a future release.", pluginPath);
+      }
+
       if (dependencies.size() > 1) {
         args.add("-classpath");
         args.add(buildJavaPath(dependencies.stream().skip(1)));
