@@ -30,9 +30,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -112,42 +112,59 @@ public final class JvmPluginResolver {
       MavenProtocPlugin plugin
   ) throws ResolutionException {
 
-    // Resolve dependencies first.
-    var dependencyIterator = artifactPathResolver
+    // Assumption: this always has at least one item in it, and the first item is the plugin
+    // artifact itself.
+    var dependencies = artifactPathResolver
         .resolveDependencies(
             List.of(plugin),
             DependencyResolutionDepth.TRANSITIVE,
             ALLOWED_SCOPES,
             false,
             true
-        )
-        .iterator();
+        );
 
-    // First dependency is always the thing we actually want to execute,
-    // so is guaranteed to be present. Marked as final to avoid checkstyle complaining
-    // about the distance between declaration and usage.
-    final var pluginPath = dependencyIterator.next();
     var args = new ArrayList<String>();
     args.add(hostSystem.getJavaExecutablePath().toString());
+    var pluginPath = dependencies.get(0);
 
-    if (dependencyIterator.hasNext()) {
+    if (Files.isDirectory(pluginPath)) {
+      log.debug("Treating JVM plugin at {} as an unbundled class tree", pluginPath);
+
+      if (plugin.getMainClass() == null) {
+        throw new IllegalArgumentException(
+            "The plugin at " + pluginPath
+                + " is not a bundled JAR. Please provide the 'mainClass' attribute in "
+                + "the configuration!");
+      }
+
       args.add("-classpath");
-      args.add(buildClasspath(dependencyIterator));
-    }
+      args.add(buildJavaPath(dependencies.stream()));
+      args.add(plugin.getMainClass());
 
-    args.add("-jar");
-    args.add(pluginPath.toString());
+    } else {
+      log.debug("Treating JVM plugin at {} as a bundled JAR", pluginPath);
+
+      if (dependencies.size() > 1) {
+        args.add("-classpath");
+        args.add(buildJavaPath(dependencies.stream().skip(1)));
+      }
+
+      args.add("-jar");
+      args.add(pluginPath.toString());
+    }
 
     return args;
   }
 
-  private String buildClasspath(Iterator<Path> paths) {
+  private String buildJavaPath(Stream<Path> paths) {
     // Expectation: at least one path is in the iterator.
-    var sb = new StringBuilder()
-        .append(paths.next());
+    var iterator = paths.iterator();
 
-    while (paths.hasNext()) {
-      sb.append(":").append(paths.next());
+    var sb = new StringBuilder()
+        .append(iterator.next());
+
+    while (iterator.hasNext()) {
+      sb.append(":").append(iterator.next());
     }
 
     return sb.toString();

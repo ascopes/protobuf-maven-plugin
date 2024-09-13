@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Stream
@@ -32,5 +31,11 @@ try (Stream<Path> fileStream = Files.list(protocPluginTargetDir)) {
       .withFailMessage { "Did not expect any JARs to be created by the build in this reproduction" }
       .isEmpty()
 }
+
+// Verify the JVM plugin produced the expected output file
+assertThat(someProjectTargetDir.resolve("generated-sources", "protobuf", "file-listing.txt"))
+    .exists()
+    .isRegularFile()
+    .hasContent("org/example/helloworld.proto")
 
 return true

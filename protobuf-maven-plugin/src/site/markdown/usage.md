@@ -345,7 +345,6 @@ as `PATH`.
 ```xml
 <plugin>
   <groupId>io.github.ascopes</groupId>
-  <artifactId>protobuf-maven-plugin</artifactId>
   <version>...</version>
 
   <configuration>
@@ -599,6 +598,25 @@ dependencies to execute.
 
 Currently, you are required to be able to execute `*.bat` files on Windows, or have 
 `sh` available on the system `$PATH` for any other platform.
+
+If you are building your own protoc plugin, you may want to use the `protobuf-maven-plugin` to test
+that it works correctly. If you do this, then the recommended way to test things out is to invoke
+projects using the `maven-invoker-plugin`, as this will ensure your project is packaged as a JAR
+correctly when it comes to running the tests. If you _do not_ want to do this, you will potentially
+need to provide the `mainClass` attribute on your plugin reference if your tests run before Maven
+has produced a JAR for the given project, as there is no way of the `protobuf-maven-plugin` knowing
+where the entrypoint is. If this is required, you will be notified of this via a build error.
+
+```xml
+<jvmMavenPlugins>
+  <jvmMavenPlugin>
+    <groupId>${project.parent.groupId}</groupId>
+    <artifactId>my-super-awesome-plugin</artifactId>
+    <version>${project.parent.version}</version>
+    <mainClass>org.example.protocplugin.MySuperAwesomePluginMainClass</mainClass>
+  </jvmMavenPlugin>
+</jvmMavenPlugins>
+```
 
 ### Mixing plugins
 

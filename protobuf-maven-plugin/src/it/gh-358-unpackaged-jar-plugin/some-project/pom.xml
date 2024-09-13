@@ -43,6 +43,7 @@
               <groupId>${project.groupId}</groupId>
               <artifactId>protoc-plugin</artifactId>
               <version>${project.version}</version>
+              <mainClass>org.example.protocplugin.ProtocPlugin</mainClass>
             </jvmMavenPlugin>
           </jvmMavenPlugins>
 

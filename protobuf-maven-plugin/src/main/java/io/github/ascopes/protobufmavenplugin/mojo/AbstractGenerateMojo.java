@@ -165,7 +165,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       property - optional.</li>
    * </ul>
    *
-   * <p>On Linux, Mac OS, and other POSIX-like systems, resolution looks for an executable
+   * <p>On Linux, MacOS, and other POSIX-like systems, resolution looks for an executable
    * binary matching the exact name in any directory in the {@code $PATH} environment variable.
    *
    * <p>On Windows, the case-insensitive {@code %PATH%} environment variable is searched for an
@@ -472,6 +472,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
+   *   <li>{@code mainClass} - if the plugin is not an assembled JAR at the time
+   *       the {@code protobuf-maven-plugin} is run, then you will need to provide
+   *       the fully qualified class name of the plugin entrypoint here. This is
+   *       usually only needed if you are creating the JVM plugin within the
+   *       same project. If the plugin is an assembled JAR, then this option is
+   *       ignored - optional.</li>
    * </ul>
    *
    * @since 0.3.0
