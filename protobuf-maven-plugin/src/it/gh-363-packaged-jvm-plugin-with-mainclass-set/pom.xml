@@ -28,7 +28,7 @@
     <relativePath>../../../../pom.xml</relativePath>
   </parent>
 
-  <groupId>gh-363-packaged-jvm-plugin</groupId>
+  <groupId>gh-363-packaged-jvm-plugin-with-mainclass-set</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 

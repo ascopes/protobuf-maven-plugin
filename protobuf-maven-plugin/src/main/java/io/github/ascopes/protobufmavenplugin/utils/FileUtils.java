@@ -17,12 +17,14 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,16 +68,27 @@ public final class FileUtils {
         : Optional.of(fileName.substring(lastDotIndex));
   }
 
-  public static FileSystemProvider getFileSystemProvider(String scheme) {
-    return FileSystemProvider
-        .installedProviders()
-        .stream()
-        .filter(provider -> provider.getScheme().equalsIgnoreCase(scheme))
-        .peek(provider -> log.debug("Found {} file system provider {}", scheme, provider))
-        .findFirst()
-        .orElseThrow(() -> new FileSystemNotFoundException(
-            "No file system provider for " + scheme + " was found"
-        ));
+  public static FileSystem openZipAsFileSystem(Path zipPath) throws IOException {
+    // Impl note: unlike other constructors, calling this multiple times on the same path
+    // will open multiple file system objects. Other constructors do not appear to do this,
+    // so would not be thread-safe for concurrent plugin executions.
+    try {
+      log.debug("Opening a new NIO virtual file system for {}", zipPath);
+
+      // TODO: is it worth memoize-ing this?
+      return FileSystemProvider
+          .installedProviders()
+          .stream()
+          .filter(provider -> provider.getScheme().equalsIgnoreCase("jar"))
+          .peek(provider -> log.debug("Found JAR file system provider at {}", provider))
+          .findFirst()
+          .orElseThrow(FileSystemNotFoundException::new)
+          .newFileSystem(zipPath, Map.of());
+    } catch (Exception ex) {
+      // The JDK will raise vague exceptions if we try to read something that is not a zip file.
+      // See ZipFileSystemProvider#getZipFileSystem for an example.
+      throw new IOException("Failed to open " + zipPath + " as a valid ZIP/JAR archive", ex);
+    }
   }
 
   public static void makeExecutable(Path file) throws IOException {

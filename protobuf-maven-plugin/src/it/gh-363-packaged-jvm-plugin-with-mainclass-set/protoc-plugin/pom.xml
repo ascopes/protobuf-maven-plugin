@@ -22,41 +22,33 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>gh-363-packaged-jvm-plugin</groupId>
+    <groupId>gh-363-packaged-jvm-plugin-with-mainclass-set</groupId>
     <artifactId>parent</artifactId>
     <version>@project.version@</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>some-project</artifactId>
+  <artifactId>protoc-plugin</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>@project.groupId@</groupId>
-        <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <jvmMavenPlugins>
-            <jvmMavenPlugin>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>protoc-plugin</artifactId>
-              <version>${project.version}</version>
-            </jvmMavenPlugin>
-          </jvmMavenPlugins>
-
-          <javaEnabled>false</javaEnabled>
-          <protocVersion>${protobuf.version}</protocVersion>
+          <archive>
+            <manifest>
+              <mainClass>org.example.protocplugin.ProtocPlugin</mainClass>
+            </manifest>
+          </archive>
         </configuration>
-
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
