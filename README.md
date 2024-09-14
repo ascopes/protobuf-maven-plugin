@@ -1,8 +1,10 @@
 ![Java 11+](https://img.shields.io/badge/Java-11+-red?logo=openjdk&logoColor=white)
+![GitHub License](https://img.shields.io/github/license/ascopes/protobuf-maven-plugin)
 [![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin)](https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin)
 [![Documentation](https://img.shields.io/badge/-Documentation-purple?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
+![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/ascopes/protobuf-maven-plugin)
 
 # protobuf-maven-plugin
 
@@ -16,7 +18,7 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
   <version>${protobuf-maven-plugin.version}</version>
 
   <configuration>
-    <protocVersion>4.28.0</protocVersion>
+    <protocVersion>${protobuf-java.version}</protocVersion>
 
     <binaryMavenPlugins>
       <binaryMavenPlugin>
@@ -50,15 +52,18 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
 - Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
 - Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
 - Supports Java and JVM Kotlin sources out of the box.
-- Plugin support. Need reactive support, Scala support, or GRPC? Just add the plugin and away you go.
-  - Ability to use plugins implemented for the JVM (JAR plugins).
+- Plugin support. Need reactive support, Scala support, or gRPC? Just add the plugin and away you go.
+  - Ability to use plugins implemented for the JVM (JAR plugins and classpath plugins) without needing them to be bundled as
+    native binaries first.
   - Ability to use regular `protoc` plugins (native binaries).
+  - Plugins can be resolved from Maven repositories, URLs, or the system path.
 - Generation of main and test sources.
 - Importing of `*.proto` sources from classpath dependencies.
 - Ready to implement Maven 4 support once Maven 4 is stable, meaning your projects will not be blocked by unmaintained plugins using
   unsupported Maven 2.x APIs.
-- Additional support for generating sources targeting C++, C#, Objective C, Python (with and without static typechecking stubs),
+- Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
   PHP, Ruby, and Rust.
+- Aims to keep builds reproducible and easily debuggable where possible.
 
 ## Usage
 
