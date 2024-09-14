@@ -57,8 +57,8 @@ jobs:
             **/build.log
             **/maven-status/**
             **/surefire-reports/**.txt
-            **/protobuf-maven-plugin/**.sh
-            **/protobuf-maven-plugin/**.bat
+            **/target/protobuf-maven-plugin/**.sh
+            **/target/protobuf-maven-plugin/**.bat
           compression-level: 9
           retention-days: 7
           include-hidden-files: true
@@ -118,8 +118,8 @@ jobs:
             **/build.log
             **/maven-status/**
             **/surefire-reports/**.txt
-            **/protobuf-maven-plugin/**.sh
-            **/protobuf-maven-plugin/**.bat
+            **/target/protobuf-maven-plugin/**.sh
+            **/target/protobuf-maven-plugin/**.bat
           compression-level: 9
           retention-days: 7
           include-hidden-files: true
