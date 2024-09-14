@@ -27,6 +27,7 @@ import io.github.ascopes.protobufmavenplugin.utils.Shlex;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -250,7 +251,7 @@ public final class JvmPluginResolver {
         ""  // Trailing newline.
     );
 
-    Files.writeString(fullScriptPath, script, StandardCharsets.ISO_8859_1);
+    writeScript(fullScriptPath, script, StandardCharsets.ISO_8859_1);
     return fullScriptPath;
   }
 
@@ -277,9 +278,14 @@ public final class JvmPluginResolver {
         ""  // Trailing newline
     );
 
-    Files.writeString(fullScriptPath, script, StandardCharsets.UTF_8);
-    FileUtils.makeExecutable(fullScriptPath);
+    writeScript(fullScriptPath, script, StandardCharsets.UTF_8);
     return fullScriptPath;
+  }
+
+  private void writeScript(Path path, String content, Charset charset) throws IOException {
+    log.debug("Writing the following script to {} as {}:\n{}", path, charset, content);
+    Files.writeString(path, content, charset);
+    FileUtils.makeExecutable(path);
   }
 
   private List<Path> findJavaModules(List<Path> paths) {
