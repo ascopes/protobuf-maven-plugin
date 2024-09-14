@@ -25,6 +25,8 @@ import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.Shlex;
 import java.io.IOException;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,8 +35,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.jspecify.annotations.Nullable;
@@ -129,15 +133,20 @@ public final class JvmPluginResolver {
     var args = new ArrayList<String>();
     args.add(hostSystem.getJavaExecutablePath().toString());
 
-    var pluginPath = dependencies.get(0);
-
     // Caveat: we currently ignore the Class-Path JAR manifest entry. Not sure why we would want
     // to be using that here though, so I am leaving it unimplemented until such a time that someone
     // requests it.
     args.add("-classpath");
-    args.add(buildJavaPath(dependencies.iterator()));
+    args.add(buildJavaPath(dependencies));
 
-    args.add(determineMainClass(plugin, pluginPath));
+    var modules = findJavaModules(dependencies);
+
+    if (!modules.isEmpty()) {
+      args.add("--module-path");
+      args.add(buildJavaPath(modules));
+    }
+
+    args.add(determineMainClass(plugin, dependencies.get(0)));
 
     return Collections.unmodifiableList(args);
   }
@@ -199,8 +208,9 @@ public final class JvmPluginResolver {
     }
   }
 
-  private String buildJavaPath(Iterator<Path> iterator) {
+  private String buildJavaPath(Iterable<Path> iterable) {
     // Expectation: at least one path is in the iterator.
+    var iterator = iterable.iterator();
     var sb = new StringBuilder()
         .append(iterator.next());
 
@@ -270,5 +280,18 @@ public final class JvmPluginResolver {
     Files.writeString(fullScriptPath, script, StandardCharsets.UTF_8);
     FileUtils.makeExecutable(fullScriptPath);
     return fullScriptPath;
+  }
+
+  private List<Path> findJavaModules(List<Path> paths) {
+    // TODO: is using a module finder here an overkill?
+    return ModuleFinder.of(paths.toArray(Path[]::new))
+        .findAll()
+        .stream()
+        .map(ModuleReference::location)
+        .flatMap(Optional::stream)
+        .map(Path::of)
+        .map(FileUtils::normalize)
+        .peek(modulePath -> log.debug("Looks like {} is a JPMS module!", modulePath))
+        .collect(Collectors.toUnmodifiableList());
   }
 }

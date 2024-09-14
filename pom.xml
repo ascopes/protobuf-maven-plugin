@@ -358,7 +358,7 @@
 
           <configuration>
             <compilerArgs>
-              <compilerArg>-Xlint:all,-classfile,-processing,-serial</compilerArg>
+              <compilerArg>-Xlint:all,-classfile,-processing,-requires-automatic,-serial</compilerArg>
             </compilerArgs>
             <failOnWarning>true</failOnWarning>
             <showDeprecation>true</showDeprecation>
