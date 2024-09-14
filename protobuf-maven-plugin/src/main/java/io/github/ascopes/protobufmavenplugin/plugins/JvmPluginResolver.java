@@ -203,8 +203,9 @@ public final class JvmPluginResolver {
         var zip = FileUtils.openZipAsFileSystem(pluginPath);
         var manifestStream = Files.newInputStream(zip.getPath("META-INF", "MANIFEST.MF"))
     ) {
-      var manifest = new Manifest(manifestStream);
-      return manifest.getMainAttributes().getValue("Main-Class");
+      return new Manifest(manifestStream)
+          .getMainAttributes()
+          .getValue("Main-Class");
     }
   }
 
