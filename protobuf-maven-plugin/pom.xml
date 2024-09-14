@@ -172,15 +172,23 @@
 
             <configuration>
               <addTestClassPath>true</addTestClassPath>
+              <cloneAllFiles>true</cloneAllFiles>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <failIfNoProjects>true</failIfNoProjects>
               <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
               <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
+              <mavenOpts>
+                <!-- Force Aether to use file locking so we can run safely in parallel with a shared it-repos directory. -->
+                -Daether.connector.basic.threads=8
+                -Daether.metadataResolver.threads=8
+                -Daether.syncContext.named.factory=file-lock
+                -Daether.syncContext.named.nameMapper=file-gav
+                -Daether.syncContext.named.time=120
+              </mavenOpts>
+              <parallelThreads>1C</parallelThreads>
               <postBuildHookScript>test</postBuildHookScript>
               <settingsFile>src/it/settings.xml</settingsFile>
               <showErrors>true</showErrors>
-              <showVersion>true</showVersion>
-              <streamLogs>true</streamLogs>
               <streamLogsOnFailures>true</streamLogsOnFailures>
               <writeJunitReport>true</writeJunitReport>
             </configuration>
@@ -363,6 +371,9 @@
               <version>${maven-invoker-plugin.version}</version>
               <configuration>
                 <invokerPropertiesFile>invoker-debug.properties</invokerPropertiesFile>
+                <showVersion>true</showVersion>
+                <streamLogs>true</streamLogs>
+                <parallelThreads>1</parallelThreads>
               </configuration>
             </plugin>
           </plugins>

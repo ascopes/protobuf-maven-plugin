@@ -86,3 +86,9 @@ individually.
 
 If you wish to enable verbose output from Maven, edit the `invoker-debug.properties` to set
 the `invoker.debug` property to `true`.
+
+## Tests that run web servers
+
+Since 2.5.0, all ITs run in parallel in an undefined order, so if you are exposing a web server
+or socket anywhere, you need to make sure that it is a unique port. These tests start with port
+10000 and increment by 1 each time a new test is added so that ports are kept unique.

@@ -28,10 +28,10 @@ class ReactorGreetingServiceImplTest {
     // Given
     var service = new ReactorGreetingServiceImpl();
     var server = ServerBuilder
-        .forPort(8080)
+        .forPort(10004)
         .addService(service)
         .build();
-    var channel = ManagedChannelBuilder.forAddress("localhost", 8080)
+    var channel = ManagedChannelBuilder.forAddress("localhost", 10004)
         .usePlaintext()
         .build();
     var stub = ReactorGreetingServiceGrpc.newReactorStub(channel);
