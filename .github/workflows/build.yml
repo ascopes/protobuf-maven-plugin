@@ -48,6 +48,22 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Upload build logs as artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-logs
+          path: |-
+            **/build.log
+            **/maven-status/**
+            **/surefire-reports/**.txt
+            **/protobuf-maven-plugin/**.sh
+            **/protobuf-maven-plugin/**.bat
+          compression-level: 9
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: warn
+
   build-x86_64-old-maven:
     name: jdk-${{ matrix.java-version }}/ubuntu-latest/x86_64 (oldest supported Maven)
     runs-on: ubuntu-latest
@@ -92,6 +108,22 @@ jobs:
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload build logs as artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jdk-${{ matrix.java-version }}-old-maven-logs
+          path: |-
+            **/build.log
+            **/maven-status/**
+            **/surefire-reports/**.txt
+            **/protobuf-maven-plugin/**.sh
+            **/protobuf-maven-plugin/**.bat
+          compression-level: 9
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: warn
 
   build-pages:
     name: Generate pages
