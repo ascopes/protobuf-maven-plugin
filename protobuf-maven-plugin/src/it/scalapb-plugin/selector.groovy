@@ -20,6 +20,6 @@ if (!System.getProperty("os.arch").equalsIgnoreCase("amd64")) {
 } else if (!System.getProperty("os.name").equalsIgnoreCase("Linux")) {
   println("Not running this test as this is not a Linux system...")
   return false
-} lse {
+} else {
   return true
 }
