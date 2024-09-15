@@ -17,11 +17,13 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Shell/batch file quoting.
  *
- * <p>Losely based on Python's {@code shlex} module.
+ * <p>Loosely based on Python's {@code shlex} module, but also with best-effort support for
+ * Batch files as well.
  *
  * <p>This is far from perfect but should work in the majority of use cases
  * to ensure scripts do not interpret special characters in paths in strange and unexpected ways.
@@ -40,11 +42,11 @@ public final class Shlex {
   }
 
   public static String quoteShellArgs(Iterable<String> args) {
-    return quote(args, Shlex::quoteShellArg, " \\\n");
+    return quote(args, quoter(Shlex::isSafe, Shlex::quoteShellArg), " \\\n");
   }
 
   public static String quoteBatchArgs(Iterable<String> args) {
-    return quote(args, Shlex::quoteBatchArg, " ^\r\n");
+    return quote(args, quoter(Shlex::isSafe, Shlex::quoteBatchArg), " ^\r\n");
   }
 
   private static String quote(
@@ -64,14 +66,14 @@ public final class Shlex {
 
     while (iter.hasNext()) {
       var next = quoter.apply(iter.next());
-
       if (lineLength + next.length() >= LINE_LENGTH_TARGET) {
         sb.append(continuation);
         lineLength = INDENT.length();
         sb.append(INDENT);
+
       } else {
         sb.append(" ");
-        lineLength += 1;
+        ++lineLength;
       }
 
       sb.append(next);
@@ -81,11 +83,16 @@ public final class Shlex {
     return sb.toString();
   }
 
-  private static String quoteShellArg(String arg) {
-    if (isSafe(arg)) {
-      return arg;
-    }
+  private static Function<String, String> quoter(
+      Predicate<String> safeCheck,
+      Function<String, String> rawQuoter
+  ) {
+    return string -> safeCheck.test(string)
+        ? string
+        : rawQuoter.apply(string);
+  }
 
+  private static String quoteShellArg(String arg) {
     var sb = new StringBuilder();
     sb.append('\'');
     for (var i = 0; i < arg.length(); ++i) {
@@ -111,26 +118,28 @@ public final class Shlex {
           break;
       }
     }
-    sb.append('\'');
 
-    return sb.toString();
+    return sb.append('\'')
+        .toString();
   }
 
+  // The way Windows handles arguments in CMD is, quite frankly, a total mess of conflicting
+  // information and totally illogical handling logic. This makes this a complete guess whether
+  // it covers all cases consistently or not.
   private static String quoteBatchArg(String arg) {
-    if (isSafe(arg)) {
-      return arg;
-    }
-
     var sb = new StringBuilder();
+    sb.append('"');
+
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
+
       switch (c) {
+        case '"':
+          sb.append("\"\"\"");
+          break;
         case '%':
           sb.append("%%");
           break;
-        case '"':
-        case '\'':
-        case ' ':
         case '\r':
         case '\t':
         case '^':
@@ -146,7 +155,8 @@ public final class Shlex {
       }
     }
 
-    return sb.toString();
+    return sb.append('"')
+        .toString();
   }
 
   private static boolean isSafe(String arg) {

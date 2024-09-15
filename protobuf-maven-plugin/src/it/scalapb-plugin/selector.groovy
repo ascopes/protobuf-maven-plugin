@@ -20,9 +20,6 @@ if (!System.getProperty("os.arch").equalsIgnoreCase("amd64")) {
 } else if (!System.getProperty("os.name").equalsIgnoreCase("Linux")) {
   println("Not running this test as this is not a Linux system...")
   return false
-} else if ("uname -o".execute().text =~ /Android.*/) {
-  println("Skipping test as it uses incompatible binaries for Android")
-  return false
-} else {
+} lse {
   return true
 }
