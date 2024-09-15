@@ -119,7 +119,7 @@ public final class JvmPluginResolver {
       MavenProtocPlugin plugin
   ) throws ResolutionException, IOException {
 
-    // Assumption: this always has at least one item in it, and the first item is the plugin
+    // Expectation this always has at least one item in it, and the first item is the plugin
     // artifact itself.
     var dependencies = artifactPathResolver
         .resolveDependencies(
