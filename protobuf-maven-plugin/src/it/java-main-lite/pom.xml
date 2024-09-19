@@ -32,7 +32,7 @@
   <artifactId>java-main-lite</artifactId>
 
   <properties>
-    <protobuf.version>4.28.0</protobuf.version>
+    <protobuf.version>4.28.2</protobuf.version>
   </properties>
 
   <dependencies>
