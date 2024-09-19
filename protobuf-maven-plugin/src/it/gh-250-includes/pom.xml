@@ -32,7 +32,7 @@
   <artifactId>gh-250-includes</artifactId>
 
   <properties>
-    <protobuf.version>4.28.0</protobuf.version>
+    <protobuf.version>4.28.2</protobuf.version>
   </properties>
 
   <dependencies>
