@@ -50,8 +50,8 @@ public final class SystemPathBinaryResolver {
     log.debug("Looking for executable matching name '{}' on the path", name);
 
     var predicate = hostSystem.isProbablyWindows()
-        ? isMatchWindows(name)
-        : isMatchPosix(name);
+        ? isWindowsMatch(name)
+        : isPosixMatch(name);
 
     var result = Optional.<Path>empty();
 
@@ -71,7 +71,7 @@ public final class SystemPathBinaryResolver {
     return result;
   }
 
-  private Predicate<Path> isMatchWindows(String name) {
+  private Predicate<Path> isWindowsMatch(String name) {
     log.debug("Using Windows path matching strategy");
     return path -> {
       var matchesName = FileUtils.getFileNameWithoutExtension(path)
@@ -92,7 +92,7 @@ public final class SystemPathBinaryResolver {
     };
   }
 
-  private Predicate<Path> isMatchPosix(String name) {
+  private Predicate<Path> isPosixMatch(String name) {
     log.debug("Using POSIX path matching strategy");
     return path -> {
       var matchesName = path.getFileName().toString().equals(name);
