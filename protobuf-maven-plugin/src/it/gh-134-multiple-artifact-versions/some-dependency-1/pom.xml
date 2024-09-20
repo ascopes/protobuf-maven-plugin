@@ -34,7 +34,7 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <!-- Do not change this, it must be unique to each submodule to test the bug correctly -->
-      <version>3.25.0</version>
+      <version>3.25.5</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
