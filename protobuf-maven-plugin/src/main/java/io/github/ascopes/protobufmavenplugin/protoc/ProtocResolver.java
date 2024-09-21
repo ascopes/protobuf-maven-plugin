@@ -20,10 +20,10 @@ import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependen
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.dependencies.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;

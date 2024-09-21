@@ -30,6 +30,11 @@ import java.util.function.Predicate;
  *
  * <p>Long lines will be split up with line continuations.
  *
+ * <p>I'd eventually like to totally get rid of this class if at all possible. It is (mostly)
+ * superseded by {@link ArgumentFileBuilder} which enables packaging arguments in a
+ * platform-agnostic way, but still requires this class to deal with quoting the generated scripts
+ * referencing those files (albeit with a lower risk of error).
+ *
  * @author Ashley Scopes
  */
 public final class Shlex {
