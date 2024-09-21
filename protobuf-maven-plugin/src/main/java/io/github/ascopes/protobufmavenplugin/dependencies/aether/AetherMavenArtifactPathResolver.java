@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.Path;
@@ -61,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * @since 2.0.3
  */
 @Named
-public class AetherMavenArtifactPathResolver {
+final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver {
 
   private static final String DEFAULT_EXTENSION = "jar";
   private static final String DEFAULT_SCOPE = "compile";
@@ -76,7 +77,7 @@ public class AetherMavenArtifactPathResolver {
   private final List<RemoteRepository> remoteRepositories;
 
   @Inject
-  public AetherMavenArtifactPathResolver(
+  AetherMavenArtifactPathResolver(
       MavenSession mavenSession,
       RepositorySystem repositorySystem,
       ArtifactHandler artifactHandler
@@ -98,13 +99,7 @@ public class AetherMavenArtifactPathResolver {
     log.debug("Detected remote repositories as {}", remoteRepositories);
   }
 
-  /**
-   * Resolve a single Maven artifact directly, and do not resolve any transitive dependencies.
-   *
-   * @param artifact the artifact to resolve.
-   * @return the path to the resolved artifact.
-   * @throws ResolutionException if resolution fails in the backend.
-   */
+  @Override
   public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
     var repositorySession = mavenSession.getRepositorySession();
     var aetherArtifact = new DefaultArtifact(
@@ -133,20 +128,7 @@ public class AetherMavenArtifactPathResolver {
     }
   }
 
-  /**
-   * Resolve all given dependencies based on their resolution depth semantics.
-   *
-   * @param artifacts                        the artifacts to resolve.
-   * @param defaultDependencyResolutionDepth the project default dependency resolution depth.
-   * @param dependencyScopes                 the allowed dependency scopes to resolve.
-   * @param includeProjectDependencies       whether to also resolve project dependencies and return
-   *                                         them in the result.
-   * @param failOnInvalidDependencies        if {@code false}, resolution of invalid dependencies
-   *                                         will result in errors being logged, but the build will
-   *                                         not be halted.
-   * @return the paths to each resolved artifact.
-   * @throws ResolutionException if resolution failed in the backend.
-   */
+  @Override
   public List<Path> resolveDependencies(
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,

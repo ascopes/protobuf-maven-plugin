@@ -17,8 +17,8 @@
 package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
@@ -61,13 +61,13 @@ public final class JvmPluginResolver {
   private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
   private final HostSystem hostSystem;
-  private final AetherMavenArtifactPathResolver artifactPathResolver;
+  private final MavenArtifactPathResolver artifactPathResolver;
   private final TemporarySpace temporarySpace;
 
   @Inject
   public JvmPluginResolver(
       HostSystem hostSystem,
-      AetherMavenArtifactPathResolver artifactPathResolver,
+      MavenArtifactPathResolver artifactPathResolver,
       TemporarySpace temporarySpace
   ) {
     this.hostSystem = hostSystem;

@@ -17,11 +17,11 @@
 package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
-import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.IOException;
@@ -48,7 +48,7 @@ public final class ProtocResolver {
   private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
   private final HostSystem hostSystem;
-  private final AetherMavenArtifactPathResolver artifactPathResolver;
+  private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
@@ -56,7 +56,7 @@ public final class ProtocResolver {
   @Inject
   public ProtocResolver(
       HostSystem hostSystem,
-      AetherMavenArtifactPathResolver artifactPathResolver,
+      MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher

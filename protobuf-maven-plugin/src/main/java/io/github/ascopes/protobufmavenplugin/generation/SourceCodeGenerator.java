@@ -16,8 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.generation;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.BinaryPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.JvmPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
@@ -57,7 +57,7 @@ public final class SourceCodeGenerator {
   private static final Logger log = LoggerFactory.getLogger(SourceCodeGenerator.class);
 
   private final MavenSession mavenSession;
-  private final AetherMavenArtifactPathResolver artifactPathResolver;
+  private final MavenArtifactPathResolver artifactPathResolver;
   private final ProtocResolver protocResolver;
   private final BinaryPluginResolver binaryPluginResolver;
   private final JvmPluginResolver jvmPluginResolver;
@@ -67,7 +67,7 @@ public final class SourceCodeGenerator {
   @Inject
   public SourceCodeGenerator(
       MavenSession mavenSession,
-      AetherMavenArtifactPathResolver artifactPathResolver,
+      MavenArtifactPathResolver artifactPathResolver,
       ProtocResolver protocResolver,
       BinaryPluginResolver binaryPluginResolver,
       JvmPluginResolver jvmPluginResolver,
