@@ -16,11 +16,11 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
-import io.github.ascopes.protobufmavenplugin.dependencies.aether.AetherMavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
@@ -43,14 +43,14 @@ public final class BinaryPluginResolver {
 
   private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
-  private final AetherMavenArtifactPathResolver artifactPathResolver;
+  private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
   public BinaryPluginResolver(
-      AetherMavenArtifactPathResolver artifactPathResolver,
+      MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UrlResourceFetcher urlResourceFetcher
