@@ -133,6 +133,11 @@ public final class JvmPluginResolver {
     var args = new ArrayList<String>();
     args.add(hostSystem.getJavaExecutablePath().toString());
 
+    // JVM tuning flags to improve the performance of short-lived processes.
+    args.add("-Xshare:auto");
+    args.add("-XX:+TieredCompilation");
+    args.add("-XX:TieredStopAtLevel=1");
+
     // Caveat: we currently ignore the Class-Path JAR manifest entry. Not sure why we would want
     // to be using that here though, so I am leaving it unimplemented until such a time that someone
     // requests it.
