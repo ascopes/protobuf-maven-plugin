@@ -24,7 +24,7 @@ Path baseDirectory = basedir.toPath().toAbsolutePath()
 Path logFile = baseDirectory.resolve("build.log")
 List<String> logLines = Files.readAllLines(logFile)
 
-int indexOfMatch(List<String> logLines, String pattern) {
+static int indexOfMatch(List<String> logLines, String pattern) {
   for (int i = 0; i < logLines.size(); ++i) {
     if (logLines.get(i).matches(pattern)) {
       return i

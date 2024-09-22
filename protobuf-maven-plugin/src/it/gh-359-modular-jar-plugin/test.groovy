@@ -54,6 +54,8 @@ assertThat(expectedGeneratedFile)
 // Verify we invoked the JVM with a module path.
 assertThat(Files.list(expectedScriptsDirectory))
     .singleElement(InstanceOfAssertFactories.PATH)
+    .isDirectory()
+    .extracting({ dir -> dir.resolve("args.txt") }, InstanceOfAssertFactories.PATH)
     .isRegularFile()
     .content()
     .contains("--module-path")

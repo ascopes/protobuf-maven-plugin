@@ -16,24 +16,30 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
+import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.Shlex;
+import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,79 +52,89 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Wraps a JVM-based plugin invocation using an OS-native script that calls Java.
+ * Component that takes a reference to a pure-Java {@code protoc} plugin and wraps it in a shell
+ * script or batch file to invoke it as if it were a single executable binary.
  *
- * <p>This script can be marked as executable and passed to the {@code protoc} invocation
- * as a path to ensure the script gets called correctly. By doing this, we avoid the need to build
- * OS-native executables during the protobuf compilation process.
+ * <p>The aim is to support enabling protoc to invoke executables without creating native
+ * binaries first, which is error-prone and increases the complexity of this Maven plugin
+ * significantly.
+ *
+ * <p>This implementation is a rewrite as of v2.6.0 that now uses Java argument files to
+ * deal with argument quoting in a platform-agnostic way, since the specification for batch files is
+ * very poorly documented and full of edge cases that could cause builds to fail.
  *
  * @author Ashley Scopes
+ * @since 2.6.0
  */
 @Named
 public final class JvmPluginResolver {
 
   private static final Set<String> ALLOWED_SCOPES = Set.of("compile", "runtime", "system");
-  private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
+  private static final Logger log = LoggerFactory.getLogger(JvmPluginResolver.class);
 
   private final HostSystem hostSystem;
   private final MavenArtifactPathResolver artifactPathResolver;
   private final TemporarySpace temporarySpace;
+  private final SystemPathBinaryResolver pathResolver;
 
   @Inject
   public JvmPluginResolver(
       HostSystem hostSystem,
       MavenArtifactPathResolver artifactPathResolver,
-      TemporarySpace temporarySpace
+      TemporarySpace temporarySpace,
+      SystemPathBinaryResolver pathResolver
   ) {
     this.hostSystem = hostSystem;
     this.artifactPathResolver = artifactPathResolver;
     this.temporarySpace = temporarySpace;
+    this.pathResolver = pathResolver;
   }
 
-  public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> plugins
+  public Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
+      Collection<? extends MavenProtocPlugin> pluginDescriptors
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
-    for (var plugin : plugins) {
-      if (plugin.isSkip()) {
-        log.info("Skipping plugin {}", plugin);
+    for (var pluginDescriptor : pluginDescriptors) {
+      if (pluginDescriptor.isSkip()) {
+        log.info("Skipping plugin {}", pluginDescriptor);
         continue;
       }
 
-      resolvedPlugins.add(resolve(plugin));
+      var resolvedPlugin = resolveMavenPlugin(pluginDescriptor);
+      resolvedPlugins.add(resolvedPlugin);
     }
-    return resolvedPlugins;
+    return Collections.unmodifiableList(resolvedPlugins);
   }
 
-  private ResolvedProtocPlugin resolve(
-      MavenProtocPlugin plugin
+  private ResolvedProtocPlugin resolveMavenPlugin(
+      MavenProtocPlugin pluginDescriptor
   ) throws IOException, ResolutionException {
 
     log.debug(
         "Resolving JVM-based Maven protoc plugin {} and generating OS-specific boostrap scripts",
-        plugin
+        pluginDescriptor
     );
 
-    var pluginId = pluginIdDigest(plugin);
-    var argLine = resolveAndBuildArgLine(plugin);
+    var id = hashPlugin(pluginDescriptor);
+    var argLine = buildArgLine(pluginDescriptor);
+    var javaPath = hostSystem.getJavaExecutablePath();
+    var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
 
     var scriptPath = hostSystem.isProbablyWindows()
-        ? writeWindowsBatchScript(pluginId, argLine)
-        : writeShellScript(pluginId, argLine);
+        ? writeWindowsScripts(id, javaPath, scratchDir, argLine)
+        : writePosixScripts(id, javaPath, scratchDir, argLine);
 
     return ImmutableResolvedProtocPlugin
         .builder()
-        .id(pluginId)
+        .id(id)
         .path(scriptPath)
-        .options(plugin.getOptions())
-        .order(plugin.getOrder())
+        .options(pluginDescriptor.getOptions())
+        .order(pluginDescriptor.getOrder())
         .build();
   }
 
-  private List<String> resolveAndBuildArgLine(
-      MavenProtocPlugin plugin
-  ) throws ResolutionException, IOException {
-
+  private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin)
+      throws ResolutionException, IOException {
     // Expectation: this always has at least one item in it, and the first item is the plugin
     // artifact itself.
     var dependencies = artifactPathResolver
@@ -128,10 +144,11 @@ public final class JvmPluginResolver {
             ALLOWED_SCOPES,
             false,
             true
-        );
+        )
+        .stream()
+        .collect(Collectors.toUnmodifiableList());
 
-    var args = new ArrayList<String>();
-    args.add(hostSystem.getJavaExecutablePath().toString());
+    var args = new ArgumentFileBuilder();
 
     // JVM tuning flags to improve the performance of short-lived processes.
     args.add("-Xshare:auto");
@@ -153,7 +170,7 @@ public final class JvmPluginResolver {
 
     args.add(determineMainClass(plugin, dependencies.get(0)));
 
-    return Collections.unmodifiableList(args);
+    return args;
   }
 
   private String determineMainClass(MavenProtocPlugin plugin, Path pluginPath) throws IOException {
@@ -227,72 +244,6 @@ public final class JvmPluginResolver {
     return sb.toString();
   }
 
-  private String pluginIdDigest(MavenProtocPlugin plugin) {
-    return Digests.sha1(plugin.toString());
-  }
-
-  private Path resolvePluginScriptPath() {
-    return temporarySpace.createTemporarySpace("plugins", "jvm");
-  }
-
-  private Path writeWindowsBatchScript(
-      String pluginId,
-      List<String> argLine
-  ) throws IOException {
-    var fullScriptPath = resolvePluginScriptPath().resolve(pluginId + ".bat");
-
-    var script = String.join(
-        "\r\n",
-        "@echo off",
-        "",
-        ":: ##################################################",
-        ":: ### Generated by ascopes/protobuf-maven-plugin ###",
-        ":: ###   Users should not invoke this script      ###",
-        ":: ###   directly, unless they know what they are ###",
-        ":: ###   doing.                                   ###",
-        ":: ##################################################",
-        "",
-        Shlex.quoteBatchArgs(argLine),
-        ""  // Trailing newline.
-    );
-
-    writeScript(fullScriptPath, script, StandardCharsets.ISO_8859_1);
-    return fullScriptPath;
-  }
-
-  private Path writeShellScript(
-      String pluginId,
-      List<String> argLine
-  ) throws IOException {
-    var fullScriptPath = resolvePluginScriptPath().resolve(pluginId + ".sh");
-
-    var script = String.join(
-        "\n",
-        "#!/usr/bin/env sh",
-        "",
-        "##################################################",
-        "### Generated by ascopes/protobuf-maven-plugin ###",
-        "###   Users should not invoke this script      ###",
-        "###   directly unless they know what they are  ###",
-        "###   doing.                                   ###",
-        "##################################################",
-        "",
-        "set -eu",
-        "",
-        Shlex.quoteShellArgs(argLine),
-        ""  // Trailing newline
-    );
-
-    writeScript(fullScriptPath, script, StandardCharsets.UTF_8);
-    return fullScriptPath;
-  }
-
-  private void writeScript(Path path, String content, Charset charset) throws IOException {
-    log.debug("Writing the following script to {} as {}:\n{}", path, charset, content);
-    Files.writeString(path, content, charset);
-    FileUtils.makeExecutable(path);
-  }
-
   private List<Path> findJavaModules(List<Path> paths) {
     // TODO: is using a module finder here an overkill?
     return ModuleFinder.of(paths.toArray(Path[]::new))
@@ -303,6 +254,71 @@ public final class JvmPluginResolver {
         .map(Path::of)
         .map(FileUtils::normalize)
         .peek(modulePath -> log.debug("Looks like {} is a JPMS module!", modulePath))
+        // Sort as the order of output is arbitrary, and this ensures reproducible builds.
+        .sorted(Comparator.comparing(Path::toString))
         .collect(Collectors.toUnmodifiableList());
+  }
+
+  private Path writePosixScripts(
+      String id,
+      Path javaExecutable,
+      Path scratchDir,
+      ArgumentFileBuilder argumentFileBuilder
+  ) throws IOException, ResolutionException {
+    var sh = pathResolver.resolve("sh").orElseThrow();
+    var argLineFile = writeArgLineFile(id, UTF_8, scratchDir, argumentFileBuilder);
+    var file = scratchDir.resolve("invoke.sh");
+
+    try (var writer = Files.newBufferedWriter(file, UTF_8, CREATE_NEW)) {
+      writer.write("#!");
+      writer.write(sh.toString());
+      writer.write("\n");
+
+      writer.write("set -o errexit");
+      writer.write("\n");
+
+      writer.write(Shlex.quoteShellArgs(List.of(javaExecutable.toString(), "@" + argLineFile)));
+      writer.write("\n");
+    }
+    FileUtils.makeExecutable(file);
+
+    return file;
+  }
+
+  private Path writeWindowsScripts(
+      String id,
+      Path javaExecutable,
+      Path scratchDir,
+      ArgumentFileBuilder argumentFileBuilder
+  ) throws IOException {
+    var argLineFile = writeArgLineFile(id, ISO_8859_1, scratchDir, argumentFileBuilder);
+    var file = scratchDir.resolve("invoke.bat");
+
+    try (var writer = Files.newBufferedWriter(file, ISO_8859_1, CREATE_NEW)) {
+      writer.write("@echo off");
+      writer.write("\r\n");
+
+      writer.write(Shlex.quoteBatchArgs(List.of(javaExecutable.toString(), "@" + argLineFile)));
+      writer.write("\r\n");
+    }
+
+    return file;
+  }
+
+  private Path writeArgLineFile(
+      String id,
+      Charset charset,
+      Path scratchDir,
+      ArgumentFileBuilder argumentFileBuilder
+  ) throws IOException {
+    var file = scratchDir.resolve("args.txt");
+    try (var writer = Files.newBufferedWriter(file, charset, CREATE_NEW)) {
+      argumentFileBuilder.write(writer);
+    }
+    return file;
+  }
+
+  private String hashPlugin(MavenProtocPlugin plugin) {
+    return Digests.sha1(plugin.toString());
   }
 }
