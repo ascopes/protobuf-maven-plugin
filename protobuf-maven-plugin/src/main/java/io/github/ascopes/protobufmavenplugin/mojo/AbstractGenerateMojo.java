@@ -326,7 +326,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If no sources are detected, it is usually a sign that this plugin
    * is misconfigured, or that you are including this plugin in a project that does not need it. For
    * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
-   * can explicitly set this to false instead.
+   * can explicitly set this to {@code false} instead.
    *
    * @since 0.5.0
    */
