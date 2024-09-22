@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
@@ -43,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -70,6 +72,12 @@ import org.slf4j.LoggerFactory;
 public final class JvmPluginResolver {
 
   private static final Set<String> ALLOWED_SCOPES = Set.of("compile", "runtime", "system");
+  private static final List<String> DEFAULT_JVM_ARGS = List.of();
+  private static final List<String> DEFAULT_JVM_CONFIG_ARGS = List.of(
+      "-Xshare:auto",
+      "-XX:+TieredCompilation",
+      "-XX:TieredStopAtLevel=1"
+  );
   private static final Logger log = LoggerFactory.getLogger(JvmPluginResolver.class);
 
   private final HostSystem hostSystem;
@@ -150,11 +158,6 @@ public final class JvmPluginResolver {
 
     var args = new ArgumentFileBuilder();
 
-    // JVM tuning flags to improve the performance of short-lived processes.
-    args.add("-Xshare:auto");
-    args.add("-XX:+TieredCompilation");
-    args.add("-XX:TieredStopAtLevel=1");
-
     // Caveat: we currently ignore the Class-Path JAR manifest entry. Not sure why we would want
     // to be using that here though, so I am leaving it unimplemented until such a time that someone
     // requests it.
@@ -168,7 +171,15 @@ public final class JvmPluginResolver {
       args.add(buildJavaPath(modules));
     }
 
+    requireNonNullElse(plugin.getJvmConfigArgs(), DEFAULT_JVM_CONFIG_ARGS)
+        .stream()
+        .filter(checkValidJvmConfigArg(plugin))
+        .forEach(args::add);
+
     args.add(determineMainClass(plugin, dependencies.get(0)));
+
+    requireNonNullElse(plugin.getJvmArgs(), DEFAULT_JVM_ARGS)
+        .forEach(args::add);
 
     return args;
   }
@@ -257,6 +268,24 @@ public final class JvmPluginResolver {
         // Sort as the order of output is arbitrary, and this ensures reproducible builds.
         .sorted(Comparator.comparing(Path::toString))
         .collect(Collectors.toUnmodifiableList());
+  }
+
+  private Predicate<String> checkValidJvmConfigArg(MavenProtocPlugin plugin) {
+    return arg -> {
+      // JVM args must begin with a hyphen, otherwise Java may interpret
+      // them as being the application entrypoint class and accidentally
+      // clobber the invocation.
+      if (arg.startsWith("-") && arg.length() > 1) {
+        return true;
+      }
+
+      log.warn(
+          "Dropping illegal JVM argument '{}' for Maven plugin {}",
+          arg,
+          plugin.getArtifactId()
+      );
+      return false;
+    };
   }
 
   private Path writePosixScripts(

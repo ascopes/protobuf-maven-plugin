@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
+import java.util.List;
 import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
@@ -35,12 +36,40 @@ import org.jspecify.annotations.Nullable;
 @Modifiable
 public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
 
+  /**
+   * Get the command line arguments to pass to the JVM.
+   *
+   * <p>This defaults to an empty list.
+   *
+   * @return the list of command line arguments to pass to the JVM.
+   * @since 2.6.0
+   */
+  @Nullable List<String> getJvmArgs();
+
+  /**
+   * The dependency resolution depth.
+   *
+   * <p>This cannot be changed for this type of plugin.
+   *
+   * @return {@code null}, always.
+   */
   @Derived
   @Override
   default @Nullable DependencyResolutionDepth getDependencyResolutionDepth() {
     // We never allow this to be specified for protoc plugins.
     return null;
   }
+
+  /**
+   * Get the arguments to pass to the JVM to configure it.
+   *
+   * <p>Users can use this to control concerns such as heap memory controls,
+   * GC and JIT settings, and specifying additional JVM options.
+   *
+   * @return the list of command line arguments to pass to the JVM.
+   * @since 2.6.0
+   */
+  @Nullable List<String> getJvmConfigArgs();
 
   /**
    * The main class entrypoint to use if the plugin is not an assembled JAR.

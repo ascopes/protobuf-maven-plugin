@@ -465,7 +465,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code version} - the version - required</li>
    *   <li>{@code type} - the artifact type - optional</li>
    *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code options} - a string of options to pass to the plugin
+   *   <li>{@code options} - a string of options to pass to the plugin. This
+   *       uses the standard {@code protoc} interface for specifying options
    *       - optional.</li>
    *   <li>{@code order} - an integer order to run the plugins in. Defaults
    *       to 100,000. Higher numbers run later than lower numbers.</li>
@@ -479,6 +480,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       same project. If the plugin is an assembled JAR, then this option is
    *       optional, the {@code Main-Class} manifest entry will be used when
    *       present if this is not provided.</li>
+   *   <li>{@code jvmArgs} - a list of commandline arguments to pass to the
+   *       plugin process - optional.</li>
+   *   <li>{@code jvmConfigArgs} - a list of commandline arguments to configure
+   *       the JVM itself. This is used to control factors such as JIT compilation,
+   *       JVM properties, heap size, etc. Users should leave this as the default
+   *       value (which optimises for short-lived processes) unless they know
+   *       exactly what they are doing - optional.
    * </ul>
    *
    * @since 0.3.0
