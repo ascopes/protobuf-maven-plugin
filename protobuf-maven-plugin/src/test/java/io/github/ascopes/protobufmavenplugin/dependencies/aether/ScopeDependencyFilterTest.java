@@ -32,9 +32,9 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("ScopeDependencyFilter tests")
 class ScopeDependencyFilterTest {
-  @DisplayName("Null dependencies return true to match the Eclipse implementation behaviour")
+  @DisplayName("Null dependencies return true to match the Aether implementation behaviour")
   @Test
-  void nullDependenciesReturnTrueToMatchTheEclipseImplementationBehaviour() {
+  void nullDependenciesReturnTrueToMatchTheAetherImplementationBehaviour() {
     // Given
     var node = mock(DependencyNode.class);
     when(node.getDependency()).thenReturn(null);
