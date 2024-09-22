@@ -18,8 +18,6 @@ package org.example.protocplugin;
 
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest;
 import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 
 public class ProtocPlugin {
   public static void main(String[] args) throws Throwable {
