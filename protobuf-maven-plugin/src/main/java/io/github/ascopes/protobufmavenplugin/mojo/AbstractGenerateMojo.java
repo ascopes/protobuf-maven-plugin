@@ -72,10 +72,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     log = LoggerFactory.getLogger(getClass());
   }
 
-  ///
-  /// MOJO dependencies.
-  ///
-
   /**
    * The source code generator.
    */
@@ -87,10 +83,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Inject
   MavenProject mavenProject;
-
-  ///
-  /// MOJO parameters.
-  ///
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -624,10 +616,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter
   @Nullable List<File> sourceDirectories;
 
-  ///
-  /// Language enabling flags
-  ///
-
   /**
    * Enable generating C++ sources from the protobuf sources.
    *
@@ -720,10 +708,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean rustEnabled;
-
-  ///
-  /// Internal functionality
-  ///
 
   /**
    * Provides the source root registrar for this Mojo.
