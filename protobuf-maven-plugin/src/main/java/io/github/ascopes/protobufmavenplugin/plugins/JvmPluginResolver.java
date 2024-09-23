@@ -297,22 +297,27 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argFileBuilder
   ) throws IOException, ResolutionException {
     var sh = pathResolver.resolve("sh").orElseThrow();
-    var content = writeArgLineFile(id, StandardCharsets.UTF_8, scratchDir, argFileBuilder);
-    var file = scratchDir.resolve("invoke.sh");
+    var argFile = writeArgFile(id, StandardCharsets.UTF_8, scratchDir, argFileBuilder);
 
-    var sb = new StringBuilder()
+    var script = new StringBuilder()
         .append("#!").append(sh).append('\n')
         .append("set -o errexit\n")
         .append("set -o posix > /dev/null 2>&1 || :\n");
 
-    quoteShellArg(sb, javaExecutable.toString());
-    sb.append(' ');
-    quoteShellArg(sb, "@" + content);
-    sb.append('\n');
+    quoteShellArg(script, javaExecutable.toString());
+    script.append(' ');
+    quoteShellArg(script, "@" + argFile);
+    script.append('\n');
 
-    Files.writeString(file, sb, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
-    FileUtils.makeExecutable(file);
-    return file;
+    var scriptFile = scratchDir.resolve("invoke.sh");
+    Files.writeString(
+        scriptFile,
+        script,
+        StandardCharsets.UTF_8,
+        StandardOpenOption.CREATE_NEW
+    );
+    FileUtils.makeExecutable(scriptFile);
+    return scriptFile;
   }
 
   private Path writeWindowsScripts(
@@ -321,32 +326,37 @@ public final class JvmPluginResolver {
       Path scratchDir,
       ArgumentFileBuilder argFileBuilder
   ) throws IOException {
-    var content = writeArgLineFile(id, StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
-    var file = scratchDir.resolve("invoke.bat");
+    var argFile = writeArgFile(id, StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
 
-    var sb = new StringBuilder()
+    var script = new StringBuilder()
         .append("@echo off\r\n");
 
-    quoteBatchArg(sb, javaExecutable.toString());
-    sb.append(' ');
-    quoteBatchArg(sb, "@" + content);
-    sb.append("\r\n");
+    quoteBatchArg(script, javaExecutable.toString());
+    script.append(' ');
+    quoteBatchArg(script, "@" + argFile);
+    script.append("\r\n");
 
-    Files.writeString(file, sb, StandardCharsets.ISO_8859_1, StandardOpenOption.CREATE_NEW);
-    return file;
+    var scriptFile = scratchDir.resolve("invoke.bat");
+    Files.writeString(
+        scriptFile,
+        script.toString(),
+        StandardCharsets.ISO_8859_1,
+        StandardOpenOption.CREATE_NEW
+    );
+    return scriptFile;
   }
 
-  private Path writeArgLineFile(
+  private Path writeArgFile(
       String id,
       Charset charset,
       Path scratchDir,
-      ArgumentFileBuilder argumentFileBuilder
+      ArgumentFileBuilder argFileBuilder
   ) throws IOException {
-    var file = scratchDir.resolve("args.txt");
-    try (var writer = Files.newBufferedWriter(file, charset, StandardOpenOption.CREATE_NEW)) {
-      argumentFileBuilder.write(writer);
+    var argFile = scratchDir.resolve("args.txt");
+    try (var writer = Files.newBufferedWriter(argFile, charset, StandardOpenOption.CREATE_NEW)) {
+      argFileBuilder.write(writer);
     }
-    return file;
+    return argFile;
   }
 
   private void quoteShellArg(StringBuilder sb, String arg) {
