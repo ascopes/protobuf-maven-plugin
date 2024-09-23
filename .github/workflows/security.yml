@@ -20,8 +20,8 @@ jobs:
       - name: Initialize Java environment
         uses: actions/setup-java@v4
         with:
-          distribution: zulu
-          java-version: 22
+          distribution: temurin
+          java-version: 23
 
       - name: Submit Dependency Snapshot
         uses: advanced-security/maven-dependency-submission-action@v4
