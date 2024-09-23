@@ -16,9 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
@@ -29,14 +26,15 @@ import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
-import io.github.ascopes.protobufmavenplugin.utils.Shlex;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -139,6 +137,10 @@ public final class JvmPluginResolver {
         .options(pluginDescriptor.getOptions())
         .order(pluginDescriptor.getOrder())
         .build();
+  }
+
+  private String hashPlugin(MavenProtocPlugin plugin) {
+    return Digests.sha1(plugin.toString());
   }
 
   private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin)
@@ -292,25 +294,24 @@ public final class JvmPluginResolver {
       String id,
       Path javaExecutable,
       Path scratchDir,
-      ArgumentFileBuilder argumentFileBuilder
+      ArgumentFileBuilder argFileBuilder
   ) throws IOException, ResolutionException {
     var sh = pathResolver.resolve("sh").orElseThrow();
-    var argLineFile = writeArgLineFile(id, UTF_8, scratchDir, argumentFileBuilder);
+    var content = writeArgLineFile(id, StandardCharsets.UTF_8, scratchDir, argFileBuilder);
     var file = scratchDir.resolve("invoke.sh");
 
-    try (var writer = Files.newBufferedWriter(file, UTF_8, CREATE_NEW)) {
-      writer.write("#!");
-      writer.write(sh.toString());
-      writer.write("\n");
+    var sb = new StringBuilder()
+        .append("#!").append(sh).append('\n')
+        .append("set -o errexit\n")
+        .append("set -o posix > /dev/null 2>&1 || :\n");
 
-      writer.write("set -o errexit");
-      writer.write("\n");
+    quoteShellArg(sb, javaExecutable.toString());
+    sb.append(' ');
+    quoteShellArg(sb, "@" + content);
+    sb.append('\n');
 
-      writer.write(Shlex.quoteShellArgs(List.of(javaExecutable.toString(), "@" + argLineFile)));
-      writer.write("\n");
-    }
+    Files.writeString(file, sb, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
     FileUtils.makeExecutable(file);
-
     return file;
   }
 
@@ -318,19 +319,20 @@ public final class JvmPluginResolver {
       String id,
       Path javaExecutable,
       Path scratchDir,
-      ArgumentFileBuilder argumentFileBuilder
+      ArgumentFileBuilder argFileBuilder
   ) throws IOException {
-    var argLineFile = writeArgLineFile(id, ISO_8859_1, scratchDir, argumentFileBuilder);
+    var content = writeArgLineFile(id, StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
     var file = scratchDir.resolve("invoke.bat");
 
-    try (var writer = Files.newBufferedWriter(file, ISO_8859_1, CREATE_NEW)) {
-      writer.write("@echo off");
-      writer.write("\r\n");
+    var sb = new StringBuilder()
+        .append("@echo off\r\n");
 
-      writer.write(Shlex.quoteBatchArgs(List.of(javaExecutable.toString(), "@" + argLineFile)));
-      writer.write("\r\n");
-    }
+    quoteBatchArg(sb, javaExecutable.toString());
+    sb.append(' ');
+    quoteBatchArg(sb, "@" + content);
+    sb.append("\r\n");
 
+    Files.writeString(file, sb, StandardCharsets.ISO_8859_1, StandardOpenOption.CREATE_NEW);
     return file;
   }
 
@@ -341,13 +343,69 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argumentFileBuilder
   ) throws IOException {
     var file = scratchDir.resolve("args.txt");
-    try (var writer = Files.newBufferedWriter(file, charset, CREATE_NEW)) {
+    try (var writer = Files.newBufferedWriter(file, charset, StandardOpenOption.CREATE_NEW)) {
       argumentFileBuilder.write(writer);
     }
     return file;
   }
 
-  private String hashPlugin(MavenProtocPlugin plugin) {
-    return Digests.sha1(plugin.toString());
+  private void quoteShellArg(StringBuilder sb, String arg) {
+    sb.append('\'');
+    for (var i = 0; i < arg.length(); ++i) {
+      var c = arg.charAt(i);
+      switch (c) {
+        case '\\':
+          sb.append("\\\\");
+          break;
+        case '\'':
+          sb.append("'\"'\"'");
+          break;
+        case '\n':
+          sb.append("'$'\\n''");
+          break;
+        case '\r':
+          sb.append("'$'\\r''");
+          break;
+        case '\t':
+          sb.append("'$'\\t''");
+          break;
+        default:
+          sb.append(c);
+          break;
+      }
+    }
+
+    sb.append('\'');
+  }
+
+  private void quoteBatchArg(StringBuilder sb, String arg) {
+    sb.append('"');
+
+    for (var i = 0; i < arg.length(); ++i) {
+      var c = arg.charAt(i);
+
+      switch (c) {
+        case '"':
+          sb.append("\"\"\"");
+          break;
+        case '%':
+          sb.append("%%");
+          break;
+        case '\r':
+        case '\t':
+        case '^':
+        case '&':
+        case '<':
+        case '>':
+        case '|':
+          sb.append('^').append(c);
+          break;
+        default:
+          sb.append(c);
+          break;
+      }
+    }
+
+    sb.append('"');
   }
 }

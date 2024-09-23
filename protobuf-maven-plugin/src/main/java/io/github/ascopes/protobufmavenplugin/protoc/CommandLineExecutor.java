@@ -17,7 +17,6 @@
 package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
-import io.github.ascopes.protobufmavenplugin.utils.Shlex;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,11 +62,8 @@ public final class CommandLineExecutor {
   }
 
   private void reportInvocation(List<String> args) {
-    var renderedCommandLine = hostSystem.isProbablyWindows()
-        ? Shlex.quoteBatchArgs(args)
-        : Shlex.quoteShellArgs(args);
-    log.info("Calling protoc with the following invocation:");
-    renderedCommandLine.lines()
+    log.info("Calling protoc with the following arguments:");
+    args.stream()
         .map("  "::concat)
         .map(String::stripTrailing)
         .forEach(log::info);
