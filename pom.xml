@@ -361,6 +361,7 @@
               <compilerArg>-Xlint:all,-classfile,-processing,-requires-automatic,-serial</compilerArg>
             </compilerArgs>
             <failOnWarning>true</failOnWarning>
+            <proc>full</proc>
             <showDeprecation>true</showDeprecation>
             <release>11</release>
           </configuration>
