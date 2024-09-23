@@ -301,8 +301,7 @@ public final class JvmPluginResolver {
 
     var script = new StringBuilder()
         .append("#!").append(sh).append('\n')
-        .append("set -o errexit\n")
-        .append("set -o posix > /dev/null 2>&1 || :\n");
+        .append("set -o errexit\n");
 
     quoteShellArg(script, javaExecutable.toString());
     script.append(' ');
