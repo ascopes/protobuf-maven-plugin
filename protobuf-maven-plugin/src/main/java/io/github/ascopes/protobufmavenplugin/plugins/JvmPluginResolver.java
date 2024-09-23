@@ -350,6 +350,8 @@ public final class JvmPluginResolver {
   }
 
   private void quoteShellArg(StringBuilder sb, String arg) {
+    // POSIX file names can be a bit more complicated and may need escaping
+    // in certain edge cases to remain valid.
     sb.append('\'');
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
@@ -374,38 +376,16 @@ public final class JvmPluginResolver {
           break;
       }
     }
-
     sb.append('\'');
   }
 
   private void quoteBatchArg(StringBuilder sb, String arg) {
-    sb.append('"');
-
-    for (var i = 0; i < arg.length(); ++i) {
-      var c = arg.charAt(i);
-
-      switch (c) {
-        case '"':
-          sb.append("\"\"\"");
-          break;
-        case '%':
-          sb.append("%%");
-          break;
-        case '\r':
-        case '\t':
-        case '^':
-        case '&':
-        case '<':
-        case '>':
-        case '|':
-          sb.append('^').append(c);
-          break;
-        default:
-          sb.append(c);
-          break;
-      }
-    }
-
-    sb.append('"');
+    // All the escapable characters in batch files other than quotes
+    // are considered to be illegal characters in Windows file names,
+    // so we can make the assumption that we don't need to change much
+    // here.
+    sb.append('"')
+        .append(arg.replaceAll("\"", "\"\"\""))
+        .append('"');
   }
 }
