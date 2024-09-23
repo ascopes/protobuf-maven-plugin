@@ -16,9 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
@@ -29,14 +26,15 @@ import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
-import io.github.ascopes.protobufmavenplugin.utils.Shlex;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -139,6 +137,10 @@ public final class JvmPluginResolver {
         .options(pluginDescriptor.getOptions())
         .order(pluginDescriptor.getOrder())
         .build();
+  }
+
+  private String hashPlugin(MavenProtocPlugin plugin) {
+    return Digests.sha1(plugin.toString());
   }
 
   private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin)
@@ -292,62 +294,107 @@ public final class JvmPluginResolver {
       String id,
       Path javaExecutable,
       Path scratchDir,
-      ArgumentFileBuilder argumentFileBuilder
+      ArgumentFileBuilder argFileBuilder
   ) throws IOException, ResolutionException {
     var sh = pathResolver.resolve("sh").orElseThrow();
-    var argLineFile = writeArgLineFile(id, UTF_8, scratchDir, argumentFileBuilder);
-    var file = scratchDir.resolve("invoke.sh");
+    var argFile = writeArgFile(id, StandardCharsets.UTF_8, scratchDir, argFileBuilder);
 
-    try (var writer = Files.newBufferedWriter(file, UTF_8, CREATE_NEW)) {
-      writer.write("#!");
-      writer.write(sh.toString());
-      writer.write("\n");
+    var script = new StringBuilder()
+        .append("#!").append(sh).append('\n')
+        .append("set -o errexit\n");
 
-      writer.write("set -o errexit");
-      writer.write("\n");
+    quoteShellArg(script, javaExecutable.toString());
+    script.append(' ');
+    quoteShellArg(script, "@" + argFile);
+    script.append('\n');
 
-      writer.write(Shlex.quoteShellArgs(List.of(javaExecutable.toString(), "@" + argLineFile)));
-      writer.write("\n");
-    }
-    FileUtils.makeExecutable(file);
-
-    return file;
+    var scriptFile = scratchDir.resolve("invoke.sh");
+    Files.writeString(
+        scriptFile,
+        script,
+        StandardCharsets.UTF_8,
+        StandardOpenOption.CREATE_NEW
+    );
+    FileUtils.makeExecutable(scriptFile);
+    return scriptFile;
   }
 
   private Path writeWindowsScripts(
       String id,
       Path javaExecutable,
       Path scratchDir,
-      ArgumentFileBuilder argumentFileBuilder
+      ArgumentFileBuilder argFileBuilder
   ) throws IOException {
-    var argLineFile = writeArgLineFile(id, ISO_8859_1, scratchDir, argumentFileBuilder);
-    var file = scratchDir.resolve("invoke.bat");
+    var argFile = writeArgFile(id, StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
 
-    try (var writer = Files.newBufferedWriter(file, ISO_8859_1, CREATE_NEW)) {
-      writer.write("@echo off");
-      writer.write("\r\n");
+    var script = new StringBuilder()
+        .append("@echo off\r\n");
 
-      writer.write(Shlex.quoteBatchArgs(List.of(javaExecutable.toString(), "@" + argLineFile)));
-      writer.write("\r\n");
-    }
+    quoteBatchArg(script, javaExecutable.toString());
+    script.append(' ');
+    quoteBatchArg(script, "@" + argFile);
+    script.append("\r\n");
 
-    return file;
+    var scriptFile = scratchDir.resolve("invoke.bat");
+    Files.writeString(
+        scriptFile,
+        script.toString(),
+        StandardCharsets.ISO_8859_1,
+        StandardOpenOption.CREATE_NEW
+    );
+    return scriptFile;
   }
 
-  private Path writeArgLineFile(
+  private Path writeArgFile(
       String id,
       Charset charset,
       Path scratchDir,
-      ArgumentFileBuilder argumentFileBuilder
+      ArgumentFileBuilder argFileBuilder
   ) throws IOException {
-    var file = scratchDir.resolve("args.txt");
-    try (var writer = Files.newBufferedWriter(file, charset, CREATE_NEW)) {
-      argumentFileBuilder.write(writer);
+    var argFile = scratchDir.resolve("args.txt");
+    try (var writer = Files.newBufferedWriter(argFile, charset, StandardOpenOption.CREATE_NEW)) {
+      argFileBuilder.write(writer);
     }
-    return file;
+    return argFile;
   }
 
-  private String hashPlugin(MavenProtocPlugin plugin) {
-    return Digests.sha1(plugin.toString());
+  private void quoteShellArg(StringBuilder sb, String arg) {
+    // POSIX file names can be a bit more complicated and may need escaping
+    // in certain edge cases to remain valid.
+    sb.append('\'');
+    for (var i = 0; i < arg.length(); ++i) {
+      var c = arg.charAt(i);
+      switch (c) {
+        case '\\':
+          sb.append("\\\\");
+          break;
+        case '\'':
+          sb.append("'\"'\"'");
+          break;
+        case '\n':
+          sb.append("'$'\\n''");
+          break;
+        case '\r':
+          sb.append("'$'\\r''");
+          break;
+        case '\t':
+          sb.append("'$'\\t''");
+          break;
+        default:
+          sb.append(c);
+          break;
+      }
+    }
+    sb.append('\'');
+  }
+
+  private void quoteBatchArg(StringBuilder sb, String arg) {
+    // All the escapable characters in batch files other than quotes
+    // are considered to be illegal characters in Windows file names,
+    // so we can make the assumption that we don't need to change much
+    // here.
+    sb.append('"')
+        .append(arg.replaceAll("\"", "\"\"\""))
+        .append('"');
   }
 }
