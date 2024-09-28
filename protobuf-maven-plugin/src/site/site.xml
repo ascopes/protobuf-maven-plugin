@@ -53,7 +53,7 @@
       <item name="Goals" href="plugin-info.html"/>
       <item name="Usage" href="usage.html"/>
     </menu>
-    <menu name="User Guides (new)">
+    <menu name="User Guides">
       <item name="Requirements" href="user-guides/requirements.html"/>
       <item name="Basic Usage" href="user-guides/basic-usage.html"/>
     </menu>
@@ -74,6 +74,6 @@
   <skin>
     <groupId>org.apache.maven.skins</groupId>
     <artifactId>maven-fluido-skin</artifactId>
-    <version>2.0.0-M9</version>
+    <version>2.0.0-M10</version>
   </skin>
 </site>
