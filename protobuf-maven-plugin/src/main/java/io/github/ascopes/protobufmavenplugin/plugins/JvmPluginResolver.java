@@ -156,6 +156,7 @@ public final class JvmPluginResolver {
             true
         )
         .stream()
+        .sorted(lexicographicalComparator())
         .collect(Collectors.toUnmodifiableList());
 
     var args = new ArgumentFileBuilder();
@@ -258,7 +259,7 @@ public final class JvmPluginResolver {
   }
 
   private List<Path> findJavaModules(List<Path> paths) {
-    // TODO: is using a module finder here an overkill?
+    // XXX: is using a module finder here an overkill?
     return ModuleFinder.of(paths.toArray(Path[]::new))
         .findAll()
         .stream()
@@ -266,10 +267,19 @@ public final class JvmPluginResolver {
         .flatMap(Optional::stream)
         .map(Path::of)
         .map(FileUtils::normalize)
-        .peek(modulePath -> log.debug("Looks like {} is a JPMS module!", modulePath))
-        // Sort as the order of output is arbitrary, and this ensures reproducible builds.
-        .sorted(Comparator.comparing(Path::toString))
+        .peek(modulePath -> log.trace(
+            "Looks like {} is a JPMS module, so will be included on the module path",
+            modulePath
+        ))
+        .sorted(lexicographicalComparator())
         .collect(Collectors.toUnmodifiableList());
+  }
+
+  private Comparator<Path> lexicographicalComparator() {
+    // Sort paths lexicographically, as the order of output from ModuleFinder and Aether is not
+    // well-defined in the API contract. This ensures reproducible builds by generating identical
+    // scripts each time.
+    return Comparator.comparing(Path::toString);
   }
 
   private Predicate<String> checkValidJvmConfigArg(MavenProtocPlugin plugin) {
