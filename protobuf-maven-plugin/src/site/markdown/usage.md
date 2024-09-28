@@ -615,6 +615,48 @@ attribute.
 </jvmMavenPlugins>
 ```
 
+#### Commandline arguments
+
+Since JVM plugins work by internally bootstrapping a Java process per invocation, you can pass some extra
+options here.
+
+If you wish to provide some commandline arguments, you can provide the `<jvmArgs>` parameter in each
+`<jvmMavenPlugin>` block. This is a list of string arguments. Of course, support for this relies entirely
+on the plugin supporting the use of commandline arguments in the first place.
+
+For example:
+
+```xml
+<jvmMavenPlugin>
+  ...
+  <jvmArgs>
+    <jvmArg>--logger.level=DEBUG</jvmArg>
+    <jvmArg>--include-comments</jvmArg>
+  </jvmArgs>
+</jvmMavenPlugin>
+```
+
+#### JVM configuration arguments
+
+You can also override the JVM configuration arguments itself if you need to tune how the JVM is running. By
+default, JVM configuration arguments are passed that disable the full server JIT, and enable class sharing
+where supported. This optimises build times for short-lived JVM processes. Overriding this argument will
+**replace** these default arguments as well.
+
+An example of providing custom arguments would be:
+
+```xml
+<jvmMavenPlugin>
+  ...
+  <jvmConfigArgs>
+    <jvmConfigArg>-Xshare:off</jvmConfigArg>
+    <jvmConfigArg>-Xms100m</jvmConfigArg>
+    <jvmConfigArg>-Xmx500m</jvmConfigArg>
+    <jvmConfigArg>org.slf4j.simpleLogger.defaultLogLevel=DEBUG</jvmConfigArg>
+  </jvmConfigArgs>
+</jvmMavenPlugin>
+```
+
 ### Mixing plugins
 
 Multiple plugins can be provided if needed. For example, if you are using the 
@@ -647,3 +689,8 @@ then you can provide the following:
   ...
 </plugin>
 ```
+
+### Running plugins without default Java code generation
+
+You can turn the default Java code generation step off by setting `<javaEnabled>false</javaEnabled>` on the
+protobuf-maven-plugin configuration. This will then only attempt to run the plugins you provide.
