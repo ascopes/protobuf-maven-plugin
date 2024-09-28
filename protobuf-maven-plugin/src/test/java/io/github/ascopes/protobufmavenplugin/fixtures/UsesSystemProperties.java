@@ -51,7 +51,7 @@ public @interface UsesSystemProperties {
   final class UsesSystemPropertiesExtension
       implements BeforeEachCallback, AfterEachCallback {
 
-    private final Logger log = LoggerFactory.getLogger(Extension.class);
+    private final Logger log = LoggerFactory.getLogger(UsesSystemProperties.class);
     private Properties originalProperties;
 
     @Override
