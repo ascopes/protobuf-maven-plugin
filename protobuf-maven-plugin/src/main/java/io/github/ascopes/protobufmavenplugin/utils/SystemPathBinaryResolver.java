@@ -46,32 +46,29 @@ public final class SystemPathBinaryResolver {
   }
 
   public Optional<Path> resolve(String name) throws ResolutionException {
-    log.debug("Looking for executable matching name '{}' on the path", name);
-
+    log.debug("Looking for executable matching name '{}' on PATH", name);
     var predicate = hostSystem.isProbablyWindows()
         ? isWindowsMatch(name)
         : isPosixMatch(name);
 
-    var result = Optional.<Path>empty();
-
     for (var dir : hostSystem.getSystemPath()) {
       try (var files = Files.walk(dir, 1)) {
-        result = files.filter(predicate).findFirst();
+        var result = files.filter(predicate).findFirst();
 
         if (result.isPresent()) {
-          break;
+          log.debug("Result for lookup of '{}' on PATH was {}", name, result.get());
+          return result;
         }
       } catch (IOException ex) {
         throw new ResolutionException("An exception occurred while scanning the system PATH", ex);
       }
     }
 
-    log.debug("Result for lookup of '{}' was {}", name, result);
-    return result;
+    log.debug("No match found for '{}' on PATH", name);
+    return Optional.empty();
   }
 
   private Predicate<Path> isWindowsMatch(String name) {
-    log.debug("Using Windows path matching strategy");
     return path -> {
       var matchesName = FileUtils.getFileNameWithoutExtension(path)
           .equalsIgnoreCase(name);
@@ -81,7 +78,7 @@ public final class SystemPathBinaryResolver {
           .isPresent();
 
       log.debug(
-          "Path '{}' (WINDOWS) matches name = {}, matches executable extension = {}",
+          "Path '{}' matches name = {}, matches executable extension = {}",
           path,
           matchesName,
           matchesExtension
@@ -92,13 +89,12 @@ public final class SystemPathBinaryResolver {
   }
 
   private Predicate<Path> isPosixMatch(String name) {
-    log.debug("Using POSIX path matching strategy");
     return path -> {
       var matchesName = path.getFileName().toString().equals(name);
       var matchesExecutableFlag = Files.isExecutable(path);
 
       log.debug(
-          "Path '{}' (POSIX) matches name = {}, matches executable flag = {}",
+          "Path '{}' matches name = {}, matches executable flag = {}",
           path,
           matchesName,
           matchesExecutableFlag
