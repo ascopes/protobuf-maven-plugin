@@ -16,8 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.fixtures;
 
-import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties.Extension;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -31,35 +31,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Annotation for JUnit5 which allows a test to modify system properties.
+ * Annotation for JUnit5 which allows a test to modify system properties by
+ * temporarily replacing them with a new map.
+ *
+ * <p>System properties are restored at the end of each test.
+ *
+ * <p>All test instances are marked as isolated due to the modification of the
+ * system properties global reference.
  *
  * @author Ashley Scopes
  */
-@ExtendWith(Extension.class)
+@ExtendWith(UsesSystemProperties.UsesSystemPropertiesExtension.class)
+@Inherited
 @Isolated("modifies system properties singleton")
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface UsesSystemProperties {
 
-  class Extension implements BeforeEachCallback, AfterEachCallback {
+  final class UsesSystemPropertiesExtension
+      implements BeforeEachCallback, AfterEachCallback {
 
     private final Logger log = LoggerFactory.getLogger(Extension.class);
-    private volatile Properties properties;
+    private Properties originalProperties;
 
     @Override
     public void beforeEach(ExtensionContext extensionContext) {
-      log.info(
+      log.debug(
           "Replacing system properties with empty map for duration of test in {}",
           extensionContext.getTestMethod()
       );
-      properties = System.getProperties();
+      originalProperties = System.getProperties();
       System.setProperties(new Properties());
     }
 
     @Override
     public void afterEach(ExtensionContext extensionContext) {
-      System.setProperties(properties);
-      log.info(
+      System.setProperties(originalProperties);
+      log.debug(
           "Restored original system properties since completion of test in {}",
           extensionContext.getTestMethod()
       );
