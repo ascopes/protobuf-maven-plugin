@@ -2,17 +2,14 @@ name: Build
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - main
-  workflow_call: {}
+    branches: [main]
   workflow_dispatch: {}
 
 jobs:
-  build-x86_64-crossos:
-    name: jdk-${{ matrix.java-version }}/${{ matrix.os-name }}/x86_64
+  build:
+    name: ${{ matrix.java-version }}/${{ matrix.os-name }}/${{ matrix.maven}}-maven
     runs-on: ${{ matrix.os-name }}
     timeout-minutes: 30
 
@@ -21,62 +18,13 @@ jobs:
       matrix:
         os-name: [ubuntu-latest, macos-latest, windows-latest]
         java-version: [11, 23]
+        maven: [default, prerequisite]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK ${{ matrix.java-version }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java-version }}
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Install protoc to $PATH
-        shell: bash
-        run: scripts/install-protoc-to-github-runner.sh
-
-      - name: Build and test
-        shell: bash
-        run: ./mvnw -B verify
-
-      - name: Publish code coverage
-        uses: codecov/codecov-action@v4
-        continue-on-error: true
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Upload build logs as artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-logs
-          path: |-
-            **/build.log
-            **/maven-status/**
-            **/surefire-reports/**.txt
-          compression-level: 9
-          retention-days: 7
-          include-hidden-files: true
-          if-no-files-found: warn
-
-  build-x86_64-old-maven:
-    name: jdk-${{ matrix.java-version }}/ubuntu-latest/x86_64 (oldest supported Maven)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    strategy:
-      fail-fast: false
-      matrix:
-        java-version: [11, 23]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ matrix.java-version }}
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java-version }}
@@ -84,6 +32,7 @@ jobs:
           cache: maven
 
       - name: Change Maven version to the prerequisite version
+        if: ${{ matrix.maven == "prerequisite" }}
         shell: bash
         run: |-
           version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven')
@@ -95,7 +44,7 @@ jobs:
 
       - name: Build and test
         shell: bash
-        run: ./mvnw -B verify
+        run: ./mvnw -B -Dcheckstyle.skip -Dlicense.skip verify
 
       - name: Publish code coverage
         uses: codecov/codecov-action@v4
@@ -108,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jdk-${{ matrix.java-version }}-old-maven-logs
+          name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-${{ matrix.maven }}
           path: |-
             **/build.log
             **/maven-status/**
@@ -118,6 +67,25 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
+  validate:
+    name: Validate build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 23
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Validate
+        shell: bash
+        run: ./mvnw -B validate
+
   build-pages:
     name: Generate pages
     runs-on: ubuntu-latest
@@ -126,7 +94,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 23
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 23
