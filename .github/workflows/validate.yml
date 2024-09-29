@@ -3,16 +3,15 @@ name: Validate configuration
 on:
   push:
     branches: 
-      - "**"
+      - maim
   pull_request:
     branches:
       - main
-  workflow_call: {}
   workflow_dispatch: {}
 
 jobs:
   build:
-    name: Validate configuration
+    name: Validate scripts and config files
     runs-on: ubuntu-latest
 
     steps:
