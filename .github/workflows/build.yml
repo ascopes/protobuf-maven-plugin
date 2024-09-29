@@ -32,7 +32,7 @@ jobs:
           cache: maven
 
       - name: Change Maven version to the prerequisite version
-        if: ${{ matrix.maven == "prerequisite" }}
+        if: ${{ matrix.maven == 'prerequisite' }}
         shell: bash
         run: |-
           version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven')
@@ -67,8 +67,8 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
-  validate:
-    name: Validate build
+  checkstyle-and-license-headers:
+    name: Checkstyle and license headers
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
