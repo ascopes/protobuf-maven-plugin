@@ -85,12 +85,10 @@ jobs:
 
       - name: Change Maven version to the prerequisite version
         shell: bash
-        run: >-
-          ./mvnw -T1 -B wrapper:wrapper -Dmaven="$(
-              ./mvnw -T1 -B -q -pl protobuf-maven-plugin help:evaluate
-              -DforceStdout -Dexpression='prerequisites.maven'
-          )"
-
+        run: |-
+          version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='prerequisites.maven')
+          ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${version}"
+  
       - name: Install protoc to $PATH
         shell: bash
         run: scripts/install-protoc-to-github-runner.sh
