@@ -85,12 +85,11 @@ jobs:
 
       - name: Change Maven version to the prerequisite version
         shell: bash
-        run: |-
-          # Use -T1 here as the plugins emit warnings about thread safety if we use the
-          # default concurrency settings for the project.
-          set -eux
-          version=3.8.2
-          ./mvnw -T1 -B wrapper:wrapper -Dmaven="${version}"
+        run: >-
+          ./mvnw -T1 -B wrapper:wrapper -Dmaven="$(
+              ./mvnw -T1 -B -q -pl protobuf-maven-plugin help:evaluate
+              -DforceStdout -Dexpression='prerequisites.maven'
+          )"
 
       - name: Install protoc to $PATH
         shell: bash
