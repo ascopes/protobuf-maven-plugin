@@ -8,8 +8,53 @@ on:
   workflow_dispatch: {}
 
 jobs:
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Shellcheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          check_together: 'yes'
+          scandir: './scripts'
+
+  validate-codecov:
+    name: Validate codecov.yml
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate codecov.yml
+        shell: bash
+        run: curl -vvv --fail --data-binary @- https://codecov.io/validate < codecov.yml
+
+  validate-checkstyle-and-license-headers:
+    name: Checkstyle and license headers
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 23
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Validate
+        shell: bash
+        run: ./mvnw -B validate
+
   build:
-    name: ${{ matrix.java-version }}/${{ matrix.os-name }}/${{ matrix.maven}}-maven
+    name: JDK ${{ matrix.java-version }} on ${{ matrix.os-name }} (${{ matrix.maven}} Maven)
     runs-on: ${{ matrix.os-name }}
     timeout-minutes: 30
 
@@ -67,27 +112,8 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
-  checkstyle-and-license-headers:
-    name: Checkstyle and license headers
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 23
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Validate
-        shell: bash
-        run: ./mvnw -B validate
-
-  build-pages:
-    name: Generate pages
+  pages:
+    name: Pages
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
