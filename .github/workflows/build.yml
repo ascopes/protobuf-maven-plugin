@@ -86,7 +86,7 @@ jobs:
       - name: Change Maven version to the prerequisite version
         shell: bash
         run: |-
-          version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='prerequisites.maven')
+          version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven')
           ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${version}"
   
       - name: Install protoc to $PATH
