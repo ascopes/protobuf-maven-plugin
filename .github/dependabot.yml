@@ -5,7 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "saturday"
+      day: "monday"
     target-branch: "main"
     assignees:
       - "ascopes"
@@ -16,7 +16,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "saturday"
+      day: "monday"
     target-branch: "main"
     assignees:
       - "ascopes"
