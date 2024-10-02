@@ -19,8 +19,6 @@ package io.github.ascopes.protobufmavenplugin.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +35,7 @@ class ArgumentFileBuilderTest {
   void argumentsAreConvertedToStringArgumentFileInExpectedFormat(
       List<Object> givenArguments,
       String expectedResult
-  ) throws IOException {
+  ) {
     // Given
     var builder = new ArgumentFileBuilder();
 
@@ -46,11 +44,7 @@ class ArgumentFileBuilderTest {
       builder.add(argument);
     }
 
-    String actualResult;
-    try (var stringWriter = new StringWriter()) {
-      builder.write(stringWriter);
-      actualResult = stringWriter.toString();
-    }
+    var actualResult = builder.toString();
 
     // Then
     assertThat(actualResult).isEqualTo(expectedResult);
