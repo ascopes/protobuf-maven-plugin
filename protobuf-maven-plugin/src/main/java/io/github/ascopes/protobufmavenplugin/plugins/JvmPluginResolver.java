@@ -352,9 +352,7 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argFileBuilder
   ) throws IOException {
     var argFile = scratchDir.resolve("args.txt");
-    try (var writer = Files.newBufferedWriter(argFile, charset, StandardOpenOption.CREATE_NEW)) {
-      argFileBuilder.write(writer);
-    }
+    Files.writeString(argFile, argFileBuilder.toString(), charset, StandardOpenOption.CREATE_NEW);
     return argFile;
   }
 
