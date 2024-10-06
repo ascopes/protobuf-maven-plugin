@@ -72,10 +72,11 @@ jobs:
           - os-name: windows-latest
             java-version: 11
             maven: default
+          # TODO: uncomment once a Java 24 compatible version of Groovy is available.
           # Test on Java 24 early access to verify future compatibility.
-          - os-name: ubuntu-latest
-            java-version: 24-ea
-            maven: default
+          #- os-name: ubuntu-latest
+          #  java-version: 24-ea
+          #  maven: default
           # Prereq Maven version, to test backwards compatibility.
           - os-name: ubuntu-latest
             java-version: 11
