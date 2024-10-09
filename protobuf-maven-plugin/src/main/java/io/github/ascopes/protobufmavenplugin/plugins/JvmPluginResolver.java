@@ -313,7 +313,7 @@ public final class JvmPluginResolver {
         scriptFile,
         script,
         StandardCharsets.UTF_8,
-        StandardOpenOption.CREATE_NEW
+        StandardOpenOption.CREATE
     );
     FileUtils.makeExecutable(scriptFile);
     return scriptFile;
@@ -340,7 +340,7 @@ public final class JvmPluginResolver {
         scriptFile,
         script.toString(),
         StandardCharsets.ISO_8859_1,
-        StandardOpenOption.CREATE_NEW
+        StandardOpenOption.CREATE
     );
     return scriptFile;
   }
@@ -352,7 +352,7 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argFileBuilder
   ) throws IOException {
     var argFile = scratchDir.resolve("args.txt");
-    Files.writeString(argFile, argFileBuilder.toString(), charset, StandardOpenOption.CREATE_NEW);
+    Files.writeString(argFile, argFileBuilder.toString(), charset, StandardOpenOption.CREATE);
     return argFile;
   }
 
