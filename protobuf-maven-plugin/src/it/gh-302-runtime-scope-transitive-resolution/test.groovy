@@ -20,29 +20,45 @@ import java.nio.file.Path
 
 import static org.assertj.core.api.Assertions.assertThat
 
-static Path resolve(Path path, String... bits) {
-  for (String bit : bits) {
-    path = path.resolve(bit)
-  }
-  return path
-}
-
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-Path transitiveRuntimeDependencyTargetDir = resolve(baseDirectory,"transitive-runtime-dependency", "target")
-Path projectTargetDir = resolve(baseDirectory, "project", "target")
+Path transitiveRuntimeDependencyTargetDir = baseDirectory
+    .resolve("transitive-runtime-dependency")
+    .resolve("target")
+Path projectTargetDir = baseDirectory
+    .resolve("project")
+    .resolve("target")
 
 /////////////////////////////////////////////////////////
 // `transitive-runtime-dependency' output expectations //
 /////////////////////////////////////////////////////////
 
+Path transitiveRuntimeDependenciesRuntimeClass = transitiveRuntimeDependencyTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("runtime")
+    .resolve("Runtime.class")
+Path transitiveRuntimeDependenciesRuntimeProto = transitiveRuntimeDependencyTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("runtime")
+    .resolve("runtime.proto")
+
 assertThat(transitiveRuntimeDependencyTargetDir).isDirectory()
-assertThat(resolve(transitiveRuntimeDependencyTargetDir, "classes", "org", "example", "runtime", "Runtime.class"))
+assertThat(transitiveRuntimeDependenciesRuntimeClass)
     .isRegularFile()
-assertThat(resolve(transitiveRuntimeDependencyTargetDir, "classes", "org", "example", "runtime", "runtime.proto"))
+assertThat(transitiveRuntimeDependenciesRuntimeProto)
     .isRegularFile()
 
 // Compile dependencies are included in the archives directory.
-assertThat(Files.list(resolve(transitiveRuntimeDependencyTargetDir, "protobuf-maven-plugin", "archives")))
+Path transitiveRuntimeDependenciesArchivesDir = transitiveRuntimeDependencyTargetDir
+    .resolve("protobuf-maven-plugin")
+    .resolve("generate")
+    .resolve("default")
+    .resolve("archives")
+
+assertThat(Files.list(transitiveRuntimeDependenciesArchivesDir))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
@@ -51,19 +67,38 @@ assertThat(Files.list(resolve(transitiveRuntimeDependencyTargetDir, "protobuf-ma
 // `project' output expectations //
 ///////////////////////////////////
 
+Path projectTargetCompilerClass = projectTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("compiler")
+    .resolve("Compiler.class")
+Path projectTargetCompilerProto = projectTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("compiler")
+    .resolve("compiler.proto")
+
 assertThat(projectTargetDir).isDirectory()
-assertThat(resolve(projectTargetDir, "classes", "org", "example", "compiler", "Compiler.class"))
+assertThat(projectTargetCompilerClass)
     .isRegularFile()
-assertThat(resolve(projectTargetDir, "classes", "org", "example", "compiler", "compiler.proto"))
+assertThat(projectTargetCompilerProto)
     .isRegularFile()
 
 // Compile dependencies are included in the archives directory.
-assertThat(Files.list(resolve(projectTargetDir, "protobuf-maven-plugin", "archives")))
+Path projectTargetDirArchives = projectTargetDir
+    .resolve("protobuf-maven-plugin")
+    .resolve("generate")
+    .resolve("default")
+    .resolve("archives")
+
+assertThat(Files.list(projectTargetDirArchives))
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .isNotEmpty()
 
 // Transitive runtime dependencies are not included in the archives directory.
-assertThat(Files.list(resolve(projectTargetDir, "protobuf-maven-plugin", "archives")))
+assertThat(Files.list(projectTargetDirArchives))
     .withFailMessage {
       "Expected transitive-runtime-dependency-* directory to not be present, this means " +
           "transitive runtime dependencies are being included erroneously!"

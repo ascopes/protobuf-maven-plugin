@@ -34,6 +34,8 @@ Path expectedGeneratedFile = baseProjectDir.resolve("some-project")
 Path expectedScriptsDirectory = baseProjectDir.resolve("some-project")
     .resolve("target")
     .resolve("protobuf-maven-plugin")
+    .resolve("generate")
+    .resolve("default")
     .resolve("plugins")
     .resolve("jvm")
 
