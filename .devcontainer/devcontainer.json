@@ -1,14 +1,15 @@
 {
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "22",
+      "version": "23",
+      "additionalVersions": "11,17,21",
       "jdkDistro": "tem",
-      "installMaven": true
+      "installMaven": false
     },
     "ghcr.io/devcontainers-contrib/features/protoc:1": {
       "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/common-utils:2": {}
+    }
   }
 }
