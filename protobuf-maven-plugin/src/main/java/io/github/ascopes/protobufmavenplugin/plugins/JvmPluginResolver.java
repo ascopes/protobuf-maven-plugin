@@ -100,20 +100,23 @@ public final class JvmPluginResolver {
       Collection<? extends MavenProtocPlugin> pluginDescriptors
   ) throws IOException, ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
+    var index = 0;
+
     for (var pluginDescriptor : pluginDescriptors) {
       if (pluginDescriptor.isSkip()) {
         log.info("Skipping plugin {}", pluginDescriptor);
         continue;
       }
 
-      var resolvedPlugin = resolveMavenPlugin(pluginDescriptor);
+      var resolvedPlugin = resolveMavenPlugin(pluginDescriptor, index++);
       resolvedPlugins.add(resolvedPlugin);
     }
     return Collections.unmodifiableList(resolvedPlugins);
   }
 
   private ResolvedProtocPlugin resolveMavenPlugin(
-      MavenProtocPlugin pluginDescriptor
+      MavenProtocPlugin pluginDescriptor,
+      int index
   ) throws IOException, ResolutionException {
 
     log.debug(
@@ -121,7 +124,7 @@ public final class JvmPluginResolver {
         pluginDescriptor
     );
 
-    var id = hashPlugin(pluginDescriptor);
+    var id = hashPlugin(pluginDescriptor, index);
     var argLine = buildArgLine(pluginDescriptor);
     var javaPath = hostSystem.getJavaExecutablePath();
     var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
@@ -139,8 +142,11 @@ public final class JvmPluginResolver {
         .build();
   }
 
-  private String hashPlugin(MavenProtocPlugin plugin) {
-    return Digests.sha1(plugin.toString());
+  private String hashPlugin(MavenProtocPlugin plugin, int index) {
+    // GH-421: Ensure duplicate plugin definitions retain a unique name
+    // when in the same execution, rather than trampling over eachother's
+    // files.
+    return Digests.sha1(plugin.toString()) + "-" + index;
   }
 
   private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin)
