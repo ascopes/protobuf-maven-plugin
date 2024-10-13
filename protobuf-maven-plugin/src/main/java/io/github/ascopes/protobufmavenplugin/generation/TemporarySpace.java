@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +39,22 @@ public final class TemporarySpace {
   private static final Logger log = LoggerFactory.getLogger(TemporarySpace.class);
 
   private final MavenProject mavenProject;
+  private final MojoExecution mojoExecution;
 
   @Inject
-  public TemporarySpace(MavenProject mavenProject) {
+  public TemporarySpace(MavenProject mavenProject, MojoExecution mojoExecution) {
     this.mavenProject = mavenProject;
+    this.mojoExecution = mojoExecution;
   }
 
   public Path createTemporarySpace(String... bits) {
-    var dir = Path.of(mavenProject.getBuild().getDirectory()).resolve(FRAG);
+    var dir = Path.of(mavenProject.getBuild().getDirectory())
+        .resolve(FRAG)
+        // GH-421: Include the execution ID and goal to keep file paths unique
+        // between invocations in multiple goals.
+        .resolve(mojoExecution.getGoal())
+        .resolve(mojoExecution.getExecutionId());
+
     for (var bit : bits) {
       dir = dir.resolve(bit);
     }

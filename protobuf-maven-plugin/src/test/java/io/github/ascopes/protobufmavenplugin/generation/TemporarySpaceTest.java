@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 import org.apache.maven.model.Build;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +38,9 @@ import org.mockito.quality.Strictness;
 @DisplayName("TemporarySpace tests")
 class TemporarySpaceTest {
 
-  @TempDir
-  Path tempDir;
-
+  @TempDir Path tempDir;
+  String goal;
+  String executionId;
   TemporarySpace temporarySpace;
 
   @BeforeEach
@@ -58,7 +59,19 @@ class TemporarySpaceTest {
     when(mavenBuild.getDirectory())
         .thenReturn(tempDir.toAbsolutePath().toString());
 
-    temporarySpace = new TemporarySpace(mavenProject);
+    goal = "goal-" + UUID.randomUUID().toString();
+    executionId = "executionId-" + UUID.randomUUID().toString();
+
+    var execution = mock(MojoExecution.class, withSettings()
+        .strictness(Strictness.LENIENT)
+        .defaultAnswer(Answers.RETURNS_SMART_NULLS));
+
+    when(execution.getExecutionId())
+        .thenReturn(executionId);
+    when(execution.getGoal())
+        .thenReturn(goal);
+
+    temporarySpace = new TemporarySpace(mavenProject, execution);
   }
 
   @DisplayName("Temporary spaces are created in the expected place")
@@ -74,6 +87,8 @@ class TemporarySpaceTest {
     assertThat(actualPath)
         .isEqualTo(tempDir
             .resolve("protobuf-maven-plugin")
+            .resolve(goal)
+            .resolve(executionId)
             .resolve("foo")
             .resolve("bar")
             .resolve("baz")
@@ -88,6 +103,8 @@ class TemporarySpaceTest {
     var id = UUID.randomUUID().toString();
     var existingPath = tempDir
         .resolve("protobuf-maven-plugin")
+        .resolve(goal)
+        .resolve(executionId)
         .resolve("foo")
         .resolve("bar")
         .resolve("baz")

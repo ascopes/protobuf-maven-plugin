@@ -41,7 +41,7 @@ assertThat(resolve(testDependencyTargetDir, "classes", "org", "example", "test",
     .isRegularFile()
 assertThat(resolve(testDependencyTargetDir, "classes", "org", "example", "test", "test.proto"))
     .isRegularFile()
-assertThat(Files.list(resolve(testDependencyTargetDir, "protobuf-maven-plugin", "archives")))
+assertThat(Files.list(resolve(testDependencyTargetDir, "protobuf-maven-plugin", "generate", "default", "archives")))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
@@ -55,12 +55,12 @@ assertThat(resolve(testProjectTargetDir, "test-classes", "org", "example", "comp
     .isRegularFile()
 assertThat(resolve(testProjectTargetDir, "test-classes", "org", "example", "compiler", "compiler.proto"))
     .isRegularFile()
-assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "archives")))
+assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "generate-test", "default", "archives")))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
 // We should include test sources in the test goal execution.
-assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "archives")))
+assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "generate-test", "default", "archives")))
     .withFailMessage { "Expected test-dependency-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("test-dependency-") }
     .hasSize(1)
@@ -74,12 +74,12 @@ assertThat(resolve(mainProjectTargetDir,"classes", "org", "example", "compiler",
     .isRegularFile()
 assertThat(resolve(mainProjectTargetDir,"classes", "org", "example", "compiler", "compiler.proto"))
     .isRegularFile()
-assertThat(Files.list(resolve(mainProjectTargetDir, "protobuf-maven-plugin", "archives")))
+assertThat(Files.list(resolve(mainProjectTargetDir, "protobuf-maven-plugin", "generate", "default", "archives")))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
 // We should exclude test sources in the main goal execution.
-assertThat(Files.list(resolve(mainProjectTargetDir, "protobuf-maven-plugin", "archives")))
+assertThat(Files.list(resolve(mainProjectTargetDir, "protobuf-maven-plugin", "generate", "default", "archives")))
     .withFailMessage { "Expected test-dependency-* directory to not be present" }
     .filteredOn { it.getFileName().toString().startsWith("test-dependency-") }
     .isEmpty()

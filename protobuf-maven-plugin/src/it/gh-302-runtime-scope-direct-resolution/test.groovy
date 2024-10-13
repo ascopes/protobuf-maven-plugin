@@ -20,29 +20,45 @@ import java.nio.file.Path
 
 import static org.assertj.core.api.Assertions.assertThat
 
-static Path resolve(Path path, String... bits) {
-  for (String bit : bits) {
-    path = path.resolve(bit)
-  }
-  return path
-}
-
 Path baseDirectory = basedir.toPath().toAbsolutePath()
-Path runtimeDependencyTargetDir = resolve(baseDirectory,"runtime-dependency", "target")
-Path projectTargetDir = resolve(baseDirectory, "project", "target")
+Path runtimeDependencyTargetDir = baseDirectory
+    .resolve("runtime-dependency")
+    .resolve("target")
+Path projectTargetDir = baseDirectory
+    .resolve("project")
+    .resolve("target")
 
 /////////////////////////////////////////////////////////
-// `transitive-runtime-dependency' output expectations //
+// `runtime-dependency' output expectations //
 /////////////////////////////////////////////////////////
+
+Path runtimeDependenciesRuntimeClass = runtimeDependencyTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("runtime")
+    .resolve("Runtime.class")
+Path runtimeDependenciesRuntimeProto = runtimeDependencyTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("runtime")
+    .resolve("runtime.proto")
 
 assertThat(runtimeDependencyTargetDir).isDirectory()
-assertThat(resolve(runtimeDependencyTargetDir,"classes", "org", "example", "runtime", "Runtime.class"))
+assertThat(runtimeDependenciesRuntimeClass)
     .isRegularFile()
-assertThat(resolve(runtimeDependencyTargetDir,"classes", "org", "example", "runtime", "runtime.proto"))
+assertThat(runtimeDependenciesRuntimeProto)
     .isRegularFile()
 
 // Compile dependencies are included in the archives directory.
-assertThat(Files.list(resolve(runtimeDependencyTargetDir, "protobuf-maven-plugin", "archives")))
+Path runtimeDependenciesArchivesDir = runtimeDependencyTargetDir
+    .resolve("protobuf-maven-plugin")
+    .resolve("generate")
+    .resolve("default")
+    .resolve("archives")
+
+assertThat(Files.list(runtimeDependenciesArchivesDir))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
@@ -51,19 +67,38 @@ assertThat(Files.list(resolve(runtimeDependencyTargetDir, "protobuf-maven-plugin
 // `project' output expectations //
 ///////////////////////////////////
 
+Path projectTargetCompilerClass = projectTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("compiler")
+    .resolve("Compiler.class")
+Path projectTargetCompilerProto = projectTargetDir
+    .resolve("classes")
+    .resolve("org")
+    .resolve("example")
+    .resolve("compiler")
+    .resolve("compiler.proto")
+
 assertThat(projectTargetDir).isDirectory()
-assertThat(resolve(projectTargetDir,"classes", "org", "example", "compiler", "Compiler.class"))
+assertThat(projectTargetCompilerClass)
     .isRegularFile()
-assertThat(resolve(projectTargetDir,"classes", "org", "example", "compiler", "compiler.proto"))
+assertThat(projectTargetCompilerProto)
     .isRegularFile()
 
 // Compile dependencies are included in the archives directory.
-assertThat(Files.list(resolve(projectTargetDir,"protobuf-maven-plugin", "archives")))
+Path projectTargetDirArchives = projectTargetDir
+    .resolve("protobuf-maven-plugin")
+    .resolve("generate")
+    .resolve("default")
+    .resolve("archives")
+
+assertThat(Files.list(projectTargetDirArchives))
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .isNotEmpty()
 
 // Transitive runtime dependencies are not included in the archives directory.
-assertThat(Files.list(resolve(projectTargetDir,"protobuf-maven-plugin", "archives")))
+assertThat(Files.list(projectTargetDirArchives))
     .withFailMessage {
       "Expected runtime-dependency-* directory to not be present, this means " +
           "direct runtime dependencies are being included erroneously!"

@@ -26,6 +26,8 @@ Path dependencyDirectory = baseDirectory
     .resolve("some-project")
     .resolve("target")
     .resolve("protobuf-maven-plugin")
+    .resolve("generate")
+    .resolve("default")
     .resolve("archives")
 
 assertThat(dependencyDirectory).isDirectory()
