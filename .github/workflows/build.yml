@@ -146,9 +146,19 @@ jobs:
 
       - name: Build Pages
         shell: bash
-        run: >-
-            ./mvnw -B site
-            -DskipTests
-            -Dinvoker.skip
-            -Dcheckstyle.skip
+        run: |-
+          ./mvnw -B site \
+            -Dmaven.test.skip \
+            -Dinvoker.skip \
+            -Dcheckstyle.skip \
             -Dlicense.skip
+
+      - name: Upload generated site as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: protobuf-maven-plugin/target/site/**
+          compression-level: 9
+          retention-days: 7
+          include-hidden-files: true
+          if-no-files-found: fail
