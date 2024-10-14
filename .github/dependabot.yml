@@ -1,24 +1,24 @@
 version: 2
 
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
+      interval: weekly
+      day: monday
+    target-branch: main
     assignees:
-      - "ascopes"
+      - ascopes
     labels:
-      - "dependencies"
+      - dependencies
 
-  - package-ecosystem: "maven"
-    directory: "/"
+  - package-ecosystem: maven
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
+      interval: weekly
+      day: monday
+    target-branch: main
     assignees:
-      - "ascopes"
+      - ascopes
     labels:
-      - "dependencies"
+      - dependencies

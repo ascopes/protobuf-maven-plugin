@@ -20,7 +20,7 @@ jobs:
         uses: ludeeus/action-shellcheck@master
         with:
           check_together: 'yes'
-          scandir: './scripts'
+          scandir: ./scripts
 
   validate-codecov:
     name: Validate codecov.yml
@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 23
-          distribution: 'temurin'
+          distribution: temurin
           cache: maven
 
       - name: Validate
@@ -81,7 +81,7 @@ jobs:
           - os-name: ubuntu-latest
             java-version: 11
             maven: prerequisite
-            
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -99,7 +99,7 @@ jobs:
         run: |-
           version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven')
           ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${version}"
-  
+
       - name: Install protoc to $PATH
         shell: bash
         run: scripts/install-protoc-to-github-runner.sh
@@ -141,7 +141,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 23
-          distribution: 'temurin'
+          distribution: temurin
           cache: maven
 
       - name: Build Pages

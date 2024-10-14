@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'java' ]
+        language: [java]
 
     steps:
       - name: Checkout repository
@@ -34,17 +34,14 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        # Do not freeze. Enables automatic updates to how CodeQL scans
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
 
       - name: Autobuild
-        # Do not freeze. Enables automatic updates to how CodeQL scans
         uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
-        # Do not freeze. Enables automatic updates to how CodeQL scans
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{matrix.language}}"

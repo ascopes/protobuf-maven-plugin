@@ -10,4 +10,3 @@ comment:
   layout: "diff, flags, files"
   behavior: default
   require_changes: true
-

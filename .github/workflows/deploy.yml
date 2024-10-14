@@ -4,27 +4,27 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Override deployment version"
+        description: Override deployment version
         default: ""
         type: string
 
       skip-maven-release:
-        description: "Skip Maven release steps"
+        description: Skip Maven release steps
         default: false
         type: boolean
 
       skip-tests:
-        description: "Skip tests"
+        description: Skip tests
         default: false
         type: boolean
 
       skip-nexus-promotion:
-        description: "Skip Nexus promotion steps"
+        description: Skip Nexus promotion steps
         default: false
         type: boolean
 
       skip-pages:
-        description: "Skip pages"
+        description: Skip pages
         default: false
         type: boolean
 
@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 23
-          distribution: 'temurin'
+          distribution: temurin
           server-id: ossrh
           server-username: OSSRH_USERNAME
           server-password: OSSRH_TOKEN
@@ -138,7 +138,6 @@ jobs:
       - name: Generate pages
         if: ${{ ! inputs.skip-pages }}
         run: |-
-          # Use the release version for deploying pages
           ./mvnw -B versions:set -DnewVersion="${release_version}"
           ./mvnw site -B -e -DskipTests -Dinvoker.skip
 
