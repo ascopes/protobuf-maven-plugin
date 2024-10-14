@@ -6,6 +6,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
+      time: 06:00
+      timezone: Europe/London
     target-branch: main
     assignees:
       - ascopes
@@ -17,6 +19,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
+      time: 06:00
+      timezone: Europe/London
     target-branch: main
     assignees:
       - ascopes
