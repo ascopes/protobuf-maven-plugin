@@ -161,4 +161,4 @@ jobs:
           compression-level: 9
           retention-days: 7
           include-hidden-files: true
-          if-no-files-found: fail
+          if-no-files-found: error
