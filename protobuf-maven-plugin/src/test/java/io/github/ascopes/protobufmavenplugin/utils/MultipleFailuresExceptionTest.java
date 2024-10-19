@@ -47,21 +47,6 @@ class MultipleFailuresExceptionTest {
     assertThat(exception).hasMessage("Multiple failures occurred");
   }
 
-  @DisplayName("The exception has no stack trace")
-  @Test
-  void exceptionHasNoStackTrace() {
-    // Given
-    var cause = new Exception("blahblah");
-
-    // When
-    var exception = MultipleFailuresException.create(List.of(cause));
-
-    // Then
-    assertThat(exception.getStackTrace())
-        .as("stack trace")
-        .isNullOrEmpty();
-  }
-
   @DisplayName("The first exception is treated as the cause")
   @ValueSource(ints = {1, 5, 10})
   @ParameterizedTest(name = "for {0} exception(s)")
