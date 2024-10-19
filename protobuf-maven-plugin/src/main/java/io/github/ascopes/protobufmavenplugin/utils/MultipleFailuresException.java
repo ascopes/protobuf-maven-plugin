@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 final class MultipleFailuresException extends RuntimeException {
 
   private MultipleFailuresException(String message, Throwable cause) {
-    super(message, cause, true, false);
+    super(message, cause);
   }
 
   /**
