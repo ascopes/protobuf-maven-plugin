@@ -8,7 +8,7 @@
 
 # protobuf-maven-plugin
 
-A scratch-built and modern Maven plugin for seamless protoc integration, with support for GRPC and custom plugins.
+A scratch-built and modern Maven plugin for seamless protoc integration, with support for gRPC and custom plugins.
 
 ```xml
 
