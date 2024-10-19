@@ -34,17 +34,47 @@ import org.junit.jupiter.params.provider.ValueSource;
 @DisplayName("MultipleFailuresException tests")
 class MultipleFailuresExceptionTest {
 
-  @DisplayName("The exception has the expected message")
+  @DisplayName("The exception has the expected message for a single exception")
   @Test
-  void exceptionHasTheExpectedMessage() {
+  void exceptionHasTheExpectedMessageForSingleException() {
     // Given
-    var cause = new Exception("blahblah");
+    var cause = new IllegalArgumentException(someText());
 
     // When
     var exception = MultipleFailuresException.create(List.of(cause));
 
     // Then
-    assertThat(exception).hasMessage("Multiple failures occurred");
+    assertThat(exception)
+        .hasMessage(
+            "A failure occured during a concurrent task: %s: %s",
+            cause.getClass().getName(),
+            cause.getMessage()
+        );
+  }
+
+  @DisplayName("The exception has the expected message for multiple exceptions")
+  @ValueSource(ints = {2, 5, 10})
+  @ParameterizedTest(name = "for {0} exception(s)")
+  void exceptionHasTheExpectedMessageForMultipleExceptions(int causeCount) {
+    // Given
+    var cause = new IllegalStateException(someText());
+    var suppressed = Stream.generate(() -> new Exception(someText()))
+        .limit(causeCount - 1);
+
+    var causes = Stream.concat(Stream.of(cause), suppressed)
+        .collect(Collectors.toList());
+
+    // When
+    var exception = MultipleFailuresException.create(causes);
+
+    // Then
+    assertThat(exception)
+        .hasMessage(
+            "%d failures occurred during a concurrent task. The first was: %s: %s",
+            causeCount,
+            cause.getClass().getName(),
+            cause.getMessage()
+        );
   }
 
   @DisplayName("The first exception is treated as the cause")
