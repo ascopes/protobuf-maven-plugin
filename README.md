@@ -5,6 +5,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin)](https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin)
 [![Documentation](https://img.shields.io/badge/-documentation-purple?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
 ![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/ascopes/protobuf-maven-plugin)
+![GitHub Release Date](https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin)
+
+![logo](protobuf-maven-plugin/src/site/resources/images/banner.jpg)
 
 # protobuf-maven-plugin
 
