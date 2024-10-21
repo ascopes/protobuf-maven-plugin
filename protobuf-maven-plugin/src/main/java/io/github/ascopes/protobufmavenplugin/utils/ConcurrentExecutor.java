@@ -42,7 +42,9 @@ import org.slf4j.LoggerFactory;
 public final class ConcurrentExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
-  private final ExecutorService executorService;
+
+  // Visible for testing only.
+  final ExecutorService executorService;
 
   public ConcurrentExecutor() {
     ExecutorService executorService;
@@ -77,15 +79,19 @@ public final class ConcurrentExecutor {
   @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
   public void destroy() throws InterruptedException {
     log.debug("Shutting down executor...");
-    executorService.shutdown();
-    log.debug("Awaiting executor termination...");
-
-    // If this fails, then we can't do much about it. Force shutdown and hope threads don't
-    // deadlock. Not going to bother adding complicated handling here as if we get stuck, we
-    // likely have far bigger problems to deal with.
-    executorService.awaitTermination(10, TimeUnit.SECONDS);
-    var remaining = executorService.shutdownNow();
-    log.debug("Shutdown ended, stubborn tasks that will be orphaned: {}", remaining);
+    var remainingTasks = executorService.shutdownNow();
+    if (remainingTasks.size() > 0) {
+      remainingTasks.forEach(future -> ((FutureTask<?>) future).cancel(true));
+      log.debug("Waiting for in-progress tasks to finish: {}", remainingTasks);
+      executorService.awaitTermination(5, TimeUnit.SECONDS);
+      if (!executorService.isTerminated()) {
+        // Nothing else we can do.
+        log.warn(
+            "Unable to shut down executor service, one or more tasks refused to cancel: {}'",
+            remainingTasks
+        );
+      }
+    }
   }
 
   public <R> FutureTask<R> submit(Callable<R> task) {
@@ -106,6 +112,8 @@ public final class ConcurrentExecutor {
     return Collectors.collectingAndThen(Collectors.toUnmodifiableList(), this::await);
   }
 
+  // Awaits each task, in the order it was scheduled. Any interrupt is caught and terminates
+  // the entire batch.
   private <R> List<R> await(List<FutureTask<R>> scheduledTasks) {
     try {
       var results = new ArrayList<R>();
@@ -117,8 +125,8 @@ public final class ConcurrentExecutor {
         } catch (ExecutionException ex) {
           exceptions.add(ex.getCause());
         } catch (InterruptedException ex) {
-          Thread.currentThread().interrupt();
-          return results;
+          exceptions.add(ex);
+          break;
         }
       }
 
