@@ -79,8 +79,6 @@ public final class ConcurrentExecutor {
 
   /**
    * Destroy the internal thread pool.
-   *
-   * @throws InterruptedException if destruction timed out or the thread was interrupted.
    */
   @PreDestroy
   @SuppressWarnings("unused")
