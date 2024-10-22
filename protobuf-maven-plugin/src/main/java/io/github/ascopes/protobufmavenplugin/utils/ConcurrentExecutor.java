@@ -59,12 +59,19 @@ public final class ConcurrentExecutor {
 
     } catch (Exception ex) {
       var concurrency = Runtime.getRuntime().availableProcessors() * 8;
+      var threadGroup = new ThreadGroup(getClass().getName());
+      executorService = Executors.newFixedThreadPool(concurrency, runnable -> {
+        var thread = new Thread(threadGroup, runnable);
+        thread.setDaemon(true);
+        return thread;
+      });
+
       log.debug(
-          "Falling back to new work-stealing thread pool (concurrency={}, Loom is unavailable)",
+          "Falling back to new fixed thread pool (group={}, concurrency={}, Loom is unavailable)",
+          threadGroup,
           concurrency,
           ex
       );
-      executorService = Executors.newWorkStealingPool(concurrency);
     }
 
     this.executorService = executorService;
