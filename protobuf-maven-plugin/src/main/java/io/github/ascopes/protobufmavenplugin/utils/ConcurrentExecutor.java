@@ -83,22 +83,11 @@ public final class ConcurrentExecutor {
    * @throws InterruptedException if destruction timed out or the thread was interrupted.
    */
   @PreDestroy
-  @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
-  public void destroy() throws InterruptedException {
+  @SuppressWarnings("unused")
+  public void destroy() {
     log.debug("Shutting down executor...");
     var remainingTasks = executorService.shutdownNow();
-    if (remainingTasks.size() > 0) {
-      remainingTasks.forEach(future -> ((FutureTask<?>) future).cancel(true));
-      log.debug("Waiting for in-progress tasks to finish: {}", remainingTasks);
-      executorService.awaitTermination(5, TimeUnit.SECONDS);
-      if (!executorService.isTerminated()) {
-        // Nothing else we can do.
-        log.warn(
-            "Unable to shut down executor service, one or more tasks refused to cancel: {}'",
-            remainingTasks
-        );
-      }
-    }
+    log.debug("Remaining tasks that will be orphaned: {}", remainingTasks);
   }
 
   public <R> FutureTask<R> submit(Callable<R> task) {
