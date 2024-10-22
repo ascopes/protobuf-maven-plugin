@@ -31,9 +31,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +60,111 @@ class ConcurrentExecutorTest {
 
   @AfterEach
   void tearDown() throws InterruptedException {
+    executor.executorService.shutdownNow();
+  }
+
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @DisplayName(".destroy() succeeds if the executor service is idle")
+  @Test
+  void destroySucceedsIfExecutorServiceIsIdle() throws Exception {
+    // Given
+    assertThat(executor.executorService.isTerminated())
+        .as("executorService.isTerminated()")
+        .isFalse();
+    assertThat(executor.executorService.isShutdown())
+        .as("executorService.isShutdown()")
+        .isFalse();
+
+    // When
     executor.destroy();
+
+    // Then
+    assertThat(executor.executorService.isTerminated())
+        .as("executorService.isTerminated()")
+        .isTrue();
+    assertThat(executor.executorService.isShutdown())
+        .as("executorService.isShutdown()")
+        .isTrue();
+  }
+
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @DisplayName(".destroy() succeeds if the executor service is already terminated")
+  @Test
+  void destroySucceedsIfExecutorServiceIsAlreadyTerminated() throws Exception {
+    // Given
+    executor.executorService.shutdownNow();
+
+    // When
+    executor.destroy();
+
+    // Then
+    assertThat(executor.executorService.isTerminated())
+        .as("executorService.isTerminated()")
+        .isTrue();
+    assertThat(executor.executorService.isShutdown())
+        .as("executorService.isShutdown()")
+        .isTrue();
+  }
+
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @DisplayName(".destroy() interrupts any interruptable running tasks")
+  @Test
+  void destroyInterruptsAnyInterruptableRunningTasks() throws Exception {
+    // Given
+    var task1 = new FutureTask<>(() -> sleepWait(10_000));
+    var task2 = new FutureTask<>(() -> sleepWait(10_000));
+
+    executor.executorService.submit(task1);
+    executor.executorService.submit(task2);
+
+    // Give tasks the chance to start.
+    Thread.sleep(1_000);
+
+    // When
+    executor.destroy();
+
+    // Then
+    assertThatExceptionOfType(ExecutionException.class)
+        .as("exception raised by task1 (%s)", task1)
+        .isThrownBy(task1::get)
+        .withCauseInstanceOf(InterruptedException.class);
+    assertThatExceptionOfType(ExecutionException.class)
+        .as("exception raised by task2 (%s)", task2)
+        .isThrownBy(task2::get)
+        .withCauseInstanceOf(InterruptedException.class);
+  }
+
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @DisplayName(".destroy() abandons any uninterruptable running tasks")
+  @Test
+  void destroyAbandonsAnyUninterruptableRunningTasks() throws Exception {
+    // Given
+    var task1 = new FutureTask<>(() -> spinWait(10_000));
+    var task2 = new FutureTask<>(() -> spinWait(10_000));
+
+    executor.executorService.submit(task1);
+    executor.executorService.submit(task2);
+
+    // Give tasks the chance to start.
+    Thread.sleep(1_000);
+
+    // When
+    executor.destroy();
+
+    assertThat(task1)
+        .as("task1 %s", task1)
+        .isNotDone();
+    assertThat(task2)
+        .as("task1 %s", task2)
+        .isNotDone();
+
+    // Then
+    assertThatExceptionOfType(TimeoutException.class)
+        .as("exception raised waiting for task1 (%s)", task1)
+        .isThrownBy(() -> task1.get(100, TimeUnit.MILLISECONDS));
+    assertThatExceptionOfType(TimeoutException.class)
+        .as("exception raised waiting for task2 (%s)", task2)
+        .isThrownBy(() -> task2.get(100, TimeUnit.MILLISECONDS));
   }
 
   @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
@@ -183,5 +289,33 @@ class ConcurrentExecutorTest {
             ex -> assertThat(expectedExceptions).containsAll(List.of(ex.getSuppressed())),
             ex -> assertThat(expectedExceptions).hasSize(ex.getSuppressed().length + 1)
         );
+  }
+
+  // Sleep-based waits can consume thread interrupts and can be cancelled,
+  // representing some IO-bound work that cancels gracefully.
+  private static @Nullable Void sleepWait(int timeoutMs) throws InterruptedException {
+    var deadline = System.nanoTime() + timeoutMs * 1_000_000L;
+    do {
+      try {
+        var remaining = deadline - System.nanoTime();
+        Thread.sleep(remaining / 1_000_000L);
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        throw ex;
+      }
+    } while (deadline - System.nanoTime() > 0);
+    return null;
+  }
+
+  // Spin-based waits should not perform IO, so should be uncancellable and
+  // uninterruptable, representing CPU bound work or a buggy/stubborn task.
+  private static @Nullable Void spinWait(int timeoutMs) {
+    var deadline = System.nanoTime() + timeoutMs * 1_000_000L;
+    // Do not perform anything that can be interrupted.
+    while (deadline - System.nanoTime() > 0) {
+      // Keep checkstyle happy by having a body on this loop.
+      continue;
+    }
+    return null;
   }
 }

@@ -42,7 +42,9 @@ import org.slf4j.LoggerFactory;
 public final class ConcurrentExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
-  private final ExecutorService executorService;
+
+  // Visible for testing only.
+  final ExecutorService executorService;
 
   public ConcurrentExecutor() {
     ExecutorService executorService;
@@ -57,12 +59,19 @@ public final class ConcurrentExecutor {
 
     } catch (Exception ex) {
       var concurrency = Runtime.getRuntime().availableProcessors() * 8;
+      var threadGroup = new ThreadGroup(getClass().getName());
+      executorService = Executors.newFixedThreadPool(concurrency, runnable -> {
+        var thread = new Thread(threadGroup, runnable);
+        thread.setDaemon(true);
+        return thread;
+      });
+
       log.debug(
-          "Falling back to new work-stealing thread pool (concurrency={}, Loom is unavailable)",
+          "Falling back to new fixed thread pool (group={}, concurrency={}, Loom is unavailable)",
+          threadGroup,
           concurrency,
           ex
       );
-      executorService = Executors.newWorkStealingPool(concurrency);
     }
 
     this.executorService = executorService;
@@ -70,22 +79,13 @@ public final class ConcurrentExecutor {
 
   /**
    * Destroy the internal thread pool.
-   *
-   * @throws InterruptedException if destruction timed out or the thread was interrupted.
    */
   @PreDestroy
-  @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
-  public void destroy() throws InterruptedException {
+  @SuppressWarnings("unused")
+  public void destroy() {
     log.debug("Shutting down executor...");
-    executorService.shutdown();
-    log.debug("Awaiting executor termination...");
-
-    // If this fails, then we can't do much about it. Force shutdown and hope threads don't
-    // deadlock. Not going to bother adding complicated handling here as if we get stuck, we
-    // likely have far bigger problems to deal with.
-    executorService.awaitTermination(10, TimeUnit.SECONDS);
-    var remaining = executorService.shutdownNow();
-    log.debug("Shutdown ended, stubborn tasks that will be orphaned: {}", remaining);
+    var remainingTasks = executorService.shutdownNow();
+    log.debug("Remaining tasks that will be orphaned: {}", remainingTasks);
   }
 
   public <R> FutureTask<R> submit(Callable<R> task) {
@@ -106,6 +106,8 @@ public final class ConcurrentExecutor {
     return Collectors.collectingAndThen(Collectors.toUnmodifiableList(), this::await);
   }
 
+  // Awaits each task, in the order it was scheduled. Any interrupt is caught and terminates
+  // the entire batch.
   private <R> List<R> await(List<FutureTask<R>> scheduledTasks) {
     try {
       var results = new ArrayList<R>();
@@ -117,8 +119,8 @@ public final class ConcurrentExecutor {
         } catch (ExecutionException ex) {
           exceptions.add(ex.getCause());
         } catch (InterruptedException ex) {
-          Thread.currentThread().interrupt();
-          return results;
+          exceptions.add(ex);
+          break;
         }
       }
 
