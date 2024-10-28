@@ -264,7 +264,10 @@ public final class JvmPluginResolver {
   }
 
   private List<Path> findJavaModules(List<Path> paths) {
-    // TODO: is using a module finder here an overkill?
+    // ModuleFinder may be an overkill, so we might eventually want to just
+    // discard this and use some other method (e.g. reading the manifest
+    // for Automatic-Module-Name, and checking for the presence of a
+    // module-info.class in the root and in META-INF/versions child directories.
     return ModuleFinder.of(paths.toArray(Path[]::new))
         .findAll()
         .stream()

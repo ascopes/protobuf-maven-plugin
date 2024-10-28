@@ -80,9 +80,7 @@ public final class FileUtils {
     try {
       log.debug("Opening a new NIO virtual file system for {}", zipPath);
 
-      // TODO: is it worth memoize-ing this?
-      return FileSystemProvider
-          .installedProviders()
+      return FileSystemProvider.installedProviders()
           .stream()
           .filter(provider -> provider.getScheme().equalsIgnoreCase("jar"))
           .peek(provider -> log.debug("Found JAR file system provider at {}", provider))
