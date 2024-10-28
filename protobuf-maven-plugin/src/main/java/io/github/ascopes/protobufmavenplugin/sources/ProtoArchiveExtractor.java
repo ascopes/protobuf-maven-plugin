@@ -22,7 +22,6 @@ import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -52,8 +51,6 @@ public final class ProtoArchiveExtractor {
       Path zipPath,
       ProtoFileFilter filter
   ) throws IOException {
-    var modifiedTime = Files.getLastModifiedTime(zipPath);
-
     try (var vfs = FileUtils.openZipAsFileSystem(zipPath)) {
       var vfsRoot = vfs.getRootDirectories().iterator().next();
       var sourceFiles = findProtoFilesInArchive(vfsRoot, filter);
@@ -63,23 +60,11 @@ public final class ProtoArchiveExtractor {
       }
 
       var extractionRoot = getExtractionRoot().resolve(generateUniqueName(zipPath));
-      Files.createDirectories(extractionRoot);
-
-      var targetFiles = new ArrayList<Path>();
-
-      for (var sourceFile : sourceFiles) {
-        var targetFile = FileUtils.changeRelativePath(extractionRoot, vfsRoot, sourceFile);
-        log.debug("Copying {} to {}", sourceFile.toUri(), targetFile);
-
-        // We have to do this on each iteration to ensure the directory hierarchy exists.
-        Files.createDirectories(targetFile.getParent());
-        Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-
-        // Retain the timestamp of the archive to produce reproducible builds.
-        Files.setLastModifiedTime(targetFile, modifiedTime);
-
-        targetFiles.add(targetFile);
-      }
+      var targetFiles = FileUtils.rebaseFileTree(
+          vfsRoot,
+          extractionRoot,
+          sourceFiles.stream()
+      );
 
       var listing = ImmutableProtoFileListing
           .builder()
