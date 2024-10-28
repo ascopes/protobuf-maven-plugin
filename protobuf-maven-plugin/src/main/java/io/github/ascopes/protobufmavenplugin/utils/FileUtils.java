@@ -21,11 +21,16 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,13 +107,42 @@ public final class FileUtils {
     }
   }
 
-  public static Path changeRelativePath(Path newRoot, Path existingRoot, Path existingPath) {
-    var path = newRoot;
+  public static List<Path> rebaseFileTree(
+      Path existingRoot,
+      Path newRoot,
+      Stream<Path> paths
+  ) throws IOException {
+    var iter = paths.iterator();
+    var newPaths = new ArrayList<Path>();
 
-    for (var part : existingRoot.relativize(existingPath)) {
-      path = path.resolve(part.toString());
+    while (iter.hasNext()) {
+      var existingPath = iter.next();
+      var newPath = newRoot;
+      for (var part : existingRoot.relativize(existingPath)) {
+        newPath = newPath.resolve(part.toString());
+      }
+
+      log.debug(
+          "copying {} to {} (existing root={}, new root={})",
+          existingPath,
+          newPath,
+          existingRoot,
+          newRoot
+      );
+
+      Files.createDirectories(newPath.getParent());
+      Files.copy(
+          existingPath,
+          newPath,
+          StandardCopyOption.COPY_ATTRIBUTES,
+          StandardCopyOption.REPLACE_EXISTING
+      );
+
+      if (!Files.isDirectory(newPath)) {
+        newPaths.add(newPath);
+      }
     }
 
-    return path;
+    return Collections.unmodifiableList(newPaths);
   }
 }

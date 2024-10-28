@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.jspecify.annotations.Nullable;
@@ -199,46 +200,57 @@ class FileUtilsTest {
         .withMessage("Failed to open %s as a valid ZIP/JAR archive", zipPath);
   }
 
-  @DisplayName(".changeRelativePath produces the expected result on the same file system")
+  @DisplayName(".rebaseFileTree(...) copies all nodes between file systems")
   @Test
-  void changeRelativePathProducesTheExpectedResultOnTheSameFileSystem(
-      @TempDir Path tempDir
-  ) throws IOException {
-    // Given
-    var dir1 = tempDir.resolve("foo").resolve("bar").resolve("baz");
-    var dir2 = tempDir.resolve("do").resolve("ray").resolve("me");
-    var existingPath = dir1.resolve("some").resolve("file.txt");
-    Files.createDirectories(dir1);
-    Files.createDirectories(dir2);
-
-    // When
-    var actualPath = FileUtils.changeRelativePath(dir2, dir1, existingPath);
-
-    // Then
-    assertThat(actualPath)
-        .isEqualTo(dir2.resolve("some").resolve("file.txt"));
-  }
-
-  @DisplayName(".changeRelativePath produces the expected result across file systems")
-  @Test
-  void changeRelativePathProducesTheExpectedResultAcrossFileSystems() throws IOException {
+  void rebaseFileTreeCopiesAllNodesBetweenFileSystems() throws IOException {
     // Given
     try (
         var fs1 = TestFileSystem.linux();
         var fs2 = TestFileSystem.windows()
     ) {
-      var dir1 = fs1.getRoot().resolve("foo").resolve("bar").resolve("baz");
-      var dir2 = fs2.getRoot().resolve("do").resolve("ray").resolve("me");
-      var existingPath = dir1.resolve("some").resolve("file.txt");
+      var root1 = fs1.getRoot().resolve("base").resolve("dir");
+      var dir1 = root1.resolve("foo").resolve("bar").resolve("baz");
+      var dir2 = root1.resolve("do").resolve("ray").resolve("me");
       Files.createDirectories(dir1);
       Files.createDirectories(dir2);
+      var file1 = Files.writeString(dir1.resolve("aaa.txt"), "foobarbaz");
+      var file2 = Files.writeString(dir1.resolve("bbb.txt"), "borkqux");
+      var file3 = Files.writeString(dir2.resolve("ccc.txt"), "eggsSpam");
+
+      var root2 = fs2.getRoot().resolve("target").resolve("directory");
 
       // When
-      var actualPath = FileUtils.changeRelativePath(dir2, dir1, existingPath);
+      List<Path> expectedResult;
+      try (var files = Files.walk(root1)) {
+        expectedResult = FileUtils.rebaseFileTree(root1, root2, files);
+      }
 
       // Then
-      assertThat(actualPath)
-          .isEqualTo(dir2.resolve("some").resolve("file.txt"));
+      var newDir1 = root2.resolve("foo").resolve("bar").resolve("baz");
+      var newDir2 = root2.resolve("do").resolve("ray").resolve("me");
+
+      assertThat(newDir1.resolve("aaa.txt"))
+          .exists()
+          .isRegularFile()
+          .hasContent("foobarbaz");
+
+      assertThat(newDir1.resolve("bbb.txt"))
+          .exists()
+          .isRegularFile()
+          .hasContent("borkqux");
+
+      assertThat(newDir2.resolve("ccc.txt"))
+          .exists()
+          .isRegularFile()
+          .hasContent("eggsSpam");
+
+      assertThat(expectedResult)
+          .isNotNull()
+          .containsExactlyInAnyOrder(
+              newDir1.resolve("aaa.txt"),
+              newDir1.resolve("bbb.txt"),
+              newDir2.resolve("ccc.txt")
+          );
     }
   }
 }

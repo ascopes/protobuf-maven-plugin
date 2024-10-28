@@ -19,9 +19,7 @@ package io.github.ascopes.protobufmavenplugin.generation;
 import io.github.ascopes.protobufmavenplugin.sources.ProtoFileListing;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import org.apache.maven.execution.MavenSession;
@@ -78,17 +76,11 @@ public final class SourceRootRegistrar {
     var targetDirectory = classOutputDirectoryGetter.andThen(Path::of)
         .apply(session.getCurrentProject().getBuild());
 
-    // TODO: extract this logic out to FileUtils and use both here and in the archive extractor
-    //   as it can be refactored into common code.
-    for (var sourceFile : listing.getProtoFiles()) {
-      var targetFile = FileUtils.changeRelativePath(
-          targetDirectory,
-          listing.getProtoFilesRoot(),
-          sourceFile
-      );
-      Files.createDirectories(targetFile.getParent());
-      Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-    }
+    FileUtils.rebaseFileTree(
+        listing.getProtoFilesRoot(),
+        targetDirectory,
+        listing.getProtoFiles().stream()
+    );
   }
 
   @Override
