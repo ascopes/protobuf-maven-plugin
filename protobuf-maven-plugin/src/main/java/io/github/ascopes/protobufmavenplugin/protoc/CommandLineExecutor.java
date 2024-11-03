@@ -16,7 +16,6 @@
 
 package io.github.ascopes.protobufmavenplugin.protoc;
 
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,11 +37,10 @@ import org.slf4j.LoggerFactory;
 public final class CommandLineExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(CommandLineExecutor.class);
-  private final HostSystem hostSystem;
 
   @Inject
-  public CommandLineExecutor(HostSystem hostSystem) {
-    this.hostSystem = hostSystem;
+  public CommandLineExecutor() {
+    // Nothing to do.
   }
 
   public boolean execute(List<String> args) throws IOException {
