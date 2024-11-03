@@ -45,7 +45,13 @@ public final class CommandLineExecutor {
 
   public boolean execute(List<String> args) throws IOException {
     log.info("Invoking protoc");
-    log.debug("Protoc invocation will occur with the following arguments: {}", args);
+
+    // Note that this order and format matters... we use it in a couple of the integration tests
+    // to verify the build ordering.
+    log.debug("Protoc invocation will occur with the following arguments:");
+    args.stream()
+        .map(" ".repeat(4)::concat)
+        .forEach(log::debug);
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
