@@ -44,7 +44,14 @@ public final class CommandLineExecutor {
   }
 
   public boolean execute(List<String> args) throws IOException {
-    reportInvocation(args);
+    log.info("Invoking protoc");
+
+    // Note that this order and format matters... we use it in a couple of the integration tests
+    // to verify the build ordering.
+    log.debug("Protoc invocation will occur with the following arguments:");
+    args.stream()
+        .map(" ".repeat(4)::concat)
+        .forEach(log::debug);
 
     var procBuilder = new ProcessBuilder(args);
     procBuilder.environment().putAll(System.getenv());
@@ -57,14 +64,6 @@ public final class CommandLineExecutor {
       newEx.initCause(ex);
       throw newEx;
     }
-  }
-
-  private void reportInvocation(List<String> args) {
-    log.info("Calling protoc with the following arguments:");
-    args.stream()
-        .map("  "::concat)
-        .map(String::stripTrailing)
-        .forEach(log::info);
   }
 
   private boolean run(ProcessBuilder procBuilder) throws InterruptedException, IOException {
