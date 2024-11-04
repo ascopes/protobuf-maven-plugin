@@ -132,7 +132,7 @@
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
 
     <!-- Plugin dependencies -->
-    <checkstyle.version>10.19.0</checkstyle.version>
+    <checkstyle.version>10.20.0</checkstyle.version>
     <maven-surefire-junit5-tree-reporter.version>1.3.0</maven-surefire-junit5-tree-reporter.version>
 
     <!--
