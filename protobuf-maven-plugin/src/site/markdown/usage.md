@@ -283,7 +283,10 @@ output directories.
 
 It is also important to note that you need to provide a valid compiler or tooling to
 make use of the generared sources (other than Java). For example, Kotlin generation
-would require you to also configure the `kotlin-maven-plugin`.
+would require you to also configure the `kotlin-maven-plugin`. See 
+[the Kotlin Maven Plugin documentation](https://kotlinlang.org/docs/maven.html) for details on
+how to configure your builds for Kotlin. Remember that you will need to use *both* Java and Kotlin compilation 
+for the default Kotlin support in `protoc`.
 
 ## Changing the input directories
 
@@ -362,7 +365,7 @@ executable by the current user (i.e. `chomd +x /path/to/protoc`), otherwise it w
 On Windows, this will respect the `%PATH%` environment variable (case insensitive). The path will
 be searched for files where their name matches `protoc` case-insensitively, ignoring the file
 extension. The file extension must match one of the extensions specified in the `%PATHEXT%`
-environment variable. The above example would match `protoc.EXE` on Windows, as an example.
+environment variable. The above example would match `protoc.exe` on Windows, as an example.
 
 ### Using protoc from a specific path
 
@@ -380,6 +383,11 @@ you can provide a URL with the `file` scheme to reference it:
   </configuration>
 </plugin>
 ```
+
+The syntax for this is `file://$PATH`, where `$PATH` is a relative or absolute path. For Windows, use 
+forward-slashes for this syntax rather than backslashes.
+
+Note that paths are resolved relative to the directory that Maven is invoked from.
 
 ### Using protoc from a remote server
 
@@ -506,7 +514,7 @@ during CI builds but do not prevent the application being built locally.
 
 On Linux, MacOS, and other POSIX-like operating systems, this will read the `$PATH` environment
 variable and search for a binary named the given name case-sensitively. The executable **MUST** be
-executable by the current user (i.e. `chomd +x /path/to/binary`), otherwise it will be ignored.
+executable by the current user (i.e. `chmod +x /path/to/binary`), otherwise it will be ignored.
 
 On Windows, this will respect the `%PATH%` environment variable (case insensitive). The path will
 be searched for files where their name matches the binary case-insensitively, ignoring the file
@@ -547,11 +555,11 @@ specific file system path:
 
 Any protocols supported by your JRE should be able to be used here, including:
 
-- `file:`
-- `http:`
-- `https:`
-- `ftp:`
-- `jar:` - this also works for ZIP files, and can be used to dereference files within the archive,
+- `file`
+- `http`
+- `https`
+- `ftp`
+- `jar` - this also works for ZIP files, and can be used to dereference files within the archive,
   e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip!/plugin.exe`,
   which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
   and internally extract `plugin.exe` from that archive.
@@ -660,7 +668,7 @@ An example of providing custom arguments would be:
 ### Mixing plugins
 
 Multiple plugins can be provided if needed. For example, if you are using the 
-[Salesforce Reactor GRPC libraries](https://github.com/salesforce/reactive-grpc/tree/master),
+[Salesforce Reactor gRPC libraries](https://github.com/salesforce/reactive-grpc/tree/master),
 then you can provide the following:
 
 ```xml
@@ -677,18 +685,22 @@ then you can provide the following:
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
       </binaryMavenPlugin>
-      <binaryMavenPlugin>
-        <!-- Use the native *.exe that Salesforce distributes -->
+    </binaryMavenPlugins>
+    <jvmMavenPlugins>
+      <jvmMavenPlugin>
+        <!-- Use the JAR that Salesforce distributes -->
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
-      </binaryMavenPlugin>
-    </binaryMavenPlugins>
+      </jvmMavenPlugin>
+    </jvmMavenPlugins>
   </configuration>
 
   ...
 </plugin>
 ```
+
+It would also be valid to use a binary plugin for Salesforce here if you prefer.
 
 ### Running plugins without default Java code generation
 
