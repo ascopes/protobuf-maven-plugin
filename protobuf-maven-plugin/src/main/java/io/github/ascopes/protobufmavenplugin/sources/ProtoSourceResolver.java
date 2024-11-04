@@ -96,7 +96,7 @@ public final class ProtoSourceResolver {
     try (var stream = Files.walk(rootPath)) {
       return stream
           .filter(filePath -> filter.matches(rootPath, filePath))
-          .peek(protoFile -> log.debug("Found proto file in root {}: {}", rootPath, protoFile))
+          .peek(protoFile -> log.trace("Found proto file in root {}: {}", rootPath, protoFile))
           .collect(Collectors.collectingAndThen(
               // Terminal operation, means we do not return a closed stream
               // by mistake.

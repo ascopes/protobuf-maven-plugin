@@ -78,12 +78,12 @@ public final class FileUtils {
     // will open multiple file system objects. Other constructors do not appear to do this,
     // so would not be thread-safe for concurrent plugin executions.
     try {
-      log.debug("Opening a new NIO virtual file system for {}", zipPath);
+      log.trace("Opening a new NIO virtual file system for {}", zipPath);
 
       return FileSystemProvider.installedProviders()
           .stream()
           .filter(provider -> provider.getScheme().equalsIgnoreCase("jar"))
-          .peek(provider -> log.debug("Found JAR file system provider at {}", provider))
+          .peek(provider -> log.trace("Found JAR file system provider at {}", provider))
           .findFirst()
           .orElseThrow(FileSystemNotFoundException::new)
           .newFileSystem(zipPath, Map.of());
@@ -96,12 +96,12 @@ public final class FileUtils {
 
   public static void makeExecutable(Path file) throws IOException {
     try {
-      log.debug("Ensuring {} is executable", file);
+      log.trace("Ensuring {} is executable", file);
       var perms = new HashSet<>(Files.getPosixFilePermissions(file));
       perms.add(PosixFilePermission.OWNER_EXECUTE);
       Files.setPosixFilePermissions(file, perms);
     } catch (UnsupportedOperationException ex) {
-      log.debug("File system does not support setting POSIX file permissions");
+      log.trace("File system does not support setting POSIX file permissions");
     }
   }
 
@@ -120,7 +120,7 @@ public final class FileUtils {
         newPath = newPath.resolve(part.toString());
       }
 
-      log.debug(
+      log.trace(
           "copying {} to {} (existing root={}, new root={})",
           existingPath,
           newPath,

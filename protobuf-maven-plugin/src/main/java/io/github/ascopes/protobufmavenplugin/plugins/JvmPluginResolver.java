@@ -275,7 +275,7 @@ public final class JvmPluginResolver {
         .flatMap(Optional::stream)
         .map(Path::of)
         .map(FileUtils::normalize)
-        .peek(modulePath -> log.debug("Looks like {} is a JPMS module!", modulePath))
+        .peek(modulePath -> log.trace("Looks like {} is a JPMS module!", modulePath))
         // Sort as the order of output is arbitrary, and this ensures reproducible builds.
         .sorted(Comparator.comparing(Path::toString))
         .collect(Collectors.toUnmodifiableList());

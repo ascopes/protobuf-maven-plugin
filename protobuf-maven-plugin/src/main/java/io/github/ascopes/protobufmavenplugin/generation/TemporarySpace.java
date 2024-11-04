@@ -59,7 +59,7 @@ public final class TemporarySpace {
       dir = dir.resolve(bit);
     }
 
-    log.debug("Creating temporary directory at '{}' if it does not already exist...", dir);
+    log.trace("Creating temporary directory at '{}' if it does not already exist...", dir);
 
     // This should be concurrent-safe as it will not break if the directory already exists unless
     // the directory is instead a regular file.
