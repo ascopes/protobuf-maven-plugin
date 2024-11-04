@@ -37,15 +37,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A bean that exposes information about the underlying platform and the context of the invocation.
  *
+ * <p>Unlike most beans, this can be a global singleton.
+ *
  * @author Ashley Scopes
  */
 @Named
+@Singleton  // Global singleton, shared between plugin instances potentially.
 public final class HostSystem {
 
   private static final Logger log = LoggerFactory.getLogger(HostSystem.class);
