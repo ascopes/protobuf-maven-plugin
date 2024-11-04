@@ -65,11 +65,11 @@ public final class ConcurrentExecutor {
         return thread;
       });
 
+      // No need to log this exception, it will always be a NoSuchMethodException.
       log.debug(
           "Falling back to new fixed thread pool (group={}, concurrency={}, Loom is unavailable)",
           threadGroup,
-          concurrency,
-          ex
+          concurrency
       );
     }
 
