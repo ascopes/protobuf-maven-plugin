@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report an issue
+about: Report an issue.
 title: "Bug: <enter a title here>"
 labels: bug
 assignees: 'ascopes'
