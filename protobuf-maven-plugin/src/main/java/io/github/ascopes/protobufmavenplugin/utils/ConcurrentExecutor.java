@@ -28,6 +28,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
