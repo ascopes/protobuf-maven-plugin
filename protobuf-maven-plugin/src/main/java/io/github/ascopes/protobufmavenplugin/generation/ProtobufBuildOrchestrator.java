@@ -17,9 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.generation;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.plugins.BinaryPluginResolver;
-import io.github.ascopes.protobufmavenplugin.plugins.JvmPluginResolver;
-import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.protoc.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
@@ -30,11 +28,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -56,34 +51,31 @@ public final class ProtobufBuildOrchestrator {
 
   private final MavenSession mavenSession;
   private final ProtocResolver protocResolver;
-  private final BinaryPluginResolver binaryPluginResolver;
-  private final JvmPluginResolver jvmPluginResolver;
-  private final CommandLineExecutor commandLineExecutor;
   private final ProjectInputResolver projectInputResolver;
+  private final ProjectPluginResolver projectPluginResolver;
+  private final CommandLineExecutor commandLineExecutor;
 
   @Inject
   public ProtobufBuildOrchestrator(
       MavenSession mavenSession,
       ProtocResolver protocResolver,
-      BinaryPluginResolver binaryPluginResolver,
-      JvmPluginResolver jvmPluginResolver,
-      CommandLineExecutor commandLineExecutor,
-      ProjectInputResolver projectInputResolver
+      ProjectInputResolver projectInputResolver,
+      ProjectPluginResolver projectPluginResolver,
+      CommandLineExecutor commandLineExecutor
   ) {
     this.mavenSession = mavenSession;
     this.protocResolver = protocResolver;
-    this.binaryPluginResolver = binaryPluginResolver;
-    this.jvmPluginResolver = jvmPluginResolver;
-    this.commandLineExecutor = commandLineExecutor;
     this.projectInputResolver = projectInputResolver;
+    this.projectPluginResolver = projectPluginResolver;
+    this.commandLineExecutor = commandLineExecutor;
   }
 
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
     log.debug("Protobuf GenerationRequest is: {}", request);
-    
+
     final var protocPath = discoverProtocPath(request);
 
-    final var resolvedPlugins = discoverPlugins(request);
+    final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
     if (projectInputs.getCompilableSources().isEmpty()) {
@@ -157,27 +149,6 @@ public final class ProtobufBuildOrchestrator {
         .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
   }
 
-  private Collection<ResolvedProtocPlugin> discoverPlugins(
-      GenerationRequest request
-  ) throws IOException, ResolutionException {
-    var plugins = concat(
-        binaryPluginResolver
-            .resolveMavenPlugins(request.getBinaryMavenPlugins()),
-        binaryPluginResolver
-            .resolvePathPlugins(request.getBinaryPathPlugins()),
-        binaryPluginResolver
-            .resolveUrlPlugins(request.getBinaryUrlPlugins()),
-        jvmPluginResolver
-            .resolveMavenPlugins(request.getJvmMavenPlugins())
-    );
-
-    // Sort by precedence then by initial order (sort is stable which guarantees this property).
-    return plugins
-        .stream()
-        .sorted(Comparator.comparingInt(ResolvedProtocPlugin::getOrder))
-        .collect(Collectors.toUnmodifiableList());
-  }
-
   private void createOutputDirectories(GenerationRequest request) throws IOException {
     var directory = request.getOutputDirectory();
     log.debug("Creating {}", directory);
@@ -230,14 +201,5 @@ public final class ProtobufBuildOrchestrator {
         );
       }
     }
-  }
-
-  // TODO(ascopes): move this into utility class and deduplicate across the project.
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  private static <T> List<T> concat(Collection<? extends T>... collections) {
-    return Stream.of(collections)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableList());
   }
 }

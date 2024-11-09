@@ -61,19 +61,19 @@ public final class BinaryPluginResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
+  public Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
       Collection<? extends MavenProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveMavenPlugin);
   }
 
-  public Collection<ResolvedProtocPlugin> resolvePathPlugins(
+  public Collection<? extends ResolvedProtocPlugin> resolvePathPlugins(
       Collection<? extends PathProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolvePathPlugin);
   }
 
-  public Collection<ResolvedProtocPlugin> resolveUrlPlugins(
+  public Collection<? extends ResolvedProtocPlugin> resolveUrlPlugins(
       Collection<? extends UrlProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveUrlPlugin);
