@@ -154,7 +154,7 @@ Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
       </td>
     </tr>
     <tr>
-      <td>Java GRPC services</td>
+      <td>Java gRPC services</td>
       <td>
         <ul>
           <li><code>com.google.protobuf:protobuf-java</code></li>
@@ -165,7 +165,7 @@ Dependencies are listed as `groupId:artifactId` for brevity. Naming is not
       </td>
     </tr>
     <tr>
-      <td>Kotlin GRPC services</td>
+      <td>Kotlin gRPC services</td>
       <td>
         <ul>
           <li><code>com.google.protobuf:protobuf-kotlin</code></li>
@@ -417,7 +417,7 @@ Providing authentication details or proxy details is not supported at this time.
 
 ## Additional plugins
 
-If you wish to generate GRPC stubs, or outputs for other languages like Scala that are not already
+If you wish to generate gRPC stubs, or outputs for other languages like Scala that are not already
 covered by the protoc executable, you can add custom plugins to your build.
 
 ### Common options
