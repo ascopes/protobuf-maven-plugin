@@ -18,7 +18,9 @@ package io.github.ascopes.protobufmavenplugin.sources;
 
 import static java.util.function.Predicate.not;
 
+import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
+import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,15 +53,15 @@ public final class ProtoSourceResolver {
   private static final Logger log = LoggerFactory.getLogger(ProtoSourceResolver.class);
 
   private final ConcurrentExecutor concurrentExecutor;
-  private final ProtoArchiveExtractor protoArchiveExtractor;
+  private final TemporarySpace temporarySpace;
 
   @Inject
   public ProtoSourceResolver(
       ConcurrentExecutor concurrentExecutor,
-      ProtoArchiveExtractor protoArchiveExtractor
+      TemporarySpace temporarySpace
   ) {
     this.concurrentExecutor = concurrentExecutor;
-    this.protoArchiveExtractor = protoArchiveExtractor;
+    this.temporarySpace = temporarySpace;
   }
 
   public Collection<ProtoFileListing> createProtoFileListings(
@@ -89,10 +91,70 @@ public final class ProtoSourceResolver {
       return Optional.empty();
     }
 
-    if (Files.isRegularFile(rootPath)) {
+    return Files.isRegularFile(rootPath)
+        ? createProtoFileListingForFile(rootPath, filter)
+        : createProtoFileListingForDirectory(rootPath, filter);
+  }
+
+
+  private Optional<ProtoFileListing> createProtoFileListingForFile(
+      Path rootPath,
+      ProtoFileFilter filter
+  ) throws IOException {
+    // XXX: we do not convert the extension to lowercase, as there
+    //  is some nuanced logic within the ZipFileSystemProvider that appears
+    //  to be case-sensitive.
+    //  See https://github.com/openjdk/jdk/blob/cafb3dc49157daf12c1a0e5d78acca8188c56918/src/jdk.zipfs/share/classes/jdk/nio/zipfs/ZipFileSystemProvider.java#L128
+    var fileExtension = FileUtils.getFileExtension(rootPath);
+
+    // GH-327: We filter out non-zip archives to prevent vague errors if
+    // users include non-zip dependencies such as POMs, which cannot be extracted.
+    if (fileExtension.filter(ZIP_FILE_EXTENSIONS::contains).isPresent()) {
       return createProtoFileListingForArchive(rootPath, filter);
     }
 
+    if (fileExtension.filter(POM_FILE_EXTENSIONS::contains).isPresent()) {
+      log.debug("Ignoring invalid dependency on potential POM at {}", rootPath);
+      return Optional.empty();
+    }
+
+    log.warn("Ignoring unknown archive type at {}", rootPath);
+    return Optional.empty();
+  }
+
+  private Optional<ProtoFileListing> createProtoFileListingForArchive(
+      Path rootPath,
+      ProtoFileFilter filter
+  ) throws IOException {
+    try (var vfs = FileUtils.openZipAsFileSystem(rootPath)) {
+      var vfsRoot = vfs.getRootDirectories().iterator().next();
+      var sourceFiles = createProtoFileListing(vfsRoot, filter);
+
+      if (sourceFiles.isEmpty()) {
+        return Optional.empty();
+      }
+
+      var extractionRoot = getArchiveExtractionRoot().resolve(generateUniqueName(rootPath));
+      var targetFiles = FileUtils.rebaseFileTree(
+          vfsRoot,
+          extractionRoot,
+          sourceFiles.get().getProtoFiles().stream()
+      );
+
+      var listing = ImmutableProtoFileListing
+          .builder()
+          .addAllProtoFiles(targetFiles)
+          .protoFilesRoot(extractionRoot)
+          .build();
+
+      return Optional.of(listing);
+    }
+  }
+
+  private Optional<ProtoFileListing> createProtoFileListingForDirectory(
+      Path rootPath,
+      ProtoFileFilter filter
+  ) throws IOException {
     try (var stream = Files.walk(rootPath)) {
       return stream
           .filter(filePath -> filter.matches(rootPath, filePath))
@@ -112,28 +174,12 @@ public final class ProtoSourceResolver {
     }
   }
 
-  private Optional<ProtoFileListing> createProtoFileListingForArchive(
-      Path rootPath,
-      ProtoFileFilter filter
-  ) throws IOException {
-    // XXX: we do not convert the extension to lowercase, as there
-    //  is some nuanced logic within the ZipFileSystemProvider that appears
-    //  to be case-sensitive.
-    //  See https://github.com/openjdk/jdk/blob/cafb3dc49157daf12c1a0e5d78acca8188c56918/src/jdk.zipfs/share/classes/jdk/nio/zipfs/ZipFileSystemProvider.java#L128
-    var fileExtension = FileUtils.getFileExtension(rootPath);
+  private Path getArchiveExtractionRoot() {
+    return temporarySpace.createTemporarySpace("archives");
+  }
 
-    // GH-327: We filter out non-zip archives to prevent vague errors if
-    // users include non-zip dependencies such as POMs, which cannot be extracted.
-    if (fileExtension.filter(ZIP_FILE_EXTENSIONS::contains).isPresent()) {
-      return protoArchiveExtractor.extractProtoFiles(rootPath, filter);
-    }
-
-    if (fileExtension.filter(POM_FILE_EXTENSIONS::contains).isPresent()) {
-      log.debug("Ignoring invalid dependency on potential POM at {}", rootPath);
-      return Optional.empty();
-    }
-
-    log.warn("Ignoring unknown archive type at {}", rootPath);
-    return Optional.empty();
+  private String generateUniqueName(Path path) {
+    var digest = Digests.sha1(path.toAbsolutePath().toString());
+    return FileUtils.getFileNameWithoutExtension(path) + "-" + digest;
   }
 }
