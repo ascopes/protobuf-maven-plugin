@@ -24,9 +24,9 @@ import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
-import io.github.ascopes.protobufmavenplugin.sources.ProtoFileFilter;
-import io.github.ascopes.protobufmavenplugin.sources.ProtoFileListing;
-import io.github.ascopes.protobufmavenplugin.sources.ProtoSourceResolver;
+import io.github.ascopes.protobufmavenplugin.sources.SourceGlobFilter;
+import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
+import io.github.ascopes.protobufmavenplugin.sources.SourceResolver;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,7 +61,7 @@ public final class SourceCodeGenerator {
   private final ProtocResolver protocResolver;
   private final BinaryPluginResolver binaryPluginResolver;
   private final JvmPluginResolver jvmPluginResolver;
-  private final ProtoSourceResolver protoListingResolver;
+  private final SourceResolver protoListingResolver;
   private final CommandLineExecutor commandLineExecutor;
 
   @Inject
@@ -71,7 +71,7 @@ public final class SourceCodeGenerator {
       ProtocResolver protocResolver,
       BinaryPluginResolver binaryPluginResolver,
       JvmPluginResolver jvmPluginResolver,
-      ProtoSourceResolver protoListingResolver,
+      SourceResolver protoListingResolver,
       CommandLineExecutor commandLineExecutor
   ) {
     this.mavenSession = mavenSession;
@@ -120,7 +120,7 @@ public final class SourceCodeGenerator {
         .fatalWarnings(request.isFatalWarnings())
         .importPaths(
             importPaths.stream()
-                .map(ProtoFileListing::getProtoFilesRoot)
+                .map(SourceListing::getProtoFilesRoot)
                 .collect(Collectors.toCollection(LinkedHashSet::new))
         );
 
@@ -136,7 +136,7 @@ public final class SourceCodeGenerator {
 
     var sourceFiles = sourcePaths
         .stream()
-        .map(ProtoFileListing::getProtoFiles)
+        .map(SourceListing::getProtoFiles)
         .flatMap(Collection::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -181,8 +181,8 @@ public final class SourceCodeGenerator {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private Collection<ProtoFileListing> discoverImportPaths(
-      Collection<ProtoFileListing> sourcePathListings,
+  private Collection<SourceListing> discoverImportPaths(
+      Collection<SourceListing> sourcePathListings,
       GenerationRequest request
   ) throws ResolutionException {
     var artifactPaths = artifactPathResolver.resolveDependencies(
@@ -193,7 +193,7 @@ public final class SourceCodeGenerator {
         request.isFailOnInvalidDependencies()
     );
 
-    var filter = new ProtoFileFilter();
+    var filter = new SourceGlobFilter();
 
     var importPathListings = protoListingResolver.createProtoFileListings(
         concat(request.getImportPaths(), artifactPaths),
@@ -208,12 +208,12 @@ public final class SourceCodeGenerator {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private Collection<ProtoFileListing> discoverCompilableSources(
+  private Collection<SourceListing> discoverCompilableSources(
       GenerationRequest request
   ) throws ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
 
-    var filter = new ProtoFileFilter(request.getIncludes(), request.getExcludes());
+    var filter = new SourceGlobFilter(request.getIncludes(), request.getExcludes());
 
     var sourcePathsListings = protoListingResolver.createProtoFileListings(
         request.getSourceRoots(),
@@ -287,7 +287,7 @@ public final class SourceCodeGenerator {
 
   private void embedSourcesInClassOutputs(
       SourceRootRegistrar registrar,
-      Collection<ProtoFileListing> listings
+      Collection<SourceListing> listings
   ) throws ResolutionException {
     for (var listing : listings) {
       try {

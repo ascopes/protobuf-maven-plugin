@@ -36,27 +36,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component that can index and resolve proto files in a file tree.
+ * Component that can index and resolve protobuf sources in a file tree.
  *
- * <p>In addition, it can discover proto files within archives. These results will be
+ * <p>In addition, it can discover sources within archives recursively. These results will be
  * extracted to a location within the Maven build directory to enable {@code protoc} and other
  * plugins to be able to view them without needing access to the Java NIO file system APIs.
  *
  * @author Ashley Scopes
  */
 @Named
-public final class ProtoSourceResolver {
+public final class SourceResolver {
 
   private static final Set<String> POM_FILE_EXTENSIONS = Set.of(".pom", ".xml");
   private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
 
-  private static final Logger log = LoggerFactory.getLogger(ProtoSourceResolver.class);
+  private static final Logger log = LoggerFactory.getLogger(SourceResolver.class);
 
   private final ConcurrentExecutor concurrentExecutor;
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public ProtoSourceResolver(
+  public SourceResolver(
       ConcurrentExecutor concurrentExecutor,
       TemporarySpace temporarySpace
   ) {
@@ -64,9 +64,9 @@ public final class ProtoSourceResolver {
     this.temporarySpace = temporarySpace;
   }
 
-  public Collection<ProtoFileListing> createProtoFileListings(
+  public Collection<SourceListing> createProtoFileListings(
       Collection<Path> rootPaths,
-      ProtoFileFilter filter
+      SourceGlobFilter filter
   ) {
     return rootPaths
         .stream()
@@ -82,9 +82,9 @@ public final class ProtoSourceResolver {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  public Optional<ProtoFileListing> createProtoFileListing(
+  public Optional<SourceListing> createProtoFileListing(
       Path rootPath,
-      ProtoFileFilter filter
+      SourceGlobFilter filter
   ) throws IOException {
     if (!Files.exists(rootPath)) {
       log.debug("Skipping lookup in path {} as it does not exist", rootPath);
@@ -96,10 +96,9 @@ public final class ProtoSourceResolver {
         : createProtoFileListingForDirectory(rootPath, filter);
   }
 
-
-  private Optional<ProtoFileListing> createProtoFileListingForFile(
+  private Optional<SourceListing> createProtoFileListingForFile(
       Path rootPath,
-      ProtoFileFilter filter
+      SourceGlobFilter filter
   ) throws IOException {
     // XXX: we do not convert the extension to lowercase, as there
     //  is some nuanced logic within the ZipFileSystemProvider that appears
@@ -122,9 +121,9 @@ public final class ProtoSourceResolver {
     return Optional.empty();
   }
 
-  private Optional<ProtoFileListing> createProtoFileListingForArchive(
+  private Optional<SourceListing> createProtoFileListingForArchive(
       Path rootPath,
-      ProtoFileFilter filter
+      SourceGlobFilter filter
   ) throws IOException {
     try (var vfs = FileUtils.openZipAsFileSystem(rootPath)) {
       var vfsRoot = vfs.getRootDirectories().iterator().next();
@@ -141,7 +140,7 @@ public final class ProtoSourceResolver {
           sourceFiles.get().getProtoFiles().stream()
       );
 
-      var listing = ImmutableProtoFileListing
+      var listing = ImmutableSourceListing
           .builder()
           .addAllProtoFiles(targetFiles)
           .protoFilesRoot(extractionRoot)
@@ -151,9 +150,9 @@ public final class ProtoSourceResolver {
     }
   }
 
-  private Optional<ProtoFileListing> createProtoFileListingForDirectory(
+  private Optional<SourceListing> createProtoFileListingForDirectory(
       Path rootPath,
-      ProtoFileFilter filter
+      SourceGlobFilter filter
   ) throws IOException {
     try (var stream = Files.walk(rootPath)) {
       return stream
@@ -166,7 +165,7 @@ public final class ProtoSourceResolver {
               Optional::of
           ))
           .filter(not(Collection::isEmpty))
-          .map(protoFiles -> ImmutableProtoFileListing
+          .map(protoFiles -> ImmutableSourceListing
               .builder()
               .addAllProtoFiles(protoFiles)
               .protoFilesRoot(rootPath)

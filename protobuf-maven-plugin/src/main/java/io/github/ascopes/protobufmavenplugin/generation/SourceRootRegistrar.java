@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.generation;
 
-import io.github.ascopes.protobufmavenplugin.sources.ProtoFileListing;
+import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -71,7 +71,7 @@ public final class SourceRootRegistrar {
     sourceRootRegistrar.accept(session.getCurrentProject(), path.toString());
   }
 
-  public void embedListing(MavenSession session, ProtoFileListing listing) throws IOException {
+  public void embedListing(MavenSession session, SourceListing listing) throws IOException {
     log.info("Embedding sources from {} in {} class outputs", listing.getProtoFilesRoot(), this);
     var targetDirectory = classOutputDirectoryGetter.andThen(Path::of)
         .apply(session.getCurrentProject().getBuild());

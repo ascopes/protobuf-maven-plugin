@@ -26,7 +26,7 @@ import org.immutables.value.Value.Immutable;
  * @author Ashley Scopes
  */
 @Immutable
-public interface ProtoFileListing {
+public interface SourceListing {
 
   Path getProtoFilesRoot();
 
