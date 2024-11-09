@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.2.0
  */
+@Singleton
 @Named
 public final class ConcurrentExecutor {
 
