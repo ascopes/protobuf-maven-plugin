@@ -18,10 +18,10 @@ package io.github.ascopes.protobufmavenplugin.sources;
 
 import static java.util.function.Predicate.not;
 
-import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
