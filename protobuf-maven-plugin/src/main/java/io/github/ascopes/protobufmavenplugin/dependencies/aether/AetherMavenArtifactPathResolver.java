@@ -24,7 +24,9 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -46,7 +48,6 @@ import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
@@ -176,12 +177,37 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       );
     }
 
-    return dependencyResult
-        .getArtifactResults()
-        .stream()
-        .map(ArtifactResult::getArtifact)
-        .map(this::determinePath)
-        .collect(Collectors.toUnmodifiableList());
+    var paths = new ArrayList<Path>();
+    var fatalResolutionExceptions = new ArrayList<Throwable>();
+    for (var artifactResult : dependencyResult.getArtifactResults()) {
+      var artifact = artifactResult.getArtifact();
+
+      if (artifact == null) {
+        // Sanity check, pretty sure this shouldn't be needed in the future.
+        assert !artifactResult.getExceptions().isEmpty() : "Unexpected empty exceptions array";
+
+        fatalResolutionExceptions.addAll(artifactResult.getExceptions());
+        continue;
+      }
+
+      if (!artifactResult.getExceptions().isEmpty()) {
+        artifactResult.getExceptions()
+            .forEach(ex -> log.debug("Encountered a non-fatal resolution error", ex));
+      }
+      paths.add(determinePath(artifact));
+    }
+
+    if (fatalResolutionExceptions.isEmpty()) {
+      return Collections.unmodifiableList(paths);
+    }
+
+    var causeIterator = fatalResolutionExceptions.iterator();
+    var exception = new ResolutionException(
+        "One or more errors occurred while resolving artifacts",
+        causeIterator.next()
+    );
+    causeIterator.forEachRemaining(exception::addSuppressed);
+    throw exception;
   }
 
   private Stream<org.eclipse.aether.graph.Dependency> getProjectDependencies() {
@@ -216,7 +242,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       var artifact = createArtifact(mavenArtifact);
 
       return new org.eclipse.aether.graph.Dependency(
-          artifact, 
+          artifact,
           DEFAULT_SCOPE,
           false,
           exclusions
@@ -293,11 +319,11 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
   }
 
   private Path determinePath(Artifact artifact) {
-    // TODO: when Maven moves to the v2.0.0 resolver API, replace
+    // TODO(ascopes): when Maven moves to the v2.0.0 resolver API, replace
     //   this method with calls to Artifact.getPath() directly
     //   and delete this polyfill method.
     @SuppressWarnings("deprecation")
-    var path = artifact.getFile().toPath();
-    return FileUtils.normalize(path);
+    var file = artifact.getFile();
+    return FileUtils.normalize(file.toPath());
   }
 }
