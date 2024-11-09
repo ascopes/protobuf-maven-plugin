@@ -20,13 +20,13 @@ import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.generation.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
+import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
@@ -98,7 +98,7 @@ public final class JvmPluginResolver {
 
   public Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
       Collection<? extends MavenProtocPlugin> pluginDescriptors
-  ) throws IOException, ResolutionException {
+  ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     var index = 0;
 
@@ -117,7 +117,7 @@ public final class JvmPluginResolver {
   private ResolvedProtocPlugin resolveMavenPlugin(
       MavenProtocPlugin pluginDescriptor,
       int index
-  ) throws IOException, ResolutionException {
+  ) throws ResolutionException {
 
     log.debug(
         "Resolving JVM-based Maven protoc plugin {} and generating OS-specific boostrap scripts",
@@ -130,8 +130,8 @@ public final class JvmPluginResolver {
     var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
 
     var scriptPath = hostSystem.isProbablyWindows()
-        ? writeWindowsScripts(id, javaPath, scratchDir, argLine)
-        : writePosixScripts(id, javaPath, scratchDir, argLine);
+        ? writeWindowsScripts(javaPath, scratchDir, argLine)
+        : writePosixScripts(javaPath, scratchDir, argLine);
 
     return ImmutableResolvedProtocPlugin
         .builder()
@@ -149,8 +149,7 @@ public final class JvmPluginResolver {
     return Digests.sha1(plugin.toString()) + "-" + index;
   }
 
-  private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin)
-      throws ResolutionException, IOException {
+  private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin) throws ResolutionException {
     // Expectation: this always has at least one item in it, and the first item is the plugin
     // artifact itself.
     var dependencies = artifactPathResolver
@@ -192,7 +191,10 @@ public final class JvmPluginResolver {
     return args;
   }
 
-  private String determineMainClass(MavenProtocPlugin plugin, Path pluginPath) throws IOException {
+  private String determineMainClass(
+      MavenProtocPlugin plugin,
+      Path pluginPath
+  ) throws ResolutionException {
     // GH-363: It appears that we have to avoid calling `java -jar` when running JARs as the
     // classpath argument is totally ignored by Java in this case, meaning no dependencies
     // get loaded correctly, and we get NoClassDefFoundErrors being raised for non-shaded JARs.
@@ -239,7 +241,7 @@ public final class JvmPluginResolver {
 
   private @Nullable String tryToDetermineMainClassFromJarManifest(
       Path pluginPath
-  ) throws IOException {
+  ) throws ResolutionException {
     try (
         var zip = FileUtils.openZipAsFileSystem(pluginPath);
         var manifestStream = Files.newInputStream(zip.getPath("META-INF", "MANIFEST.MF"))
@@ -247,6 +249,13 @@ public final class JvmPluginResolver {
       return new Manifest(manifestStream)
           .getMainAttributes()
           .getValue("Main-Class");
+    } catch (IOException ex) {
+      throw new ResolutionException(
+          "Failed to determine the main class in the MANIFEST.MF for JAR corresponding to "
+              + pluginPath
+              + ": an unexpected IO error occurred",
+          ex
+      );
     }
   }
 
@@ -300,13 +309,12 @@ public final class JvmPluginResolver {
   }
 
   private Path writePosixScripts(
-      String id,
       Path javaExecutable,
       Path scratchDir,
       ArgumentFileBuilder argFileBuilder
-  ) throws IOException, ResolutionException {
+  ) throws ResolutionException {
     var sh = pathResolver.resolve("sh").orElseThrow();
-    var argFile = writeArgFile(id, StandardCharsets.UTF_8, scratchDir, argFileBuilder);
+    var argFile = writeArgFile(StandardCharsets.UTF_8, scratchDir, argFileBuilder);
 
     var script = new StringBuilder()
         .append("#!").append(sh).append('\n')
@@ -318,23 +326,16 @@ public final class JvmPluginResolver {
     script.append('\n');
 
     var scriptFile = scratchDir.resolve("invoke.sh");
-    Files.writeString(
-        scriptFile,
-        script,
-        StandardCharsets.UTF_8,
-        StandardOpenOption.CREATE
-    );
-    FileUtils.makeExecutable(scriptFile);
+    writeFile(scriptFile, script.toString(), StandardCharsets.UTF_8, true);
     return scriptFile;
   }
 
   private Path writeWindowsScripts(
-      String id,
       Path javaExecutable,
       Path scratchDir,
       ArgumentFileBuilder argFileBuilder
-  ) throws IOException {
-    var argFile = writeArgFile(id, StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
+  ) throws ResolutionException {
+    var argFile = writeArgFile(StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
 
     var script = new StringBuilder()
         .append("@echo off\r\n");
@@ -345,24 +346,38 @@ public final class JvmPluginResolver {
     script.append("\r\n");
 
     var scriptFile = scratchDir.resolve("invoke.bat");
-    Files.writeString(
-        scriptFile,
-        script.toString(),
-        StandardCharsets.ISO_8859_1,
-        StandardOpenOption.CREATE
-    );
+    writeFile(scriptFile, script.toString(), StandardCharsets.ISO_8859_1, false);
     return scriptFile;
   }
 
   private Path writeArgFile(
-      String id,
       Charset charset,
       Path scratchDir,
       ArgumentFileBuilder argFileBuilder
-  ) throws IOException {
+  ) throws ResolutionException {
     var argFile = scratchDir.resolve("args.txt");
-    Files.writeString(argFile, argFileBuilder.toString(), charset, StandardOpenOption.CREATE);
+    writeFile(argFile, argFileBuilder.toString(), charset, false);
     return argFile;
+  }
+
+  private void writeFile(
+      Path file,
+      String content,
+      Charset charset,
+      boolean makeExecutable
+  ) throws ResolutionException {
+    try {
+      Files.writeString(file, content, charset, StandardOpenOption.CREATE);
+
+      if (makeExecutable) {
+        FileUtils.makeExecutable(file);
+      }
+    } catch (IOException ex) {
+      throw new ResolutionException(
+          "Failed to write file " + file + ": an unexpected IO error occurred",
+          ex
+      );
+    }
   }
 
   private void quoteShellArg(StringBuilder sb, String arg) {

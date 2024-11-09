@@ -16,19 +16,18 @@
 
 package io.github.ascopes.protobufmavenplugin.sources;
 
-import java.nio.file.Path;
-import java.util.Set;
+import java.util.Collection;
 import org.immutables.value.Value.Immutable;
 
 /**
- * Listing for a root containing proto files.
+ * Wrapper around a collection of source and import listings.
  *
  * @author Ashley Scopes
+ * @since 2.7.0
  */
 @Immutable
-public interface SourceListing {
+public interface ProjectInputListing {
+  Collection<SourceListing> getCompilableSources();
 
-  Path getSourceRoot();
-
-  Set<Path> getSourceProtoFiles();
+  Collection<SourceListing> getImports();
 }

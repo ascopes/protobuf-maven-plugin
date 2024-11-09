@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependencies;
+package io.github.ascopes.protobufmavenplugin.utils;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
 import static org.assertj.core.api.Assertions.assertThat;

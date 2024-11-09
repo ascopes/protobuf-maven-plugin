@@ -16,27 +16,20 @@
 
 package io.github.ascopes.protobufmavenplugin.generation;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.plugins.BinaryPluginResolver;
-import io.github.ascopes.protobufmavenplugin.plugins.JvmPluginResolver;
-import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.protoc.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
-import io.github.ascopes.protobufmavenplugin.sources.SourceGlobFilter;
+import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
-import io.github.ascopes.protobufmavenplugin.sources.SourceResolver;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -57,42 +50,35 @@ public final class ProtobufBuildOrchestrator {
   private static final Logger log = LoggerFactory.getLogger(ProtobufBuildOrchestrator.class);
 
   private final MavenSession mavenSession;
-  private final MavenArtifactPathResolver artifactPathResolver;
   private final ProtocResolver protocResolver;
-  private final BinaryPluginResolver binaryPluginResolver;
-  private final JvmPluginResolver jvmPluginResolver;
-  private final SourceResolver protoListingResolver;
+  private final ProjectInputResolver projectInputResolver;
+  private final ProjectPluginResolver projectPluginResolver;
   private final CommandLineExecutor commandLineExecutor;
 
   @Inject
   public ProtobufBuildOrchestrator(
       MavenSession mavenSession,
-      MavenArtifactPathResolver artifactPathResolver,
       ProtocResolver protocResolver,
-      BinaryPluginResolver binaryPluginResolver,
-      JvmPluginResolver jvmPluginResolver,
-      SourceResolver protoListingResolver,
+      ProjectInputResolver projectInputResolver,
+      ProjectPluginResolver projectPluginResolver,
       CommandLineExecutor commandLineExecutor
   ) {
     this.mavenSession = mavenSession;
-    this.artifactPathResolver = artifactPathResolver;
     this.protocResolver = protocResolver;
-    this.binaryPluginResolver = binaryPluginResolver;
-    this.jvmPluginResolver = jvmPluginResolver;
-    this.protoListingResolver = protoListingResolver;
+    this.projectInputResolver = projectInputResolver;
+    this.projectPluginResolver = projectPluginResolver;
     this.commandLineExecutor = commandLineExecutor;
   }
 
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
     log.debug("Protobuf GenerationRequest is: {}", request);
-    
+
     final var protocPath = discoverProtocPath(request);
 
-    final var resolvedPlugins = discoverPlugins(request);
-    final var sourcePaths = discoverCompilableSources(request);
-    final var importPaths = discoverImportPaths(sourcePaths, request);
+    final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
+    final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
-    if (sourcePaths.isEmpty()) {
+    if (projectInputs.getCompilableSources().isEmpty()) {
       if (request.isFailOnMissingSources()) {
         log.error("No protobuf sources found. If this is unexpected, check your "
             + "configuration and try again.");
@@ -119,8 +105,8 @@ public final class ProtobufBuildOrchestrator {
     var argLineBuilder = new ArgLineBuilder(protocPath)
         .fatalWarnings(request.isFatalWarnings())
         .importPaths(
-            importPaths.stream()
-                .map(SourceListing::getProtoFilesRoot)
+            projectInputs.getImports().stream()
+                .map(SourceListing::getSourceRoot)
                 .collect(Collectors.toCollection(LinkedHashSet::new))
         );
 
@@ -134,9 +120,9 @@ public final class ProtobufBuildOrchestrator {
     // GH-269: Add the plugins after the enabled languages to support generated code injection
     argLineBuilder.plugins(resolvedPlugins, request.getOutputDirectory());
 
-    var sourceFiles = sourcePaths
+    var sourceFiles = projectInputs.getCompilableSources()
         .stream()
-        .map(SourceListing::getProtoFiles)
+        .map(SourceListing::getSourceProtoFiles)
         .flatMap(Collection::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -149,7 +135,10 @@ public final class ProtobufBuildOrchestrator {
     registerSourceRoots(request);
 
     if (request.isEmbedSourcesInClassOutputs()) {
-      embedSourcesInClassOutputs(request.getSourceRootRegistrar(), sourcePaths);
+      embedSourcesInClassOutputs(
+          request.getSourceRootRegistrar(),
+          projectInputs.getCompilableSources()
+      );
     }
 
     return true;
@@ -158,94 +147,6 @@ public final class ProtobufBuildOrchestrator {
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
     return protocResolver.resolve(request.getProtocVersion())
         .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
-  }
-
-  private Collection<ResolvedProtocPlugin> discoverPlugins(
-      GenerationRequest request
-  ) throws IOException, ResolutionException {
-    var plugins = concat(
-        binaryPluginResolver
-            .resolveMavenPlugins(request.getBinaryMavenPlugins()),
-        binaryPluginResolver
-            .resolvePathPlugins(request.getBinaryPathPlugins()),
-        binaryPluginResolver
-            .resolveUrlPlugins(request.getBinaryUrlPlugins()),
-        jvmPluginResolver
-            .resolveMavenPlugins(request.getJvmMavenPlugins())
-    );
-
-    // Sort by precedence then by initial order (sort is stable which guarantees this property).
-    return plugins
-        .stream()
-        .sorted(Comparator.comparingInt(ResolvedProtocPlugin::getOrder))
-        .collect(Collectors.toUnmodifiableList());
-  }
-
-  private Collection<SourceListing> discoverImportPaths(
-      Collection<SourceListing> sourcePathListings,
-      GenerationRequest request
-  ) throws ResolutionException {
-    var artifactPaths = artifactPathResolver.resolveDependencies(
-        request.getImportDependencies(),
-        request.getDependencyResolutionDepth(),
-        request.getDependencyScopes(),
-        !request.isIgnoreProjectDependencies(),
-        request.isFailOnInvalidDependencies()
-    );
-
-    var filter = new SourceGlobFilter();
-
-    var importPathListings = protoListingResolver.createProtoFileListings(
-        concat(request.getImportPaths(), artifactPaths),
-        filter
-    );
-
-    // Use the source paths here as well and use them first to give them precedence. This works
-    // around GH-172 where we can end up with different versions on the import and source paths
-    // depending on how dependency conflicts arise.
-    return Stream.concat(sourcePathListings.stream(), importPathListings.stream())
-        .distinct()
-        .collect(Collectors.toUnmodifiableList());
-  }
-
-  private Collection<SourceListing> discoverCompilableSources(
-      GenerationRequest request
-  ) throws ResolutionException {
-    log.debug("Discovering all compilable protobuf source files");
-
-    var filter = new SourceGlobFilter(request.getIncludes(), request.getExcludes());
-
-    var sourcePathsListings = protoListingResolver.createProtoFileListings(
-        request.getSourceRoots(),
-        filter
-    );
-
-    var sourceDependencies = artifactPathResolver.resolveDependencies(
-        request.getSourceDependencies(),
-        request.getDependencyResolutionDepth(),
-        request.getDependencyScopes(),
-        false,
-        request.isFailOnInvalidDependencies()
-    );
-
-    var sourceDependencyListings = protoListingResolver.createProtoFileListings(
-        sourceDependencies,
-        filter
-    );
-
-    var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
-
-    var sourceFileCount = sourcePaths.stream()
-        .mapToInt(sourcePath -> sourcePath.getProtoFiles().size())
-        .sum();
-    
-    log.info(
-        "Generating source code for {} from {}",
-        pluralize(sourceFileCount, "protobuf file"),
-        pluralize(sourcePaths.size(), "source file tree")
-    );
-
-    return sourcePaths;
   }
 
   private void createOutputDirectories(GenerationRequest request) throws IOException {
@@ -294,25 +195,11 @@ public final class ProtobufBuildOrchestrator {
         registrar.embedListing(mavenSession, listing);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to embed " + listing.getProtoFilesRoot() 
+            "Failed to embed " + listing.getSourceRoot()
                 + " into the class outputs directory",
             ex
         );
       }
     }
-  }
-
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  private static <T> List<T> concat(Collection<? extends T>... collections) {
-    return Stream.of(collections)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableList());
-  }
-
-  private static String pluralize(int count, String name) {
-    return count == 1
-        ? "1 " + name
-        : count + " " + name + "s";
   }
 }

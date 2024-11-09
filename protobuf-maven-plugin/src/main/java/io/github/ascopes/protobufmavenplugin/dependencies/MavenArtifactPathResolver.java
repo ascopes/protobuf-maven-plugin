@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;

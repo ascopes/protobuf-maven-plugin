@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.generation;
+package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

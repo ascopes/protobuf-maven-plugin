@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.HostSystemMockConfigurer;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -43,7 +43,7 @@ final class MultipleFailuresException extends RuntimeException {
     var cause = causeIterator.next();
     var message = causeIterator.hasNext()
         ? exceptions.size() + " failures occurred during a concurrent task. The first was: "
-        : "A failure occured during a concurrent task: ";
+        : "A failure occurred during a concurrent task: ";
     message += cause.getClass().getName() + ": " + cause.getMessage();
 
     var ex = new MultipleFailuresException(message, cause);

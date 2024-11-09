@@ -46,7 +46,7 @@ class MultipleFailuresExceptionTest {
     // Then
     assertThat(exception)
         .hasMessage(
-            "A failure occured during a concurrent task: %s: %s",
+            "A failure occurred during a concurrent task: %s: %s",
             cause.getClass().getName(),
             cause.getMessage()
         );

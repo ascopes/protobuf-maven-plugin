@@ -18,10 +18,10 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
-import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -61,19 +61,19 @@ public final class BinaryPluginResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Collection<ResolvedProtocPlugin> resolveMavenPlugins(
+  public Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
       Collection<? extends MavenProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveMavenPlugin);
   }
 
-  public Collection<ResolvedProtocPlugin> resolvePathPlugins(
+  public Collection<? extends ResolvedProtocPlugin> resolvePathPlugins(
       Collection<? extends PathProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolvePathPlugin);
   }
 
-  public Collection<ResolvedProtocPlugin> resolveUrlPlugins(
+  public Collection<? extends ResolvedProtocPlugin> resolveUrlPlugins(
       Collection<? extends UrlProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveUrlPlugin);
