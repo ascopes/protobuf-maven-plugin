@@ -137,7 +137,7 @@ public final class SourceResolver {
       var targetFiles = FileUtils.rebaseFileTree(
           vfsRoot,
           extractionRoot,
-          sourceFiles.get().getProtoFiles().stream()
+          sourceFiles.get().getSourceProtoFiles().stream()
       );
 
       var listing = ImmutableSourceListing

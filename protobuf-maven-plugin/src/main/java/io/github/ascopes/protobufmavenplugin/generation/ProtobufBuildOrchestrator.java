@@ -120,7 +120,7 @@ public final class ProtobufBuildOrchestrator {
         .fatalWarnings(request.isFatalWarnings())
         .importPaths(
             importPaths.stream()
-                .map(SourceListing::getProtoFilesRoot)
+                .map(SourceListing::getSourceRoot)
                 .collect(Collectors.toCollection(LinkedHashSet::new))
         );
 
@@ -136,7 +136,7 @@ public final class ProtobufBuildOrchestrator {
 
     var sourceFiles = sourcePaths
         .stream()
-        .map(SourceListing::getProtoFiles)
+        .map(SourceListing::getSourceProtoFiles)
         .flatMap(Collection::stream)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -236,7 +236,7 @@ public final class ProtobufBuildOrchestrator {
     var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
 
     var sourceFileCount = sourcePaths.stream()
-        .mapToInt(sourcePath -> sourcePath.getProtoFiles().size())
+        .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
         .sum();
     
     log.info(
@@ -294,7 +294,7 @@ public final class ProtobufBuildOrchestrator {
         registrar.embedListing(mavenSession, listing);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to embed " + listing.getProtoFilesRoot() 
+            "Failed to embed " + listing.getSourceRoot()
                 + " into the class outputs directory",
             ex
         );

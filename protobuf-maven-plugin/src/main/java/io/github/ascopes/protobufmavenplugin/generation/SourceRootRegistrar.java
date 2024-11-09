@@ -72,14 +72,14 @@ public final class SourceRootRegistrar {
   }
 
   public void embedListing(MavenSession session, SourceListing listing) throws IOException {
-    log.info("Embedding sources from {} in {} class outputs", listing.getProtoFilesRoot(), this);
+    log.info("Embedding sources from {} in {} class outputs", listing.getSourceRoot(), this);
     var targetDirectory = classOutputDirectoryGetter.andThen(Path::of)
         .apply(session.getCurrentProject().getBuild());
 
     FileUtils.rebaseFileTree(
-        listing.getProtoFilesRoot(),
+        listing.getSourceRoot(),
         targetDirectory,
-        listing.getProtoFiles().stream()
+        listing.getSourceProtoFiles().stream()
     );
   }
 
