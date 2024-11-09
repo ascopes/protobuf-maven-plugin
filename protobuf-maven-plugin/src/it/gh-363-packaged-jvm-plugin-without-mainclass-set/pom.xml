@@ -22,10 +22,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>gh-363-packaged-jvm-plugin-without-mainclass-set</groupId>
@@ -36,18 +36,4 @@
     <module>protoc-plugin</module>
     <module>some-project</module>
   </modules>
-
-  <properties>
-    <protobuf.version>4.28.2</protobuf.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>${protobuf.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>

@@ -22,24 +22,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>gh-250-excludes</groupId>
   <artifactId>gh-250-excludes</artifactId>
 
-  <properties>
-    <protobuf.version>4.28.2</protobuf.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
@@ -48,11 +44,8 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
-          <protocVersion>${protobuf.version}</protocVersion>
-
           <excludes>
             <exclude>**/channel.proto</exclude>
             <exclude>**/message.proto</exclude>

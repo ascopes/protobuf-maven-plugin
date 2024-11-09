@@ -33,7 +33,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -45,13 +44,12 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <protocVersion>${protobuf.version}</protocVersion>
-
           <sourceDependencies>
             <sourceDependency>
               <groupId>${project.groupId}</groupId>
               <artifactId>user-protos</artifactId>
               <version>${project.version}</version>
+              <classifier>zip</classifier>
               <type>zip</type>
             </sourceDependency>
           </sourceDependencies>

@@ -22,16 +22,17 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>http-url-protoc</groupId>
   <artifactId>http-url-protoc</artifactId>
 
   <properties>
+    <!-- Do not upgrade these, they are frozen to satisfy this test reproduction. -->
     <protobuf.version>3.25.5</protobuf.version>
   </properties>
 
@@ -39,7 +40,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -65,7 +65,6 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
           <protocVersion>https://repo1.maven.org/maven2/com/google/protobuf/protoc/${protobuf.version}/protoc-${protobuf.version}-linux-x86_64.exe</protocVersion>

@@ -22,18 +22,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>java-test-empty</groupId>
   <artifactId>java-test-empty</artifactId>
 
-  <properties>
-    <protobuf.version>4.28.0</protobuf.version>
-  </properties>
 
   <build>
     <plugins>
@@ -48,11 +45,9 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
           <failOnMissingSources>false</failOnMissingSources>
-          <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>

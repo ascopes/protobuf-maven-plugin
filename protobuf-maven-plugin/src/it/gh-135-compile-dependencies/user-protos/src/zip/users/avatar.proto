@@ -16,19 +16,18 @@
 
 syntax = "proto3";
 
-package org.example.channels;
+package users;
 
 option java_multiple_files = true;
-option java_package = "org.example.channels";
+option java_package = "org.example.users";
 
-import "google/protobuf/timestamp.proto";
-import "org/example/user.proto";
+enum AvatarFormat {
+  PNG = 0;
+  WEBP = 1;
+  SVG = 2;
+}
 
-message Channel {
-  string id = 1;
-  string name = 2;
-  google.protobuf.Timestamp created_at = 3;
-  optional google.protobuf.Timestamp updated_at = 4;
-  users.User owner = 5;
-  repeated org.example.users.User members = 6;
+message Avatar {
+  string binary_data = 1;
+  AvatarFormat format = 2;
 }

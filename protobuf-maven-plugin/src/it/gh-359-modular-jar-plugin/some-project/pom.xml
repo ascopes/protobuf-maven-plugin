@@ -35,7 +35,6 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
           <jvmMavenPlugins>
@@ -47,7 +46,6 @@
           </jvmMavenPlugins>
 
           <javaEnabled>false</javaEnabled>
-          <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>
