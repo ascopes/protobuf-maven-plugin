@@ -64,7 +64,7 @@ public final class SourceResolver {
     this.temporarySpace = temporarySpace;
   }
 
-  public Collection<SourceListing> createProtoFileListings(
+  public Collection<SourceListing> resolveSources(
       Collection<Path> rootPaths,
       SourceGlobFilter filter
   ) {
@@ -75,14 +75,14 @@ public final class SourceResolver {
         .map(FileUtils::normalize)
         // GH-132: Avoid running multiple times on the same location.
         .distinct()
-        .map(path -> concurrentExecutor.submit(() -> createProtoFileListing(path, filter)))
+        .map(path -> concurrentExecutor.submit(() -> resolveSources(path, filter)))
         .collect(concurrentExecutor.awaiting())
         .stream()
         .flatMap(Optional::stream)
         .collect(Collectors.toUnmodifiableList());
   }
 
-  public Optional<SourceListing> createProtoFileListing(
+  private Optional<SourceListing> resolveSources(
       Path rootPath,
       SourceGlobFilter filter
   ) throws IOException {
@@ -92,11 +92,11 @@ public final class SourceResolver {
     }
 
     return Files.isRegularFile(rootPath)
-        ? createProtoFileListingForFile(rootPath, filter)
-        : createProtoFileListingForDirectory(rootPath, filter);
+        ? resolveSourcesWithinFile(rootPath, filter)
+        : resolveSourcesWithinDirectory(rootPath, filter);
   }
 
-  private Optional<SourceListing> createProtoFileListingForFile(
+  private Optional<SourceListing> resolveSourcesWithinFile(
       Path rootPath,
       SourceGlobFilter filter
   ) throws IOException {
@@ -109,7 +109,7 @@ public final class SourceResolver {
     // GH-327: We filter out non-zip archives to prevent vague errors if
     // users include non-zip dependencies such as POMs, which cannot be extracted.
     if (fileExtension.filter(ZIP_FILE_EXTENSIONS::contains).isPresent()) {
-      return createProtoFileListingForArchive(rootPath, filter);
+      return resolveSourcesWithinArchive(rootPath, filter);
     }
 
     if (fileExtension.filter(POM_FILE_EXTENSIONS::contains).isPresent()) {
@@ -121,36 +121,32 @@ public final class SourceResolver {
     return Optional.empty();
   }
 
-  private Optional<SourceListing> createProtoFileListingForArchive(
+  private Optional<SourceListing> resolveSourcesWithinArchive(
       Path rootPath,
       SourceGlobFilter filter
   ) throws IOException {
+    // We move the source files out of the archive and place them in a location on the root
+    // file system so that protoc is able to see their contents.
     try (var vfs = FileUtils.openZipAsFileSystem(rootPath)) {
       var vfsRoot = vfs.getRootDirectories().iterator().next();
-      var sourceFiles = createProtoFileListing(vfsRoot, filter);
+      var sourceFiles = resolveSources(vfsRoot, filter);
 
       if (sourceFiles.isEmpty()) {
         return Optional.empty();
       }
 
       var extractionRoot = getArchiveExtractionRoot().resolve(generateUniqueName(rootPath));
-      var targetFiles = FileUtils.rebaseFileTree(
+      var relocatedSourceFiles = FileUtils.rebaseFileTree(
           vfsRoot,
           extractionRoot,
           sourceFiles.get().getSourceProtoFiles().stream()
       );
 
-      var listing = ImmutableSourceListing
-          .builder()
-          .addAllProtoFiles(targetFiles)
-          .protoFilesRoot(extractionRoot)
-          .build();
-
-      return Optional.of(listing);
+      return Optional.of(createSourceListing(relocatedSourceFiles, extractionRoot));
     }
   }
 
-  private Optional<SourceListing> createProtoFileListingForDirectory(
+  private Optional<SourceListing> resolveSourcesWithinDirectory(
       Path rootPath,
       SourceGlobFilter filter
   ) throws IOException {
@@ -165,12 +161,15 @@ public final class SourceResolver {
               Optional::of
           ))
           .filter(not(Collection::isEmpty))
-          .map(protoFiles -> ImmutableSourceListing
-              .builder()
-              .addAllProtoFiles(protoFiles)
-              .protoFilesRoot(rootPath)
-              .build());
+          .map(protoFiles -> createSourceListing(protoFiles, rootPath));
     }
+  }
+
+  private SourceListing createSourceListing(Collection<Path> sourceFiles, Path rootPath) {
+    return ImmutableSourceListing.builder()
+        .addAllSourceProtoFiles(sourceFiles)
+        .sourceRoot(rootPath)
+        .build();
   }
 
   private Path getArchiveExtractionRoot() {
