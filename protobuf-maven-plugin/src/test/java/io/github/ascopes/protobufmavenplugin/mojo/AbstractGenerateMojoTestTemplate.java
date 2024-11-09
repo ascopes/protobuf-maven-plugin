@@ -34,7 +34,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
-import io.github.ascopes.protobufmavenplugin.generation.SourceCodeGenerator;
+import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
@@ -955,9 +955,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     return consumer;
   }
 
-  static SourceCodeGenerator sourceCodeGenerator(boolean result) throws Throwable {
+  static ProtobufBuildOrchestrator sourceCodeGenerator(boolean result) throws Throwable {
     var sourceCodeGenerator = mock(
-        SourceCodeGenerator.class,
+        ProtobufBuildOrchestrator.class,
         withSettings().strictness(Strictness.LENIENT)
     );
     when(sourceCodeGenerator.generate(any()))
@@ -965,9 +965,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     return sourceCodeGenerator;
   }
 
-  static SourceCodeGenerator erroringSourceCodeGenerator(Throwable cause) throws Throwable {
+  static ProtobufBuildOrchestrator erroringSourceCodeGenerator(Throwable cause) throws Throwable {
     var sourceCodeGenerator = mock(
-        SourceCodeGenerator.class,
+        ProtobufBuildOrchestrator.class,
         withSettings().strictness(Strictness.LENIENT)
     );
     when(sourceCodeGenerator.generate(any()))

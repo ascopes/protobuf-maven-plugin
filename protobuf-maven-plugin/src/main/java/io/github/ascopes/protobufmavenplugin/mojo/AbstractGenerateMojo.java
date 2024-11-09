@@ -25,7 +25,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
 import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
-import io.github.ascopes.protobufmavenplugin.generation.SourceCodeGenerator;
+import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
@@ -76,7 +76,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * The source code generator.
    */
   @Inject
-  SourceCodeGenerator sourceCodeGenerator;
+  ProtobufBuildOrchestrator sourceCodeGenerator;
 
   /**
    * The active Maven project.

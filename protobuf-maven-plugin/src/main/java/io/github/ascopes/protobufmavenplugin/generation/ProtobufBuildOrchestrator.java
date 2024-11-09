@@ -52,9 +52,9 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 @Named
-public final class SourceCodeGenerator {
+public final class ProtobufBuildOrchestrator {
 
-  private static final Logger log = LoggerFactory.getLogger(SourceCodeGenerator.class);
+  private static final Logger log = LoggerFactory.getLogger(ProtobufBuildOrchestrator.class);
 
   private final MavenSession mavenSession;
   private final MavenArtifactPathResolver artifactPathResolver;
@@ -65,7 +65,7 @@ public final class SourceCodeGenerator {
   private final CommandLineExecutor commandLineExecutor;
 
   @Inject
-  public SourceCodeGenerator(
+  public ProtobufBuildOrchestrator(
       MavenSession mavenSession,
       MavenArtifactPathResolver artifactPathResolver,
       ProtocResolver protocResolver,
