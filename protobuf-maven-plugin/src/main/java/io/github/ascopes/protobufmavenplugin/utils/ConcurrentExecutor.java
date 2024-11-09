@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.2.0
  */
-@Named
+@Singleton
 public final class ConcurrentExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
