@@ -22,49 +22,37 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>scalapb-plugin</groupId>
   <artifactId>scalapb-plugin</artifactId>
 
-  <properties>
-    <grpc.version>1.65.0</grpc.version>
-    <protobuf.version>4.28.2</protobuf.version>
-    <scala.version>3.4.2</scala.version>
-    <scalapb.version>0.11.15</scalapb.version>
-    <scala-maven-plugin.version>4.9.1</scala-maven-plugin.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>com.thesamet.scalapb</groupId>
       <artifactId>scalapb-runtime-grpc_3</artifactId>
-      <version>${scalapb.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-netty</artifactId>
-      <version>${grpc.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala3-library_3</artifactId>
-      <version>${scala.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -80,16 +68,14 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
           <javaEnabled>false</javaEnabled>
-          <protocVersion>${protobuf.version}</protocVersion>
 
           <binaryUrlPlugins>
             <binaryUrlPlugin>
-              <url>jar:https://github.com/scalapb/ScalaPB/releases/download/v0.11.15/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
-              <options>flat_package,grpc</options>
+              <url>jar:https://github.com/scalapb/ScalaPB/releases/download/v${scalapb.version}/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
+              <options>flat_package,grpc,scala3_sources</options>
             </binaryUrlPlugin>
           </binaryUrlPlugins>
         </configuration>
@@ -106,17 +92,10 @@
       <plugin>
         <groupId>net.alchim31.maven</groupId>
         <artifactId>scala-maven-plugin</artifactId>
-        <version>${scala-maven-plugin.version}</version>
 
-        <executions>
-          <execution>
-            <goals>
-              <goal>add-source</goal>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
+        <configuration>
+          <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
+        </configuration>
       </plugin>
     </plugins>
   </build>

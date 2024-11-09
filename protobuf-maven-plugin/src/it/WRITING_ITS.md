@@ -4,6 +4,11 @@ This directory contains Maven Invoker integration tests that will be executed as
 project for each directory within this one. JaCoCo will also be hooked up automatically for you
 to capture code coverage.
 
+## Parent POM
+
+All test POMs inherit the `setup/pom.xml` project which acts as the base for defining common 
+versions across all projects. This keeps various concerns simple when updating dependencies.
+
 ## Invocation
 
 To run all integration tests, run:
@@ -16,8 +21,12 @@ If you want to run specific tests only, pass the `-Dinvoker.test` flag with a co
 name of each project in this directory you want to run.
 
 ```shell
-$ ./mvnw integration-test -Dinvoker.test=help,java-simple
+$ ./mvnw integration-test -Dinvoker.test=setup,help,java-simple
 ```
+
+This should always be called with `setup` as the first project to ensure that the aggregator
+test parent POM is installed into the test environment first. Failing to do this will result
+in test failures.
 
 ## Configuration
 
@@ -74,7 +83,7 @@ use of the `invoker-debug.properties` in this directory rather than `invoker.pro
 For example, to debug the plugin while running the `path-protoc` IT case, you could run
 
 ```console
-$ ./mvnw verify -DskipTests -Dinvoker.test=path-protoc -Pinvoker-debug
+$ ./mvnw verify -DskipTests -Dinvoker.test=setup,path-protoc -Pinvoker-debug
 ```
 
 This debugger will suspend the invoked IT Maven process until a debugger client connects to the

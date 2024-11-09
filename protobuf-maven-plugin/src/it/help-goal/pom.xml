@@ -22,10 +22,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>help-goal</groupId>

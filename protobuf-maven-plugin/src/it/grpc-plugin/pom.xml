@@ -22,45 +22,37 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>grpc-plugin</groupId>
   <artifactId>grpc-plugin</artifactId>
 
-  <properties>
-    <grpc.version>1.65.0</grpc.version>
-    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
-    <protobuf.version>4.28.2</protobuf.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-protobuf</artifactId>
-      <version>${grpc.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-netty</artifactId>
-      <version>${grpc.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-stub</artifactId>
-      <version>${grpc.version}</version>
       <scope>compile</scope>
     </dependency>
 
@@ -68,7 +60,7 @@
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>${javax-annotation-api.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -93,7 +85,6 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
           <binaryMavenPlugins>
@@ -103,8 +94,6 @@
               <version>${grpc.version}</version>
             </binaryMavenPlugin>
           </binaryMavenPlugins>
-
-          <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>

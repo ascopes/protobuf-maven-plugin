@@ -22,32 +22,35 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>gh-327-non-zip-archive-handling</groupId>
   <artifactId>gh-327-non-zip-archive-handling</artifactId>
 
   <properties>
-    <protobuf.version>4.28.2</protobuf.version>
+    <!-- Do not upgrade these, they are frozen to satisfy this test reproduction. -->
+    <axon-spring-boot-starter.version>4.10.0</axon-spring-boot-starter.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <!-- GH-327 was triggered by depending on a POM artifact,
-           specifically this axon spring boot startet one. -->
+           specifically this axon spring boot starter one. So don't remove this or change it,
+           thinking that it isn't declared correctly, because that is the whole point of this
+           test! -->
       <groupId>org.axonframework</groupId>
       <artifactId>axon-spring-boot-starter</artifactId>
-      <version>4.10.0</version>
+      <version>${axon-spring-boot-starter.version}</version>
       <scope>import</scope>
       <type>pom</type>
     </dependency>
@@ -63,11 +66,6 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
-
-        <configuration>
-          <protocVersion>${protobuf.version}</protocVersion>
-        </configuration>
 
         <executions>
           <execution>

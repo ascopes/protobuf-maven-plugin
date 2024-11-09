@@ -22,59 +22,51 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>gh-277-plugin-ordering</groupId>
   <artifactId>gh-277-plugin-ordering</artifactId>
 
-  <properties>
-    <grpc.version>1.65.0</grpc.version>
-    <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
-    <protobuf.version>4.28.2</protobuf.version>
-    <reactor-core.version>3.6.7</reactor-core.version>
-    <reactor-grpc.version>1.2.4</reactor-grpc.version>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>com.salesforce.servicelibs</groupId>
       <artifactId>reactor-grpc-stub</artifactId>
-      <version>${reactor-grpc.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-protobuf</artifactId>
-      <version>${grpc.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-stub</artifactId>
-      <version>${grpc.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
-      <version>${reactor-core.version}</version>
+      <scope>compile</scope>
     </dependency>
 
     <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>${javax-annotation-api.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
@@ -88,7 +80,6 @@
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-        <version>@project.version@</version>
 
         <configuration>
           <binaryMavenPlugins>
@@ -106,8 +97,6 @@
               <order>100</order>
             </binaryMavenPlugin>
           </binaryMavenPlugins>
-
-          <protocVersion>${protobuf.version}</protocVersion>
         </configuration>
 
         <executions>

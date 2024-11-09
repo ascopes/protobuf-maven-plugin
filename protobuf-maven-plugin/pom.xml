@@ -177,7 +177,7 @@
               <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
               <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
               <postBuildHookScript>test</postBuildHookScript>
-              <settingsFile>src/it/settings.xml</settingsFile>
+              <settingsFile>${project.basedir}/src/it/settings.xml</settingsFile>
               <showErrors>true</showErrors>
               <showVersion>true</showVersion>
               <streamLogs>true</streamLogs>

@@ -22,10 +22,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@</groupId>
-    <artifactId>protobuf-maven-plugin-parent</artifactId>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../../../../pom.xml</relativePath>
+    <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
   <groupId>gh-135-compile-dependencies</groupId>
@@ -33,59 +33,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>user-protos</module>
     <module>some-project</module>
   </modules>
-
-  <properties>
-    <protobuf.version>4.28.2</protobuf.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>${protobuf.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <executions>
-          <execution>
-            <!-- Inject the user-protos.zip archive into the current Maven repository prior to
-                building anything. This then makes it appear as a ZIP-based dependency on the
-                local repository for the some-project module to pull in as a dependency. -->
-            <id>install-user-protos-zip</id>
-            <inherited>false</inherited>
-            <phase>initialize</phase>
-            <goals>
-              <goal>install-file</goal>
-            </goals>
-            <configuration>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>user-protos</artifactId>
-              <version>${project.version}</version>
-              <packaging>zip</packaging>
-              <file>${project.basedir}/user-protos.zip</file>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>@project.groupId@</groupId>
-          <artifactId>@project.artifactId@</artifactId>
-          <version>@project.version@</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>

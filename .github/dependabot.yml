@@ -15,7 +15,9 @@ updates:
       - dependencies
 
   - package-ecosystem: maven
-    directory: /
+    directories:
+      - /
+      - /protobuf-maven-plugin/src/it/setup
     schedule:
       interval: weekly
       day: monday
