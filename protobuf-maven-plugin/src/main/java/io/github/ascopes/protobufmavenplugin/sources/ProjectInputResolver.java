@@ -40,12 +40,12 @@ public final class ProjectInputResolver {
   private static final Logger log = LoggerFactory.getLogger(ProjectInputResolver.class);
 
   private final MavenArtifactPathResolver artifactPathResolver;
-  private final SourceResolver sourceResolver;
+  private final SourcePathResolver sourceResolver;
 
   @Inject
   public ProjectInputResolver(
       MavenArtifactPathResolver artifactPathResolver,
-      SourceResolver sourceResolver
+      SourcePathResolver sourceResolver
   ) {
     this.artifactPathResolver = artifactPathResolver;
     this.sourceResolver = sourceResolver;

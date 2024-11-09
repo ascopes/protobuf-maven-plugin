@@ -45,18 +45,18 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 @Named
-public final class SourceResolver {
+public final class SourcePathResolver {
 
   private static final Set<String> POM_FILE_EXTENSIONS = Set.of(".pom", ".xml");
   private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
 
-  private static final Logger log = LoggerFactory.getLogger(SourceResolver.class);
+  private static final Logger log = LoggerFactory.getLogger(SourcePathResolver.class);
 
   private final ConcurrentExecutor concurrentExecutor;
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public SourceResolver(
+  public SourcePathResolver(
       ConcurrentExecutor concurrentExecutor,
       TemporarySpace temporarySpace
   ) {
