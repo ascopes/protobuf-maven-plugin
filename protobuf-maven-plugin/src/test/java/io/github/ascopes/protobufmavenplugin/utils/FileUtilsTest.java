@@ -213,9 +213,9 @@ class FileUtilsTest {
       var dir2 = root1.resolve("do").resolve("ray").resolve("me");
       Files.createDirectories(dir1);
       Files.createDirectories(dir2);
-      var file1 = Files.writeString(dir1.resolve("aaa.txt"), "foobarbaz");
-      var file2 = Files.writeString(dir1.resolve("bbb.txt"), "borkqux");
-      var file3 = Files.writeString(dir2.resolve("ccc.txt"), "eggsSpam");
+      Files.writeString(dir1.resolve("aaa.txt"), "foobarbaz");
+      Files.writeString(dir1.resolve("bbb.txt"), "borkqux");
+      Files.writeString(dir2.resolve("ccc.txt"), "eggsSpam");
 
       var root2 = fs2.getRoot().resolve("target").resolve("directory");
 

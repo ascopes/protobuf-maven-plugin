@@ -32,7 +32,7 @@ public final class RandomFixtures {
     // Static-only class.
   }
 
-  public static String someText() {
+  public static String someBasicString() {
     return UUID.randomUUID().toString();
   }
 

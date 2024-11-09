@@ -31,7 +31,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 @DisplayName("Digests tests")
 class DigestsTest {
 
-  @DisplayName("sha1(String) returns the expected unpadded url-safe base64 string")
+  @DisplayName("sha1(String) returns the expected un-padded url-safe base64 string")
   @CsvSource({
       "           foobarbaz, X1UT-IIv2-UUWvM7ZNjZcNz5XG4",
       "      /src/main/java, R4yHFYpaVvKy0Ckbl9gOpNRrw4I",
@@ -42,7 +42,7 @@ class DigestsTest {
       "EsWoyIWuIcpMltIOJJAv, zYwfI-X_k4pk__DriohLNCpAHbU",
   })
   @ParameterizedTest(name = "sha1(\"{0}\") returns \"{1}\"")
-  void sha1ReturnsExpectedUnpaddedUrlSafeBase64String(String input, String expected) {
+  void sha1ReturnsExpectedUnPaddedUrlSafeBase64String(String input, String expected) {
     // When
     var actual = Digests.sha1(input);
     // Then

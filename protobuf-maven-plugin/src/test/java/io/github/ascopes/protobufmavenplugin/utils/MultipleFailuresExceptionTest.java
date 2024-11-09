@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -38,7 +38,7 @@ class MultipleFailuresExceptionTest {
   @Test
   void exceptionHasTheExpectedMessageForSingleException() {
     // Given
-    var cause = new IllegalArgumentException(someText());
+    var cause = new IllegalArgumentException(someBasicString());
 
     // When
     var exception = MultipleFailuresException.create(List.of(cause));
@@ -57,8 +57,8 @@ class MultipleFailuresExceptionTest {
   @ParameterizedTest(name = "for {0} exception(s)")
   void exceptionHasTheExpectedMessageForMultipleExceptions(int causeCount) {
     // Given
-    var cause = new IllegalStateException(someText());
-    var suppressed = Stream.generate(() -> new Exception(someText()))
+    var cause = new IllegalStateException(someBasicString());
+    var suppressed = Stream.generate(() -> new Exception(someBasicString()))
         .limit(causeCount - 1);
 
     var causes = Stream.concat(Stream.of(cause), suppressed)
@@ -82,7 +82,7 @@ class MultipleFailuresExceptionTest {
   @ParameterizedTest(name = "for {0} exception(s)")
   void firstExceptionIsTreatedAsCause(int causeCount) {
     // Given
-    var causes = Stream.generate(() -> new Exception(someText()))
+    var causes = Stream.generate(() -> new Exception(someBasicString()))
         .limit(causeCount)
         .collect(Collectors.toList());
 
@@ -97,7 +97,7 @@ class MultipleFailuresExceptionTest {
   @Test
   void singleExceptionResultsInNoSuppressions() {
     // Given
-    var cause = new Exception(someText());
+    var cause = new Exception(someBasicString());
 
     // When
     var exception = MultipleFailuresException.create(List.of(cause));
@@ -111,7 +111,7 @@ class MultipleFailuresExceptionTest {
   @ParameterizedTest(name = "for {0} exception(s)")
   void restOfExceptionsAreSuppressed(int causeCount) {
     // Given
-    var causes = Stream.generate(() -> new Exception(someText()))
+    var causes = Stream.generate(() -> new Exception(someBasicString()))
         .limit(causeCount)
         .collect(Collectors.toList());
 

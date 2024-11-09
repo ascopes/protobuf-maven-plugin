@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.withSettings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
@@ -59,8 +59,8 @@ class TemporarySpaceTest {
     when(mavenBuild.getDirectory())
         .thenReturn(tempDir.toAbsolutePath().toString());
 
-    goal = "goal-" + UUID.randomUUID().toString();
-    executionId = "executionId-" + UUID.randomUUID().toString();
+    goal = "goal-" + someBasicString();
+    executionId = "executionId-" + someBasicString();
 
     var execution = mock(MojoExecution.class, withSettings()
         .strictness(Strictness.LENIENT)
@@ -76,9 +76,9 @@ class TemporarySpaceTest {
 
   @DisplayName("Temporary spaces are created in the expected place")
   @Test
-  void temporarySpacesAreCreatedInTheExpectedPlace() throws IOException {
+  void temporarySpacesAreCreatedInTheExpectedPlace() {
     // Given
-    var id = UUID.randomUUID().toString();
+    var id = someBasicString();
 
     // When
     var actualPath = temporarySpace.createTemporarySpace("foo", "bar", "baz", id);
@@ -100,7 +100,7 @@ class TemporarySpaceTest {
   @Test
   void nothingHappensIfTheTemporaryDirectoryAlreadyExists() throws IOException {
     // Given
-    var id = UUID.randomUUID().toString();
+    var id = someBasicString();
     var existingPath = tempDir
         .resolve("protobuf-maven-plugin")
         .resolve(goal)
