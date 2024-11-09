@@ -26,20 +26,20 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Filter for files.
+ * Filter for source files to allow including and excluding based on glob patterns.
  *
  * @author Ashley Scopes
  */
-public final class ProtoFileFilter {
+public final class SourceGlobFilter {
 
   private final List<PathMatcher> includes;
   private final List<PathMatcher> excludes;
 
-  public ProtoFileFilter() {
+  public SourceGlobFilter() {
     this(List.of(), List.of());
   }
 
-  public ProtoFileFilter(List<String> includes, List<String> excludes) {
+  public SourceGlobFilter(List<String> includes, List<String> excludes) {
     this.includes = compileMatchers(includes);
     this.excludes = compileMatchers(excludes);
   }
@@ -48,7 +48,6 @@ public final class ProtoFileFilter {
     var relativeFile = relativeRoot.relativize(file);
 
     var excluded = !excludes.isEmpty() && excludes.stream().anyMatch(checking(relativeFile));
-
     var notIncluded = !includes.isEmpty() && includes.stream().noneMatch(checking(relativeFile));
 
     if (excluded || notIncluded) {
@@ -59,16 +58,6 @@ public final class ProtoFileFilter {
         && FileUtils.getFileExtension(file)
             .filter(".proto"::equalsIgnoreCase)
             .isPresent();
-  }
-
-  @Override
-  public String toString() {
-    // Used for debug logs only.
-    return "ProtoFileFilter{"
-        + "isProtoFile=true, "
-        + "includes=" + includes + ", "
-        + "excludes=" + excludes
-        + "}";
   }
 
   private static List<PathMatcher> compileMatchers(List<String> patterns) {
