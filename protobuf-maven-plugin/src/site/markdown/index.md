@@ -10,7 +10,7 @@ the version of this plugin to be able to pull in a newer version of `protoc` whe
 If your system is not directly supported by Google in the `protoc` releases they supply, you can
 instruct the plugin to instead invoke `protoc` from your system path directly.
 
-For users who are writing GRPC services, this plugin can also support generating the GRPC stubs
+For users who are writing gRPC services, this plugin can also support generating the gRPC stubs
 for you automatically.
 
 In addition to generating Java sources, this plugin can also generate Kotlin sources.
