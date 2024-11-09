@@ -19,7 +19,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Exception raised if resolution fails.
+ * Exception raised if resolution of resources fail.
  *
  * @author Ashley Scopes
  */
