@@ -17,6 +17,7 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.dependencies;
+package io.github.ascopes.protobufmavenplugin.utils;
 
 import org.jspecify.annotations.Nullable;
 

@@ -17,8 +17,8 @@
 package io.github.ascopes.protobufmavenplugin.sources;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
-import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;

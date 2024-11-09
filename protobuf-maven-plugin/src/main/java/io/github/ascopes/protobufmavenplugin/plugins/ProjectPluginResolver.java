@@ -16,8 +16,8 @@
 
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;

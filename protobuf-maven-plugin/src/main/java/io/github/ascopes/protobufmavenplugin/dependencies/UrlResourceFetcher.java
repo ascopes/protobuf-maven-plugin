@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
 import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
