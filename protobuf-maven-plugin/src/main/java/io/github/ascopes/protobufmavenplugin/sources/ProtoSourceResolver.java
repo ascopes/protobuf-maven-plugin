@@ -48,7 +48,7 @@ public final class ProtoSourceResolver {
   private static final Set<String> POM_FILE_EXTENSIONS = Set.of(".pom", ".xml");
   private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
 
-  private static final Logger log = LoggerFactory.getLogger(ProtoArchiveExtractor.class);
+  private static final Logger log = LoggerFactory.getLogger(ProtoSourceResolver.class);
 
   private final ConcurrentExecutor concurrentExecutor;
   private final ProtoArchiveExtractor protoArchiveExtractor;
