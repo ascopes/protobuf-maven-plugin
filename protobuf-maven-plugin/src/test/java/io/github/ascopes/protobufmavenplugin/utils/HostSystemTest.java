@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +55,7 @@ class HostSystemTest {
     // Given
     var properties = new Properties();
     var env = Map.<String, String>of();
-    var osName = someText();
+    var osName = someBasicString();
     properties.put("os.name", osName);
 
     // When
@@ -72,7 +71,7 @@ class HostSystemTest {
     // Given
     var properties = new Properties();
     var env = Map.<String, String>of();
-    var cpuArch = someText();
+    var cpuArch = someBasicString();
     properties.put("os.arch", cpuArch);
 
     // When
@@ -415,10 +414,10 @@ class HostSystemTest {
   void callReturnsTheExpectedOutputWhenFailed() {
     // Given
     var hostSystemBean = new HostSystem();
-    var nonExistantProgramName = UUID.randomUUID() + ".exe";
+    var nonExistentProgramName = someBasicString() + ".exe";
 
     // When
-    var result = hostSystemBean.call(nonExistantProgramName, "--version");
+    var result = hostSystemBean.call(nonExistentProgramName, "--version");
 
     // Then
     assertThat(result)

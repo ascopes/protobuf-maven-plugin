@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +33,7 @@ class ResolutionExceptionTest {
   @Test
   void canInitializeExceptionWithMessage() {
     // Given
-    var message = someText();
+    var message = someBasicString();
 
     // When
     var ex = new ResolutionException(message);
@@ -50,7 +50,7 @@ class ResolutionExceptionTest {
   void canInitializeExceptionWithMessageAndCause() {
     // Given
     var cause = new RuntimeException("Well, damn");
-    var message = someText();
+    var message = someBasicString();
 
     // When
     var ex = new ResolutionException(message, cause);

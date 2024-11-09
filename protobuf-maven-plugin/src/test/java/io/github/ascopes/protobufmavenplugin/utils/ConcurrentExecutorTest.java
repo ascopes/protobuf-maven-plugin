@@ -293,6 +293,7 @@ class ConcurrentExecutorTest {
 
   // Sleep-based waits can consume thread interrupts and can be cancelled,
   // representing some IO-bound work that cancels gracefully.
+  @SuppressWarnings({"BusyWait", "SameParameterValue"})
   private static @Nullable Void sleepWait(int timeoutMs) throws InterruptedException {
     var deadline = System.nanoTime() + timeoutMs * 1_000_000L;
     do {
@@ -307,8 +308,9 @@ class ConcurrentExecutorTest {
     return null;
   }
 
-  // Spin-based waits should not perform IO, so should be uncancellable and
-  // uninterruptable, representing CPU bound work or a buggy/stubborn task.
+  // Spin-based waits should not perform IO, so should be un-cancellable and
+  // uninterruptible, representing CPU bound work or a buggy/stubborn task.
+  @SuppressWarnings("SameParameterValue")
   private static @Nullable Void spinWait(int timeoutMs) {
     var deadline = System.nanoTime() + timeoutMs * 1_000_000L;
     // Do not perform anything that can be interrupted.

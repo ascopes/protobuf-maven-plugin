@@ -22,7 +22,7 @@ import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.macOs;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.otherOs;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.windows;
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -52,7 +52,7 @@ class PlatformClassifierFactoryTest {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
-    var artifactId = someText();
+    var artifactId = someBasicString();
     var factory = new PlatformClassifierFactory(hostSystem);
 
     // When
@@ -71,7 +71,7 @@ class PlatformClassifierFactoryTest {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
-    var artifactId = someText();
+    var artifactId = someBasicString();
     var factory = new PlatformClassifierFactory(hostSystem);
 
     // Then

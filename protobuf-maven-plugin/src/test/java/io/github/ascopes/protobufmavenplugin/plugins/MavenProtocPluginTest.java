@@ -24,7 +24,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("MavenProtocPlugin tests")
-@SuppressWarnings("DataFlowIssue")
 class MavenProtocPluginTest {
 
   @DisplayName("The default value for getDependencyResolutionDepth is the expected value")

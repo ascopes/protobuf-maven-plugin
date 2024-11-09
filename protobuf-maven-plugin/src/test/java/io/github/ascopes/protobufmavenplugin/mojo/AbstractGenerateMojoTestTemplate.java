@@ -16,7 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.mojo;
 
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someText;
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -194,7 +194,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         Class<Throwable> causeType
     ) throws Throwable {
       // Given
-      var message = "some message blah blah " + someText();
+      var message = "some message blah blah " + someBasicString();
       var exceptionCause = causeType.getConstructor(String.class).newInstance(message);
       mojo.sourceCodeGenerator = erroringSourceCodeGenerator(exceptionCause);
 
