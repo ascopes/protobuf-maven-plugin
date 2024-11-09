@@ -179,7 +179,9 @@ public final class ProtoSourceResolver {
   }
 
   private String generateUniqueName(Path path) {
-    var digest = Digests.sha1(path.toAbsolutePath().toString());
+    // Use a URI here as the URI will correctly encapsulate archives within archives. Paths may have
+    // name collisions between archives using the same relative file paths internally.
+    var digest = Digests.sha1(FileUtils.normalize(path).toUri().toASCIIString());
     return FileUtils.getFileNameWithoutExtension(path) + "-" + digest;
   }
 }
