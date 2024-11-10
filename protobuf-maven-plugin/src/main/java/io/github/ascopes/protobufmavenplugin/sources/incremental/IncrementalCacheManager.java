@@ -90,8 +90,16 @@ public class IncrementalCacheManager {
   public Collection<Path> determineSourcesToCompile(
       ProjectInputListing listing
   ) throws IOException {
-    final var startTime = System.nanoTime();
+    var startTime = System.nanoTime();
+    var sourcesToCompile = determineSourcesToCompileUntimed(listing);
+    var timeTaken = (System.nanoTime() - startTime) / 1_000_000L;
+    log.info("Detected {} sources to compile in {}ms", sourcesToCompile, timeTaken);
+    return sourcesToCompile;
+  }
 
+  private Collection<Path> determineSourcesToCompileUntimed(
+      ProjectInputListing listing
+  ) throws IOException {
     // Always update the cache to catch changes in the next builds.
     var newBuildCache = buildIncrementalCache(listing);
     writeIncrementalCache(getNewIncrementalCachePath(), newBuildCache);
@@ -124,17 +132,13 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    var sourcesToCompile = newBuildCache.getSources().keySet()
+    return newBuildCache.getSources().keySet()
         .stream()
         .filter(file -> !Objects.equals(
             newBuildCache.getSources().get(file),
             previousBuildCache.getSources().get(file)
         ))
         .collect(Collectors.toUnmodifiableSet());
-
-    var timeTaken = (System.nanoTime() - startTime) / 1_000_000L;
-    log.info("Detected {} sources to compile in {}ms", sourcesToCompile, timeTaken);
-    return sourcesToCompile;
   }
 
   private Optional<SerializedIncrementalCache> readIncrementalCache(Path path) throws IOException {
