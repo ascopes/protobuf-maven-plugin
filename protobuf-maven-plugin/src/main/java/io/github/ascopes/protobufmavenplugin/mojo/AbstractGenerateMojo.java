@@ -158,7 +158,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       property - optional.</li>
    * </ul>
    *
-   * <p>On Linux, MacOS, and other POSIX-like systems, resolution looks for an executable
+   * <p>On Linux, macOS, and other POSIX-like systems, resolution looks for an executable
    * binary matching the exact name in any directory in the {@code $PATH} environment variable.
    *
    * <p>On Windows, the case-insensitive {@code %PATH%} environment variable is searched for an
@@ -551,7 +551,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
    *
    *
-   * <p>Path resolution on Linux, Mac OS, and other POSIX-like systems, resolution looks
+   * <p>Path resolution on Linux, macOS, and other POSIX-like systems, resolution looks
    * for an executable binary matching the exact name in any directory in the {@code $PATH}
    * environment variable.
    *

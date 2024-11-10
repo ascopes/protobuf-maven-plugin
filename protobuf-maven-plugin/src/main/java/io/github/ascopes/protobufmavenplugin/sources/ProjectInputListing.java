@@ -29,5 +29,5 @@ import org.immutables.value.Value.Immutable;
 public interface ProjectInputListing {
   Collection<SourceListing> getCompilableSources();
 
-  Collection<SourceListing> getImports();
+  Collection<SourceListing> getDependencySources();
 }

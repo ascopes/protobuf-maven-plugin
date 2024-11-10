@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.List;
  *
  * @author Ashley Scopes
  */
+@SuppressWarnings("UnusedReturnValue")
 public final class ArgLineBuilder {
 
   private final Path protocPath;
@@ -43,7 +45,7 @@ public final class ArgLineBuilder {
     importPaths = new ArrayList<>();
   }
 
-  public List<String> compile(Collection<Path> sourcesToCompile) {
+  public List<String> compile(Collection<SourceListing> sourceListings) {
     if (targets.isEmpty()) {
       throw new IllegalStateException("No output target operations were provided");
     }
@@ -59,8 +61,10 @@ public final class ArgLineBuilder {
       target.addArgsTo(args);
     }
 
-    for (var sourceToCompile : sourcesToCompile) {
-      args.add(sourceToCompile.toString());
+    for (var sourceListing : sourceListings) {
+      for (var sourcePath : sourceListing.getSourceProtoFiles()) {
+        args.add(sourcePath.toString());
+      }
     }
 
     for (var importPath : importPaths) {
@@ -81,8 +85,11 @@ public final class ArgLineBuilder {
     return this;
   }
 
-  public ArgLineBuilder importPaths(Collection<Path> importPaths) {
-    this.importPaths.addAll(importPaths);
+  public ArgLineBuilder importPaths(Collection<SourceListing> importPathListings) {
+    for (var importPathListing : importPathListings) {
+      importPaths.add(importPathListing.getSourceRoot());
+    }
+
     return this;
   }
 

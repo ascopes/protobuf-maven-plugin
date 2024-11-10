@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -104,11 +102,8 @@ public final class ProtobufBuildOrchestrator {
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
         .fatalWarnings(request.isFatalWarnings())
-        .importPaths(
-            projectInputs.getImports().stream()
-                .map(SourceListing::getSourceRoot)
-                .collect(Collectors.toCollection(LinkedHashSet::new))
-        );
+        .importPaths(projectInputs.getCompilableSources())
+        .importPaths(projectInputs.getDependencySources());
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(
@@ -120,13 +115,7 @@ public final class ProtobufBuildOrchestrator {
     // GH-269: Add the plugins after the enabled languages to support generated code injection
     argLineBuilder.plugins(resolvedPlugins, request.getOutputDirectory());
 
-    var sourceFiles = projectInputs.getCompilableSources()
-        .stream()
-        .map(SourceListing::getSourceProtoFiles)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    var argLine = argLineBuilder.compile(sourceFiles);
+    var argLine = argLineBuilder.compile(projectInputs.getCompilableSources());
 
     if (!commandLineExecutor.execute(argLine)) {
       return false;
