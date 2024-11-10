@@ -17,8 +17,13 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +36,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 @DisplayName("Digests tests")
 class DigestsTest {
 
-  @DisplayName("sha1(String) returns the expected un-padded url-safe base64 string")
+  @DisplayName(
+      ".sha1(String) returns the expected SHA-1 digest in an un-padded url-safe base64 string"
+  )
   @CsvSource({
       "           foobarbaz, X1UT-IIv2-UUWvM7ZNjZcNz5XG4",
       "      /src/main/java, R4yHFYpaVvKy0Ckbl9gOpNRrw4I",
@@ -41,19 +48,25 @@ class DigestsTest {
       // found.
       "EsWoyIWuIcpMltIOJJAv, zYwfI-X_k4pk__DriohLNCpAHbU",
   })
-  @ParameterizedTest(name = "sha1(\"{0}\") returns \"{1}\"")
-  void sha1ReturnsExpectedUnPaddedUrlSafeBase64String(String input, String expected) {
+  @ParameterizedTest(name = ".sha1(\"{0}\") returns \"{1}\"")
+  void sha1ReturnsExpectedSha1DigestInUnPaddedUrlSafeBase64String(String input, String expected) {
     // When
     var actual = Digests.sha1(input);
     // Then
     assertThat(actual).isEqualTo(expected);
   }
 
-  @DisplayName("sha1(String) raises an IllegalArgumentException on error")
+  @DisplayName(".sha1(String) raises an IllegalArgumentException if unsupported")
   @Test
-  void sha1RaisesIllegalArgumentExceptionOnError() {
-    // Then
-    assertThatThrownBy(() -> Digests.sha1(null))
-        .isInstanceOf(IllegalArgumentException.class);
+  void sha1RaisesAnIllegalArgumentExceptionIfUnsupported() {
+    try (var mockMessageDigestCls = mockStatic(MessageDigest.class)) {
+      // Given
+      mockMessageDigestCls.when(() -> MessageDigest.getInstance(any()))
+          .thenThrow(new NoSuchAlgorithmException("that doesn't exist!"));
+
+      // Then
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> Digests.sha1("foobar"));
+    }
   }
 }

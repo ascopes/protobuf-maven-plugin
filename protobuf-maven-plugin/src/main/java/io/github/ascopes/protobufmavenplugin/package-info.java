@@ -26,7 +26,6 @@
     defaultAsDefault = true,
     deferCollectionAllocation = true,
     headerComments = true,
-    jacksonIntegration = false,
     jdkOnly = true,
     jdk9Collections = true,
     nullableAnnotation = "org.jspecify.annotations.Nullable",

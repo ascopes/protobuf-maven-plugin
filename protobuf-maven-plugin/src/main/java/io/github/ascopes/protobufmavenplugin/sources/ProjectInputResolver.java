@@ -85,21 +85,9 @@ public final class ProjectInputResolver {
         filter
     );
 
-    var sourcePaths = Stream
+    return Stream
         .concat(sourcePathsListings.stream(), sourceDependencyListings.stream())
         .collect(Collectors.toUnmodifiableList());
-
-    var sourceFileCount = sourcePaths.stream()
-        .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
-        .sum();
-
-    log.info(
-        "Generating source code for {} from {}",
-        pluralize(sourceFileCount, "protobuf file"),
-        pluralize(sourcePaths.size(), "source file tree")
-    );
-
-    return sourcePaths;
   }
 
   private Collection<SourceListing> resolveDependencySources(
@@ -120,11 +108,5 @@ public final class ProjectInputResolver {
         .collect(Collectors.toUnmodifiableList());
 
     return sourceResolver.resolveSources(importPaths, filter);
-  }
-
-  private static String pluralize(int count, String name) {
-    return count == 1
-        ? "1 " + name
-        : count + " " + name + "s";
   }
 }

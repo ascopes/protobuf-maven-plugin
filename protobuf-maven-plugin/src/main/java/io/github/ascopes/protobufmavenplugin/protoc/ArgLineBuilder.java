@@ -45,7 +45,7 @@ public final class ArgLineBuilder {
     importPaths = new ArrayList<>();
   }
 
-  public List<String> compile(Collection<SourceListing> sourceListings) {
+  public List<String> compile(Collection<Path> sources) {
     if (targets.isEmpty()) {
       throw new IllegalStateException("No output target operations were provided");
     }
@@ -61,10 +61,8 @@ public final class ArgLineBuilder {
       target.addArgsTo(args);
     }
 
-    for (var sourceListing : sourceListings) {
-      for (var sourcePath : sourceListing.getSourceProtoFiles()) {
-        args.add(sourcePath.toString());
-      }
+    for (var source : sources) {
+      args.add(source.toString());
     }
 
     for (var importPath : importPaths) {
@@ -85,9 +83,9 @@ public final class ArgLineBuilder {
     return this;
   }
 
-  public ArgLineBuilder importPaths(Collection<SourceListing> importPathListings) {
-    for (var importPathListing : importPathListings) {
-      importPaths.add(importPathListing.getSourceRoot());
+  public ArgLineBuilder importPaths(Collection<Path> importRootPaths) {
+    for (var importRootPath : importRootPaths) {
+      importPaths.add(importRootPath);
     }
 
     return this;
