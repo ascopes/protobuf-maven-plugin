@@ -62,6 +62,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private static final String PROTOBUF_COMPILER_EXCLUDES = "protobuf.compiler.excludes";
   private static final String PROTOBUF_COMPILER_INCLUDES = "protobuf.compiler.includes";
+  private static final String PROTOBUF_COMPILER_INCREMENTAL = "protobuf.compiler.incremental";
   private static final String PROTOBUF_COMPILER_VERSION = "protobuf.compiler.version";
   private static final String PROTOBUF_SKIP = "protobuf.skip";
 
@@ -500,6 +501,19 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean liteOnly;
 
   /**
+   * Whether to enable "incremental" compilation.
+   *
+   * <p><strong>Warning:</strong> this is highly experimental, and may change or be removed
+   * in a future release.
+   *
+   * <p>By default, this is {@code false}
+   *
+   * @since 2.6.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
+  boolean incrementalCompilation;
+
+  /**
    * Override the directory to output generated code to.
    *
    * <p>Leave unspecified or explicitly null to use the default for the
@@ -789,6 +803,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isFailOnMissingSources(failOnMissingSources)
         .isFailOnMissingTargets(failOnMissingTargets)
         .isFatalWarnings(fatalWarnings)
+        .isIncrementalCompilationEnabled(incrementalCompilation)
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isLiteEnabled(liteOnly)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)

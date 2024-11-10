@@ -195,8 +195,7 @@ public final class ProtobufBuildOrchestrator {
         registrar.embedListing(mavenSession, listing);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to embed " + listing.getSourceRoot()
-                + " into the class outputs directory",
+            "Failed to embed " + listing.getSourceRoot() + " into the class outputs directory",
             ex
         );
       }
