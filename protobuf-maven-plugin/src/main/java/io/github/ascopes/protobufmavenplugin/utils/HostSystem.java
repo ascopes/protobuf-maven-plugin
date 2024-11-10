@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public final class HostSystem {
   private final String pathSeparator;
   private final Path workingDirectory;
   private final Path javaHome;
-  private final Collection<Path> path;
+  private final List<Path> path;
   private final SortedSet<String> pathExt;
 
   @Inject
@@ -139,7 +139,7 @@ public final class HostSystem {
     return javaHome.resolve("bin").resolve(isProbablyWindows() ? "java.exe" : "java");
   }
 
-  public Collection<Path> getSystemPath() {
+  public List<Path> getSystemPath() {
     return path;
   }
 
