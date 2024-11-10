@@ -90,10 +90,11 @@ public class IncrementalCacheManager {
   public Collection<Path> determineSourcesToCompile(
       ProjectInputListing listing
   ) throws IOException {
+    // TODO(ascopes): we can eventually demote this to debug logging once the feature is stable.
     var startTime = System.nanoTime();
     var sourcesToCompile = determineSourcesToCompileUntimed(listing);
     var timeTaken = (System.nanoTime() - startTime) / 1_000_000L;
-    log.info("Detected {} sources to compile in {}ms", sourcesToCompile, timeTaken);
+    log.info("Detected {} sources to compile in {}ms", sourcesToCompile.size(), timeTaken);
     return sourcesToCompile;
   }
 
