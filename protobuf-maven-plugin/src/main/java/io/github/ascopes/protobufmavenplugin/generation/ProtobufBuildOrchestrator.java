@@ -116,9 +116,9 @@ public final class ProtobufBuildOrchestrator {
             .map(SourceListing::getSourceRoot)
             .collect(Collectors.toUnmodifiableList()))
         .importPaths(projectInputs.getDependencySources()
-                .stream()
-                .map(SourceListing::getSourceRoot)
-                .collect(Collectors.toUnmodifiableList()));
+            .stream()
+            .map(SourceListing::getSourceRoot)
+            .collect(Collectors.toUnmodifiableList()));
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(
@@ -134,6 +134,7 @@ public final class ProtobufBuildOrchestrator {
     if (compilableSources.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
       // incremental compilation and nothing changed since the last build.
+      incrementalCacheManager.updateIncrementalCache();
       return true;
     }
 
