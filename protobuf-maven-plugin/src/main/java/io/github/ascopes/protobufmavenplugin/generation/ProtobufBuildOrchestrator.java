@@ -130,6 +130,13 @@ public final class ProtobufBuildOrchestrator {
     // GH-269: Add the plugins after the enabled languages to support generated code injection
     argLineBuilder.plugins(resolvedPlugins, request.getOutputDirectory());
 
+    // GH-438: We now register the source roots before generating anything. This ensures we still
+    // call Javac with the sources even if we incrementally compile with zero changes.
+    registerSourceRoots(request);
+    
+    // Determine the sources we need to regenerate. This will be all of the sources usually but
+    // if incremental compilation is enabled then we will only output the files that have changed
+    // unless we deem a full rebuild necesarry.
     var compilableSources = computeActualSourcesToCompile(request, projectInputs);
     if (compilableSources.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
@@ -147,8 +154,6 @@ public final class ProtobufBuildOrchestrator {
     // Since we've succeeded in the codegen phase, we can replace the old incremental cache
     // with the new one.
     incrementalCacheManager.updateIncrementalCache();
-
-    registerSourceRoots(request);
 
     if (request.isEmbedSourcesInClassOutputs()) {
       embedSourcesInClassOutputs(
