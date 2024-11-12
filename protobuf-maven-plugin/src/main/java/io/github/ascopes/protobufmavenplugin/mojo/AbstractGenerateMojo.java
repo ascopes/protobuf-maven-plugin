@@ -508,7 +508,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>By default, this is {@code false}
    *
-   * @since 2.6.0
+   * @since 2.7.0
    */
   @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
   boolean incrementalCompilation;
