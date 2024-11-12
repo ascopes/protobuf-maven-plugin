@@ -22,6 +22,15 @@ import java.nio.file.Path;
 import java.util.Map;
 import org.immutables.value.Value.Immutable;
 
+/**
+ * Serialized format of the incremental compilation cache.
+ *
+ * <p>If changing the structure of this, update the {@code SPEC_VERSION} within
+ * {@link IncrementalCacheManager} to avoid breaking changes for users.
+ *
+ * @author Ashley Scopes
+ * @since 2.7.0
+ */
 @Immutable
 @JsonDeserialize(builder = ImmutableSerializedIncrementalCache.Builder.class)
 @JsonSerialize(as = ImmutableSerializedIncrementalCache.class)

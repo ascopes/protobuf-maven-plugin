@@ -53,6 +53,9 @@ import org.slf4j.LoggerFactory;
 @Named
 public class IncrementalCacheManager {
 
+  // If we make breaking changes to the format of the cache, increment this value. This prevents
+  // builds failing for users between versions if they do not perform a clean install first.
+  private static final String SPEC_VERSION = "1.0";
   private static final Logger log = LoggerFactory.getLogger(IncrementalCacheManager.class);
 
   private final ConcurrentExecutor concurrentExecutor;
@@ -74,10 +77,10 @@ public class IncrementalCacheManager {
 
   public void updateIncrementalCache() throws IOException {
     var previousCache = getPreviousIncrementalCachePath();
-    var newCache = getNewIncrementalCachePath();
-    if (Files.exists(newCache)) {
-      log.debug("Overwriting incremental compilation cache at {} with {}", previousCache, newCache);
-      Files.move(newCache, previousCache, StandardCopyOption.REPLACE_EXISTING);
+    var nextCache = getNextIncrementalCachePath();
+    if (Files.exists(nextCache)) {
+      log.debug("Overwriting incremental build cache at {} with {}", previousCache, nextCache);
+      Files.move(nextCache, previousCache, StandardCopyOption.REPLACE_EXISTING);
     } else {
       log.debug("No new incremental cache was created, so nothing will be updated...");
     }
@@ -98,8 +101,8 @@ public class IncrementalCacheManager {
       ProjectInputListing listing
   ) throws IOException {
     // Always update the cache to catch changes in the next builds.
-    var newBuildCache = buildIncrementalCache(listing);
-    writeIncrementalCache(getNewIncrementalCachePath(), newBuildCache);
+    var nextBuildCache = buildIncrementalCache(listing);
+    writeIncrementalCache(getNextIncrementalCachePath(), nextBuildCache);
     var maybePreviousBuildCache = readIncrementalCache(getPreviousIncrementalCachePath());
 
     // If we lack a cache from a previous build, then we cannot determine what we should compile
@@ -113,14 +116,14 @@ public class IncrementalCacheManager {
 
     // If dependencies change, we should recompile everything so that we can spot any compilation
     // failures that have been created by changes to imported messages.
-    if (!previousBuildCache.getDependencies().equals(newBuildCache.getDependencies())) {
+    if (!previousBuildCache.getDependencies().equals(nextBuildCache.getDependencies())) {
       log.info("Detected a change in dependencies, all sources will be recompiled");
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
     var filesDeletedSinceLastBuild = previousBuildCache.getSources().keySet()
         .stream()
-        .anyMatch(not(newBuildCache.getSources().keySet()::contains));
+        .anyMatch(not(nextBuildCache.getSources().keySet()::contains));
 
     // If any sources were deleted, we should rebuild everything, as those files being deleted may
     // have caused a compilation failure.
@@ -129,10 +132,10 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    return newBuildCache.getSources().keySet()
+    return nextBuildCache.getSources().keySet()
         .stream()
         .filter(file -> !Objects.equals(
-            newBuildCache.getSources().get(file),
+            nextBuildCache.getSources().get(file),
             previousBuildCache.getSources().get(file)
         ))
         .collect(Collectors.toUnmodifiableSet());
@@ -194,14 +197,14 @@ public class IncrementalCacheManager {
   }
 
   private Path getIncrementalCacheRoot() {
-    return temporarySpace.createTemporarySpace("incremental");
+    return temporarySpace.createTemporarySpace("incremental-build-cache", SPEC_VERSION);
   }
 
   private Path getPreviousIncrementalCachePath() {
-    return getIncrementalCacheRoot().resolve("previous-build-cache.json");
+    return getIncrementalCacheRoot().resolve("previous.json");
   }
 
-  private Path getNewIncrementalCachePath() {
-    return getIncrementalCacheRoot().resolve("current-build-cache.json");
+  private Path getNextIncrementalCachePath() {
+    return getIncrementalCacheRoot().resolve("next.json");
   }
 }
