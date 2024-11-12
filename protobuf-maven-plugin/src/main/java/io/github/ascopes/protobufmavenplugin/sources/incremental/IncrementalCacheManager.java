@@ -22,7 +22,6 @@ import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
@@ -33,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.OffsetDateTime;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -71,8 +69,6 @@ public class IncrementalCacheManager {
 
     objectMapper = new JsonMapper()
         .configure(SerializationFeature.INDENT_OUTPUT, true)
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .registerModule(new JavaTimeModule())
         .registerModule(new SerializedIncrementalCacheModule());
   }
 
@@ -182,7 +178,6 @@ public class IncrementalCacheManager {
         .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     return ImmutableSerializedIncrementalCache.builder()
-        .generatedAt(OffsetDateTime.now())
         .dependencies(dependencyDigests)
         .sources(sourceDigests)
         .build();
