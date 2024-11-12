@@ -27,6 +27,7 @@ import java.util.concurrent.FutureTask;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @since 2.2.0
  */
 @Named
-@Singleton
+@Singleton  // Only one instance globally to avoid resource exhaustion
 public final class ConcurrentExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
@@ -47,6 +48,7 @@ public final class ConcurrentExecutor {
   // Visible for testing only.
   final ExecutorService executorService;
 
+  @Inject
   public ConcurrentExecutor() {
     ExecutorService executorService;
 
@@ -59,19 +61,20 @@ public final class ConcurrentExecutor {
       log.debug("Loom virtual thread pool creation was successful!");
 
     } catch (Exception ex) {
-      var concurrency = Runtime.getRuntime().availableProcessors() * 8;
       var threadGroup = new ThreadGroup(getClass().getName());
-      executorService = Executors.newFixedThreadPool(concurrency, runnable -> {
+      // As of v2.7.0, we use a cached thread pool as the majority of our operations are
+      // short-lived IO bound tasks. The unbound nature reduces the risk of deadlocking in
+      // some cases on older hardware.
+      executorService = Executors.newCachedThreadPool(runnable -> {
         var thread = new Thread(threadGroup, runnable);
         thread.setDaemon(true);
         return thread;
       });
-
-      // No need to log this exception, it will always be a NoSuchMethodException.
       log.debug(
-          "Falling back to new fixed thread pool (group={}, concurrency={}, Loom is unavailable)",
+          "Falling back to new cached thread pool (group={}, reason={}: {})",
           threadGroup,
-          concurrency
+          ex.getClass().getName(),
+          ex.getMessage()
       );
     }
 
