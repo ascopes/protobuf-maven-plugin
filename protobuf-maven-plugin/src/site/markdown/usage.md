@@ -706,3 +706,16 @@ It would also be valid to use a binary plugin for Salesforce here if you prefer.
 
 You can turn the default Java code generation step off by setting `<javaEnabled>false</javaEnabled>` on the
 protobuf-maven-plugin configuration. This will then only attempt to run the plugins you provide.
+
+## Incremental compilation
+
+As of v2.7.0 of this plugin, experimental support for incremental compilation has been added. This can be
+enabled by setting `<incrementalCompilation>true</incrementalCompilation>`,
+by specifying `-Dprotobuf.compiler.incremental=true` on the commandline, or by setting the
+`protobuf.compiler.incremental` Maven property to `true`.
+
+This feature is subject to change in patch versions until it is marked as stable.
+
+Incremental compilation will track the state of all source files and dependencies between builds (as long
+as `mvn clean` is not run), and will only run the `protoc` binary across any files it has deemed to need
+recompilation. If any dependencies change, then the entire project is recompiled.
