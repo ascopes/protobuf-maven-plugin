@@ -21,9 +21,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.Random;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,5 +71,43 @@ class DigestsTest {
       assertThatExceptionOfType(IllegalArgumentException.class)
           .isThrownBy(() -> Digests.sha1("foobar"));
     }
+  }
+
+  @DisplayName(".sha512ForStream(InputStream) returns the expected result")
+  @Test
+  void sha512ForStreamReturnsTheExpectedResult() throws Exception {
+    // Given
+    var data = randomBytes(8000);
+    var expectedRawDigest = MessageDigest.getInstance("SHA-512").digest(data);
+    var expectedDigest = Base64.getUrlEncoder().withoutPadding()
+        .encodeToString(expectedRawDigest);
+
+    // When
+    var inputStream = new ByteArrayInputStream(data);
+    var actualDigest = Digests.sha512ForStream(inputStream);
+
+    // Then
+    assertThat(actualDigest).isEqualTo(expectedDigest);
+  }
+
+  @DisplayName(".sha512ForStream(InputStream) raises an IllegalArgumentException if unsupported")
+  @Test
+  void sha512ForStreamRaisesAnIllegalArgumentExceptionIfUnsupported() throws Exception {
+    try (var mockMessageDigestCls = mockStatic(MessageDigest.class)) {
+      // Given
+      mockMessageDigestCls.when(() -> MessageDigest.getInstance(any()))
+          .thenThrow(new NoSuchAlgorithmException("that doesn't exist!"));
+      var stream = new ByteArrayInputStream(randomBytes(128));
+
+      // Then
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> Digests.sha256ForStream(stream));
+    }
+  }
+
+  static byte[] randomBytes(int size) {
+    var data = new byte[size];
+    new Random().nextBytes(data);
+    return data;
   }
 }
