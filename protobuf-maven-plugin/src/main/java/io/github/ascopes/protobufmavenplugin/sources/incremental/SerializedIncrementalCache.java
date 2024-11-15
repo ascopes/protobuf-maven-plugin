@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.sources;
+package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
-import java.util.Collection;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.nio.file.Path;
+import java.util.Map;
 import org.immutables.value.Value.Immutable;
 
 /**
- * Wrapper around a collection of source and import listings.
+ * Serialized format of the incremental compilation cache.
+ *
+ * <p>If changing the structure of this, update the {@code SPEC_VERSION} within
+ * {@link IncrementalCacheManager} to avoid breaking changes for users.
  *
  * @author Ashley Scopes
  * @since 2.7.0
  */
 @Immutable
-public interface ProjectInputListing {
+@JsonDeserialize(builder = ImmutableSerializedIncrementalCache.Builder.class)
+@JsonSerialize(as = ImmutableSerializedIncrementalCache.class)
+interface SerializedIncrementalCache {
+  Map<Path, String> getDependencies();
 
-  Collection<SourceListing> getCompilableSources();
-
-  Collection<SourceListing> getDependencySources();
+  Map<Path, String> getSources();
 }

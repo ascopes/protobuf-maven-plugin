@@ -79,6 +79,8 @@ public interface GenerationRequest {
 
   boolean isIgnoreProjectDependencies();
 
+  boolean isIncrementalCompilationEnabled();
+
   boolean isLiteEnabled();
 
   boolean isRegisterAsCompilationRoot();

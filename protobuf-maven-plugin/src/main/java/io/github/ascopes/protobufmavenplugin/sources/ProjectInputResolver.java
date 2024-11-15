@@ -20,7 +20,6 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -54,12 +53,10 @@ public final class ProjectInputResolver {
   public ProjectInputListing resolveProjectInputs(
       GenerationRequest request
   ) throws ResolutionException {
-    var compilableSources = resolveCompilableSources(request);
-    var imports = resolveImports(request, compilableSources);
-
+    // XXX: We might want to run these two resolution steps in parallel in the future.
     return ImmutableProjectInputListing.builder()
-        .compilableSources(compilableSources)
-        .imports(imports)
+        .compilableSources(resolveCompilableSources(request))
+        .dependencySources(resolveDependencySources(request))
         .build();
   }
 
@@ -88,24 +85,13 @@ public final class ProjectInputResolver {
         filter
     );
 
-    var sourcePaths = concat(sourcePathsListings, sourceDependencyListings);
-
-    var sourceFileCount = sourcePaths.stream()
-        .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
-        .sum();
-
-    log.info(
-        "Generating source code for {} from {}",
-        pluralize(sourceFileCount, "protobuf file"),
-        pluralize(sourcePaths.size(), "source file tree")
-    );
-
-    return sourcePaths;
+    return Stream
+        .concat(sourcePathsListings.stream(), sourceDependencyListings.stream())
+        .collect(Collectors.toUnmodifiableList());
   }
 
-  private Collection<SourceListing> resolveImports(
-      GenerationRequest request,
-      Collection<SourceListing> knownSourceListings
+  private Collection<SourceListing> resolveDependencySources(
+      GenerationRequest request
   ) throws ResolutionException {
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),
@@ -117,30 +103,10 @@ public final class ProjectInputResolver {
 
     var filter = new SourceGlobFilter();
 
-    var importListings = sourceResolver.resolveSources(
-        concat(request.getImportPaths(), artifactPaths),
-        filter
-    );
-
-    // Use the source paths here as well and use them first to give them precedence. This works
-    // around GH-172 where we can end up with different versions on the import and source paths
-    // depending on how dependency conflicts arise.
-    return Stream.concat(knownSourceListings.stream(), importListings.stream())
-        .distinct()
+    var importPaths = Stream
+        .concat(request.getImportPaths().stream(), artifactPaths.stream())
         .collect(Collectors.toUnmodifiableList());
-  }
 
-  @SafeVarargs
-  @SuppressWarnings("varargs")
-  private static <T> List<T> concat(Collection<? extends T>... collections) {
-    return Stream.of(collections)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableList());
-  }
-
-  private static String pluralize(int count, String name) {
-    return count == 1
-        ? "1 " + name
-        : count + " " + name + "s";
+    return sourceResolver.resolveSources(importPaths, filter);
   }
 }

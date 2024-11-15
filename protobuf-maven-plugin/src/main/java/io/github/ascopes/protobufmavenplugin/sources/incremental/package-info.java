@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.sources;
-
-import java.util.Collection;
-import org.immutables.value.Value.Immutable;
-
 /**
- * Wrapper around a collection of source and import listings.
- *
- * @author Ashley Scopes
- * @since 2.7.0
+ * Components to facilitate incremental code generation, which aims to reduce build times for
+ * large codebases by allowing the {@code maven-compiler-plugin} to incrementally generate classes
+ * from Java sources.
  */
-@Immutable
-public interface ProjectInputListing {
-
-  Collection<SourceListing> getCompilableSources();
-
-  Collection<SourceListing> getDependencySources();
-}
+package io.github.ascopes.protobufmavenplugin.sources.incremental;

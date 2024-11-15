@@ -16,19 +16,23 @@
 
 package io.github.ascopes.protobufmavenplugin.generation;
 
+import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
+
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.protoc.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
+import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
+import io.github.ascopes.protobufmavenplugin.sources.incremental.IncrementalCacheManager;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -53,6 +57,7 @@ public final class ProtobufBuildOrchestrator {
   private final ProtocResolver protocResolver;
   private final ProjectInputResolver projectInputResolver;
   private final ProjectPluginResolver projectPluginResolver;
+  private final IncrementalCacheManager incrementalCacheManager;
   private final CommandLineExecutor commandLineExecutor;
 
   @Inject
@@ -61,12 +66,14 @@ public final class ProtobufBuildOrchestrator {
       ProtocResolver protocResolver,
       ProjectInputResolver projectInputResolver,
       ProjectPluginResolver projectPluginResolver,
+      IncrementalCacheManager incrementalCacheManager,
       CommandLineExecutor commandLineExecutor
   ) {
     this.mavenSession = mavenSession;
     this.protocResolver = protocResolver;
     this.projectInputResolver = projectInputResolver;
     this.projectPluginResolver = projectPluginResolver;
+    this.incrementalCacheManager = incrementalCacheManager;
     this.commandLineExecutor = commandLineExecutor;
   }
 
@@ -104,11 +111,14 @@ public final class ProtobufBuildOrchestrator {
 
     var argLineBuilder = new ArgLineBuilder(protocPath)
         .fatalWarnings(request.isFatalWarnings())
-        .importPaths(
-            projectInputs.getImports().stream()
-                .map(SourceListing::getSourceRoot)
-                .collect(Collectors.toCollection(LinkedHashSet::new))
-        );
+        .importPaths(projectInputs.getCompilableSources()
+            .stream()
+            .map(SourceListing::getSourceRoot)
+            .collect(Collectors.toUnmodifiableList()))
+        .importPaths(projectInputs.getDependencySources()
+            .stream()
+            .map(SourceListing::getSourceRoot)
+            .collect(Collectors.toUnmodifiableList()));
 
     request.getEnabledLanguages()
         .forEach(language -> argLineBuilder.generateCodeFor(
@@ -120,19 +130,30 @@ public final class ProtobufBuildOrchestrator {
     // GH-269: Add the plugins after the enabled languages to support generated code injection
     argLineBuilder.plugins(resolvedPlugins, request.getOutputDirectory());
 
-    var sourceFiles = projectInputs.getCompilableSources()
-        .stream()
-        .map(SourceListing::getSourceProtoFiles)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    // GH-438: We now register the source roots before generating anything. This ensures we still
+    // call Javac with the sources even if we incrementally compile with zero changes.
+    registerSourceRoots(request);
+    
+    // Determine the sources we need to regenerate. This will be all of the sources usually but
+    // if incremental compilation is enabled then we will only output the files that have changed
+    // unless we deem a full rebuild necesarry.
+    var compilableSources = computeActualSourcesToCompile(request, projectInputs);
+    if (compilableSources.isEmpty()) {
+      // Nothing to compile. If we hit here, then we likely received inputs but were using
+      // incremental compilation and nothing changed since the last build.
+      incrementalCacheManager.updateIncrementalCache();
+      return true;
+    }
 
-    var argLine = argLineBuilder.compile(sourceFiles);
+    var argLine = argLineBuilder.compile(compilableSources);
 
     if (!commandLineExecutor.execute(argLine)) {
       return false;
     }
 
-    registerSourceRoots(request);
+    // Since we've succeeded in the codegen phase, we can replace the old incremental cache
+    // with the new one.
+    incrementalCacheManager.updateIncrementalCache();
 
     if (request.isEmbedSourcesInClassOutputs()) {
       embedSourcesInClassOutputs(
@@ -186,6 +207,36 @@ public final class ProtobufBuildOrchestrator {
     }
   }
 
+  private Collection<Path> computeActualSourcesToCompile(
+      GenerationRequest request,
+      ProjectInputListing projectInputs
+  ) throws IOException {
+    var totalSourceFileCount = projectInputs.getCompilableSources().stream()
+        .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
+        .sum();
+
+    var sourcesToCompile = request.isIncrementalCompilationEnabled()
+        ? incrementalCacheManager.determineSourcesToCompile(projectInputs)
+        : flattenSourceProtoFiles(projectInputs.getCompilableSources());
+
+    if (sourcesToCompile.isEmpty()) {
+      log.info(
+          "Found {} source files, but none have any changes, so there is nothing to do",
+          totalSourceFileCount
+      );
+      return List.of();
+    }
+
+    log.info(
+        "Generating source code from {} (discovered within {}, from a total of {})",
+        pluralize(sourcesToCompile.size(), "source file"),
+        pluralize(projectInputs.getCompilableSources().size(), "source root"),
+        pluralize(totalSourceFileCount, "candidate source file")
+    );
+
+    return sourcesToCompile;
+  }
+
   private void embedSourcesInClassOutputs(
       SourceRootRegistrar registrar,
       Collection<SourceListing> listings
@@ -195,11 +246,16 @@ public final class ProtobufBuildOrchestrator {
         registrar.embedListing(mavenSession, listing);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to embed " + listing.getSourceRoot()
-                + " into the class outputs directory",
+            "Failed to embed " + listing.getSourceRoot() + " into the class outputs directory",
             ex
         );
       }
     }
+  }
+
+  private static String pluralize(int count, String name) {
+    return count == 1
+        ? "1 " + name
+        : count + " " + name + "s";
   }
 }

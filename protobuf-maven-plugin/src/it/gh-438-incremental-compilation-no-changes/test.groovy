@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package io.github.ascopes.protobufmavenplugin.sources;
+import java.nio.file.Path
 
-import java.util.Collection;
-import org.immutables.value.Value.Immutable;
+Path baseDirectory = basedir.toPath().toAbsolutePath()
 
-/**
- * Wrapper around a collection of source and import listings.
- *
- * @author Ashley Scopes
- * @since 2.7.0
- */
-@Immutable
-public interface ProjectInputListing {
-
-  Collection<SourceListing> getCompilableSources();
-
-  Collection<SourceListing> getDependencySources();
-}
+return true

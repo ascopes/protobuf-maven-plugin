@@ -570,6 +570,27 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     }
   }
 
+  @DisplayName("incrementalCompilation tests")
+  @Nested
+  class IncrementalCompilationTest {
+
+    @DisplayName("incrementalCompilation is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void incrementalCompilationIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.incrementalCompilation = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isIncrementalCompilationEnabled()).isEqualTo(value);
+    }
+  }
+
   @DisplayName("jvmMavenPlugins tests")
   @Nested
   class JvmMavenPluginsTest {
