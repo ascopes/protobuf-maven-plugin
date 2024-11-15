@@ -101,7 +101,7 @@ class DigestsTest {
 
       // Then
       assertThatExceptionOfType(IllegalArgumentException.class)
-          .isThrownBy(() -> Digests.sha256ForStream(stream));
+          .isThrownBy(() -> Digests.sha512ForStream(stream));
     }
   }
 
