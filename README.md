@@ -67,6 +67,7 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
 - Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
   PHP, Ruby, and Rust.
 - Aims to keep builds reproducible and easily debuggable where possible.
+- Incremental compilation (experimental).
 
 ## Usage
 
