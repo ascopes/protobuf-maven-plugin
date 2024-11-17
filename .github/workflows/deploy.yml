@@ -161,6 +161,6 @@ jobs:
             **/maven-status/**
             **/surefire-reports/**.txt
           compression-level: 9
-          retention-days: 120
+          retention-days: 90  # Max allowed
           include-hidden-files: true
           if-no-files-found: error
