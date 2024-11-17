@@ -93,7 +93,7 @@ public class IncrementalCacheManager {
     var startTime = System.nanoTime();
     var sourcesToCompile = determineSourcesToCompileUntimed(listing);
     var timeTaken = (System.nanoTime() - startTime) / 1_000_000L;
-    log.info("Detected {} source(s) to compile in {}ms", sourcesToCompile.size(), timeTaken);
+    log.debug("Detected {} source(s) to compile in {}ms", sourcesToCompile.size(), timeTaken);
     return sourcesToCompile;
   }
 
