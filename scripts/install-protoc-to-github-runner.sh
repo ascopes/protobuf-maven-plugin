@@ -8,9 +8,9 @@
 ###
 set -o errexit
 set -o nounset
-[[ -n ${DEBUG+undef} ]] && set -o xtrace
+[[ -n ${DEBUG+defined} ]] && set -o xtrace
 
-readonly version=4.27.3
+readonly version=4.28.3
 
 case "$(uname)" in
   Linux)
