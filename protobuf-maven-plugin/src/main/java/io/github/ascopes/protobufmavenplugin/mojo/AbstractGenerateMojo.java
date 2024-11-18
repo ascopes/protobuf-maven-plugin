@@ -431,6 +431,24 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<String> includes;
 
   /**
+   * Whether to enable "incremental" compilation.
+   *
+   * <p>When enabled, this plugin will track changes to sources and importable protobuf 
+   * dependencies between builds, making a best-effort attempt to only rebuild files that
+   * have changed since the last build. This will reduce the time that large projects take
+   * to build when repeatedly rebuilt during development.
+   *
+   * <p><strong>Warning:</strong> this is highly experimental, and may change or be removed
+   * in a future release.
+   *
+   * <p>By default, this is set to {@code false}, although it may be changed to {@code true}
+   * eventually.
+   *
+   * @since 2.7.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
+  boolean incrementalCompilation;
+  /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
    *
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
@@ -499,19 +517,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean liteOnly;
-
-  /**
-   * Whether to enable "incremental" compilation.
-   *
-   * <p><strong>Warning:</strong> this is highly experimental, and may change or be removed
-   * in a future release.
-   *
-   * <p>By default, this is {@code false}
-   *
-   * @since 2.7.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
-  boolean incrementalCompilation;
 
   /**
    * Override the directory to output generated code to.
