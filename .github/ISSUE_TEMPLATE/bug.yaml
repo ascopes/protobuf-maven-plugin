@@ -103,6 +103,18 @@ body:
 
         If this is not possible then not to worry!
 
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Would you like to contribute a bugfix?
+      description: >-
+        If you would like to contribute this change, then that is awesome! Even if you
+        are unfamiliar with the codebase, help is always welcome and we are happy to
+        provide any assistance you may need!
+      options:
+        - label: Yes, I'd like to contribute a bugfix!
+          required: false
+
   - type: markdown
     attributes:
       value: >-
