@@ -7,7 +7,7 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: |-
+      value: >-
         Hey there! Thanks for taking the time to fill out this bug report form.
         
         We just need a few details on the issue you are facing.
@@ -16,10 +16,9 @@ body:
     id: brief-description
     attributes:
       label: Brief description
-      description: |-
-        Try to explain the overall nature of the problem briefly. This can be a
-        couple of short sentences. We'll ask some more detailed questions further
-        below.
+      description: >- 
+        Try to explain the overall nature of the problem briefly. This should include
+        what you expect to happen and what actually happens.
     validations:
       required: true
 
@@ -27,27 +26,9 @@ body:
     id: steps-to-reproduce
     attributes:
       label: Steps to reproduce
-      description: |-
+      description: >-
         What are the steps to reproduce the issue? Try to give a simple numbered
         list of steps!
-    validations:
-      required: true
-
-  - type: textarea
-    id: what-should-happen
-    attributes:
-      label: Expected behaviour
-      description: |-
-        What do you think should happen, and why?
-    validations:
-      required: true
-
-  - type: textarea
-    id: what-actually-happens
-    attributes:
-      label: Actual behaviour
-      description: |-
-        Briefly, what actually happens?
     validations:
       required: true
 
@@ -55,7 +36,7 @@ body:
     id: error-message
     attributes:
       label: Error message
-      description: |-
+      description: >-
         Add any error message you see here. This will be formatted into a code
         block for you if provided.
       render: text
@@ -64,22 +45,22 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: |-
-        Please run your build with the following additional flags and paste the 
-        output here.
+      description: >-
+        Please provide the trace logs for your build. This will be formatted in a code
+        block automatically for you if provided.
+
+        You can show the trace logs by passing the following flag to the Maven command:
 
         ```
-        "-Dorg.slf4j.simpleLogger.log.io.github.ascopes.protobufmavenplugin=trace"
+        -Dorg.slf4j.simpleLogger.log.io.github.ascopes.protobufmavenplugin=trace
         ```
-
-        This will be formatted in a code block automatically for you if provided.
       render: text
 
   - type: input
     id: os-version
     attributes:
       label: Operating system
-      description: |-
+      description: >-
         What OS are you using? On Windows, run `winver.exe`. On Linux and macOS, run
         `uname -a` and paste the output here.
     validations:
@@ -89,7 +70,7 @@ body:
     id: java-version
     attributes:
       label: JDK version
-      description: |-
+      description: >-
         What version of Java are you using?
     validations:
       required: true
@@ -98,7 +79,7 @@ body:
     id: protobuf-maven-plugin-version
     attributes:
       label: Plugin version
-      description: |-
+      description: >-
         What version of this project are you using?
     validations:
       required: true
@@ -107,7 +88,7 @@ body:
     id: protoc-version
     attributes:
       label: Protoc version
-      description: |-
+      description: >-
         What version of `protoc` are you using?
     validations:
       required: true
@@ -116,7 +97,7 @@ body:
     id: other-details
     attributes:
       label: Additional details
-      description: |-
+      description: >-
         Is there anything else we need to know? If possible, use this area
         to link to a reproduction project, too.
 
@@ -124,6 +105,6 @@ body:
 
   - type: markdown
     attributes:
-      value: |-
+      value: >-
         Thanks! That is all we need to know for now. We will try to get back
         to you as soon as possible if any other information is needed!
