@@ -48,4 +48,4 @@ body:
         provide any assistance you may need!
       options:
         - label: Yes, I'd like to contribute this change!
-          required: true
+          required: false
