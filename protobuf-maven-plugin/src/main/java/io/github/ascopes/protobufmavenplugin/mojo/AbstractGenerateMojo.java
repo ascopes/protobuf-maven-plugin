@@ -448,6 +448,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
   boolean incrementalCompilation;
+
   /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
    *
