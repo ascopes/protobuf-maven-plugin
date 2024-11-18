@@ -1,0 +1,51 @@
+name: Feature Request
+description: Request a new feature in this project
+title: "[Feature]: "
+labels: ["proposal", "new feature"]
+assignees:
+  - ascopes
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        So you'd like to request a new feature? That's great! We just need to ask a few
+        questions and we can get started.
+        
+  - type: textarea
+    id: brief-description
+    attributes:
+      label: Brief description
+      description: >- 
+        Please describe briefly what you would like to do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Aims and goals
+      description: >-
+        What are you hoping to achieve with this feature, and why do you need it?
+        If possible please provide some examples!
+    validations:
+      required: true
+
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: Workarounds
+      description: >-
+        If applicable, describe the current workaround you are using that this feature
+        would replace. If this isn't applicable then just leave this blank.
+
+  - type: checkboxes
+    id: checkboxes
+    attributes:
+      label: Would you like to contribute to this feature?
+      description: >-
+        If you would like to contribute this change, then that is awesome! Even if you
+        are unfamiliar with the codebase, help is always welcome and we are happy to
+        provide any assistance you may need!
+      options:
+        - label: Yes, I'd like to contribute this change!
+          required: false
