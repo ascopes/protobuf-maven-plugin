@@ -109,7 +109,7 @@ body:
   - type: input
     id: protoc-version
     attributes:
-      label: `protoc` version
+      label: Protoc version
       description: |-
         What version of `protoc` are you using?
       render: text
