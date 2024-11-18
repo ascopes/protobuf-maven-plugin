@@ -1,0 +1,133 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - ascopes
+body:
+  - type: markdown
+    attributes:
+      value: |-
+        Hey there! Thanks for taking the time to fill out this bug report form.
+        
+        We just need a few details on the issue you are facing.
+
+  - type: textarea
+    id: brief-description
+    attributes:
+      label: Brief description
+      description: |-
+        Try to explain the overall nature of the problem briefly. This can be a
+        couple of short sentences. We'll ask some more detailed questions further
+        below.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: |-
+        What are the steps to reproduce the issue? Try to give a simple numbered
+        list of steps!
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-should-happen
+    attributes:
+      label: Expected behaviour
+      description: |-
+        What do you think should happen, and why?
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-actually-happens
+    attributes:
+      label: Actual behaviour
+      description: |-
+        Briefly, what actually happens?
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Error message
+      description: |-
+        Add any error message you see here. This will be formatted into a code
+        block for you if provided.
+      render: text
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |-
+        Please run your build with the following additional flags and paste the 
+        output here.
+
+        ```
+        "-Dorg.slf4j.simpleLogger.log.io.github.ascopes.protobufmavenplugin=trace"
+        ```
+
+        This will be formatted in a code block automatically for you if provided.
+      render: text
+
+  - type: input
+    id: os-version
+    attributes:
+      label: Operating system
+      description: |-
+        What OS are you using? On Windows, run `winver.exe`. On Linux and macOS, run
+        `uname -a` and paste the output here.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: JDK version
+      description: |-
+        What version of Java are you using?
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: protobuf-maven-plugin-version
+    attributes:
+      label: Plugin version
+      description: |-
+        What version of this project are you using?
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: protoc-version
+    attributes:
+      label: `protoc` version
+      description: |-
+        What version of `protoc` are you using?
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: other-details
+    attributes:
+      label: Additional details
+      description: |-
+        Is there anything else we need to know? If possible, use this area
+        to link to a reproduction project, too.
+
+        If this is not possible then not to worry!
+
+  - type: markdown
+    attributes:
+      value: |-
+        Thanks! That is all we need to know for now. We will try to get back
+        to you as soon as possible if any other information is needed!
