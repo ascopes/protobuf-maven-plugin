@@ -82,7 +82,6 @@ body:
       description: |-
         What OS are you using? On Windows, run `winver.exe`. On Linux and macOS, run
         `uname -a` and paste the output here.
-      render: text
     validations:
       required: true
 
@@ -92,7 +91,6 @@ body:
       label: JDK version
       description: |-
         What version of Java are you using?
-      render: text
     validations:
       required: true
 
@@ -102,7 +100,6 @@ body:
       label: Plugin version
       description: |-
         What version of this project are you using?
-      render: text
     validations:
       required: true
 
@@ -112,7 +109,6 @@ body:
       label: Protoc version
       description: |-
         What version of `protoc` are you using?
-      render: text
     validations:
       required: true
 
