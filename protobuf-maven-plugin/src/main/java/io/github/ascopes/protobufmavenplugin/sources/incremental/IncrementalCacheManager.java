@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.FutureTask;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -89,7 +90,6 @@ public class IncrementalCacheManager {
   public Collection<Path> determineSourcesToCompile(
       ProjectInputListing listing
   ) throws IOException {
-    // TODO(ascopes): we can eventually demote this to debug logging once the feature is stable.
     var startTime = System.nanoTime();
     var sourcesToCompile = determineSourcesToCompileUntimed(listing);
     var timeTaken = (System.nanoTime() - startTime) / 1_000_000L;
@@ -134,13 +134,19 @@ public class IncrementalCacheManager {
 
     return nextBuildCache.getSources().keySet()
         .stream()
-        .filter(file -> !Objects.equals(
-            nextBuildCache.getSources().get(file),
-            previousBuildCache.getSources().get(file)
-        ))
+        .filter(not(isSourceFileTheSame(previousBuildCache, nextBuildCache)))
         .collect(Collectors.toUnmodifiableSet());
   }
 
+  private Predicate<Path> isSourceFileTheSame(
+      SerializedIncrementalCache previousBuildCache,
+      SerializedIncrementalCache nextBuildCache
+  ) {
+     return file -> Objects.equals(
+         previousBuildCache.getSources().get(file),
+         nextBuildCache.getSources().get(file)
+     );
+  }
   private Optional<SerializedIncrementalCache> readIncrementalCache(Path path) throws IOException {
     log.debug("Reading incremental cache in from {}", path);
 
@@ -191,6 +197,7 @@ public class IncrementalCacheManager {
       log.trace("Generating digest for {}", file);
       try (var inputStream = Files.newInputStream(file)) {
         var digest = Digests.sha512ForStream(inputStream);
+        // XXX: use a record once we move support to Java 17 as a minimum.
         return new SimpleImmutableEntry<>(file, digest);
       }
     });
