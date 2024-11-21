@@ -171,26 +171,29 @@ public class IncrementalCacheManager {
   }
 
   private SerializedIncrementalCache buildIncrementalCache(ProjectInputListing listing) {
-    var dependencyDigests = listing.getDependencySources().stream()
-        .map(SourceListing::getSourceProtoFiles)
-        .flatMap(Collection::stream)
-        .map(this::createSerializedFileDigestAsync)
+    // Done this way for now to propagate errors correctly. Probably worth refactoring in the future
+    // to be less of a hack?
+    var results = Stream.of(listing.getDependencySources(), listing.getCompilableSources())
+        .map(this::createSerializedFileDigestsAsync)
         .collect(concurrentExecutor.awaiting())
-        .stream()
-        .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-    var sourceDigests = listing.getCompilableSources().stream()
-        .map(SourceListing::getSourceProtoFiles)
-        .flatMap(Collection::stream)
-        .map(this::createSerializedFileDigestAsync)
-        .collect(concurrentExecutor.awaiting())
-        .stream()
-        .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        .iterator();
 
     return ImmutableSerializedIncrementalCache.builder()
-        .dependencies(dependencyDigests)
-        .sources(sourceDigests)
+        .dependencies(results.next())
+        .sources(results.next())
         .build();
+  }
+
+  private FutureTask<Map<Path, String>> createSerializedFileDigestsAsync(
+      Collection<SourceListing> listings
+  ) {
+    return concurrentExecutor.submit(() -> listings.stream()
+        .map(SourceListing::getSourceProtoFiles)
+        .flatMap(Collection::stream)
+        .map(this::createSerializedFileDigestAsync)
+        .collect(concurrentExecutor.awaiting())
+        .stream()
+        .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
   }
 
   private FutureTask<Entry<Path, String>> createSerializedFileDigestAsync(Path file) {
