@@ -142,11 +142,12 @@ public class IncrementalCacheManager {
       SerializedIncrementalCache previousBuildCache,
       SerializedIncrementalCache nextBuildCache
   ) {
-     return file -> Objects.equals(
-         previousBuildCache.getSources().get(file),
-         nextBuildCache.getSources().get(file)
-     );
+    return file -> Objects.equals(
+        previousBuildCache.getSources().get(file),
+        nextBuildCache.getSources().get(file)
+    );
   }
+
   private Optional<SerializedIncrementalCache> readIncrementalCache(Path path) throws IOException {
     log.debug("Reading incremental cache in from {}", path);
 
