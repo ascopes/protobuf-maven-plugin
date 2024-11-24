@@ -17,7 +17,6 @@
 package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
 import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
-import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -123,9 +122,9 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    var filesDeletedSinceLastBuild = previousBuildCache.getSources().keySet()
+    var filesDeletedSinceLastBuild = !previousBuildCache.getSources().keySet()
         .stream()
-        .anyMatch(not(nextBuildCache.getSources().keySet()::contains));
+        .allMatch(nextBuildCache.getSources().keySet()::contains);
 
     // If any sources were deleted, we should rebuild everything, as those files being deleted may
     // have caused a compilation failure.
@@ -136,15 +135,15 @@ public class IncrementalCacheManager {
 
     return nextBuildCache.getSources().keySet()
         .stream()
-        .filter(not(isSourceFileTheSame(previousBuildCache, nextBuildCache)))
+        .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
         .collect(Collectors.toUnmodifiableSet());
   }
 
-  private Predicate<Path> isSourceFileTheSame(
+  private Predicate<Path> isSourceFileDifferent(
       SerializedIncrementalCache previousBuildCache,
       SerializedIncrementalCache nextBuildCache
   ) {
-    return file -> Objects.equals(
+    return file -> !Objects.equals(
         previousBuildCache.getSources().get(file),
         nextBuildCache.getSources().get(file)
     );
