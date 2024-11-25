@@ -56,6 +56,7 @@
     <menu name="User Guides">
       <item name="Requirements" href="user-guides/requirements.html"/>
       <item name="Basic Usage" href="user-guides/basic-usage.html"/>
+      <item name="Incremental Compilation" href="user-guides/incremental-compilation.html"/>
     </menu>
     <menu name="Links">
       <item name="CodeCov" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
