@@ -31,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -184,16 +183,15 @@ public class IncrementalCacheManager {
         .map(this::createSerializedFileDigestAsync)
         .collect(concurrentExecutor.awaiting())
         .stream()
-        .collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        .collect(Collectors.toMap(CacheEntry::getPath, CacheEntry::getDigest)));
   }
 
-  private FutureTask<Entry<Path, String>> createSerializedFileDigestAsync(Path file) {
+  private FutureTask<CacheEntry> createSerializedFileDigestAsync(Path file) {
     return concurrentExecutor.submit(() -> {
       log.trace("Generating digest for {}", file);
       try (var inputStream = Files.newInputStream(file)) {
         var digest = Digests.sha512ForStream(inputStream);
-        // XXX: use a record once we move support to Java 17 as a minimum.
-        return new SimpleImmutableEntry<>(file, digest);
+        return new CacheEntry(file, digest);
       }
     });
   }
@@ -208,5 +206,23 @@ public class IncrementalCacheManager {
 
   private Path getNextIncrementalCachePath() {
     return getIncrementalCacheRoot().resolve("next.json");
+  }
+
+  private static final class CacheEntry {
+    private final Path path;
+    private final String digest;
+
+    private CacheEntry(Path path, String digest) {
+      this.path = path;
+      this.digest = digest;
+    }
+
+    private Path getPath() {
+      return path;
+    }
+
+    private String getDigest() {
+      return digest;
+    }
   }
 }
