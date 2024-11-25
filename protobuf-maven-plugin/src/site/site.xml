@@ -51,13 +51,13 @@
     <menu name="Documentation">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
-      <item name="Usage" href="usage.html"/>
-    </menu>
-    <menu name="User Guides">
-      <item name="Requirements" href="user-guides/requirements.html"/>
-      <item name="Basic Usage" href="user-guides/basic-usage.html"/>
-      <item name="Additional Language Support" href="user-guides/additional-language-support.html"/>
-      <item name="Incremental Compilation" href="user-guides/incremental-compilation.html"/>
+      <item name="Requirements" href="requirements.html"/>
+      <item name="Basic Usage" href="basic-usage.html"/>
+      <item name="Additional Language Support" href="additional-language-support.html"/>
+      <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
+      <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
+      <item name="Incremental Compilation" href="incremental-compilation.html"/>
+      <item name="Known Issues" href="known-issues.html"/>
     </menu>
     <menu name="Links">
       <item name="CodeCov" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>

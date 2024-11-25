@@ -1,4 +1,4 @@
-# Basic usage
+# Basic Usage
 
 This plugin is designed with simplicity in mind. As a result, you do not need
 to do much to get this working.
