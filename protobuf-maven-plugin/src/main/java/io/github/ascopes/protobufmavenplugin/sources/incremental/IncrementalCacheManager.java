@@ -91,16 +91,6 @@ public class IncrementalCacheManager {
   public Collection<Path> determineSourcesToCompile(
       ProjectInputListing listing
   ) throws IOException {
-    var startTime = System.nanoTime();
-    var sourcesToCompile = determineSourcesToCompileUntimed(listing);
-    var timeTaken = (System.nanoTime() - startTime) / 1_000_000L;
-    log.debug("Detected {} source(s) to compile in {}ms", sourcesToCompile.size(), timeTaken);
-    return sourcesToCompile;
-  }
-
-  private Collection<Path> determineSourcesToCompileUntimed(
-      ProjectInputListing listing
-  ) throws IOException {
     // Always update the cache to catch changes in the next builds.
     var nextBuildCache = buildIncrementalCache(listing);
     writeIncrementalCache(getNextIncrementalCachePath(), nextBuildCache);
