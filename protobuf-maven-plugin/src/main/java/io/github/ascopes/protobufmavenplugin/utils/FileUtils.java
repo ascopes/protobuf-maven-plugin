@@ -83,7 +83,6 @@ public final class FileUtils {
       return FileSystemProvider.installedProviders()
           .stream()
           .filter(provider -> provider.getScheme().equalsIgnoreCase("jar"))
-          .peek(provider -> log.trace("Found JAR file system provider at {}", provider))
           .findFirst()
           .orElseThrow(FileSystemNotFoundException::new)
           .newFileSystem(zipPath, Map.of());
@@ -101,7 +100,9 @@ public final class FileUtils {
       perms.add(PosixFilePermission.OWNER_EXECUTE);
       Files.setPosixFilePermissions(file, perms);
     } catch (UnsupportedOperationException ex) {
-      log.trace("File system does not support setting POSIX file permissions");
+      log.trace(
+          "File system does not support setting POSIX file permissions, "
+              + "this is probably fine, continuing anyway...");
     }
   }
 
@@ -116,12 +117,14 @@ public final class FileUtils {
     while (iter.hasNext()) {
       var existingPath = iter.next();
       var newPath = newRoot;
+      // Rebuild the new target path using the fragments from the original relative
+      // path. This enables us to relativize paths on different file systems correctly.
       for (var part : existingRoot.relativize(existingPath)) {
         newPath = newPath.resolve(part.toString());
       }
 
       log.trace(
-          "copying {} to {} (existing root={}, new root={})",
+          "Copying {} to {} (existing root={}, new root={})",
           existingPath,
           newPath,
           existingRoot,
@@ -129,6 +132,7 @@ public final class FileUtils {
       );
 
       Files.createDirectories(newPath.getParent());
+
       Files.copy(
           existingPath,
           newPath,
