@@ -76,6 +76,15 @@ body:
       required: true
 
   - type: input
+    id: maven-version
+    attributes:
+      label: Maven version
+      description: >-
+        What version of Maven are you using?
+    validations:
+      required: true
+
+  - type: input
     id: protobuf-maven-plugin-version
     attributes:
       label: Plugin version
