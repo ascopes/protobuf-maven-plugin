@@ -44,6 +44,7 @@ public final class ProtocResolver {
   private static final String EXECUTABLE_NAME = "protoc";
   private static final String GROUP_ID = "com.google.protobuf";
   private static final String ARTIFACT_ID = "protoc";
+  private static final String TYPE = "exe";
 
   private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
@@ -131,7 +132,7 @@ public final class ProtocResolver {
         .groupId(GROUP_ID)
         .artifactId(ARTIFACT_ID)
         .version(version)
-        .type("exe")
+        .type(TYPE)
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
