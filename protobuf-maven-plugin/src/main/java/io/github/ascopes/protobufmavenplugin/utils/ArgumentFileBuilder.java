@@ -16,6 +16,7 @@
 
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,46 +43,41 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
-  @Override
-  public String toString() {
-    var sb = new StringBuilder();
-
+  public void writeTo(Appendable appendable) throws IOException {
     for (var argument : arguments) {
       if (argument.chars().noneMatch(c -> " \n\r\t'\"".indexOf(c) >= 0)) {
-        sb.append(argument).append("\n");
+        appendable.append(argument).append("\n");
         continue;
       }
 
-      sb.append('"');
+      appendable.append('"');
       for (var i = 0; i < argument.length(); ++i) {
         var nextChar = argument.charAt(i);
         switch (nextChar) {
           case '"':
-            sb.append("\\\"");
+            appendable.append("\\\"");
             break;
           case '\'':
-            sb.append("\\'");
+            appendable.append("\\'");
             break;
           case '\\':
-            sb.append("\\\\");
+            appendable.append("\\\\");
             break;
           case '\n':
-            sb.append("\\n");
+            appendable.append("\\n");
             break;
           case '\r':
-            sb.append("\\r");
+            appendable.append("\\r");
             break;
           case '\t':
-            sb.append("\\t");
+            appendable.append("\\t");
             break;
           default:
-            sb.append(nextChar);
+            appendable.append(nextChar);
             break;
         }
       }
-      sb.append("\"\n");
+      appendable.append("\"\n");
     }
-
-    return sb.toString();
   }
 }
