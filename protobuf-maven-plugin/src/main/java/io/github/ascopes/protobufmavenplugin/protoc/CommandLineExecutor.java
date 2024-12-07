@@ -16,12 +16,17 @@
 
 package io.github.ascopes.protobufmavenplugin.protoc;
 
+import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
+import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
+import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,27 +42,27 @@ import org.slf4j.LoggerFactory;
 public final class CommandLineExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(CommandLineExecutor.class);
+  private final TemporarySpace temporarySpace;
 
   @Inject
-  public CommandLineExecutor() {
-    // Nothing to do.
+  public CommandLineExecutor(TemporarySpace temporarySpace) {
+    this.temporarySpace = temporarySpace;
   }
 
-  public boolean execute(List<String> args) throws IOException {
+  public boolean execute(
+      Path protocPath,
+      ArgumentFileBuilder argumentFileBuilder
+  ) throws IOException {
+    var argumentFile = writeArgumentFile(argumentFileBuilder);
+
     log.info("Invoking protoc");
+    log.debug("Protoc binary is located at {}", protocPath);
 
-    // Note that this order and format matters... we use it in a couple of the integration tests
-    // to verify the build ordering.
-    log.debug("Protoc invocation will occur with the following arguments:");
-    args.stream()
-        .map(" ".repeat(4)::concat)
-        .forEach(log::debug);
-
-    var procBuilder = new ProcessBuilder(args);
+    var procBuilder = new ProcessBuilder(protocPath.toString(), "@" + argumentFile);
     procBuilder.environment().putAll(System.getenv());
 
     try {
-      return run(procBuilder);
+      return runProcess(procBuilder);
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       var newEx = new InterruptedIOException("Execution was interrupted");
@@ -66,7 +71,7 @@ public final class CommandLineExecutor {
     }
   }
 
-  private boolean run(ProcessBuilder procBuilder) throws InterruptedException, IOException {
+  private boolean runProcess(ProcessBuilder procBuilder) throws InterruptedException, IOException {
     var startTimeNs = System.nanoTime();
     var proc = procBuilder.start();
 
@@ -107,5 +112,18 @@ public final class CommandLineExecutor {
     thread.setName("protoc output redirector thread for " + stream);
     thread.start();
     return thread;
+  }
+
+  private Path writeArgumentFile(ArgumentFileBuilder argumentFileBuilder) throws IOException {
+    var file = temporarySpace.createTemporarySpace("protoc").resolve("args.txt");
+    log.debug("Writing to protoc argument file at {}", file);
+
+    var writer = new TeeWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8));
+    try (writer) {
+      argumentFileBuilder.writeTo(writer);
+    }
+
+    log.debug("Written arguments were:\n{}", writer);
+    return file;
   }
 }

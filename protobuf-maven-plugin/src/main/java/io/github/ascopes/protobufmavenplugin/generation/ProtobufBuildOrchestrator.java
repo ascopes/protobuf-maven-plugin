@@ -19,8 +19,8 @@ package io.github.ascopes.protobufmavenplugin.generation;
 import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
 
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
-import io.github.ascopes.protobufmavenplugin.protoc.ArgLineBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
+import io.github.ascopes.protobufmavenplugin.protoc.ProtocArgumentFileBuilderBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
@@ -109,34 +109,13 @@ public final class ProtobufBuildOrchestrator {
 
     createOutputDirectories(request);
 
-    var argLineBuilder = new ArgLineBuilder(protocPath)
-        .fatalWarnings(request.isFatalWarnings())
-        .importPaths(projectInputs.getCompilableSources()
-            .stream()
-            .map(SourceListing::getSourceRoot)
-            .collect(Collectors.toUnmodifiableList()))
-        .importPaths(projectInputs.getDependencySources()
-            .stream()
-            .map(SourceListing::getSourceRoot)
-            .collect(Collectors.toUnmodifiableList()));
-
-    request.getEnabledLanguages()
-        .forEach(language -> argLineBuilder.generateCodeFor(
-            language,
-            request.getOutputDirectory(),
-            request.isLiteEnabled()
-        ));
-
-    // GH-269: Add the plugins after the enabled languages to support generated code injection
-    argLineBuilder.plugins(resolvedPlugins, request.getOutputDirectory());
-
     // GH-438: We now register the source roots before generating anything. This ensures we still
     // call Javac with the sources even if we incrementally compile with zero changes.
     registerSourceRoots(request);
-    
-    // Determine the sources we need to regenerate. This will be all of the sources usually but
+
+    // Determine the sources we need to regenerate. This will be all the sources usually but
     // if incremental compilation is enabled then we will only output the files that have changed
-    // unless we deem a full rebuild necesarry.
+    // unless we deem a full rebuild necessary.
     var compilableSources = computeActualSourcesToCompile(request, projectInputs);
     if (compilableSources.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
@@ -145,9 +124,25 @@ public final class ProtobufBuildOrchestrator {
       return true;
     }
 
-    var argLine = argLineBuilder.compile(compilableSources);
+    var argumentFileBuilder = new ProtocArgumentFileBuilderBuilder()
+        .addLanguages(
+            request.getEnabledLanguages(),
+            request.getOutputDirectory(),
+            request.isLiteEnabled())
+        .addImportPaths(projectInputs.getCompilableSources()
+            .stream()
+            .map(SourceListing::getSourceRoot)
+            .collect(Collectors.toUnmodifiableList()))
+        .addImportPaths(projectInputs.getDependencySources()
+            .stream()
+            .map(SourceListing::getSourceRoot)
+            .collect(Collectors.toUnmodifiableList()))
+        .addPlugins(resolvedPlugins, request.getOutputDirectory())
+        .addSourcePaths(compilableSources)
+        .setFatalWarnings(request.isFatalWarnings())
+        .build();
 
-    if (!commandLineExecutor.execute(argLine)) {
+    if (!commandLineExecutor.execute(protocPath, argumentFileBuilder)) {
       return false;
     }
 

@@ -18,84 +18,96 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
- * Builder for a {@code protoc} commandline invocation.
+ * Builder for a {@code protoc} command line invocation {@link ArgumentFileBuilder}.
  *
  * @author Ashley Scopes
  */
-public final class ArgLineBuilder {
+public final class ProtocArgumentFileBuilderBuilder {
 
-  private final Path protocPath;
   private boolean fatalWarnings;
-  private final List<Target> targets;
   private final List<Path> importPaths;
+  private final List<Path> sourcePaths;
+  private final List<Target> targets;
 
-  public ArgLineBuilder(Path protocPath) {
-    this.protocPath = protocPath;
+  public ProtocArgumentFileBuilderBuilder() {
     fatalWarnings = false;
-    targets = new ArrayList<>();
     importPaths = new ArrayList<>();
+    sourcePaths = new ArrayList<>();
+    targets = new ArrayList<>();
   }
 
-  public List<String> compile(Collection<Path> sourcesToCompile) {
-    if (targets.isEmpty()) {
-      throw new IllegalStateException("No output target operations were provided");
-    }
-
-    var args = new ArrayList<String>();
-    args.add(protocPath.toString());
-
-    if (fatalWarnings) {
-      args.add("--fatal_warnings");
-    }
-
-    for (var target : targets) {
-      target.addArgsTo(args);
-    }
-
-    for (var sourceToCompile : sourcesToCompile) {
-      args.add(sourceToCompile.toString());
-    }
-
-    for (var importPath : importPaths) {
-      args.add("--proto_path=" + importPath.toString());
-    }
-
-    return Collections.unmodifiableList(args);
-  }
-
-  public ArgLineBuilder fatalWarnings(boolean fatalWarnings) {
-    this.fatalWarnings = fatalWarnings;
-    return this;
-  }
-
-  @SuppressWarnings("UnusedReturnValue")
-  public ArgLineBuilder generateCodeFor(Language language, Path outputPath, boolean lite) {
-    targets.add(new LanguageTarget(language, outputPath, lite));
-    return this;
-  }
-
-  public ArgLineBuilder importPaths(Collection<Path> importPaths) {
+  public ProtocArgumentFileBuilderBuilder addImportPaths(Collection<Path> importPaths) {
     this.importPaths.addAll(importPaths);
     return this;
   }
 
-  public ArgLineBuilder plugins(Collection<ResolvedProtocPlugin> plugins, Path outputPath) {
-    for (var plugin : plugins) {
-      targets.add(new PluginTarget(plugin, outputPath));
-    }
+  public ProtocArgumentFileBuilderBuilder addLanguages(
+      Collection<Language> languages,
+      Path outputPath,
+      boolean lite
+  ) {
+    languages.stream()
+        .map(language -> new LanguageTarget(language, outputPath, lite))
+        .forEachOrdered(targets::add);
     return this;
+  }
+
+  public ProtocArgumentFileBuilderBuilder addPlugins(
+      Collection<ResolvedProtocPlugin> plugins,
+      Path outputPath
+  ) {
+    plugins.stream()
+        .map(plugin -> new PluginTarget(plugin, outputPath))
+        .forEachOrdered(targets::add);
+    return this;
+  }
+
+  public ProtocArgumentFileBuilderBuilder addSourcePaths(Collection<Path> sourcePaths) {
+    this.sourcePaths.addAll(sourcePaths);
+    return this;
+  }
+
+  public ProtocArgumentFileBuilderBuilder setFatalWarnings(boolean fatalWarnings) {
+    this.fatalWarnings = fatalWarnings;
+    return this;
+  }
+
+  public ArgumentFileBuilder build() {
+    if (targets.isEmpty()) {
+      throw new IllegalStateException("No output target operations were provided");
+    }
+
+    var argumentFileBuilder = new ArgumentFileBuilder();
+
+    if (fatalWarnings) {
+      argumentFileBuilder.add("--fatal_warnings");
+    }
+
+    for (var target : targets) {
+      target.addArgsTo(argumentFileBuilder);
+    }
+
+    for (var sourcePath : sourcePaths) {
+      argumentFileBuilder.add(sourcePath);
+    }
+
+    for (var importPath : importPaths) {
+      argumentFileBuilder.add("--proto_path=" + importPath);
+    }
+
+    return argumentFileBuilder;
   }
 
   private interface Target {
 
-    void addArgsTo(List<String> list);
+    void addArgsTo(ArgumentFileBuilder argumentFileBuilder);
   }
 
   private static final class LanguageTarget implements Target {
@@ -111,13 +123,13 @@ public final class ArgLineBuilder {
     }
 
     @Override
-    public void addArgsTo(List<String> list) {
+    public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
       var flag = "--" + language.getFlagName() + "_out"
           + "="
           + (lite ? "lite:" : "")
           + outputPath;
 
-      list.add(flag);
+      argumentFileBuilder.add(flag);
     }
   }
 
@@ -132,14 +144,14 @@ public final class ArgLineBuilder {
     }
 
     @Override
-    public void addArgsTo(List<String> list) {
+    public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
       // protoc always maps a flag `--xxx_out` to a plugin named `protoc-gen-xxx`, so we have
       // to inject this flag to be consistent.
-      list.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
-      list.add("--" + plugin.getId() + "_out=" + outputPath);
+      argumentFileBuilder.add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath());
+      argumentFileBuilder.add("--" + plugin.getId() + "_out=" + outputPath);
       plugin.getOptions()
           .map(options -> "--" + plugin.getId() + "_opt=" + options)
-          .ifPresent(list::add);
+          .ifPresent(argumentFileBuilder::add);
     }
   }
 }

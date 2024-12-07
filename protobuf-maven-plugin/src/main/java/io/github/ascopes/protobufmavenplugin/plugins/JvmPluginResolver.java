@@ -27,6 +27,7 @@ import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
@@ -34,7 +35,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -314,20 +314,21 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argFileBuilder
   ) throws ResolutionException {
     var sh = pathResolver.resolve("sh").orElseThrow();
-    var argFile = writeArgFile(StandardCharsets.UTF_8, scratchDir, argFileBuilder);
+    var argumentFile = writeArgumentFile(StandardCharsets.UTF_8, scratchDir, argFileBuilder);
 
-    var script = new StringBuilder()
-        .append("#!").append(sh).append('\n')
-        .append("set -o errexit\n");
+    var script = scratchDir.resolve("invoke.sh");
+    writeAndPropagateExceptions(script, StandardCharsets.UTF_8, true, writer -> {
+      writer.append("#!")
+          .append(sh.toString())
+          .append('\n')
+          .append("set -o errexit\n");
+      quoteShellArg(writer, javaExecutable.toString());
+      writer.append(' ');
+      quoteShellArg(writer, "@" + argumentFile);
+      writer.append('\n');
+    });
 
-    quoteShellArg(script, javaExecutable.toString());
-    script.append(' ');
-    quoteShellArg(script, "@" + argFile);
-    script.append('\n');
-
-    var scriptFile = scratchDir.resolve("invoke.sh");
-    writeFile(scriptFile, script.toString(), StandardCharsets.UTF_8, true);
-    return scriptFile;
+    return script;
   }
 
   private Path writeWindowsScripts(
@@ -335,88 +336,89 @@ public final class JvmPluginResolver {
       Path scratchDir,
       ArgumentFileBuilder argFileBuilder
   ) throws ResolutionException {
-    var argFile = writeArgFile(StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
+    var argumentFile = writeArgumentFile(StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
 
-    var script = new StringBuilder()
-        .append("@echo off\r\n");
+    var script = scratchDir.resolve("invoke.bat");
+    writeAndPropagateExceptions(script, StandardCharsets.ISO_8859_1, false, writer -> {
+      writer.append("@echo off\r\n");
+      quoteBatchArg(writer, javaExecutable.toString());
+      writer.append(" ");
+      quoteBatchArg(writer, "@" + argumentFile);
+      writer.append("\r\n");
+    });
 
-    quoteBatchArg(script, javaExecutable.toString());
-    script.append(' ');
-    quoteBatchArg(script, "@" + argFile);
-    script.append("\r\n");
-
-    var scriptFile = scratchDir.resolve("invoke.bat");
-    writeFile(scriptFile, script.toString(), StandardCharsets.ISO_8859_1, false);
-    return scriptFile;
+    return script;
   }
 
-  private Path writeArgFile(
+  private Path writeArgumentFile(
       Charset charset,
       Path scratchDir,
-      ArgumentFileBuilder argFileBuilder
+      ArgumentFileBuilder argumentFileBuilder
   ) throws ResolutionException {
-    var argFile = scratchDir.resolve("args.txt");
-    writeFile(argFile, argFileBuilder.toString(), charset, false);
-    return argFile;
+    var argumentFile = scratchDir.resolve("args.txt");
+    writeAndPropagateExceptions(argumentFile, charset, false, argumentFileBuilder::writeTo);
+    return argumentFile;
   }
 
-  private void writeFile(
-      Path file,
-      String content,
-      Charset charset,
-      boolean makeExecutable
-  ) throws ResolutionException {
-    try {
-      Files.writeString(file, content, charset, StandardOpenOption.CREATE);
-
-      if (makeExecutable) {
-        FileUtils.makeExecutable(file);
-      }
-    } catch (IOException ex) {
-      throw new ResolutionException(
-          "Failed to write file " + file + ": an unexpected IO error occurred",
-          ex
-      );
-    }
-  }
-
-  private void quoteShellArg(StringBuilder sb, String arg) {
+  private void quoteShellArg(Appendable appendable, String arg) throws IOException {
     // POSIX file names can be a bit more complicated and may need escaping
     // in certain edge cases to remain valid.
-    sb.append('\'');
+    appendable.append('\'');
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       switch (c) {
         case '\\':
-          sb.append("\\\\");
+          appendable.append("\\\\");
           break;
         case '\'':
-          sb.append("'\"'\"'");
+          appendable.append("'\"'\"'");
           break;
         case '\n':
-          sb.append("'$'\\n''");
+          appendable.append("'$'\\n''");
           break;
         case '\r':
-          sb.append("'$'\\r''");
+          appendable.append("'$'\\r''");
           break;
         case '\t':
-          sb.append("'$'\\t''");
+          appendable.append("'$'\\t''");
           break;
         default:
-          sb.append(c);
+          appendable.append(c);
           break;
       }
     }
-    sb.append('\'');
+    appendable.append('\'');
   }
 
-  private void quoteBatchArg(StringBuilder sb, String arg) {
+  private void quoteBatchArg(Appendable appendable, String arg) throws IOException {
     // All the escapable characters in batch files other than quotes
     // are considered to be illegal characters in Windows file names,
     // so we can make the assumption that we don't need to change much
     // here.
-    sb.append('"')
+    appendable.append("\"")
         .append(arg.replaceAll("\"", "\"\"\""))
-        .append('"');
+        .append("\"");
+  }
+
+  private static void writeAndPropagateExceptions(
+      Path file,
+      Charset charset,
+      boolean makeExecutable,
+      WriteOperation writeOperation
+  ) throws ResolutionException {
+    try {
+      try (var writer = Files.newBufferedWriter(file, charset)) {
+        writeOperation.invoke(writer);
+      }
+      if (makeExecutable) {
+        FileUtils.makeExecutable(file);
+      }
+    } catch (IOException ex) {
+      throw new ResolutionException("An unexpected IO error occurred while writing to " + file, ex);
+    }
+  }
+
+  private interface WriteOperation {
+    void invoke(BufferedWriter writer) throws IOException;
   }
 }
