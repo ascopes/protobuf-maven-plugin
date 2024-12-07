@@ -27,6 +27,7 @@ import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
@@ -316,23 +317,18 @@ public final class JvmPluginResolver {
     var argumentFile = writeArgumentFile(StandardCharsets.UTF_8, scratchDir, argFileBuilder);
 
     var script = scratchDir.resolve("invoke.sh");
-    try {
-      try (var writer = Files.newBufferedWriter(script, StandardCharsets.UTF_8)) {
-        writer.append("#!").append(sh.toString()).append('\n')
-            .append("set -o errexit\n");
-        quoteShellArg(writer, javaExecutable.toString());
-        writer.append(' ');
-        quoteShellArg(writer, "@" + argumentFile);
-        writer.append('\n');
-      }
 
-      FileUtils.makeExecutable(script);
-    } catch (IOException ex) {
-      throw new ResolutionException(
-          "Failed to create plugin invocation shell script at " + script + ": an IO error occurred",
-          ex
-      );
-    }
+    writeAndPropagateExceptions(argumentFile, StandardCharsets.UTF_8, true, writer -> {
+      writer.append("#!")
+          .append(sh.toString())
+          .append('\n')
+          .append("set -o errexit\n");
+      quoteShellArg(writer, javaExecutable.toString());
+      writer.append(' ');
+      quoteShellArg(writer, "@" + argumentFile);
+      writer.append('\n');
+    });
+
     return script;
   }
 
@@ -344,18 +340,14 @@ public final class JvmPluginResolver {
     var argumentFile = writeArgumentFile(StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
 
     var script = scratchDir.resolve("invoke.bat");
-    try (var writer = Files.newBufferedWriter(script, StandardCharsets.ISO_8859_1)) {
+
+    writeAndPropagateExceptions(argumentFile, StandardCharsets.ISO_8859_1, false, writer -> {
       writer.append("@echo off\r\n");
       quoteBatchArg(writer, javaExecutable.toString());
       writer.append(" ");
       quoteBatchArg(writer, "@" + argumentFile);
       writer.append("\r\n");
-    } catch (IOException ex) {
-      throw new ResolutionException(
-          "Failed to create plugin invocation batch script at " + script + ": an IO error occurred",
-          ex
-      );
-    }
+    });
 
     return script;
   }
@@ -366,15 +358,7 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argumentFileBuilder
   ) throws ResolutionException {
     var argumentFile = scratchDir.resolve("args.txt");
-
-    try (var writer = Files.newBufferedWriter(argumentFile, charset)) {
-      argumentFileBuilder.writeTo(writer);
-    } catch (IOException ex) {
-      throw new ResolutionException(
-          "Failed to write argument file at " + argumentFile + ": an IO error occurred",
-          ex
-      );
-    }
+    writeAndPropagateExceptions(argumentFile, charset, false, argumentFileBuilder::writeTo);
     return argumentFile;
   }
 
@@ -416,5 +400,27 @@ public final class JvmPluginResolver {
     appendable.append("\"")
         .append(arg.replaceAll("\"", "\"\"\""))
         .append("\"");
+  }
+
+  private static void writeAndPropagateExceptions(
+      Path file,
+      Charset charset,
+      boolean makeExecutable,
+      WriteOperation writeOperation
+  ) throws ResolutionException {
+    try {
+      try (var writer = Files.newBufferedWriter(file, charset)) {
+        writeOperation.invoke(writer);
+      }
+      if (makeExecutable) {
+        FileUtils.makeExecutable(file);
+      }
+    } catch (IOException ex) {
+      throw new ResolutionException("An unexpected IO error occurred while writing to " + file, ex);
+    }
+  }
+
+  private interface WriteOperation {
+    void invoke(BufferedWriter writer) throws IOException;
   }
 }
