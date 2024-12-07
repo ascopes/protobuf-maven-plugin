@@ -317,8 +317,7 @@ public final class JvmPluginResolver {
     var argumentFile = writeArgumentFile(StandardCharsets.UTF_8, scratchDir, argFileBuilder);
 
     var script = scratchDir.resolve("invoke.sh");
-
-    writeAndPropagateExceptions(argumentFile, StandardCharsets.UTF_8, true, writer -> {
+    writeAndPropagateExceptions(script, StandardCharsets.UTF_8, true, writer -> {
       writer.append("#!")
           .append(sh.toString())
           .append('\n')
@@ -340,8 +339,7 @@ public final class JvmPluginResolver {
     var argumentFile = writeArgumentFile(StandardCharsets.ISO_8859_1, scratchDir, argFileBuilder);
 
     var script = scratchDir.resolve("invoke.bat");
-
-    writeAndPropagateExceptions(argumentFile, StandardCharsets.ISO_8859_1, false, writer -> {
+    writeAndPropagateExceptions(script, StandardCharsets.ISO_8859_1, false, writer -> {
       writer.append("@echo off\r\n");
       quoteBatchArg(writer, javaExecutable.toString());
       writer.append(" ");
