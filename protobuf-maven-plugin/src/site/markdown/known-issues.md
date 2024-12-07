@@ -62,10 +62,6 @@ The workaround for now appears to be to include `plexus-utils` explicitly as a d
 
 - See https://github.com/ascopes/protobuf-maven-plugin/issues/472 for tracking this issue.
 
-- See
-[this discussion](https://github.com/ascopes/protobuf-maven-plugin/discussions/470)
-for further discussion.
-
 ## Incremental compilation edge cases
 
 The experimental incremental compilation feature is known to have some edge cases

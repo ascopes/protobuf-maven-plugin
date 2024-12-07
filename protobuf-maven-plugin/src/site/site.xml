@@ -56,7 +56,7 @@
       <item name="Additional Language Support" href="additional-language-support.html"/>
       <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
       <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
-      <item name="Incremental Compilation" href="incremental-compilation.html"/>
+      <item name="Faster Builds" href="faster-builds.html"/>
       <item name="Known Issues" href="known-issues.html"/>
     </menu>
     <menu name="Links">
