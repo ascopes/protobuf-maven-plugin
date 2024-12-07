@@ -120,7 +120,7 @@ public final class CommandLineExecutor {
 
     var writer = new TeeWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8));
     try (writer) {
-      argumentFileBuilder.writeTo(writer);
+      argumentFileBuilder.writeToProtocArgumentFile(writer);
     }
 
     log.debug("Written arguments were:\n{}", writer);

@@ -23,7 +23,7 @@ import java.io.Writer;
  * A writer that also writes to an in-memory buffer to enable the content to be replayed.
  *
  * @author Ashley Scopes
- * @since 2.7.3
+ * @since 2.7.2
  */
 public final class TeeWriter extends Writer {
 

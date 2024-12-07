@@ -23,15 +23,11 @@ import java.util.List;
 /**
  * Builder for Java argument files that deals with the quoting and escaping rules Java expects.
  *
- * <p>See
- * https://github.com/openjdk/jdk/blob/2461263aac35b25e2a48b6fc84da49e4b553dbc3/src/java.base/share/native/libjli/args.c#L165-L355
- * for the Java implementation.
- *
  * @author Ashley Scopes
  * @since 2.6.0
  */
-@SuppressWarnings("JavadocLinkAsPlainText")
 public final class ArgumentFileBuilder {
+
   private final List<String> arguments;
 
   public ArgumentFileBuilder() {
@@ -43,7 +39,15 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
-  public void writeTo(Appendable appendable) throws IOException {
+  // See https://github.com/protocolbuffers/protobuf/blob/0361a593/src/google/protobuf/compiler/command_line_interface.cc#L1759
+  public void writeToProtocArgumentFile(Appendable appendable) throws IOException {
+    for (var argument : arguments) {
+      appendable.append(argument).append("\n");
+    }
+  }
+
+  // See https://github.com/openjdk/jdk/blob/2461263a/src/java.base/share/native/libjli/args.c#L165-L355
+  public void writeToJavaArgumentFile(Appendable appendable) throws IOException {
     for (var argument : arguments) {
       if (argument.chars().noneMatch(c -> " \n\r\t'\"".indexOf(c) >= 0)) {
         appendable.append(argument).append("\n");
