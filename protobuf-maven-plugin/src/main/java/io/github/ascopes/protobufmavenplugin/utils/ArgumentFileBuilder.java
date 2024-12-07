@@ -19,22 +19,14 @@ package io.github.ascopes.protobufmavenplugin.utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Builder for Java argument files that deals with the quoting and escaping rules Java expects.
  *
- * <p>See
- * https://github.com/openjdk/jdk/blob/2461263aac35b25e2a48b6fc84da49e4b553dbc3/src/java.base/share/native/libjli/args.c#L165-L355
- * for the Java implementation.
- *
  * @author Ashley Scopes
  * @since 2.6.0
  */
-@SuppressWarnings("JavadocLinkAsPlainText")
 public final class ArgumentFileBuilder {
-  private static final Logger log = LoggerFactory.getLogger(ArgumentFileBuilder.class);
 
   private final List<String> arguments;
 
@@ -54,6 +46,7 @@ public final class ArgumentFileBuilder {
     }
   }
 
+  // See https://github.com/openjdk/jdk/blob/2461263a/src/java.base/share/native/libjli/args.c#L165-L355
   public void writeToJavaArgumentFile(Appendable appendable) throws IOException {
     for (var argument : arguments) {
       if (argument.chars().noneMatch(c -> " \n\r\t'\"".indexOf(c) >= 0)) {
