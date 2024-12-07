@@ -356,7 +356,7 @@ public final class JvmPluginResolver {
       ArgumentFileBuilder argumentFileBuilder
   ) throws ResolutionException {
     var argumentFile = scratchDir.resolve("args.txt");
-    writeAndPropagateExceptions(argumentFile, charset, false, argumentFileBuilder::writeTo);
+    writeAndPropagateExceptions(argumentFile, charset, false, argumentFileBuilder::writeToJavaArgumentFile);
     return argumentFile;
   }
 

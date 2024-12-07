@@ -19,6 +19,8 @@ package io.github.ascopes.protobufmavenplugin.utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder for Java argument files that deals with the quoting and escaping rules Java expects.
@@ -32,6 +34,8 @@ import java.util.List;
  */
 @SuppressWarnings("JavadocLinkAsPlainText")
 public final class ArgumentFileBuilder {
+  private static final Logger log = LoggerFactory.getLogger(ArgumentFileBuilder.class);
+
   private final List<String> arguments;
 
   public ArgumentFileBuilder() {
@@ -43,7 +47,14 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
-  public void writeTo(Appendable appendable) throws IOException {
+  // See https://github.com/protocolbuffers/protobuf/blob/0361a593/src/google/protobuf/compiler/command_line_interface.cc#L1759
+  public void writeToProtocArgumentFile(Appendable appendable) throws IOException {
+    for (var argument : arguments) {
+      appendable.append(argument).append("\n");
+    }
+  }
+
+  public void writeToJavaArgumentFile(Appendable appendable) throws IOException {
     for (var argument : arguments) {
       if (argument.chars().noneMatch(c -> " \n\r\t'\"".indexOf(c) >= 0)) {
         appendable.append(argument).append("\n");
