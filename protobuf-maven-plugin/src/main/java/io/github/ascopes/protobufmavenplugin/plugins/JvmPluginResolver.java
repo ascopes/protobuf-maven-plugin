@@ -120,7 +120,7 @@ public final class JvmPluginResolver {
   ) throws ResolutionException {
 
     log.debug(
-        "Resolving JVM-based Maven protoc plugin {} and generating OS-specific boostrap scripts",
+        "Resolving JVM-based Maven protoc plugin {} and generating OS-specific bootstrap scripts",
         pluginDescriptor
     );
 
@@ -183,6 +183,8 @@ public final class JvmPluginResolver {
         .filter(checkValidJvmConfigArg(plugin))
         .forEach(args::add);
 
+    // First dependency is always the entrypoint due to how Aether resolves
+    // dependencies internally.
     args.add(determineMainClass(plugin, dependencies.get(0)));
 
     requireNonNullElse(plugin.getJvmArgs(), DEFAULT_JVM_ARGS)
@@ -292,15 +294,15 @@ public final class JvmPluginResolver {
 
   private Predicate<String> checkValidJvmConfigArg(MavenProtocPlugin plugin) {
     return arg -> {
-      // JVM args must begin with a hyphen, otherwise Java may interpret
-      // them as being the application entrypoint class and accidentally
-      // clobber the invocation.
+      // JVM args must begin with a hyphen and be greater than zero in size,
+      // otherwise Java may interpret them as being the application entrypoint
+      // class and accidentally clobber the invocation.
       if (arg.startsWith("-") && arg.length() > 1) {
         return true;
       }
 
       log.warn(
-          "Dropping illegal JVM argument '{}' for Maven plugin {}",
+          "Dropping illegal JVM argument '{}' for Maven plugin '{}'",
           arg,
           plugin.getArtifactId()
       );
