@@ -415,7 +415,7 @@ public final class JvmPluginResolver {
   ) throws ResolutionException {
     try {
       try (var writer = Files.newBufferedWriter(file, charset)) {
-        writeOperation.invoke(writer);
+        writeOperation.writeTo(writer);
       }
       if (makeExecutable) {
         FileUtils.makeExecutable(file);
@@ -425,7 +425,8 @@ public final class JvmPluginResolver {
     }
   }
 
+  @FunctionalInterface
   private interface WriteOperation {
-    void invoke(BufferedWriter writer) throws IOException;
+    void writeTo(BufferedWriter writer) throws IOException;
   }
 }
