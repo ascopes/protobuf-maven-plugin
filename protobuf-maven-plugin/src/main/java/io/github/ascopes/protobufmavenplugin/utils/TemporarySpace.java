@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.plugin.MojoExecution;
@@ -52,8 +53,10 @@ public final class TemporarySpace {
         .resolve(FRAG)
         // GH-421: Include the execution ID and goal to keep file paths unique
         // between invocations in multiple goals.
-        .resolve(mojoExecution.getGoal())
-        .resolve(mojoExecution.getExecutionId());
+        // GH-488: Execution ID and goal can potentially be null, e.g. in Quarkus dev mode, so
+        // default to a semi-sensible value to prevent a NullPointerException.
+        .resolve(Objects.requireNonNullElse(mojoExecution.getGoal(), "unknown-goal"))
+        .resolve(Objects.requireNonNullElse(mojoExecution.getExecutionId(), "unknown-execution-id"));
 
     for (var bit : bits) {
       dir = dir.resolve(bit);
