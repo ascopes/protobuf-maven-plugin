@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * Filter for source files to allow including and excluding based on glob patterns.
  *
  * @author Ashley Scopes
+ * @since 2.2.0
  */
 public final class SourceGlobFilter {
 
@@ -47,10 +48,13 @@ public final class SourceGlobFilter {
   public boolean matches(Path relativeRoot, Path file) {
     var relativeFile = relativeRoot.relativize(file);
 
-    var excluded = !excludes.isEmpty() && excludes.stream().anyMatch(checking(relativeFile));
-    var notIncluded = !includes.isEmpty() && includes.stream().noneMatch(checking(relativeFile));
-
-    if (excluded || notIncluded) {
+    if (excludes.stream().anyMatch(checking(relativeFile))) {
+      // File was explicitly excluded.
+      return false;
+    }
+    
+    if (!includes.isEmpty() && includes.stream().noneMatch(checking(relativeFile))) {
+      // File was not explicitly included when inclusions were present.
       return false;
     }
 
