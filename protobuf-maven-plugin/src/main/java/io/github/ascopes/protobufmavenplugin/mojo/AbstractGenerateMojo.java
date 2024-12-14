@@ -245,8 +245,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.4.0
    */
   @Parameter
-  @Nullable
-  Set<String> dependencyScopes;
+  @Nullable Set<String> dependencyScopes;
 
   /**
    * Set whether to attach all compiled protobuf sources to the output of this
