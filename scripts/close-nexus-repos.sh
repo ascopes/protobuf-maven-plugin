@@ -22,7 +22,7 @@
 ###
 set -o errexit
 set -o nounset
-[[ -n ${DEBUG+undef} ]] && set -o xtrace
+[[ ${DEBUG} ]] && set -o xtrace
 
 function usage() {
   echo "USAGE: ${BASH_SOURCE[0]} [-h] -a <artifactId> -g <groupId> -v <version> -u <userName> -p <password> -s <server>"
@@ -178,6 +178,7 @@ function is-artifact-in-repository() {
 }
 
 function find-correct-repository-id() {
+  local repository_id
   for repository_id in $(get-staging-repositories); do
     if is-artifact-in-repository "${repository_id}"; then
       echo "${repository_id}"
