@@ -22,7 +22,7 @@
 ###
 set -o errexit
 set -o nounset
-[[ ${DEBUG} ]] && set -o xtrace
+[[ -n ${DEBUG+defined} ]] && set -o xtrace
 
 function usage() {
   echo "USAGE: ${BASH_SOURCE[0]} [-h] -a <artifactId> -g <groupId> -v <version> -u <userName> -p <password> -s <server>"
