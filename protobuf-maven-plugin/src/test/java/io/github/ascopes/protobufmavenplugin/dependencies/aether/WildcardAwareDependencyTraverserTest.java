@@ -44,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("WildcardAwareDependencyTraverser tests")
 @ExtendWith(MockitoExtension.class)
 class WildcardAwareDependencyTraverserTest {
+
   @Mock
   DependencyTraverser delegate;
 
