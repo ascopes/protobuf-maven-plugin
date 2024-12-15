@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.aether.RepositorySystem;
@@ -49,17 +50,32 @@ final class AetherResolver {
   private static final Logger log = LoggerFactory.getLogger(AetherResolver.class);
 
   private final RepositorySystem repositorySystem;
-  private final RepositorySystemSession repositorySystemSession;
+  private final ProtobufMavenPluginRepositorySession repositorySystemSession;
   private final List<RemoteRepository> remoteRepositories;
 
   AetherResolver(
       RepositorySystem repositorySystem,
-      RepositorySystemSession repositorySystemSession,
+      ProtobufMavenPluginRepositorySession repositorySystemSession,
       List<RemoteRepository> remoteRepositories
   ) {
     this.repositorySystem = repositorySystem;
     this.repositorySystemSession = repositorySystemSession;
     this.remoteRepositories = remoteRepositories;
+  }
+
+  // Visible for testing only.
+  RepositorySystem getRepositorySystem() {
+    return repositorySystem;
+  }
+
+  // Visible for testing only.
+  ProtobufMavenPluginRepositorySession getRepositorySystemSession() {
+    return repositorySystemSession;
+  }
+
+  // Visible for testing only.
+  List<RemoteRepository> getRemoteRepositories() {
+    return Collections.unmodifiableList(remoteRepositories);
   }
 
   Artifact resolveArtifact(Artifact unresolvedArtifact) throws ResolutionException {

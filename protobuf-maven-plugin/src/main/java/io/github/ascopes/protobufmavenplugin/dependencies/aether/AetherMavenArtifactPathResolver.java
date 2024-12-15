@@ -68,6 +68,21 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         repositorySystem, repositorySystemSession, remoteRepositories);
   }
 
+  // Visible for testing only.
+  MavenSession getMavenSession() {
+    return mavenSession;
+  }
+
+  // Visible for testing only.
+  AetherArtifactMapper getAetherMapper() {
+    return aetherMapper;
+  }
+
+  // Visible for testing only.
+  AetherResolver getAetherResolver() {
+    return aetherResolver;
+  }
+
   @Override
   public Path resolveArtifact(MavenArtifact mavenArtifact) throws ResolutionException {
     var unresolvedArtifact = aetherMapper.mapPmpArtifactToEclipseArtifact(mavenArtifact);

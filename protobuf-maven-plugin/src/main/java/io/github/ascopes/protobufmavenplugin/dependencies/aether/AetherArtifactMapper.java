@@ -56,6 +56,15 @@ final class AetherArtifactMapper {
     this.artifactTypeRegistry = artifactTypeRegistry;
   }
 
+  // Visible for testing only.
+  org.apache.maven.artifact.handler.ArtifactHandler getArtifactHandler() {
+    return artifactHandler;
+  }
+
+  org.eclipse.aether.artifact.ArtifactTypeRegistry getArtifactTypeRegistry() {
+    return artifactTypeRegistry;
+  }
+
   Path mapEclipseArtifactToPath(org.eclipse.aether.artifact.Artifact eclipseArtifact) {
     // TODO(ascopes): when Maven moves to the v2.0.0 resolver API, replace
     //   this method with calls to Artifact.getPath() directly.
