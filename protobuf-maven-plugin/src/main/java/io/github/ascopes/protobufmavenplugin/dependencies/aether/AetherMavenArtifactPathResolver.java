@@ -16,66 +16,36 @@
 
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
-import static java.util.Objects.requireNonNullElse;
-
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.artifact.ArtifactType;
-import org.eclipse.aether.artifact.ArtifactTypeRegistry;
-import org.eclipse.aether.artifact.DefaultArtifact;
-import org.eclipse.aether.collection.CollectRequest;
-import org.eclipse.aether.graph.Exclusion;
-import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.ArtifactRequest;
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.resolution.DependencyRequest;
-import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.resolution.DependencyResult;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.aether.graph.Dependency;
 
 /**
- * Component that can resolve artifacts and dependencies from the Eclipse Aether dependency
- * resolution backend.
+ * Implementation of {@link MavenArtifactPathResolver} that integrates with the Eclipse Aether
+ * artifact resolution backend provided by Eclipse for Apache Maven.
  *
  * @author Ashley Scopes
- * @since 2.0.3
+ * @since 2.4.4, many iterations of this existed in the past with different names.
  */
 @Named
 final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver {
-
-  private static final String DEFAULT_EXTENSION = "jar";
-  private static final String DEFAULT_SCOPE = "compile";
-
-  private static final Logger log = LoggerFactory.getLogger(AetherMavenArtifactPathResolver.class);
-
   private final MavenSession mavenSession;
-  private final ArtifactHandler artifactHandler;
-  private final ArtifactTypeRegistry artifactTypeRegistry;
-  private final RepositorySystem repositorySystem;
-  private final RepositorySystemSession repositorySession;
-  private final List<RemoteRepository> remoteRepositories;
+  private final AetherArtifactMapper aetherMapper;
+  private final AetherResolver aetherResolver;
 
   @Inject
   AetherMavenArtifactPathResolver(
@@ -83,247 +53,70 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       RepositorySystem repositorySystem,
       ArtifactHandler artifactHandler
   ) {
-    repositorySession = new ProtobufMavenPluginRepositorySession(
-        mavenSession.getRepositorySession()
-    );
+    var artifactRepositories = mavenSession.getProjectBuildingRequest().getRemoteRepositories();
+    var remoteRepositories = RepositoryUtils.toRepos(artifactRepositories);
 
     this.mavenSession = mavenSession;
-    this.repositorySystem = repositorySystem;
-    artifactTypeRegistry = repositorySession.getArtifactTypeRegistry();
-    this.artifactHandler = artifactHandler;
 
-    // Convert the Maven ArtifactRepositories into Aether RemoteRepositories
-    var artifactRepositories = mavenSession.getProjectBuildingRequest().getRemoteRepositories();
-    remoteRepositories = RepositoryUtils.toRepos(artifactRepositories);
+    var repositorySystemSession = new ProtobufMavenPluginRepositorySession(
+        mavenSession.getRepositorySession());
 
-    log.debug("Injected artifact handler {}", artifactHandler);
-    log.debug("Detected remote repositories as {}", remoteRepositories);
+    aetherMapper = new AetherArtifactMapper(
+        artifactHandler, repositorySystemSession.getArtifactTypeRegistry());
+
+    aetherResolver = new AetherResolver(
+        repositorySystem, repositorySystemSession, remoteRepositories);
+  }
+
+  // Visible for testing only.
+  MavenSession getMavenSession() {
+    return mavenSession;
+  }
+
+  // Visible for testing only.
+  AetherArtifactMapper getAetherMapper() {
+    return aetherMapper;
+  }
+
+  // Visible for testing only.
+  AetherResolver getAetherResolver() {
+    return aetherResolver;
   }
 
   @Override
-  public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
-    var repositorySession = mavenSession.getRepositorySession();
-    var aetherArtifact = new DefaultArtifact(
-        artifact.getGroupId(),
-        artifact.getArtifactId(),
-        classifierOrDefault(artifact.getClassifier()),
-        extensionOrDefault(artifact.getType()),
-        artifact.getVersion()
-    );
-
-    log.info("Resolving artifact {} from repositories", aetherArtifact);
-
-    var artifactRequest = new ArtifactRequest(aetherArtifact, remoteRepositories, null);
-
-    try {
-      var resolvedArtifact = repositorySystem
-          .resolveArtifact(repositorySession, artifactRequest)
-          .getArtifact();
-      return determinePath(resolvedArtifact);
-
-    } catch (ArtifactResolutionException ex) {
-      throw new ResolutionException(
-          "Failed to resolve artifact " + aetherArtifact + " from repositories",
-          ex
-      );
-    }
+  public Path resolveArtifact(MavenArtifact mavenArtifact) throws ResolutionException {
+    var unresolvedArtifact = aetherMapper.mapPmpArtifactToEclipseArtifact(mavenArtifact);
+    var resolvedArtifact = aetherResolver.resolveArtifact(unresolvedArtifact);
+    return aetherMapper.mapEclipseArtifactToPath(resolvedArtifact);
   }
 
   @Override
   public List<Path> resolveDependencies(
       Collection<? extends MavenArtifact> artifacts,
-      DependencyResolutionDepth defaultDependencyResolutionDepth,
+      DependencyResolutionDepth defaultDepth,
       Set<String> dependencyScopes,
       boolean includeProjectDependencies,
       boolean failOnInvalidDependencies
   ) throws ResolutionException {
-    DependencyResult dependencyResult;
+    var unresolvedDependencies = new ArrayList<Dependency>();
 
-    try {
-      var dependenciesToResolve = Stream
-          .concat(
-              includeProjectDependencies ? getProjectDependencies() : Stream.of(),
-              artifacts.stream().map(createDependency(defaultDependencyResolutionDepth))
-          )
-          .collect(Collectors.toUnmodifiableList());
+    artifacts.stream()
+        .map(artifact -> aetherMapper.mapPmpArtifactToEclipseDependency(artifact, defaultDepth))
+        .forEach(unresolvedDependencies::add);
 
-      log.debug(
-          "Attempting to resolve the following dependencies in this pass: {}",
-          dependenciesToResolve
-      );
-
-      var scopeFilter = new ScopeDependencyFilter(dependencyScopes);
-      var collectRequest = new CollectRequest(dependenciesToResolve, null, remoteRepositories);
-      var dependencyRequest = new DependencyRequest(collectRequest, scopeFilter);
-      dependencyResult = repositorySystem.resolveDependencies(repositorySession, dependencyRequest);
-
-    } catch (DependencyResolutionException ex) {
-      // GH-299: if this exception is raised, we may still have some results we can use. If this is
-      // the case then resolution only partially failed, so continue for now unless strict
-      // resolution is enabled. We do not fail-fast here anymore (since 2.4.0) as any resolution
-      // errors should be dealt with by the maven-compiler-plugin later on if needed.
-      //
-      // If we didn't get any result, then something more fatal has occurred, so raise.
-      dependencyResult = ex.getResult();
-
-      if (dependencyResult == null || failOnInvalidDependencies) {
-        throw new ResolutionException("Failed to resolve dependencies from repositories", ex);
-      }
-
-      // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
-      log.warn(
-          "Error resolving one or more dependencies, dependencies may be missing during "
-              + "protobuf compilation! {}", ex.getMessage(), ex
-      );
+    if (includeProjectDependencies) {
+      mavenSession.getCurrentProject().getDependencies()
+          .stream()
+          .map(aetherMapper::mapMavenDependencyToEclipseDependency)
+          .forEach(unresolvedDependencies::add);
     }
 
-    var paths = new ArrayList<Path>();
-    var fatalResolutionExceptions = new ArrayList<Throwable>();
-    for (var artifactResult : dependencyResult.getArtifactResults()) {
-      var artifact = artifactResult.getArtifact();
+    var resolvedArtifacts = aetherResolver.resolveDependenciesToArtifacts(
+        unresolvedDependencies, dependencyScopes, failOnInvalidDependencies);
 
-      if (artifact == null) {
-        // Sanity check, pretty sure this shouldn't be needed in the future.
-        assert !artifactResult.getExceptions().isEmpty() : "Unexpected empty exceptions array";
-
-        fatalResolutionExceptions.addAll(artifactResult.getExceptions());
-        continue;
-      }
-
-      if (!artifactResult.getExceptions().isEmpty()) {
-        artifactResult.getExceptions()
-            .forEach(ex -> log.debug("Encountered a non-fatal resolution error", ex));
-      }
-      paths.add(determinePath(artifact));
-    }
-
-    if (fatalResolutionExceptions.isEmpty()) {
-      return Collections.unmodifiableList(paths);
-    }
-
-    var causeIterator = fatalResolutionExceptions.iterator();
-    var exception = new ResolutionException(
-        "One or more errors occurred while resolving artifacts",
-        causeIterator.next()
-    );
-    causeIterator.forEachRemaining(exception::addSuppressed);
-    throw exception;
-  }
-
-  private Stream<org.eclipse.aether.graph.Dependency> getProjectDependencies() {
-    return mavenSession.getCurrentProject().getDependencies()
-        .stream()
-        .map(this::createDependency);
-  }
-
-  private Artifact createArtifact(MavenArtifact artifact) {
-    return new DefaultArtifact(
-        artifact.getGroupId(),
-        artifact.getArtifactId(),
-        classifierOrDefault(artifact.getClassifier()),
-        extensionOrDefault(artifact.getType()),  // MavenArtifact types <-> Aether extensions
-        artifact.getVersion()
-    );
-  }
-
-  private Function<MavenArtifact, org.eclipse.aether.graph.Dependency> createDependency(
-      DependencyResolutionDepth defaultDependencyResolutionDepth
-  ) {
-    return mavenArtifact -> {
-      var effectiveDependencyResolutionDepth = requireNonNullElse(
-          mavenArtifact.getDependencyResolutionDepth(),
-          defaultDependencyResolutionDepth
-      );
-
-      var exclusions = effectiveDependencyResolutionDepth == DependencyResolutionDepth.DIRECT
-          ? List.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
-          : List.<Exclusion>of();
-
-      var artifact = createArtifact(mavenArtifact);
-
-      return new org.eclipse.aether.graph.Dependency(
-          artifact,
-          DEFAULT_SCOPE,
-          false,
-          exclusions
-      );
-    };
-  }
-
-  private org.eclipse.aether.graph.Dependency createDependency(
-      org.apache.maven.model.Dependency mavenDependency
-  ) {
-    var artifact = new DefaultArtifact(
-        mavenDependency.getGroupId(),
-        mavenDependency.getArtifactId(),
-        classifierOrDefault(mavenDependency.getClassifier()),
-        null,  // Inferred elsewhere.
-        mavenDependency.getVersion(),
-        extensionToType(mavenDependency.getType())  // MavenArtifact types <-> Aether extensions
-    );
-
-    var exclusions = mavenDependency.getExclusions()
-        .stream()
-        .map(mavenExclusion -> new Exclusion(
-            mavenExclusion.getGroupId(),
-            mavenExclusion.getArtifactId(),
-            null,  // Any
-            null   // Any
-        ))
+    return resolvedArtifacts.stream()
+        .map(aetherMapper::mapEclipseArtifactToPath)
+        .distinct()
         .collect(Collectors.toUnmodifiableList());
-
-    return new org.eclipse.aether.graph.Dependency(
-        artifact,
-        mavenDependency.getScope(),
-        mavenDependency.isOptional(),
-        exclusions
-    );
-  }
-
-  private @Nullable String classifierOrDefault(@Nullable String classifier) {
-    // .getClassifier can return null in this case to imply a default classifier to Aether.
-    if (classifier == null) {
-      classifier = artifactHandler.getClassifier();
-    }
-    return classifier;
-  }
-
-  private @Nullable ArtifactType extensionToType(@Nullable String extension) {
-    extension = extensionOrDefault(extension);
-    var type = artifactTypeRegistry.get(extension);
-
-    if (type == null) {
-      log.debug("Could not resolve extension {} to any known Aether artifact type", extension);
-    } else {
-      log.debug(
-          "Resolved extension {} to Aether artifact type (classifier: {}, type: {}, id: {}, {})",
-          extension,
-          type.getClassifier(),
-          type.getExtension(),
-          type.getId(),
-          type.getProperties()
-      );
-    }
-    return type;
-  }
-
-  private String extensionOrDefault(@Nullable String extension) {
-    // We have to provide a sensible default here if it isn't provided by the artifact
-    // handler, otherwise we fall over in a heap because Maven implicitly infers this information
-    // whereas Aether does not. For some reason, this is mandatory whereas classifiers can be
-    // totally inferred if null.
-    if (extension == null) {
-      extension = requireNonNullElse(artifactHandler.getExtension(), DEFAULT_EXTENSION);
-    }
-    return extension;
-  }
-
-  private Path determinePath(Artifact artifact) {
-    // TODO(ascopes): when Maven moves to the v2.0.0 resolver API, replace
-    //   this method with calls to Artifact.getPath() directly
-    //   and delete this polyfill method.
-    @SuppressWarnings("deprecation")
-    var file = artifact.getFile();
-    return FileUtils.normalize(file.toPath());
   }
 }

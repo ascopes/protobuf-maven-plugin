@@ -41,6 +41,11 @@ final class WildcardAwareDependencyTraverser implements DependencyTraverser {
     this.delegate = delegate;
   }
 
+  // Visible for testing.
+  DependencyTraverser getDelegate() {
+    return delegate;
+  }
+
   @Override
   public boolean traverseDependency(Dependency dependency) {
     // If we internally have the special wildcard exclusion we define, then assume it is a
@@ -50,7 +55,9 @@ final class WildcardAwareDependencyTraverser implements DependencyTraverser {
   }
 
   @Override
-  public DependencyTraverser deriveChildTraverser(DependencyCollectionContext context) {
+  public WildcardAwareDependencyTraverser deriveChildTraverser(
+      DependencyCollectionContext context
+  ) {
     return new WildcardAwareDependencyTraverser(delegate.deriveChildTraverser(context));
   }
 }
