@@ -56,7 +56,7 @@ public class IncrementalCacheManager {
 
   // If we make breaking changes to the format of the cache, increment this value. This prevents
   // builds failing for users between versions if they do not perform a clean install first.
-  private static final String SPEC_VERSION = "1.0";
+  private static final String SPEC_VERSION = "1.1";
   private static final Logger log = LoggerFactory.getLogger(IncrementalCacheManager.class);
 
   private final ConcurrentExecutor concurrentExecutor;
@@ -111,25 +111,6 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    var filesDeletedSinceLastBuild = !previousBuildCache.getSources().keySet()
-        .stream()
-        .allMatch(nextBuildCache.getSources().keySet()::contains);
-
-    // If any sources were deleted, we should rebuild everything, as those files being deleted may
-    // have caused a compilation failure.
-    if (filesDeletedSinceLastBuild) {
-      log.info("Detected that source files have been deleted, all sources will be recompiled");
-      return flattenSourceProtoFiles(listing.getCompilableSources());
-    }
-
-    // For now, let's be more aggressive and force a full rebuild if any files change.
-    // This prevents the risk of missing changes such as imports changing in sibling files,
-    // which we will not force a full rebuild for. We might be able to build a DAG in the
-    // future to track these and be able to uncomment the following snippet instead.
-    //return nextBuildCache.getSources().keySet()
-    //    .stream()
-    //    .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
-    //    .collect(Collectors.toUnmodifiableSet());
     var sourceFilesChanged = nextBuildCache.getSources().keySet()
         .stream()
         .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
@@ -141,6 +122,7 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
+    log.info("Detected no changes to sources or dependencies since the previous build.");
     return List.of();
   }
 
