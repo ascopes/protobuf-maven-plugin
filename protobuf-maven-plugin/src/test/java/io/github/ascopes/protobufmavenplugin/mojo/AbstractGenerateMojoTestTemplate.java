@@ -882,6 +882,30 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     }
   }
 
+  @DisplayName("descriptorFile tests")
+  @Nested
+  class DescriptorFileTest {
+
+    @DisplayName("when descriptorFile is provided, expect the provided file to be used")
+    @Test
+    void whenDescriptorFileProvidedExpectProvidedDirectoryToBeUsed(
+        @TempDir Path tempDir
+    ) throws Throwable {
+      File expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc")).toFile();
+      // Given
+      mojo.descriptorFile = expectedDescriptorFile;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getDescriptorFile()).isEqualTo(expectedDescriptorFile);
+    }
+  }
+
   @DisplayName("languages are enabled and disabled as expected")
   @MethodSource("languageEnablingCases")
   @ParameterizedTest(name = "when {0}, then expect {2} to be enabled")

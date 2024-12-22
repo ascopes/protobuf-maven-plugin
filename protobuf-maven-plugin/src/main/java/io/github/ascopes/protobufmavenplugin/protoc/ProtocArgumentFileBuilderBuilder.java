@@ -19,6 +19,7 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +36,7 @@ public final class ProtocArgumentFileBuilderBuilder {
   private final List<Path> importPaths;
   private final List<Path> sourcePaths;
   private final List<Target> targets;
+  private File descriptorFile;
 
   public ProtocArgumentFileBuilderBuilder() {
     fatalWarnings = false;
@@ -79,6 +81,11 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
+  public ProtocArgumentFileBuilderBuilder setDescriptorFile(File descriptorFile) {
+    this.descriptorFile = descriptorFile;
+    return this;
+  }
+
   public ArgumentFileBuilder build() {
     if (targets.isEmpty()) {
       throw new IllegalStateException("No output target operations were provided");
@@ -100,6 +107,10 @@ public final class ProtocArgumentFileBuilderBuilder {
 
     for (var importPath : importPaths) {
       argumentFileBuilder.add("--proto_path=" + importPath);
+    }
+
+    if (descriptorFile != null) {
+      argumentFileBuilder.add("--descriptor_set_out=" + descriptorFile);
     }
 
     return argumentFileBuilder;

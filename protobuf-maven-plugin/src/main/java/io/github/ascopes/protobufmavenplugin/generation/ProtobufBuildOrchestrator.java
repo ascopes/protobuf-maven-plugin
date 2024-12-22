@@ -140,6 +140,7 @@ public final class ProtobufBuildOrchestrator {
         .addPlugins(resolvedPlugins, request.getOutputDirectory())
         .addSourcePaths(compilableSources)
         .setFatalWarnings(request.isFatalWarnings())
+        .setDescriptorFile(request.getDescriptorFile())
         .build();
 
     if (!commandLineExecutor.execute(protocPath, argumentFileBuilder)) {

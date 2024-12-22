@@ -21,11 +21,13 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPlugin;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.immutables.value.Value.Immutable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base for a generation request with all the details of what to do during generation.
@@ -58,6 +60,9 @@ public interface GenerationRequest {
   Collection<? extends MavenProtocPlugin> getJvmMavenPlugins();
 
   Path getOutputDirectory();
+
+  @Nullable
+  File getDescriptorFile();
 
   String getProtocVersion();
 
