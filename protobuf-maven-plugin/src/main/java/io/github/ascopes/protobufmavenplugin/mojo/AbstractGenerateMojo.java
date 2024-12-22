@@ -520,7 +520,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.9.0
    */
   @Parameter
-  File outputDescriptorFile;
+  @Nullable File outputDescriptorFile;
 
   /**
    * Override the directory to output generated code to.
