@@ -66,11 +66,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private static final String PROTOBUF_COMPILER_VERSION = "protobuf.compiler.version";
   private static final String PROTOBUF_SKIP = "protobuf.skip";
 
-  private final Logger log;
+  private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
 
   public AbstractGenerateMojo() {
-    // Use the implementation class to mark the logger.
-    log = LoggerFactory.getLogger(getClass());
+    // Nothing to do here.
   }
 
   /**
