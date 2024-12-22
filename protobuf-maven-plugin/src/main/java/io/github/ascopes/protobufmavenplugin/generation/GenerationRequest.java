@@ -62,7 +62,7 @@ public interface GenerationRequest {
   Path getOutputDirectory();
 
   @Nullable
-  File getDescriptorFile();
+  File getOutputDescriptorFile();
 
   String getProtocVersion();
 

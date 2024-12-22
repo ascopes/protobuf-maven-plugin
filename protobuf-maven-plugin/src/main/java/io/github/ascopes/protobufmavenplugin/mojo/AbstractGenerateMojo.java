@@ -350,12 +350,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Defines the file in which to write the protobin descriptor.
    *
    * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
-   * defined in descriptor.proto) containing all the input files in {@code descriptorFile}.</p>
+   * defined in descriptor.proto) containing all the input files in
+   * {@code outputDescriptorFile}.</p>
    *
    * @since 2.9.0
    */
   @Parameter
-  File descriptorFile;
+  File outputDescriptorFile;
 
   /**
    * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
@@ -820,7 +821,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .sourceDependencies(nonNullList(sourceDependencies))
         .sourceRootRegistrar(sourceRootRegistrar())
         .sourceRoots(sourceDirectories())
-        .descriptorFile(descriptorFile)
+        .outputDescriptorFile(outputDescriptorFile)
         .build();
 
     try {

@@ -62,7 +62,7 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <descriptorFile>${project.build.directory}/protobin.desc</descriptorFile>
+          <outputDescriptorFile>${project.build.directory}/protobin.desc</outputDescriptorFile>
         </configuration>
 
         <executions>

@@ -36,7 +36,7 @@ public final class ProtocArgumentFileBuilderBuilder {
   private final List<Path> importPaths;
   private final List<Path> sourcePaths;
   private final List<Target> targets;
-  private File descriptorFile;
+  private File outputDescriptorFile;
 
   public ProtocArgumentFileBuilderBuilder() {
     fatalWarnings = false;
@@ -81,8 +81,8 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder setDescriptorFile(File descriptorFile) {
-    this.descriptorFile = descriptorFile;
+  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(File outputDescriptorFile) {
+    this.outputDescriptorFile = outputDescriptorFile;
     return this;
   }
 
@@ -109,8 +109,8 @@ public final class ProtocArgumentFileBuilderBuilder {
       argumentFileBuilder.add("--proto_path=" + importPath);
     }
 
-    if (descriptorFile != null) {
-      argumentFileBuilder.add("--descriptor_set_out=" + descriptorFile);
+    if (outputDescriptorFile != null) {
+      argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
     }
 
     return argumentFileBuilder;

@@ -882,18 +882,18 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     }
   }
 
-  @DisplayName("descriptorFile tests")
+  @DisplayName("outputDescriptorFile tests")
   @Nested
   class DescriptorFileTest {
 
-    @DisplayName("when descriptorFile is provided, expect the provided file to be used")
+    @DisplayName("when outputDescriptorFile is provided, expect the provided file to be used")
     @Test
     void whenDescriptorFileProvidedExpectProvidedDirectoryToBeUsed(
         @TempDir Path tempDir
     ) throws Throwable {
       File expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc")).toFile();
       // Given
-      mojo.descriptorFile = expectedDescriptorFile;
+      mojo.outputDescriptorFile = expectedDescriptorFile;
 
       // When
       mojo.execute();
@@ -902,7 +902,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       var captor = ArgumentCaptor.forClass(GenerationRequest.class);
       verify(mojo.sourceCodeGenerator).generate(captor.capture());
       var actualRequest = captor.getValue();
-      assertThat(actualRequest.getDescriptorFile()).isEqualTo(expectedDescriptorFile);
+      assertThat(actualRequest.getOutputDescriptorFile()).isEqualTo(expectedDescriptorFile);
     }
   }
 
