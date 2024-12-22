@@ -122,7 +122,6 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    log.info("Detected no changes to sources or dependencies since the previous build.");
     return List.of();
   }
 
