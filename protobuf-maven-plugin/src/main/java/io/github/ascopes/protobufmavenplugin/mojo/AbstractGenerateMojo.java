@@ -353,7 +353,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
    * defined in descriptor.proto) containing all the input files in {@code descriptorFile}.</p>
    *
-   * @since 2.7.4
+   * @since 2.9.0
    */
   @Parameter
   File descriptorFile;
