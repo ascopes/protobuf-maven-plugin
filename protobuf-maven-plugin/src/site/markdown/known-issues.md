@@ -62,20 +62,6 @@ The workaround for now appears to be to include `plexus-utils` explicitly as a d
 
 - See https://github.com/ascopes/protobuf-maven-plugin/issues/472 for tracking this issue.
 
-## Incremental compilation edge cases
-
-The experimental incremental compilation feature is known to have some edge cases
-where a `mvn clean` is required to rebuild the entire source tree. This is due to
-the somewhat coarse way that changes are monitored between builds. If this becomes
-overly problematic, please raise an issue on GitHub with details of how to reproduce
-the issue you are seeing.
-
-Incremental compilation only currently considers if an entire file has changed. No attempt
-is made to parse a dependency graph of all sources to determine whether a change impacts
-other files. This may be implemented in the future if the performance overhead is
-not too high. For now, it is best to disable incremental compilation, use includes/excludes,
-or perform clean builds if you are actively changing protobuf sources.
-
 ## Descriptor support
 
 Protobuf descriptors are currently unsupported. Please raise an issue on GitHub if you wish

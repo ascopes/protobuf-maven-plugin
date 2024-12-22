@@ -432,20 +432,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Whether to enable "incremental" compilation.
    *
-   * <p>When enabled, this plugin will track changes to sources and importable protobuf 
-   * dependencies between builds, making a best-effort attempt to only rebuild files that
-   * have changed since the last build. This will reduce the time that large projects take
-   * to build when repeatedly rebuilt during development.
-   *
-   * <p><strong>Warning:</strong> this is highly experimental, and may change or be removed
-   * in a future release.
-   *
-   * <p>By default, this is set to {@code false}, although it may be changed to {@code true}
-   * eventually.
+   * <p>When enabled, this plugin will track changes to sources and importable protobuf
+   * dependencies between builds, making a best-effort attempt to only rebuild files when
+   * changes have been made since the last build.
    *
    * @since 2.7.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
+  @Parameter(defaultValue = DEFAULT_TRUE, property = PROTOBUF_COMPILER_INCREMENTAL)
   boolean incrementalCompilation;
 
   /**
