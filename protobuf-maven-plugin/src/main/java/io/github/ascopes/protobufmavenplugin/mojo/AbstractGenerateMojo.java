@@ -347,6 +347,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean fatalWarnings;
 
   /**
+   * Defines the file in which to write the protobin descriptor.
+   *
+   * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
+   * defined in descriptor.proto) containing all the input files in
+   * {@code outputDescriptorFile}.</p>
+   *
+   * @since 2.9.0
+   */
+  @Parameter
+  Path outputDescriptorFile;
+
+  /**
    * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
    * {@code *.proto} files to add to the import paths.
    *
@@ -809,6 +821,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .sourceDependencies(nonNullList(sourceDependencies))
         .sourceRootRegistrar(sourceRootRegistrar())
         .sourceRoots(sourceDirectories())
+        .outputDescriptorFile(outputDescriptorFile)
         .build();
 
     try {

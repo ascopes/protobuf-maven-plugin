@@ -95,7 +95,7 @@ to do this for you. It will not change anything if the versions are already set 
 
 Before raising a PR, please make sure your fork works by running `./mvnw clean verify` locally.
 
-#### Commit hygene
+#### Commit hygiene
 
 Please avoid creating merge commits from the main branch to your branch. If you need to pull in upstream
 changes, please use `git rebase` instead. It keeps the project history linear and readable.

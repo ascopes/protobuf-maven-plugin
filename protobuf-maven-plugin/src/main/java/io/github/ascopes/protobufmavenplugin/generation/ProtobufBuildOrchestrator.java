@@ -96,7 +96,8 @@ public final class ProtobufBuildOrchestrator {
       }
     }
 
-    if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()) {
+    if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()
+        && request.getOutputDescriptorFile() == null) {
       if (request.isFailOnMissingTargets()) {
         log.error("No languages are enabled and no plugins found, check your "
             + "configuration and try again.");
@@ -140,6 +141,7 @@ public final class ProtobufBuildOrchestrator {
         .addPlugins(resolvedPlugins, request.getOutputDirectory())
         .addSourcePaths(compilableSources)
         .setFatalWarnings(request.isFatalWarnings())
+        .setOutputDescriptorFile(request.getOutputDescriptorFile())
         .build();
 
     if (!commandLineExecutor.execute(protocPath, argumentFileBuilder)) {

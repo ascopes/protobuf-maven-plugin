@@ -79,6 +79,11 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
+  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(Path outputDescriptorFile) {
+    targets.add(new ProtoDescriptorTarget(outputDescriptorFile));
+    return this;
+  }
+
   public ArgumentFileBuilder build() {
     if (targets.isEmpty()) {
       throw new IllegalStateException("No output target operations were provided");
@@ -152,6 +157,20 @@ public final class ProtocArgumentFileBuilderBuilder {
       plugin.getOptions()
           .map(options -> "--" + plugin.getId() + "_opt=" + options)
           .ifPresent(argumentFileBuilder::add);
+    }
+  }
+
+  private static final class ProtoDescriptorTarget implements Target {
+
+    private final Path outputDescriptorFile;
+
+    private ProtoDescriptorTarget(Path outputDescriptorFile) {
+      this.outputDescriptorFile = outputDescriptorFile;
+    }
+
+    @Override
+    public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
+      argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
     }
   }
 }

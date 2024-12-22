@@ -29,7 +29,7 @@ header of this page.
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${protobuf.version}</version>
-    </dependencies>
+    </dependency>
   </dependencies>
 
   <build>
@@ -214,6 +214,30 @@ configure their paths individually.
   </executions>
 </plugin>
 ```
+
+---
+
+## Generating proto descriptor
+
+Descriptors essentially contain exactly the information found in one or more .proto files.
+If you need to generate a FileDescriptorSet (a protocol buffer, defined in 
+[descriptor.proto](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/descriptor.proto))
+containing all the input files you can provide an outputDescriptorFile configuration option.
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+  <version>%VERSION%</version>
+
+  <configuration>
+    <outputDescriptorFile>path/to/descriptor/file.desc</outputDescriptorFile>
+  </configuration>
+
+</plugin>
+```
+For more information see [Descriptor production](https://protobuf.com/docs/descriptors#descriptor-production)
+
 
 ---
 
