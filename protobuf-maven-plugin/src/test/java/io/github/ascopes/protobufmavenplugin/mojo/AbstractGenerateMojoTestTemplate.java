@@ -891,9 +891,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     void whenDescriptorFileProvidedExpectProvidedDirectoryToBeUsed(
         @TempDir Path tempDir
     ) throws Throwable {
-      Path expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc"));
+      var expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc"));
       // Given
-      mojo.outputDescriptorFile = expectedDescriptorFile;
+      mojo.outputDescriptorFile = expectedDescriptorFile.toFile();
 
       // When
       mojo.execute();
@@ -902,7 +902,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       var captor = ArgumentCaptor.forClass(GenerationRequest.class);
       verify(mojo.sourceCodeGenerator).generate(captor.capture());
       var actualRequest = captor.getValue();
-      assertThat(actualRequest.getOutputDescriptorFile()).isEqualTo(expectedDescriptorFile);
+      assertThat(actualRequest.getOutputDescriptorFile())
+          .isEqualTo(expectedDescriptorFile);
     }
   }
 

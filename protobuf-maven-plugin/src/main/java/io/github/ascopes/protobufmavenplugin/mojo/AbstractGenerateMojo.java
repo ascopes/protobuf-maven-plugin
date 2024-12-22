@@ -517,10 +517,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * defined in descriptor.proto) containing all the input files in
    * {@code outputDescriptorFile}.</p>
    *
-   * @since 2.8.1
+   * @since 2.9.0
    */
   @Parameter
-  Path outputDescriptorFile;
+  File outputDescriptorFile;
 
   /**
    * Override the directory to output generated code to.
@@ -816,12 +816,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isLiteEnabled(liteOnly)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
+        .outputDescriptorFile(outputDescriptorFile())
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
         .sourceDependencies(nonNullList(sourceDependencies))
         .sourceRootRegistrar(sourceRootRegistrar())
         .sourceRoots(sourceDirectories())
-        .outputDescriptorFile(outputDescriptorFile)
         .build();
 
     try {
@@ -839,6 +839,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     return Optional.ofNullable(dependencyScopes)
         .filter(not(Set::isEmpty))
         .orElseGet(this::defaultDependencyScopes);
+  }
+
+  private @Nullable Path outputDescriptorFile() {
+    return Optional.ofNullable(outputDescriptorFile)
+        .map(File::toPath)
+        .orElse(null);
   }
 
   private Path outputDirectory() {
