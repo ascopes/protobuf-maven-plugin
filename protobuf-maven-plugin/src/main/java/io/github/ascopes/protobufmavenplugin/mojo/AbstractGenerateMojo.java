@@ -356,7 +356,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.9.0
    */
   @Parameter
-  File outputDescriptorFile;
+  Path outputDescriptorFile;
 
   /**
    * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering

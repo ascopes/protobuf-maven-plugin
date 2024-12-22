@@ -21,7 +21,6 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPlugin;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -62,7 +61,7 @@ public interface GenerationRequest {
   Path getOutputDirectory();
 
   @Nullable
-  File getOutputDescriptorFile();
+  Path getOutputDescriptorFile();
 
   String getProtocVersion();
 

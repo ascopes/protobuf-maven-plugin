@@ -891,7 +891,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     void whenDescriptorFileProvidedExpectProvidedDirectoryToBeUsed(
         @TempDir Path tempDir
     ) throws Throwable {
-      File expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc")).toFile();
+      Path expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc"));
       // Given
       mojo.outputDescriptorFile = expectedDescriptorFile;
 

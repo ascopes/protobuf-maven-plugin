@@ -19,7 +19,6 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +35,6 @@ public final class ProtocArgumentFileBuilderBuilder {
   private final List<Path> importPaths;
   private final List<Path> sourcePaths;
   private final List<Target> targets;
-  private File outputDescriptorFile;
 
   public ProtocArgumentFileBuilderBuilder() {
     fatalWarnings = false;
@@ -81,8 +79,8 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(File outputDescriptorFile) {
-    this.outputDescriptorFile = outputDescriptorFile;
+  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(Path outputDescriptorFile) {
+    targets.add(new ProtoDescriptorTarget(outputDescriptorFile));
     return this;
   }
 
@@ -107,10 +105,6 @@ public final class ProtocArgumentFileBuilderBuilder {
 
     for (var importPath : importPaths) {
       argumentFileBuilder.add("--proto_path=" + importPath);
-    }
-
-    if (outputDescriptorFile != null) {
-      argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
     }
 
     return argumentFileBuilder;
@@ -163,6 +157,20 @@ public final class ProtocArgumentFileBuilderBuilder {
       plugin.getOptions()
           .map(options -> "--" + plugin.getId() + "_opt=" + options)
           .ifPresent(argumentFileBuilder::add);
+    }
+  }
+
+  private static final class ProtoDescriptorTarget implements Target {
+
+    private final Path outputDescriptorFile;
+
+    private ProtoDescriptorTarget(Path outputDescriptorFile) {
+      this.outputDescriptorFile = outputDescriptorFile;
+    }
+
+    @Override
+    public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
+      argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
     }
   }
 }
