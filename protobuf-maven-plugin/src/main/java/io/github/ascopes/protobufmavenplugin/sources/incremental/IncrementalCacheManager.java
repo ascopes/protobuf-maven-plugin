@@ -199,15 +199,15 @@ public class IncrementalCacheManager {
         .map(this::createSerializedFileDigestAsync)
         .collect(concurrentExecutor.awaiting())
         .stream()
-        .collect(Collectors.toMap(CacheEntry::getPath, CacheEntry::getDigest)));
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
 
-  private FutureTask<CacheEntry> createSerializedFileDigestAsync(Path file) {
+  private FutureTask<Map.Entry<Path, String>> createSerializedFileDigestAsync(Path file) {
     return concurrentExecutor.submit(() -> {
       log.trace("Generating digest for {}", file);
       try (var inputStream = Files.newInputStream(file)) {
         var digest = Digests.sha512ForStream(inputStream);
-        return new CacheEntry(file, digest);
+        return Map.entry(file, digest);
       }
     });
   }
@@ -222,23 +222,5 @@ public class IncrementalCacheManager {
 
   private Path getNextIncrementalCachePath() {
     return getIncrementalCacheRoot().resolve("next.json");
-  }
-
-  private static final class CacheEntry {
-    private final Path path;
-    private final String digest;
-
-    private CacheEntry(Path path, String digest) {
-      this.path = path;
-      this.digest = digest;
-    }
-
-    private Path getPath() {
-      return path;
-    }
-
-    private String getDigest() {
-      return digest;
-    }
   }
 }
