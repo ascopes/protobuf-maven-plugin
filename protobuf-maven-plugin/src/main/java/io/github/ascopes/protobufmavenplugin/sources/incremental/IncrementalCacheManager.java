@@ -32,6 +32,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public class IncrementalCacheManager {
 
   // If we make breaking changes to the format of the cache, increment this value. This prevents
   // builds failing for users between versions if they do not perform a clean install first.
-  private static final String SPEC_VERSION = "1.0";
+  private static final String SPEC_VERSION = "1.1";
   private static final Logger log = LoggerFactory.getLogger(IncrementalCacheManager.class);
 
   private final ConcurrentExecutor concurrentExecutor;
@@ -110,21 +111,19 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    var filesDeletedSinceLastBuild = !previousBuildCache.getSources().keySet()
+    var sourceFilesChanged = nextBuildCache.getSources().keySet()
         .stream()
-        .allMatch(nextBuildCache.getSources().keySet()::contains);
+        .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
+        .findAny()
+        .isPresent();
 
-    // If any sources were deleted, we should rebuild everything, as those files being deleted may
-    // have caused a compilation failure.
-    if (filesDeletedSinceLastBuild) {
-      log.info("Detected that source files have been deleted, all sources will be recompiled");
+    if (sourceFilesChanged) {
+      log.info("Detected that source files have changed, all sources will be recompiled.");
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    return nextBuildCache.getSources().keySet()
-        .stream()
-        .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
-        .collect(Collectors.toUnmodifiableSet());
+    log.info("Detected no changes to sources or dependencies since the previous build.");
+    return List.of();
   }
 
   private Predicate<Path> isSourceFileDifferent(
@@ -182,15 +181,15 @@ public class IncrementalCacheManager {
         .map(this::createSerializedFileDigestAsync)
         .collect(concurrentExecutor.awaiting())
         .stream()
-        .collect(Collectors.toMap(CacheEntry::getPath, CacheEntry::getDigest)));
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
 
-  private FutureTask<CacheEntry> createSerializedFileDigestAsync(Path file) {
+  private FutureTask<Map.Entry<Path, String>> createSerializedFileDigestAsync(Path file) {
     return concurrentExecutor.submit(() -> {
       log.trace("Generating digest for {}", file);
       try (var inputStream = Files.newInputStream(file)) {
         var digest = Digests.sha512ForStream(inputStream);
-        return new CacheEntry(file, digest);
+        return Map.entry(file, digest);
       }
     });
   }
@@ -205,23 +204,5 @@ public class IncrementalCacheManager {
 
   private Path getNextIncrementalCachePath() {
     return getIncrementalCacheRoot().resolve("next.json");
-  }
-
-  private static final class CacheEntry {
-    private final Path path;
-    private final String digest;
-
-    private CacheEntry(Path path, String digest) {
-      this.path = path;
-      this.digest = digest;
-    }
-
-    private Path getPath() {
-      return path;
-    }
-
-    private String getDigest() {
-      return digest;
-    }
   }
 }

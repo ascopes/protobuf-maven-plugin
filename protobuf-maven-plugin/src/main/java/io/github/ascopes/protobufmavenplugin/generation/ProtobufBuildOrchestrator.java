@@ -188,18 +188,11 @@ public final class ProtobufBuildOrchestrator {
   }
 
   private void registerSourceRoots(GenerationRequest request) {
-    var directory = request.getOutputDirectory();
-
     if (request.isRegisterAsCompilationRoot()) {
-      var registrar = request.getSourceRootRegistrar();
-      log.info(
-          "Registering {} as {} compilation root in this Maven project.",
-          directory,
-          registrar
+      request.getSourceRootRegistrar().registerSourceRoot(
+          mavenSession,
+          request.getOutputDirectory()
       );
-      registrar.registerSourceRoot(mavenSession, directory);
-    } else {
-      log.debug("Not registering {} as a compilation root", directory);
     }
   }
 
