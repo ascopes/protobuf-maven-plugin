@@ -106,7 +106,7 @@ jobs:
 
       - name: Build and test
         shell: bash
-        run: ./mvnw -B -Dcheckstyle.skip -Dlicense.skip verify
+        run: ./mvnw -B -Dcheckstyle.skip -Dlicense.skip clean verify
 
       - name: Publish code coverage
         uses: codecov/codecov-action@v4
