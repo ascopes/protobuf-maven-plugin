@@ -431,20 +431,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Whether to enable "incremental" compilation.
    *
-   * <p>When enabled, this plugin will track changes to sources and importable protobuf 
-   * dependencies between builds, making a best-effort attempt to only rebuild files that
-   * have changed since the last build. This will reduce the time that large projects take
-   * to build when repeatedly rebuilt during development.
-   *
-   * <p><strong>Warning:</strong> this is highly experimental, and may change or be removed
-   * in a future release.
-   *
-   * <p>By default, this is set to {@code false}, although it may be changed to {@code true}
-   * eventually.
+   * <p>When enabled, this plugin will track changes to sources and importable protobuf
+   * dependencies between builds, making a best-effort attempt to only rebuild files when
+   * changes have been made since the last build.
    *
    * @since 2.7.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_COMPILER_INCREMENTAL)
+  @Parameter(defaultValue = DEFAULT_TRUE, property = PROTOBUF_COMPILER_INCREMENTAL)
   boolean incrementalCompilation;
 
   /**
@@ -775,12 +768,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     if (skip) {
       log.info("Execution of this plugin has been skipped in the configuration");
       return;
-    }
-
-    if (incrementalCompilation) {
-      // TODO(ascopes): remove this warning once we're happy with the stability.
-      log.warn("You have enabled incremental compilation. This is highly experimental and subject "
-          + "to change between minor versions. Please report any bugs you encounter on GitHub.");
     }
 
     var enabledLanguages = Language.languageSet()

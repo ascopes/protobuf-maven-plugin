@@ -32,6 +32,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -121,10 +122,26 @@ public class IncrementalCacheManager {
       return flattenSourceProtoFiles(listing.getCompilableSources());
     }
 
-    return nextBuildCache.getSources().keySet()
+    // For now, let's be more aggressive and force a full rebuild if any files change.
+    // This prevents the risk of missing changes such as imports changing in sibling files,
+    // which we will not force a full rebuild for. We might be able to build a DAG in the
+    // future to track these and be able to uncomment the following snippet instead.
+    //return nextBuildCache.getSources().keySet()
+    //    .stream()
+    //    .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
+    //    .collect(Collectors.toUnmodifiableSet());
+    var sourceFilesChanged = nextBuildCache.getSources().keySet()
         .stream()
         .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
-        .collect(Collectors.toUnmodifiableSet());
+        .findAny()
+        .isPresent();
+
+    if (sourceFilesChanged) {
+      log.info("Detected that source files have changed, all sources will be recompiled.");
+      return flattenSourceProtoFiles(listing.getCompilableSources());
+    }
+
+    return List.of();
   }
 
   private Predicate<Path> isSourceFileDifferent(
