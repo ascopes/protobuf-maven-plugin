@@ -771,12 +771,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       return;
     }
 
-    if (incrementalCompilation) {
-      // TODO(ascopes): remove this warning once we're happy with the stability.
-      log.warn("You have enabled incremental compilation. This is highly experimental and subject "
-          + "to change between minor versions. Please report any bugs you encounter on GitHub.");
-    }
-
     var enabledLanguages = Language.languageSet()
         .addIf(cppEnabled, Language.CPP)
         .addIf(csharpEnabled, Language.C_SHARP)
