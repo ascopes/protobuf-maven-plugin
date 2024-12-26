@@ -70,11 +70,11 @@ public final class ProtocResolver {
   }
 
   public Optional<Path> resolve(String version) throws ResolutionException {
-    if (version.equalsIgnoreCase("latest")) {
-      throw new IllegalArgumentException(
-          "Cannot use LATEST for the protobuf.compiler.version. "
-              + "Google has not released linear versions in the past, meaning that "
-              + "using LATEST will have unexpected behaviour."
+    if (version.equalsIgnoreCase("LATEST")) {
+      log.warn(
+          "You have set the protoc version to 'latest'. This will likely not behave as you "
+              + "would expect, since Google have released incorrect version numbers of protoc "
+              + "in the past. To remove this warning, please use a pinned version instead."
       );
     }
 
@@ -82,6 +82,7 @@ public final class ProtocResolver {
       return systemPathResolver.resolve(EXECUTABLE_NAME);
     }
 
+    // It is likely a URL, not a version string.
     var path = version.contains(":")
         ? resolveFromUrl(version)
         : resolveFromMavenRepositories(version);
@@ -119,12 +120,14 @@ public final class ProtocResolver {
   private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
     if (hostSystem.isProbablyAndroid()) {
       log.warn(
-          "It looks like you are using Android! Android is known to be missing "
-              + "system calls for Linux that the official protoc binaries rely on "
-              + "to work correctly. If you encounter issues, run Maven again with the "
-              + "-Dprotobuf.compiler.version=PATH flag to rerun with a custom "
-              + "user-provided version of protoc. If nothing fails, then you can "
-              + "safely ignore this message!"
+          "It looks like you are using Android! If you are using an environment such as Termux, "
+              + "then you may find that the Maven-distributed versions of protoc fail to run. "
+              + "This is due to Android's kernel restricting the types of system calls that can "
+              + "be made. You may wish to run 'pkg in protobuf' to install a modified version of "
+              + "protoc, and reinvoke Maven with '-Dprotobuf.compiler.version=PATH' to force "
+              + "this Maven plugin to use a compatible version. Also ensure you have the latest "
+              + "JDK installed in this case. If you do not encounter any issues, then great! You "
+              + "can safely ignore this warning."
       );
     }
 
