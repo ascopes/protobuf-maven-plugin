@@ -48,9 +48,16 @@ for massive projects:
 </plugin>
 ```
 
+Note that you may see new warnings, as ECJ tends to be much more vocal by default than javac.
+
 ## Move proto files into a separate module
 
 If you are pairing your proto files with your application logic, you may find your project has a
 large number of files in it, which will hinder build speeds. You can always consider moving your
 proto files into a separate Maven project that you only rebuild when the proto files change. By
 doing this, you can just reference the generated code as a dependency.
+
+## Skipping plugin invocation entirely
+
+If you do not want the plugin to run at all, you can invoke Maven with the `-Dprotobuf.skip` flag. This will
+skip the invocation of this plugin entirely.
