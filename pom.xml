@@ -456,6 +456,7 @@
           <version>${maven-site-plugin.version}</version>
 
           <configuration>
+            <generateSitemap>true</generateSitemap>
             <!-- Fixes links pointing to the wrong place. -->
             <relativizeSiteLinks>false</relativizeSiteLinks>
             <!-- Strict validation. -->
