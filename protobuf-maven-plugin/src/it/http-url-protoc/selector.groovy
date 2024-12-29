@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024, Ashley Scopes.
+ * Copyright (C) 2023 - 2025, Ashley Scopes.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 // Only execute on x86 Linux systems, as the URL we test against is CPU and OS specific.
 if (!System.getProperty("os.arch").equalsIgnoreCase("amd64")) {
   println("Skipping this test case as the system is not x86_64")
