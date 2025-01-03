@@ -71,6 +71,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     // Nothing to do here.
   }
 
+  /*
+   * Dependencies to inject.
+   */
+
   /**
    * The source code generator.
    */
@@ -82,6 +86,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Inject
   MavenProject mavenProject;
+
+  /*
+   * User parameters.
+   *
+   * Note that for files, we retain the use of java.io.File despite using java.nio.file.Path
+   * everywhere else. Maven did not support parsing java.nio.file.Path until v3.9.x, and we
+   * support 3.8.2 out of the box.
+   */
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -221,6 +233,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable List<UrlProtocPluginBean> binaryUrlPlugins;
+
+  /**
+   * Enable generating C++ sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean cppEnabled;
+
+  /**
+   * Enable generating C# sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean csharpEnabled;
 
   /**
    * The scope to resolve dependencies with.
@@ -440,6 +468,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean incrementalCompilation;
 
   /**
+   * Enable generating Java sources from the protobuf sources.
+   *
+   * <p>Defaults to {@code true}, although some users may wish to disable this
+   * if using an alternative plugin that covers generating the code for models instead.
+   *
+   * @since 0.1.1
+   */
+  @Parameter(defaultValue = DEFAULT_TRUE)
+  boolean javaEnabled;
+
+  /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
    *
    * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
@@ -497,6 +536,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<MavenProtocPluginBean> jvmMavenPlugins;
 
   /**
+   * Enable generating Kotlin API wrapper code around the generated Java code.
+   *
+   * <p>This may require {@code javaEnabled} to also be {@code true}, otherwise compilation
+   * may fail unless other sources are generated to replace the expected Java ones.
+   *
+   * @since 0.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean kotlinEnabled;
+
+  /**
    * Whether to only generate "lite" messages or not.
    *
    * <p>These are bare-bones sources that do not contain most of the metadata that regular
@@ -508,6 +558,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean liteOnly;
+
+  /**
+   * Enable generating Objective-C sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean objcEnabled;
 
   /**
    * Defines the file in which to write the protobin descriptor.
@@ -531,6 +589,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable File outputDirectory;
+
+  /**
+   * Enable generating PHP sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean phpEnabled;
 
   /**
    * Specifies where to find {@code protoc} or which version to download.
@@ -574,6 +640,29 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   String protocVersion;
 
   /**
+   * Enable generating Python sources from the protobuf sources.
+   *
+   * <p>If you enable this, you probably will also want to enable Python stubs
+   * to enable generating {@code *.pyi} files for static type checkers.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean pythonEnabled;
+
+  /**
+   * Enable generating Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
+   * sources.
+   *
+   * <p>If you enable this, you probably will also want to enable Python itself
+   * to get actual source code to accompany the stubs.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean pythonStubsEnabled;
+
+  /**
    * Whether to register the output directories as compilation roots with Maven.
    *
    * <p>Generally, you want to do this, but there may be edge cases where you
@@ -584,6 +673,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_TRUE)
   boolean registerAsCompilationRoot;
+
+  /**
+   * Enable generating Ruby sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean rubyEnabled;
+
+  /**
+   * Enable generating Rust sources from the protobuf sources.
+   *
+   * @since 1.1.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean rustEnabled;
 
   /**
    * Whether to skip the plugin execution entirely.
@@ -638,108 +743,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter
   @Nullable List<File> sourceDirectories;
 
-  /**
-   * Enable generating C++ sources from the protobuf sources.
-   *
-   * @since 1.1.0
+  /*
+   * Implementation-specific details.
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean cppEnabled;
-
-  /**
-   * Enable generating C# sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean csharpEnabled;
-
-  /**
-   * Enable generating Java sources from the protobuf sources.
-   *
-   * <p>Defaults to {@code true}, although some users may wish to disable this
-   * if using an alternative plugin that covers generating the code for models instead.
-   *
-   * @since 0.1.1
-   */
-  @Parameter(defaultValue = DEFAULT_TRUE)
-  boolean javaEnabled;
-
-  /**
-   * Enable generating Kotlin API wrapper code around the generated Java code.
-   *
-   * <p>This may require {@code javaEnabled} to also be {@code true}, otherwise compilation
-   * may fail unless other sources are generated to replace the expected Java ones.
-   *
-   * @since 0.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean kotlinEnabled;
-
-  /**
-   * Enable generating Objective-C sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean objcEnabled;
-
-  /**
-   * Enable generating PHP sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean phpEnabled;
-
-  /**
-   * Enable generating Python sources from the protobuf sources.
-   *
-   * <p>If you enable this, you probably will also want to enable Python stubs
-   * to enable generating {@code *.pyi} files for static type checkers.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean pythonEnabled;
-
-  /**
-   * Enable generating Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
-   * sources.
-   *
-   * <p>If you enable this, you probably will also want to enable Python itself
-   * to get actual source code to accompany the stubs.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean pythonStubsEnabled;
-
-  /**
-   * Enable generating Ruby sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean rubyEnabled;
-
-  /**
-   * Enable generating Rust sources from the protobuf sources.
-   *
-   * @since 1.1.0
-   */
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean rustEnabled;
-
-  /**
-   * Provides the source root registrar for this Mojo.
-   *
-   * <p>This specifies where to attach generated sources to in order for it
-   * to be included as part of the compilation for main or test sources.
-   *
-   * @return the registrar to use.
-   */
-  abstract SourceRootRegistrar sourceRootRegistrar();
 
   /**
    * Provides the default source directory to read protobuf sources from.
@@ -767,6 +773,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @return the set of dependency scopes used for resolution.
    */
   abstract Set<String> defaultDependencyScopes();
+
+  /**
+   * Provides the source root registrar for this Mojo.
+   *
+   * <p>This specifies where to attach generated sources to in order for it
+   * to be included as part of the compilation for main or test sources.
+   *
+   * @return the registrar to use.
+   */
+  abstract SourceRootRegistrar sourceRootRegistrar();
+
+  /*
+   * Core implementation.
+   */
 
   /**
    * Execute the plugin and generate sources.
