@@ -139,11 +139,13 @@ public final class ProtobufBuildOrchestrator {
             .collect(Collectors.toUnmodifiableList()))
         .addPlugins(resolvedPlugins, request.getOutputDirectory())
         .addSourcePaths(compilableSources)
-        .setFatalWarnings(request.isFatalWarnings())
-        .setOutputDescriptorFile(request.getOutputDescriptorFile())
-        .build();
+        .setFatalWarnings(request.isFatalWarnings());
 
-    if (!commandLineExecutor.execute(protocPath, argumentFileBuilder)) {
+    if (request.getOutputDescriptorFile() != null) {
+      argumentFileBuilder.setOutputDescriptorFile(request.getOutputDescriptorFile());
+    }
+
+    if (!commandLineExecutor.execute(protocPath, argumentFileBuilder.build())) {
       return false;
     }
 
