@@ -169,9 +169,7 @@ public final class ProtocArgumentFileBuilderBuilder {
 
     @Override
     public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
-      if (outputDescriptorFile != null) {
-        argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
-      }
+      argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
     }
   }
 }
