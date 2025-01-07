@@ -124,7 +124,7 @@ public final class ProtobufBuildOrchestrator {
       return true;
     }
 
-    var argumentFileBuilder = new ProtocArgumentFileBuilderBuilder()
+    var args = new ProtocArgumentFileBuilderBuilder()
         .addLanguages(
             request.getEnabledLanguages(),
             request.getOutputDirectory(),
@@ -142,10 +142,15 @@ public final class ProtobufBuildOrchestrator {
         .setFatalWarnings(request.isFatalWarnings());
 
     if (request.getOutputDescriptorFile() != null) {
-      argumentFileBuilder.setOutputDescriptorFile(request.getOutputDescriptorFile());
+      args.setOutputDescriptorFile(
+          request.getOutputDescriptorFile(),
+          request.isOutputDescriptorIncludeImports(),
+          request.isOutputDescriptorIncludeSourceInfo(),
+          request.isOutputDescriptorRetainOptions()
+      );
     }
 
-    if (!commandLineExecutor.execute(protocPath, argumentFileBuilder.build())) {
+    if (!commandLineExecutor.execute(protocPath, args.build())) {
       return false;
     }
 
@@ -206,7 +211,7 @@ public final class ProtobufBuildOrchestrator {
         .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
         .sum();
 
-    var sourcesToCompile = request.isIncrementalCompilationEnabled()
+    var sourcesToCompile = shouldIncrementallyCompile(request)
         ? incrementalCacheManager.determineSourcesToCompile(projectInputs)
         : flattenSourceProtoFiles(projectInputs.getCompilableSources());
 
@@ -226,6 +231,25 @@ public final class ProtobufBuildOrchestrator {
     );
 
     return sourcesToCompile;
+  }
+
+  private boolean shouldIncrementallyCompile(GenerationRequest request) {
+    if (!request.isIncrementalCompilationEnabled()) {
+      log.debug("Incremental compilation is disabled");
+      return false;
+    }
+
+    if (request.getOutputDescriptorFile() != null) {
+      // Protoc does not selectively update an existing descriptor with differentiated
+      // changes. Using incremental compilation will result in behaviour that is
+      // inconsistent, so do not allow it here.
+      log.info("Incremental compilation will be disabled since proto descriptor generation "
+          + "was requested.");
+      return false;
+    }
+
+    log.debug("Will use incremental compilation");
+    return true;
   }
 
   private void embedSourcesInClassOutputs(

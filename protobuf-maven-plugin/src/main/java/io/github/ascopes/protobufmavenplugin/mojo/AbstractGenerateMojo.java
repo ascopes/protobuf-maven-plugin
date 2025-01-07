@@ -574,10 +574,49 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * defined in descriptor.proto) containing all the input files in
    * {@code outputDescriptorFile}.</p>
    *
+   * <p>If this is specified, then
+   * {@link #incrementalCompilationEnabled incremental compilation}
+   * will always be disabled to prevent issues with inconsistent build
+   * results.
+   *
    * @since 2.9.0
    */
   @Parameter
   @Nullable File outputDescriptorFile;
+
+  /**
+   * Enable including imports in generated protobin descriptor files.
+   *
+   * <p>This is ignored if {@link #outputDescriptorFile} is not provided.
+   *
+   * @see #outputDescriptorFile
+   * @since 2.10.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean outputDescriptorIncludeImports;
+
+  /**
+   * Enable including source information in generated protobin descriptor
+   * files.
+   *
+   * <p>This is ignored if {@link #outputDescriptorFile} is not provided.
+   *
+   * @see #outputDescriptorFile
+   * @since 2.10.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean outputDescriptorIncludeSourceInfo;
+
+  /**
+   * Enable retaining option details in generated protobin descriptors.
+   *
+   * <p>This is ignored if {@link #outputDescriptorFile} is not provided.
+   *
+   * @see #outputDescriptorFile
+   * @since 2.10.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean outputDescriptorRetainOptions;
 
   /**
    * Override the directory to output generated code to.
@@ -834,6 +873,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isIncrementalCompilationEnabled(incrementalCompilation)
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isLiteEnabled(liteOnly)
+        .isOutputDescriptorIncludeImports(outputDescriptorIncludeImports)
+        .isOutputDescriptorIncludeSourceInfo(outputDescriptorIncludeSourceInfo)
+        .isOutputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
         .outputDescriptorFile(outputDescriptorFile())
         .outputDirectory(outputDirectory())

@@ -62,7 +62,10 @@ The workaround for now appears to be to include `plexus-utils` explicitly as a d
 
 - See https://github.com/ascopes/protobuf-maven-plugin/issues/472 for tracking this issue.
 
-## Descriptor support
+## Incremental compilation with descriptor files
 
-Protobuf descriptors are currently unsupported. Please raise an issue on GitHub if you wish
-to request this feature, along with details of your use case.
+Using incremental compilation when creating descriptor files is not supported due to limitations
+with `protoc`. The entire descriptor must be rebuilt on each build to remain valid.
+
+As of 2.10.0, incremental compilation will be disabled automatically if this condition is
+detected.
