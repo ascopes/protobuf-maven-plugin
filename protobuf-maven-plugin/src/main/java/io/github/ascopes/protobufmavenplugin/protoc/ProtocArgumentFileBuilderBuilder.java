@@ -78,8 +78,18 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(Path outputDescriptorFile) {
-    targets.add(new ProtoDescriptorTarget(outputDescriptorFile));
+  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(
+      Path outputDescriptorFile,
+      boolean includeImports,
+      boolean includeSourceInfo,
+      boolean retainOptions
+  ) {
+    targets.add(new ProtoDescriptorTarget(
+        outputDescriptorFile,
+        includeImports,
+        includeSourceInfo,
+        retainOptions
+    ));
     return this;
   }
 
@@ -162,14 +172,37 @@ public final class ProtocArgumentFileBuilderBuilder {
   private static final class ProtoDescriptorTarget implements Target {
 
     private final Path outputDescriptorFile;
+    private final boolean includeImports;
+    private final boolean includeSourceInfo;
+    private final boolean retainOptions;
 
-    private ProtoDescriptorTarget(Path outputDescriptorFile) {
+    private ProtoDescriptorTarget(
+        Path outputDescriptorFile,
+        boolean includeImports,
+        boolean includeSourceInfo,
+        boolean retainOptions
+    ) {
       this.outputDescriptorFile = outputDescriptorFile;
+      this.includeImports = includeImports;
+      this.includeSourceInfo = includeSourceInfo;
+      this.retainOptions = retainOptions;
     }
 
     @Override
     public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
       argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
+
+      if (includeImports) {
+        argumentFileBuilder.add("--include_imports");
+      }
+
+      if (includeSourceInfo) {
+        argumentFileBuilder.add("--include_source_info");
+      }
+
+      if (retainOptions) {
+        argumentFileBuilder.add("--retain_options");
+      }
     }
   }
 }

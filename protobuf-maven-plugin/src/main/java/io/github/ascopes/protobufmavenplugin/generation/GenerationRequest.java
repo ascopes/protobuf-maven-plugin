@@ -86,5 +86,11 @@ public interface GenerationRequest {
 
   boolean isLiteEnabled();
 
+  boolean isOutputDescriptorIncludeImports();
+
+  boolean isOutputDescriptorIncludeSourceInfo();
+
+  boolean isOutputDescriptorRetainOptions();
+
   boolean isRegisterAsCompilationRoot();
 }

@@ -652,6 +652,111 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     }
   }
 
+  @DisplayName("outputDescriptorFile tests")
+  @Nested
+  class OutputDescriptorFileTest {
+
+    @DisplayName("when outputDescriptorFile is provided, expect the provided file to be used")
+    @Test
+    void whenDescriptorFileProvidedExpectProvidedDirectoryToBeUsed(
+        @TempDir Path tempDir
+    ) throws Throwable {
+      var expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc"));
+      // Given
+      mojo.outputDescriptorFile = expectedDescriptorFile.toFile();
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getOutputDescriptorFile())
+          .isEqualTo(expectedDescriptorFile);
+    }
+
+    @DisplayName("when outputDescriptorFile is not provided, expect no file to be used")
+    @Test
+    void whenDescriptorFileNotProvidedExpectNoFileToBeUsed() throws Throwable {
+      // Given
+      mojo.outputDescriptorFile = null;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.getOutputDescriptorFile())
+          .isNull();
+    }
+  }
+
+  @DisplayName("outputDescriptorIncludeImports tests")
+  @Nested
+  class OutputDescriptorIncludeImportsTest {
+
+    @DisplayName("outputDescriptorIncludeImports is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void outputDescriptorIncludeImportsIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.outputDescriptorIncludeImports = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isOutputDescriptorIncludeImports()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("outputDescriptorIncludeSourceInfo tests")
+  @Nested
+  class OutputDescriptorIncludeSourceInfoTest {
+
+    @DisplayName("outputDescriptorIncludeSourceInfo is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void outputDescriptorIncludeSourceInfoIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.outputDescriptorIncludeSourceInfo = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isOutputDescriptorIncludeSourceInfo()).isEqualTo(value);
+    }
+  }
+
+  @DisplayName("outputDescriptorRetainOptions tests")
+  @Nested
+  class OutputDescriptorRetainOptionsTest {
+
+    @DisplayName("outputDescriptorIncludeImports is set to the specified value")
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest(name = "for {0}")
+    void outputDescriptorRetainOptionsIsSetToSpecifiedValue(boolean value) throws Throwable {
+      mojo.outputDescriptorRetainOptions = value;
+
+      // When
+      mojo.execute();
+
+      // Then
+      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+      verify(mojo.sourceCodeGenerator).generate(captor.capture());
+      var actualRequest = captor.getValue();
+      assertThat(actualRequest.isOutputDescriptorRetainOptions()).isEqualTo(value);
+    }
+  }
+
   @DisplayName("outputDirectory tests")
   @Nested
   class OutputDirectoryTest {
@@ -881,34 +986,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     }
   }
 
-  @DisplayName("outputDescriptorFile tests")
-  @Nested
-  class DescriptorFileTest {
-
-    @DisplayName("when outputDescriptorFile is provided, expect the provided file to be used")
-    @Test
-    void whenDescriptorFileProvidedExpectProvidedDirectoryToBeUsed(
-        @TempDir Path tempDir
-    ) throws Throwable {
-      var expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc"));
-      // Given
-      mojo.outputDescriptorFile = expectedDescriptorFile.toFile();
-
-      // When
-      mojo.execute();
-
-      // Then
-      var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-      verify(mojo.sourceCodeGenerator).generate(captor.capture());
-      var actualRequest = captor.getValue();
-      assertThat(actualRequest.getOutputDescriptorFile())
-          .isEqualTo(expectedDescriptorFile);
-    }
-  }
-
   @DisplayName("languages are enabled and disabled as expected")
   @MethodSource("languageEnablingCases")
-  @ParameterizedTest(name = "when {0}, then expect {2} to be enabled")
+  @ParameterizedTest(name = "when {0} is true, then expect {2} to be enabled")
   void languagesAreEnabledAndDisabledAsExpected(
       String description,
       Consumer<A> languageConfigurer,
@@ -946,7 +1026,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         arguments("Rust", consumer(a -> a.rustEnabled = true), EnumSet.of(Language.RUST)),
         // Combined cases
         arguments(
-            "Java and Kotlin",
+            "Java, Kotlin",
             consumer(a -> {
               a.javaEnabled = true;
               a.kotlinEnabled = true;
@@ -954,7 +1034,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
             EnumSet.of(Language.JAVA, Language.KOTLIN)
         ),
         arguments(
-            "Python and PYI",
+            "Python, PYI",
             consumer(a -> {
               a.pythonEnabled = true;
               a.pythonStubsEnabled = true;
@@ -962,7 +1042,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
             EnumSet.of(Language.PYTHON, Language.PYI)
         ),
         arguments(
-            "C++, C#, Rust, and ObjC",
+            "C++, C#, Rust, Objective C",
             consumer(a -> {
               a.cppEnabled = true;
               a.csharpEnabled = true;
@@ -972,7 +1052,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
             EnumSet.of(Language.CPP, Language.C_SHARP, Language.OBJECTIVE_C, Language.RUST)
         ),
         arguments(
-            "all languages",
+            "everything",
             consumer(a -> {
               a.cppEnabled = true;
               a.csharpEnabled = true;
