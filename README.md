@@ -62,8 +62,7 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
   - Plugins can be resolved from Maven repositories, URLs, or the system path.
 - Generation of main and test sources.
 - Importing of `*.proto` sources from classpath dependencies.
-- Ready to implement Maven 4 support once Maven 4 is stable, meaning your projects will not be blocked by unmaintained plugins using
-  unsupported Maven 2.x APIs.
+- Plans to support Maven 4.x once a stable interface is available.
 - Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
   PHP, Ruby, and Rust.
 - Aims to keep builds reproducible and easily debuggable where possible.
