@@ -106,20 +106,6 @@ jobs:
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Promote staging to Maven Central
-        if: ${{ ! inputs.skip-nexus-promotion && ! inputs.dry-run }}
-        run: |-
-          ./scripts/close-nexus-repos.sh \
-              -u "${OSSRH_USERNAME}" \
-              -p "${OSSRH_TOKEN}" \
-              -g "${group_id}" \
-              -a "${artifact_id}" \
-              -v "${release_version}" \
-              -s "https://s01.oss.sonatype.org/"
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-
       - name: Abort and rollback staging release
         if: ${{ failure() && ! inputs.skip-maven-release }}
         run: |-
@@ -133,6 +119,19 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Promote staging to Maven Central
+        if: ${{ ! inputs.skip-nexus-promotion && ! inputs.dry-run }}
+        run: |-
+          ./scripts/close-nexus-repos.sh \
+              -u "${OSSRH_USERNAME}" \
+              -p "${OSSRH_TOKEN}" \
+              -g "${group_id}" \
+              -a "${artifact_id}" \
+              -v "${release_version}" \
+              -s "https://s01.oss.sonatype.org/"
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Create GitHub release
         uses: ncipollo/release-action@v1
