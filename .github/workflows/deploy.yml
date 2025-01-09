@@ -28,6 +28,11 @@ on:
         default: false
         type: boolean
 
+      dry-run:
+        description: Perform a dry run
+        default: false
+        type: boolean
+
 jobs:
   deploy:
     name: Deploy
@@ -89,6 +94,7 @@ jobs:
         if: ${{ ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
+              -DdryRun='${{ inputs.dry-run }}' \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
               -DsignTag=false \
@@ -100,7 +106,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Promote staging to Maven Central
-        if: ${{ ! inputs.skip-nexus-promotion }}
+        if: ${{ ! inputs.skip-nexus-promotion && ! inputs.dry-run }}
         run: |-
           ./scripts/close-nexus-repos.sh \
               -u "${OSSRH_USERNAME}" \
@@ -117,6 +123,7 @@ jobs:
         if: ${{ failure() && ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
+              -DdryRun='${{ inputs.dry-run }}' \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${release_version}" \
               -Dtag="v${release_version}" \
@@ -128,7 +135,7 @@ jobs:
 
       - name: Create GitHub release
         uses: ncipollo/release-action@v1
-        if:  ${{ ! inputs.skip-nexus-promotion }}
+        if:  ${{ ! inputs.skip-nexus-promotion && ! inputs.dry-run }}
         with:
           tag: v${{ env.release_version }}
           name: v${{ env.release_version }}
@@ -148,7 +155,7 @@ jobs:
           path: protobuf-maven-plugin/target/site
 
       - name: Deploy pages
-        if: ${{ ! inputs.skip-pages }}
+        if: ${{ ! inputs.skip-pages && ! inputs.dry-run }}
         uses: actions/deploy-pages@v4
 
       - name: Upload build logs as artifacts
