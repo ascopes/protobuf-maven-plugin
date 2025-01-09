@@ -93,6 +93,7 @@ jobs:
       - name: Deploy staging to Nexus
         if: ${{ ! inputs.skip-maven-release }}
         run: |-
+          gpg --list-keys
           ./mvnw -B -e \
               -DdryRun='${{ inputs.dry-run }}' \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
