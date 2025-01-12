@@ -32,7 +32,6 @@ import org.eclipse.aether.artifact.ArtifactTypeRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.mockito.Answers;
 import org.mockito.MockSettings;
 import org.mockito.quality.Strictness;
