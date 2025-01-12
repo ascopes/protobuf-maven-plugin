@@ -33,6 +33,7 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +103,7 @@ final class AetherResolver {
       Set<String> dependencyScopes,
       boolean failOnInvalidDependencies
   ) throws ResolutionException {
-    var scopeFilter = new ScopeDependencyFilter(dependencyScopes);
+    var scopeFilter = new ScopeDependencyFilter(dependencyScopes, List.of());
     var collectRequest = new CollectRequest(unresolvedDependencies, null, remoteRepositories);
     var request = new DependencyRequest(collectRequest, scopeFilter);
 
