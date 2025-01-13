@@ -574,10 +574,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * defined in descriptor.proto) containing all the input files in
    * {@code outputDescriptorFile}.</p>
    *
-   * <p>If this is specified, then
-   * {@link #incrementalCompilationEnabled incremental compilation}
-   * will always be disabled to prevent issues with inconsistent build
-   * results.
+   * <p>If this is specified, then incremental compilation will always be disabled
+   * to prevent issues with inconsistent build results.
    *
    * @since 2.9.0
    */
@@ -587,7 +585,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Enable including imports in generated protobin descriptor files.
    *
-   * <p>This is ignored if {@link #outputDescriptorFile} is not provided.
+   * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
    * @see #outputDescriptorFile
    * @since 2.10.0
@@ -599,7 +597,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Enable including source information in generated protobin descriptor
    * files.
    *
-   * <p>This is ignored if {@link #outputDescriptorFile} is not provided.
+   * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
    * @see #outputDescriptorFile
    * @since 2.10.0
@@ -610,7 +608,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Enable retaining option details in generated protobin descriptors.
    *
-   * <p>This is ignored if {@link #outputDescriptorFile} is not provided.
+   * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
    * @see #outputDescriptorFile
    * @since 2.10.0

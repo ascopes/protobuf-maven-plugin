@@ -35,62 +35,233 @@ import org.jspecify.annotations.Nullable;
 @Immutable
 public interface GenerationRequest {
 
+  /**
+   * Binary {@code protoc} plugins that should be resolved from Maven
+   * repositories.
+   *
+   * @return the collection of plugins.
+   */
   Collection<? extends MavenProtocPlugin> getBinaryMavenPlugins();
 
+  /**
+   * Binary {@code protoc} plugins that should be resolved from the system
+   * {@code $PATH}.
+   *
+   * @return the collection of plugins.
+   */
   Collection<? extends PathProtocPlugin> getBinaryPathPlugins();
 
+  /**
+   * Binary {@code protoc} plugins that should be resolved from URLs.
+   *
+   * @return the collection of plugins.
+   */
   Collection<? extends UrlProtocPlugin> getBinaryUrlPlugins();
 
+  /**
+   * The preference for how to resolve transitive dependencies by default.
+   *
+   * @return the dependency resolution depth preference.
+   */
   DependencyResolutionDepth getDependencyResolutionDepth();
 
+  /**
+   * The dependency scopes to allow when searching the Maven project
+   * dependency list for {@code *.proto} files.
+   *
+   * @return the set of scopes.
+   */
   Set<String> getDependencyScopes();
 
+  /**
+   * The collection of supported langagues to enable in {@code protoc}.
+   *
+   * @return the languages.
+   */
   Collection<Language> getEnabledLanguages();
 
+  /**
+   * The collection of {@code *.proto} path patterns to exclude from being
+   * passed to {@code protoc}.
+   *
+   * @return the collection of glob patterns.
+   */
   List<String> getExcludes();
 
+  /**
+   * Additional user-defined Maven dependencies to include in the {@code protoc}
+   * import path.
+   *
+   * @return the collection of dependencies.
+   */
   Collection<? extends MavenDependency> getImportDependencies();
 
+  /**
+   * Additional user-defined paths relative to the project root to include in the
+   * {@code protoc} import path.
+   *
+   * @return the collection of paths.
+   */
   Collection<Path> getImportPaths();
 
+  /**
+   * The collection of {@code *.proto} path patterns to include to be passed to
+   * {@code protoc}.
+   *
+   * @return the collection of glob patterns.
+   */
   List<String> getIncludes();
 
+  /**
+   * Java executable projects that satisfy the {@code protoc} plugin interface
+   * to wrap in bootstrapping scripts and pass to {@code protoc}.
+   *
+   * @return the collection of plugins.
+   */
   Collection<? extends MavenProtocPlugin> getJvmMavenPlugins();
 
+  /**
+   * The path to write all output files to.
+   *
+   * @return the output path.
+   */
   Path getOutputDirectory();
 
-  @Nullable
-  Path getOutputDescriptorFile();
+  /**
+   * The output {@code protobin} descriptor file to create, or {@code null} if
+   * no descriptor file should be created.
+   *
+   * @return the path to the descriptor file to output, or {@code null}.
+   */
+  @Nullable Path getOutputDescriptorFile();
 
+  /**
+   * The version of {@code protoc} to use.
+   *
+   * <p>This will be one of:
+   *
+   * <ul>
+   *   <li>A Maven version string (such as {@code 4.29.3}), to indicate to
+   *       pull from the Maven repositories;
+   *   <li>The literal string {@code PATH}, to indicate to invoke the
+   *       {@code protoc} binary on the system {@code $PATH};
+   *   <li>A URL to a binary to execute.
+   * </ul>
+   *
+   * @return the version indicator.
+   */
   String getProtocVersion();
 
+  /**
+   * Additional user-defined Maven dependencies to include in the {@code protoc}
+   * import path, and to compile.
+   *
+   * @return the collection of dependencies.
+   */
   Collection<? extends MavenDependency> getSourceDependencies();
 
+  /**
+   * Paths relative to the project root that contain {@code *.proto} sources to
+   * compile.
+   *
+   * @return the source roots.
+   */
   Collection<Path> getSourceRoots();
 
+  /**
+   * The registrar strategy to use to notify Maven of generated sources.
+   *
+   * @return the registrar strategy.
+   */
   SourceRootRegistrar getSourceRootRegistrar();
 
+  /**
+   * Whether to include input {@code proto} sources in the output class
+   * directory.
+   *
+   * @return the boolean preference.
+   */
   boolean isEmbedSourcesInClassOutputs();
 
+  /**
+   * Whether to treat invalid dependencies as a build error.
+   *
+   * @return the boolean preference.
+   */
   boolean isFailOnInvalidDependencies();
 
+  /**
+   * Whether to treat non-existent source roots as a build error.
+   *
+   * @return the boolean preference.
+   */
   boolean isFailOnMissingSources();
 
+  /**
+   * Whether to treat builds with no enabled languages, plugins, or descriptor
+   * file outputs as a build error.
+   *
+   * @return the boolean preference.
+   */
   boolean isFailOnMissingTargets();
 
+  /**
+   * Whether to treat {@code protoc} build warnings as errors.
+   *
+   * @return the boolean preference.
+   */
   boolean isFatalWarnings();
 
+  /**
+   * Whether to skip discovering {@code *.proto} files to import from the Maven
+   * project {@code <dependencies/>} block.
+   *
+   * @return the boolean preference.
+   */
   boolean isIgnoreProjectDependencies();
 
+  /**
+   * Whether to enable incrementally compiling sources.
+   *
+   * @return the boolean preference.
+   */
   boolean isIncrementalCompilationEnabled();
 
+  /**
+   * Whether to request the generation of "lite" sources.
+   *
+   * @return the boolean preference.
+   */
   boolean isLiteEnabled();
 
+  /**
+   * Whether to include imports in the output {@code protobin} descriptor.
+   *
+   * @return the boolean preference.
+   */
   boolean isOutputDescriptorIncludeImports();
 
+  /**
+   * Whether to include source information in the output {@code protobin}
+   * descriptor.
+   *
+   * @return the boolean preference.
+   */
   boolean isOutputDescriptorIncludeSourceInfo();
 
+  /**
+   * Whether to retain build option metadata in the output {@code protobin}
+   * descriptor.
+   *
+   * @return the boolean preference.
+   */
   boolean isOutputDescriptorRetainOptions();
 
+  /**
+   * Whether to mark generated sources as candidates for compilation with the
+   * {@code maven-compiler-plugin} and similar plugins.
+   *
+   * @return the boolean preference.
+   */
   boolean isRegisterAsCompilationRoot();
 }
