@@ -22,7 +22,6 @@ import static org.mockito.Mockito.withSettings;
 
 import java.util.List;
 import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -51,8 +50,6 @@ class AetherMavenArtifactPathResolverTest {
 
   RepositorySystem repositorySystem;
 
-  ArtifactHandler artifactHandler;
-
   AetherMavenArtifactPathResolver underTest;
 
   @BeforeEach
@@ -69,10 +66,9 @@ class AetherMavenArtifactPathResolverTest {
     when(repositorySystemSession.getArtifactTypeRegistry()).thenReturn(artifactTypeRegistry);
 
     repositorySystem = mock();
-    artifactHandler = mock();
 
     underTest = new AetherMavenArtifactPathResolver(
-        mavenSession, repositorySystem, artifactHandler);
+        mavenSession, repositorySystem);
   }
 
   @DisplayName("the MavenSession is initialised as expected")
@@ -87,8 +83,6 @@ class AetherMavenArtifactPathResolverTest {
   @Test
   void aetherMapperIsInitialisedAsExpected() {
     // Then
-    assertThat(underTest.getAetherMapper().getArtifactHandler())
-        .isSameAs(artifactHandler);
     assertThat(underTest.getAetherMapper().getArtifactTypeRegistry())
         .isSameAs(artifactTypeRegistry);
   }
