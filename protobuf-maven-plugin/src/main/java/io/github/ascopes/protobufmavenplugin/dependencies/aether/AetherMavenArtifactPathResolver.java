@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.graph.Dependency;
@@ -49,8 +48,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
   @Inject
   AetherMavenArtifactPathResolver(
       MavenSession mavenSession,
-      RepositorySystem repositorySystem,
-      ArtifactHandler artifactHandler
+      RepositorySystem repositorySystem
   ) {
     var artifactRepositories = mavenSession.getProjectBuildingRequest().getRemoteRepositories();
     var remoteRepositories = RepositoryUtils.toRepos(artifactRepositories);
@@ -61,7 +59,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         mavenSession.getRepositorySession());
 
     aetherMapper = new AetherArtifactMapper(
-        artifactHandler, repositorySystemSession.getArtifactTypeRegistry());
+        repositorySystemSession.getArtifactTypeRegistry());
 
     aetherResolver = new AetherResolver(
         repositorySystem, repositorySystemSession, remoteRepositories);
