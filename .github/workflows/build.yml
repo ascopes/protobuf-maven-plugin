@@ -72,15 +72,12 @@ jobs:
           - os-name: windows-latest
             java-version: 11
             maven: default
-          # TODO: uncomment once a Java 24 compatible version of Groovy is available.
-          # Test on Java 24 early access to verify future compatibility.
-          #- os-name: ubuntu-latest
-          #  java-version: 24-ea
-          #  maven: default
-          # Prereq Maven version, to test backwards compatibility.
           - os-name: ubuntu-latest
             java-version: 11
             maven: prerequisite
+          - os-name: ubuntu-latest
+            java-version: 17
+            maven: 4.0.0-rc-2
 
     steps:
       - name: Checkout code
@@ -93,12 +90,20 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Change Maven version to the prerequisite version
-        if: ${{ matrix.maven == 'prerequisite' }}
+      - name: Set Maven version
         shell: bash
         run: |-
-          version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven')
-          ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${version}"
+          case '${{ matrix.maven }}' in
+            prerequisite) version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven');;
+            default) :;;
+            *) version='${{ matrix.maven }}';;
+          esac
+
+          if [[ -n ${version+defined} ]]; then
+            ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${version}"
+          fi
+
+          ./mvnw --version
 
       - name: Install protoc to $PATH
         shell: bash
