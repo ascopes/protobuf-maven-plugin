@@ -52,6 +52,7 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
 
 ## Features
 
+- Maven 4 support.
 - Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
 - Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
 - Supports Java and JVM Kotlin sources out of the box.
@@ -62,7 +63,6 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
   - Plugins can be resolved from Maven repositories, URLs, or the system path.
 - Generation of main and test sources.
 - Importing of `*.proto` sources from classpath dependencies.
-- Plans to support Maven 4.x once a stable interface is available.
 - Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
   PHP, Ruby, and Rust.
 - Aims to keep builds reproducible and easily debuggable where possible.
@@ -78,7 +78,7 @@ and  examples are present [in the integration tests](https://github.com/ascopes/
 At the time of writing, the existing Maven plugins that provide Protobuf support are not kept up to date. This poses a risk for any applications depending on these plugins as they
 are either constrained to outdated versions of Protoc, or are not guaranteed to work in the future.
 
-Maven 4.0 will eventually be released, and many of these existing plugins will not be compatible with the v4.0 API.
+Many of these existing plugins will not be compatible with the Maven v4.0 APIs.
 
 Some plugins are highly specific to certain CPU architectures as well, which produces issues when using Apple Silicon devices.
 
@@ -91,4 +91,4 @@ plugin with the following requirements:
 - It must support compiling Protobuf sources from archives and from the local filesystem tree.
 - It must be able to allow Protoc to import Protobuf files from other file trees, archives, and JARs transparently.
 - It must be aware of the Maven project dependencies.
-- It must have the ability to be migrated to Maven 4.0 fairly rapidly when the time comes.
+- It must be compatible with Maven 4.0 once a stable version is released.
