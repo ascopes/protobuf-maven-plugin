@@ -38,7 +38,7 @@
     <kotlin.version>2.1.0</kotlin.version>
     <protobuf.version>4.29.3</protobuf.version>
     <proto-google-common-protos.version>2.50.1</proto-google-common-protos.version>
-    <scala.version>3.6.2</scala.version>
+    <scala.version>3.6.3</scala.version>
     <scalapb.version>0.11.17</scalapb.version>
     <scala-maven-plugin.version>4.9.2</scala-maven-plugin.version>
     <reactor-core.version>3.7.1</reactor-core.version>
