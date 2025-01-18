@@ -16,16 +16,16 @@
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import static java.util.Objects.requireNonNullElse;
+import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.maven.RepositoryUtils;
-import org.eclipse.aether.artifact.ArtifactType;
 import org.eclipse.aether.graph.Exclusion;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +68,30 @@ final class AetherArtifactMapper {
   org.eclipse.aether.artifact.Artifact mapPmpArtifactToEclipseArtifact(
       io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact
   ) {
-    var type = dependencyTypeToEclipseArtifactType(mavenArtifact.getType());
+    var extension = Objects.requireNonNullElse(mavenArtifact.getType(), DEFAULT_EXTENSION);
+
+    var artifactType = Optional.ofNullable(artifactTypeRegistry.get(extension))
+        .orElseGet(() -> new FallbackEclipseArtifactType(extension));
+
+    log.debug(
+        "Resolved extension {} to Aether artifact type (classifier: \"{}\", type: \"{}\", "
+            + "id: \"{}\", \"{}\")",
+        mavenArtifact.getType(),
+        artifactType.getClassifier(),
+        artifactType.getExtension(),
+        artifactType.getId(),
+        artifactType.getProperties()
+    );
+
+    var classifier = Optional.ofNullable(mavenArtifact.getClassifier())
+        .filter(not(String::isBlank))
+        .orElseGet(artifactType::getClassifier);
+
     return new org.eclipse.aether.artifact.DefaultArtifact(
         mavenArtifact.getGroupId(),
         mavenArtifact.getArtifactId(),
-        mavenArtifact.getClassifier() == null || mavenArtifact.getClassifier().trim().isEmpty()
-            ? type.getClassifier() : mavenArtifact.getClassifier(),
-        type.getExtension(),
+        classifier,
+        artifactType.getExtension(),
         mavenArtifact.getVersion()
     );
   }
@@ -107,47 +124,5 @@ final class AetherArtifactMapper {
   ) {
     // maven-core recommended tool to perform these kind of conversions
     return RepositoryUtils.toDependency(mavenDependency, artifactTypeRegistry);
-  }
-
-  private org.eclipse.aether.artifact.ArtifactType dependencyTypeToEclipseArtifactType(
-      @Nullable String depType
-  ) {
-    final String adjustedType = depType == null ? DEFAULT_EXTENSION : depType;
-    var type = artifactTypeRegistry.get(adjustedType);
-
-    if (type == null) {
-      log.debug("Could not resolve extension {} to any known Aether artifact type", adjustedType);
-      type = new ArtifactType() {
-        @Override
-        public String getId() {
-          return adjustedType;
-        }
-
-        @Override
-        public String getExtension() {
-          return adjustedType;
-        }
-
-        @Override
-        public String getClassifier() {
-          return "";
-        }
-
-        @Override
-        public Map<String, String> getProperties() {
-          return Map.of();
-        }
-      };
-    } else {
-      log.debug(
-          "Resolved extension {} to Aether artifact type (classifier: {}, type: {}, id: {}, {})",
-          adjustedType,
-          type.getClassifier(),
-          type.getExtension(),
-          type.getId(),
-          type.getProperties()
-      );
-    }
-    return type;
   }
 }
