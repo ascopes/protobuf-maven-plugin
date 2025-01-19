@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -121,9 +122,8 @@ public final class ConcurrentExecutor {
           results.add(task.get());
         } catch (ExecutionException ex) {
           exceptions.add(ex.getCause());
-        } catch (InterruptedException ex) {
+        } catch (CancellationException | InterruptedException ex) {
           exceptions.add(ex);
-          break;
         }
       }
 

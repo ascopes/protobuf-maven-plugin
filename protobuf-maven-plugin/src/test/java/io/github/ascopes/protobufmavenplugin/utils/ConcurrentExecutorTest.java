@@ -27,6 +27,7 @@ import io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -208,6 +209,25 @@ class ConcurrentExecutorTest {
     verifyNoMoreInteractions(callable);
   }
 
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @DisplayName(".submit(Callable) calls the callable and handles interruption")
+  @Test
+  void submitCallsCallableAndHandlesInterruption() {
+    // Given
+    Callable<Void> callable = () -> {
+      Thread.sleep(10_000);
+      return null;
+    };
+
+    // When
+    var future = executor.submit(callable);
+    future.cancel(true);
+
+    // Then
+    assertThatExceptionOfType(CancellationException.class)
+        .isThrownBy(future::get);
+  }
+
   // If we take more than 20 seconds on the 1000 instance case, we've probably run sequentially.
   @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".submit(Callable) submits and executes the given tasks in parallel")
@@ -287,6 +307,35 @@ class ConcurrentExecutorTest {
             ex -> assertThat(expectedExceptions).contains(ex.getCause()),
             ex -> assertThat(expectedExceptions).containsAll(List.of(ex.getSuppressed())),
             ex -> assertThat(expectedExceptions).hasSize(ex.getSuppressed().length + 1)
+        );
+  }
+
+  @DisplayName(".awaiting() awaits all tasks and handles interruptions")
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Test
+  void awaitingAwaitsAllTasksAndHandlesInterruptions() {
+    // Given
+    List<FutureTask<Void>> tasks = new ArrayList<>();
+    for (var i = 0; i < 1000; ++i) {
+      // Local copy to prevent the lambda reading the mutable value from the closure.
+      tasks.add(executor.submit(() -> {
+        Thread.sleep(10_000);
+        return null;
+      }));
+    }
+
+    // When
+    tasks.forEach(task -> task.cancel(true));
+
+    // Then
+    assertThatExceptionOfType(MultipleFailuresException.class)
+        .isThrownBy(() -> tasks.stream().collect(executor.awaiting()))
+        .satisfies(
+            ex -> assertThat(ex.getCause()).isInstanceOf(CancellationException.class),
+            ex -> assertThat(ex.getSuppressed())
+                .hasSize(999)
+                .allSatisfy(suppressed -> assertThat(suppressed)
+                    .isInstanceOf(CancellationException.class))
         );
   }
 
