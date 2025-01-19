@@ -23,7 +23,6 @@ import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,6 +65,8 @@ public final class UrlResourceFetcher {
   }
 
   public Optional<Path> fetchFileFromUrl(URL url, String extension) throws ResolutionException {
+    // This will die if the URL points to a file on the non default file system...
+    // probably don't care enough to fix this bug as users should not ever want to do this I guess.
     return url.getProtocol().equalsIgnoreCase("file")
         ? handleFileSystemUrl(url)
         : handleOtherUrl(url, extension);
@@ -76,7 +77,8 @@ public final class UrlResourceFetcher {
       return Optional.of(url.toURI())
           .map(Path::of)
           .filter(Files::exists);
-    } catch (URISyntaxException ex) {
+    } catch (Exception ex) {
+      log.debug("Failed to interrogate local file {}", url, ex);
       throw new ResolutionException("Failed to resolve '" + url + "' due to malformed syntax", ex);
     }
   }
@@ -108,6 +110,8 @@ public final class UrlResourceFetcher {
       }
 
     } catch (IOException ex) {
+      log.debug("Failed to copy {} to {}", url, targetFile, ex);
+
       throw new ResolutionException("Failed to copy '" + url + "' to '" + targetFile + "'", ex);
     }
   }
