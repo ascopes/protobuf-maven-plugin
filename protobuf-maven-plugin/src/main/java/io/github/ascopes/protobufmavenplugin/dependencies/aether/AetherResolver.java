@@ -91,6 +91,7 @@ final class AetherResolver {
 
       throw resolutionException(
           "failed to resolve artifact " + unresolvedArtifact, response.getExceptions());
+
     } catch (ArtifactResolutionException ex) {
       throw new ResolutionException("Failed to resolve artifact " + unresolvedArtifact, ex);
     }
@@ -124,6 +125,7 @@ final class AetherResolver {
     // Part 1: resolve the dependencies directly.
     try {
       response = repositorySystem.resolveDependencies(repositorySystemSession, request);
+
     } catch (DependencyResolutionException ex) {
       // GH-299: if this exception is raised, we may still have some results we can use. If this is
       // the case then resolution only partially failed, so continue for now unless strict
@@ -182,11 +184,7 @@ final class AetherResolver {
   }
 
   private void logWarnings(String descriptionOfAction, Iterable<Exception> exceptions) {
-    var iterator = exceptions.iterator();
-
-    if (iterator.hasNext()) {
-      iterator.forEachRemaining(ex -> log.debug(
-          "Encountered a non-fatal resolution error while {}", descriptionOfAction, ex));
-    }
+    exceptions.iterator().forEachRemaining(ex -> log.debug(
+        "Encountered a non-fatal resolution error while {}", descriptionOfAction, ex));
   }
 }
