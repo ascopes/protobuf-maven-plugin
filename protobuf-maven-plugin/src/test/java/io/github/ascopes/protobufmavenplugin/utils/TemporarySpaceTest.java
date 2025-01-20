@@ -17,11 +17,15 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.maven.model.Build;
@@ -117,5 +121,23 @@ class TemporarySpaceTest {
     assertThat(actualPath)
         .isEqualTo(existingPath)
         .isDirectory();
+  }
+
+  @DisplayName("Directory creation failures are propagated")
+  @Test
+  void directoryCreationFailuresArePropagated() {
+    try (var filesMock = mockStatic(Files.class)) {
+      // Given
+      var expectedCause = new IOException("boom");
+      filesMock.when(() -> Files.createDirectories(any()))
+          .thenThrow(expectedCause);
+
+      var id = someBasicString();
+
+      // Then
+      assertThatExceptionOfType(UncheckedIOException.class)
+          .isThrownBy(() -> temporarySpace.createTemporarySpace("foo", id))
+          .withCause(expectedCause);
+    }
   }
 }
