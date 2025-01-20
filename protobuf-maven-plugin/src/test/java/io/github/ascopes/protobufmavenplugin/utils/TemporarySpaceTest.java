@@ -137,6 +137,7 @@ class TemporarySpaceTest {
       // Then
       assertThatExceptionOfType(UncheckedIOException.class)
           .isThrownBy(() -> temporarySpace.createTemporarySpace("foo", id))
+          .withMessage("Failed to create temporary directory!")
           .withCause(expectedCause);
     }
   }
