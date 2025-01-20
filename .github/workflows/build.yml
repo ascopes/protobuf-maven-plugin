@@ -74,7 +74,7 @@ jobs:
             maven: default
           - os-name: ubuntu-latest
             java-version: 11
-            maven: prerequisite
+            maven: 3.8.8
           - os-name: ubuntu-latest
             java-version: 17
             maven: 4.0.0-rc-2
@@ -94,7 +94,6 @@ jobs:
         shell: bash
         run: |-
           case '${{ matrix.maven }}' in
-            prerequisite) version=$(./mvnw -B -T1 -q -pl protobuf-maven-plugin help:evaluate -DforceStdout -Dexpression='project.prerequisites.maven');;
             default) :;;
             *) version='${{ matrix.maven }}';;
           esac
