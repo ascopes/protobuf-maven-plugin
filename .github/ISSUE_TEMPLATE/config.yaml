@@ -1,1 +1,8 @@
 blank_issues_enabled: true
+contact_links:
+  - name: Questions and discussions
+    url: https://github.com/ascopes/protobuf-maven-plugin/discussions
+    about: |-
+      Please ask and answer questions here rather than raising issues for general
+      queries!
+
