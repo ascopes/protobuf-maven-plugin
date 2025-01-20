@@ -151,6 +151,38 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
+  @DisplayName("Other pathless URLs are resolved when they exist")
+  @Test
+  void otherPathlessUrlsAreResolvedWhenTheyExist(
+      @TempDir Path tempDir
+  ) throws Exception {
+    // Given
+    wireMockClient.register(get(urlEqualTo("/"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "text/plain")
+            .withBody("Hello, World!")));
+    when(temporarySpace.createTemporarySpace(any(), any()))
+        .thenReturn(tempDir);
+
+    var url = URI.create(wireMockBaseUrl).toURL();
+    var digest = Digests.sha1(url.toExternalForm());
+
+    // When
+    var finalPath = urlResourceFetcher.fetchFileFromUrl(url, ".textfile");
+
+    // Then
+    //noinspection AssertBetweenInconvertibleTypes
+    assertThat(finalPath)
+        .isPresent()
+        .get(InstanceOfAssertFactories.PATH)
+        .isEqualTo(tempDir.resolve(digest + ".textfile"))
+        .hasContent("Hello, World!");
+
+    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/"))
+        .withHeader("User-Agent", equalTo(expectedUserAgent())));
+  }
+
   @DisplayName("Other URLs are not resolved when they do not exist")
   @Test
   void otherUrlsAreNotResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
