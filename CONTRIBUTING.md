@@ -91,6 +91,15 @@ If you are making a breaking API change, you need to bump the major version.
 I'll advise about this during PR reviews as needed, but you can use the `scripts/bump-versions.sh` script
 to do this for you. It will not change anything if the versions are already set up correctly.
 
+#### Unit tests
+
+Where appropriate, please include valid unit tests. We are slowly aiming for 100% coverage where possible!
+
+### Integration tests
+
+In `src/main/it` exists a number of integration tests that are full Maven projects. Where
+appropriate, please include integration tests per the guidelines outlined in `src/it/WRITING_ITS.md`.
+
 #### Making sure it builds
 
 Before raising a PR, please make sure your fork works by running `./mvnw clean verify` locally.
