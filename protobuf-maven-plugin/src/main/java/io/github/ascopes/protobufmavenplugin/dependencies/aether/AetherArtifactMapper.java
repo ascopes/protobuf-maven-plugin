@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.maven.RepositoryUtils;
 import org.eclipse.aether.graph.Exclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +122,7 @@ final class AetherArtifactMapper {
       org.apache.maven.model.Dependency mavenDependency
   ) {
     // maven-core recommended tool to perform these kind of conversions
-    return RepositoryUtils.toDependency(mavenDependency, artifactTypeRegistry);
+    return org.apache.maven.RepositoryUtils
+        .toDependency(mavenDependency, artifactTypeRegistry);
   }
 }
