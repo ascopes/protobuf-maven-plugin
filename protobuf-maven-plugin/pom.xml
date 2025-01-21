@@ -31,7 +31,7 @@
   <packaging>maven-plugin</packaging>
 
   <prerequisites>
-    <maven>3.8.2</maven>
+    <maven>3.8</maven>
   </prerequisites>
 
   <dependencies>
