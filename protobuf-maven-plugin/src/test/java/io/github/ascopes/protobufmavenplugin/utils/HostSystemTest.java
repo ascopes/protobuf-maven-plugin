@@ -17,12 +17,6 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,15 +25,11 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.quality.Strictness;
 
 /**
  * @author Ashley Scopes
@@ -203,54 +193,27 @@ class HostSystemTest {
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
-  @DisplayName(".isProbablyAndroid() returns the expected results")
+  @DisplayName(".isProbablyTermux() returns the expected results")
   @CsvSource({
-      " true,  android,  true",
-      " true,  AnDrOid,  true",
-      " true,   Fedora, false",
-      " true,       '', false",
-      " true,         , false",
-      "false,  android, false",
-      "false,  AnDrOid, false",
-      "false,   Fedora, false",
-      "false,       '', false",
-      "false,         , false",
+      "oracle, false",
+      "termux,  true",
   })
-  @ParameterizedTest(
-      name = "when .isProbablyLinux() returns {0} and .call('uname', '-o') returns <{1}>, "
-          + "expect {2}"
-  )
-  void isProbablyAndroidReturnsTheExpectedResults(
-      boolean isProbablyLinux,
-      @Nullable String unameOutput,
+  @ParameterizedTest(name = "when java.vendor is {0}, expect the result to be {1}")
+  void isProbablyTermuxReturnsTheExpectedResults(
+      String javaVendor,
       boolean expectedResult
   ) {
     // Given
-    var hostSystemBean = mock(HostSystem.class, withSettings().strictness(Strictness.LENIENT));
-    when(hostSystemBean.isProbablyLinux())
-        .thenReturn(isProbablyLinux);
-    when(hostSystemBean.call(any(String[].class)))
-        .thenReturn(Optional.ofNullable(unameOutput));
-    when(hostSystemBean.isProbablyAndroid())
-        .thenCallRealMethod();
+    var properties = new Properties();
+    var env = Map.<String, String>of();
+    properties.put("java.vendor", javaVendor);
+    var hostSystemBean = new HostSystem(properties, env::get);
 
     // When
-    var actualResult = hostSystemBean.isProbablyAndroid();
+    var actualResult = hostSystemBean.isProbablyTermux();
 
     // Then
     assertThat(actualResult).isEqualTo(expectedResult);
-
-    // Needed to ensure we observed the initial call we tested, otherwise
-    // failure for verification of no further interactions will not work.
-    verify(hostSystemBean).isProbablyAndroid();
-    verify(hostSystemBean).isProbablyLinux();
-
-    if (isProbablyLinux) {
-      verify(hostSystemBean).call("uname", "-o");
-      verifyNoMoreInteractions(hostSystemBean);
-    } else {
-      verifyNoMoreInteractions(hostSystemBean);
-    }
   }
 
   @DisplayName(".getWorkingDirectory() returns the working directory")
@@ -389,37 +352,5 @@ class HostSystemTest {
     assertThat(actualPathExt)
         .hasSize(4)
         .contains(".foo", ".bar", ".baz", ".bork", ".BORK");
-  }
-
-  @DisabledOnOs({OS.WINDOWS, OS.OTHER})
-  @DisplayName(".call(<command>) returns the expected output when successful")
-  @Test
-  void callReturnsTheExpectedOutputWhenSuccessful() {
-    // Given
-    var hostSystemBean = new HostSystem();
-
-    // When
-    var result = hostSystemBean.call("/bin/echo", "Hello, World");
-
-    // Then
-    assertThat(result)
-        .isPresent()
-        .get()
-        .isEqualTo("Hello, World");
-  }
-
-  @DisplayName(".call(<command>) returns the expected output when failed")
-  @Test
-  void callReturnsTheExpectedOutputWhenFailed() {
-    // Given
-    var hostSystemBean = new HostSystem();
-    var nonExistentProgramName = someBasicString() + ".exe";
-
-    // When
-    var result = hostSystemBean.call(nonExistentProgramName, "--version");
-
-    // Then
-    assertThat(result)
-        .isNotPresent();
   }
 }

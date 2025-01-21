@@ -88,7 +88,7 @@ public final class ProtocResolver {
 
     if (path.isPresent()) {
       var resolvedPath = path.get();
-  
+
       try {
         FileUtils.makeExecutable(resolvedPath);
 
@@ -117,9 +117,9 @@ public final class ProtocResolver {
   }
 
   private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
-    if (hostSystem.isProbablyAndroid()) {
+    if (hostSystem.isProbablyTermux()) {
       log.warn(
-          "It looks like you are using Android! If you are using an environment such as Termux, "
+          "It looks like you are using Termux! If you are using an environment such as Termux, "
               + "then you may find that the Maven-distributed versions of protoc fail to run. "
               + "This is due to Android's kernel restricting the types of system calls that can "
               + "be made. You may wish to run 'pkg in protobuf' to install a modified version of "

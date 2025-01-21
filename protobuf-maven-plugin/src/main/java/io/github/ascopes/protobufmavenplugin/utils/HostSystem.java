@@ -17,15 +17,11 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static java.util.function.Predicate.not;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.SortedSet;
@@ -37,8 +33,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A bean that exposes information about the underlying platform and the context of the invocation.
@@ -51,13 +45,12 @@ import org.slf4j.LoggerFactory;
 @Singleton  // Global singleton, shared between plugin instances potentially.
 public final class HostSystem {
 
-  private static final Logger log = LoggerFactory.getLogger(HostSystem.class);
-
   private final String operatingSystem;
   private final String cpuArchitecture;
   private final String pathSeparator;
   private final Path workingDirectory;
   private final Path javaHome;
+  private final String javaVendor;
   private final List<Path> path;
   private final SortedSet<String> pathExt;
 
@@ -69,17 +62,11 @@ public final class HostSystem {
 
   public HostSystem(Properties properties, Function<String, String> envProvider) {
     operatingSystem = properties.getProperty("os.name", "");
-    log.debug("Reported OS is {}", operatingSystem);
-
     cpuArchitecture = properties.getProperty("os.arch", "");
-    log.debug("Reported CPU architecture is {}", cpuArchitecture);
-
     pathSeparator = properties.getProperty("path.separator", "");
-
     workingDirectory = FileUtils.normalize(Path.of(""));
-
     javaHome = FileUtils.normalize(Path.of(properties.getProperty("java.home", "")));
-    log.debug("Reported java.home is {}", javaHome);
+    javaVendor = properties.getProperty("java.vendor", "");
 
     path = tokenizeFilePath(
         pathSeparator,
@@ -90,14 +77,12 @@ public final class HostSystem {
             .distinct()
             .filter(Files::isDirectory)
             .collect(Collectors.toUnmodifiableList()));
-    log.debug("Parsed PATH environment variable to {}", path);
 
     pathExt = tokenizeFilePath(
         pathSeparator,
         Objects.requireNonNullElse(envProvider.apply("PATHEXT"), ""),
         extensions -> extensions
             .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
-    log.debug("Parsed PATHEXT environment variable to {}", pathExt);
   }
 
   public String getOperatingSystem() {
@@ -112,14 +97,8 @@ public final class HostSystem {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("linux");
   }
 
-  public boolean isProbablyAndroid() {
-    if (isProbablyLinux()) {
-      return call("uname", "-o")
-          .filter("android"::equalsIgnoreCase)
-          .isPresent();
-    }
-
-    return false;
+  public boolean isProbablyTermux() {
+    return javaVendor.equalsIgnoreCase("termux");
   }
 
   public boolean isProbablyMacOs() {
@@ -148,37 +127,6 @@ public final class HostSystem {
 
   public SortedSet<String> getSystemPathExtensions() {
     return pathExt;
-  }
-
-  /**
-   * Run a command internally, and return the first line of the standard output.
-   *
-   * <p>If the program does not exist or some IO issue occurs, then an empty optional
-   * is returned.
-   *
-   * <p>This is visible for testing only.
-   *
-   * @param args the command arguments.
-   * @return the first line of stdout, or an empty optional if execution failed or no output
-   *     stream was available.
-   */
-  Optional<String> call(String... args) {
-    var procBuilder = new ProcessBuilder(args);
-    procBuilder.environment().putAll(System.getenv());
-
-    log.debug("Invoking command in subprocess {}", String.join(" ", args));
-
-    try {
-      var proc = procBuilder.start();
-      try (var reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-        return Optional.ofNullable(reader.readLine()).map(String::trim);
-      } finally {
-        proc.destroyForcibly();
-      }
-    } catch (IOException ex) {
-      log.debug("Ignoring exception caught while executing subprocess", ex);
-      return Optional.empty();
-    }
   }
 
   private static <T> T tokenizeFilePath(
