@@ -224,7 +224,7 @@ An example of providing custom arguments would be:
     <jvmConfigArg>-Xshare:off</jvmConfigArg>
     <jvmConfigArg>-Xms100m</jvmConfigArg>
     <jvmConfigArg>-Xmx500m</jvmConfigArg>
-    <jvmConfigArg>org.slf4j.simpleLogger.defaultLogLevel=DEBUG</jvmConfigArg>
+    <jvmConfigArg>-Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG</jvmConfigArg>
   </jvmConfigArgs>
 </jvmMavenPlugin>
 ```
