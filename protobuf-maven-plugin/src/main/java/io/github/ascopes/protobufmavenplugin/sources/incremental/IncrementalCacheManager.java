@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @since 2.7.0
  */
 @Named
-public class IncrementalCacheManager {
+public final class IncrementalCacheManager {
 
   // If we make breaking changes to the format of the cache, increment this value. This prevents
   // builds failing for users between versions if they do not perform a clean install first.
