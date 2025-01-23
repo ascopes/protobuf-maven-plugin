@@ -30,28 +30,28 @@ import java.util.stream.Collectors;
  * @author Ashley Scopes
  * @since 2.2.0
  */
-public final class SourceGlobFilter {
+final class SourceGlobFilter {
 
   private final List<PathMatcher> includes;
   private final List<PathMatcher> excludes;
 
-  public SourceGlobFilter() {
+  SourceGlobFilter() {
     this(List.of(), List.of());
   }
 
-  public SourceGlobFilter(List<String> includes, List<String> excludes) {
+  SourceGlobFilter(List<String> includes, List<String> excludes) {
     this.includes = compileMatchers(includes);
     this.excludes = compileMatchers(excludes);
   }
 
-  public boolean matches(Path relativeRoot, Path file) {
+  boolean matches(Path relativeRoot, Path file) {
     var relativeFile = relativeRoot.relativize(file);
 
     if (excludes.stream().anyMatch(checking(relativeFile))) {
       // File was explicitly excluded.
       return false;
     }
-    
+
     if (!includes.isEmpty() && includes.stream().noneMatch(checking(relativeFile))) {
       // File was not explicitly included when inclusions were present.
       return false;
