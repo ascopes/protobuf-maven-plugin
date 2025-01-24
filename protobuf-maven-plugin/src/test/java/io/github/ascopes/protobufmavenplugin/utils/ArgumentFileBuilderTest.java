@@ -20,6 +20,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,6 +73,29 @@ class ArgumentFileBuilderTest {
 
     // Then
     assertThat(actualResult).asString().isEqualTo(expectedResult);
+  }
+
+  @DisplayName(".toString() returns the expected result")
+  @MethodSource("javaArgumentFileCases")
+  @MethodSource("protocArgumentFileCases")
+  @ParameterizedTest(name = "for argument list {0}")
+  void toStringReturnsTheExpectedResult(
+      List<Object> givenArguments,
+      String ignored
+  ) {
+    // Given
+    var builder = new ArgumentFileBuilder();
+    var expectedResult = givenArguments.stream()
+        .map(Objects::toString)
+        .collect(Collectors.joining("\n"));
+
+    // When
+    for (var argument : givenArguments) {
+      builder.add(argument);
+    }
+
+    // Then
+    assertThat(builder).asString().isEqualTo(expectedResult);
   }
 
   static Stream<Arguments> javaArgumentFileCases() {

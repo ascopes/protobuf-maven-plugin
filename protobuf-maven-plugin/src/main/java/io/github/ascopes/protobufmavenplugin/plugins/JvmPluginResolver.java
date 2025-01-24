@@ -128,6 +128,8 @@ public final class JvmPluginResolver {
     var javaPath = hostSystem.getJavaExecutablePath();
     var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
 
+    log.debug("Arguments for JVM plugin {} (id {}) are:\n{}", pluginDescriptor, id, argLine);
+
     var scriptPath = hostSystem.isProbablyWindows()
         ? writeWindowsScripts(javaPath, scratchDir, argLine)
         : writePosixScripts(javaPath, scratchDir, argLine);

@@ -83,4 +83,13 @@ public final class ArgumentFileBuilder {
       appendable.append("\"\n");
     }
   }
+
+  @Override
+  public String toString() {
+    var sb = new StringBuilder();
+    for (var argument : arguments) {
+      sb.append(argument).append("\n");
+    }
+    return sb.toString().trim();
+  }
 }

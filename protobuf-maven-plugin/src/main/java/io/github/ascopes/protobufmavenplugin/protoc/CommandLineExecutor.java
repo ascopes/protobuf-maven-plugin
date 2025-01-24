@@ -56,6 +56,7 @@ public final class CommandLineExecutor {
 
     log.info("Invoking protoc");
     log.debug("Protoc binary is located at {}", protocPath);
+    log.debug("Protoc argument file:\n{},", argumentFileBuilder);
 
     var procBuilder = new ProcessBuilder(protocPath.toString(), "@" + argumentFile);
     procBuilder.environment().putAll(System.getenv());
