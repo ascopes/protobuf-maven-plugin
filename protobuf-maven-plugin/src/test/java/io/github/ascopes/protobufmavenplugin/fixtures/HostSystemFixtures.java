@@ -20,6 +20,13 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.mockito.quality.Strictness;
 
 /**
@@ -68,6 +75,29 @@ public final class HostSystemFixtures {
       when(hs.isProbablyWindows()).thenReturn(false);
     });
   }
+
+  public static HostSystemMockConfigurer path(Path... directories) {
+    var directoriesList = List.of(directories);
+
+    return namedConfigurer(
+        "Path containing " + Arrays.deepToString(directories),
+        hs -> when(hs.getSystemPath()).thenReturn(directoriesList)
+    );
+  }
+
+  public static HostSystemMockConfigurer pathExtensions(String... extensions) {
+    var extensionSet = Stream.of(extensions)
+        .collect(Collectors.collectingAndThen(
+            Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
+            Collections::unmodifiableSortedSet
+        ));
+
+    return namedConfigurer(
+        "Path extensions set to " + Arrays.deepToString(extensions),
+        hs -> when(hs.getSystemPathExtensions()).thenReturn(extensionSet)
+    );
+  }
+
 
   @FunctionalInterface
   public interface HostSystemMockConfigurer {

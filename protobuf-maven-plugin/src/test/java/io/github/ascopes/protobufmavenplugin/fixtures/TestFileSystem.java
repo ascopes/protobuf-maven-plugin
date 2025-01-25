@@ -26,8 +26,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Test file system support for testing logic across multiple platforms.
@@ -36,12 +34,12 @@ import org.slf4j.LoggerFactory;
  */
 public final class TestFileSystem implements Closeable {
 
-  private static final Logger log = LoggerFactory.getLogger(TestFileSystem.class);
-
   private final FileSystem fileSystem;
+  private final boolean isPosix;
 
-  private TestFileSystem(MemoryFileSystemBuilder builder) {
+  private TestFileSystem(MemoryFileSystemBuilder builder, boolean isPosix) {
     fileSystem = unchecked(() -> builder.build());
+    this.isPosix = isPosix;
   }
 
   @Override
@@ -57,8 +55,18 @@ public final class TestFileSystem implements Closeable {
     return unchecked(() -> {
       var dir = reduce(root, bits);
       Files.createDirectories(dir);
-      log.debug("Created directory '{}'", dir.toUri());
-      makeOwnerReadWrite(dir);
+
+      if (isPosix) {
+        // Apparently we need executable permissions too otherwise we cannot make the child
+        // executable.
+        changePermissions(dir, perms -> {
+          perms.clear();
+          perms.add(PosixFilePermission.OWNER_READ);
+          perms.add(PosixFilePermission.OWNER_WRITE);
+          perms.add(PosixFilePermission.OWNER_EXECUTE);
+        });
+      }
+
       return dir;
     });
   }
@@ -72,29 +80,59 @@ public final class TestFileSystem implements Closeable {
       var file = reduce(root, bits);
       Files.createDirectories(file.getParent());
       Files.createFile(file);
-      log.debug("Created file '{}'", file.toUri());
-      makeOwnerReadWrite(file);
+
+      if (isPosix) {
+        changePermissions(file, perms -> {
+          perms.clear();
+          perms.add(PosixFilePermission.OWNER_READ);
+          perms.add(PosixFilePermission.OWNER_WRITE);
+        });
+      }
+
       return file;
+    });
+  }
+
+  public Path givenExecutableFileExists(Path root, String... bits) {
+    return unchecked(() -> {
+      var file = reduce(root, bits);
+      Files.createDirectories(file.getParent());
+      Files.createFile(file);
+
+      if (isPosix) {
+        changePermissions(file, perms -> {
+          perms.clear();
+          perms.add(PosixFilePermission.OWNER_READ);
+          perms.add(PosixFilePermission.OWNER_WRITE);
+          perms.add(PosixFilePermission.OWNER_EXECUTE);
+        });
+      }
+
+      return file;
+    });
+  }
+
+  public Path givenExecutableSymbolicLinkExists(Path target, Path root, String... bits) {
+    return unchecked(() -> {
+      var source = reduce(root, bits);
+      Files.createDirectories(source.getParent());
+      Files.createSymbolicLink(source, target);
+
+      if (isPosix) {
+        changePermissions(source, perms -> {
+          perms.clear();
+          perms.add(PosixFilePermission.OWNER_READ);
+          perms.add(PosixFilePermission.OWNER_WRITE);
+          perms.add(PosixFilePermission.OWNER_EXECUTE);
+        });
+      }
+
+      return source;
     });
   }
 
   public Path givenFileExists(String... bits) {
     return givenFileExists(getRoot(), bits);
-  }
-
-  public Path givenSymbolicLinkExists(Path target, String... bits) {
-    return givenSymbolicLinkExists(target, getRoot(), bits);
-  }
-
-  public Path givenSymbolicLinkExists(Path target, Path root, String... bits) {
-    return unchecked(() -> {
-      var source = reduce(root, bits);
-      Files.createDirectories(source.getParent());
-      Files.createSymbolicLink(source, target);
-      log.debug("Created symlink '{}' pointing to '{}'", source.toUri(), target.toUri());
-      makeOwnerReadWrite(source);
-      return source;
-    });
   }
 
   public void changePermissions(
@@ -103,23 +141,11 @@ public final class TestFileSystem implements Closeable {
   ) {
     unchecked(() -> {
       // Wrap in a hashset so that we guarantee we can modify the result.
-      var permissions = new HashSet<>(Files.getPosixFilePermissions(file));
+      var originalPermissions = Files.getPosixFilePermissions(file);
+      var permissions = new HashSet<>(originalPermissions);
       modifier.accept(permissions);
       Files.setPosixFilePermissions(file, permissions);
     });
-  }
-
-  private void makeOwnerReadWrite(Path path) {
-    try {
-      changePermissions(path, perms -> {
-        perms.clear();
-        perms.add(PosixFilePermission.OWNER_READ);
-        perms.add(PosixFilePermission.OWNER_WRITE);
-        log.debug("Updated permissions for path '{}'", path.toUri());
-      });
-    } catch (UnsupportedOperationException ex) {
-      // Ignore.
-    }
   }
 
   private Path reduce(Path root, String... bits) {
@@ -130,11 +156,15 @@ public final class TestFileSystem implements Closeable {
   }
 
   public static TestFileSystem windows() {
-    return unchecked(() -> new TestFileSystem(MemoryFileSystemBuilder.newWindows()));
+    return unchecked(() -> new TestFileSystem(MemoryFileSystemBuilder.newWindows(), false));
+  }
+
+  public static TestFileSystem macOs() {
+    return unchecked(() -> new TestFileSystem(MemoryFileSystemBuilder.newMacOs(), true));
   }
 
   public static TestFileSystem linux() {
-    return unchecked(() -> new TestFileSystem(MemoryFileSystemBuilder.newLinux()));
+    return unchecked(() -> new TestFileSystem(MemoryFileSystemBuilder.newLinux(), true));
   }
 
   private static <T> T unchecked(IoExceptionThrowableSupplier<T> func) {
