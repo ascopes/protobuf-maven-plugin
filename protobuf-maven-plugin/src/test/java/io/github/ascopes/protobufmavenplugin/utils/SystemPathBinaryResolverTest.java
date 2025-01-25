@@ -58,10 +58,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenExecutableFileExists(fooDir, "do");
       fs.givenExecutableFileExists(fooDir, "ray");
@@ -69,14 +69,14 @@ class SystemPathBinaryResolverTest {
       fs.givenExecutableFileExists(bazDir, "sh");
       fs.givenExecutableFileExists(barDir, "soh");
       fs.givenExecutableFileExists(bazDir, "soh");
-      var expectedResult = fs.givenExecutableFileExists(barDir, "sh");
+      final var expectedResult = fs.givenExecutableFileExists(barDir, "sh");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("sh");
+      final var result = underTest.resolve("sh");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -94,10 +94,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenExecutableFileExists(fooDir, "do");
       fs.givenExecutableFileExists(fooDir, "ray");
@@ -106,15 +106,15 @@ class SystemPathBinaryResolverTest {
       fs.givenExecutableFileExists(barDir, "soh");
       fs.givenExecutableFileExists(bazDir, "soh");
 
-      var actualSh = fs.givenExecutableFileExists(bazDir, "bash");
-      var expectedResult = fs.givenExecutableSymbolicLinkExists(actualSh, barDir, "sh");
+      final var actualSh = fs.givenExecutableFileExists(bazDir, "bash");
+      final var expectedResult = fs.givenExecutableSymbolicLinkExists(actualSh, barDir, "sh");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("sh");
+      final var result = underTest.resolve("sh");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -132,11 +132,11 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var fooBinDir = fs.givenDirectoryExists("foo", "bin");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var fooBinDir = fs.givenDirectoryExists("foo", "bin");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenExecutableFileExists(fooDir, "do");
       fs.givenExecutableFileExists(fooDir, "ray");
@@ -144,14 +144,14 @@ class SystemPathBinaryResolverTest {
       fs.givenExecutableFileExists(fooBinDir, "protoc");
       fs.givenExecutableFileExists(barDir, "soh");
       fs.givenExecutableFileExists(bazDir, "soh");
-      var expectedResult = fs.givenExecutableFileExists(barDir, "protoc");
+      final var expectedResult = fs.givenExecutableFileExists(barDir, "protoc");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("protoc");
+      final var result = underTest.resolve("protoc");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -171,10 +171,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenExecutableFileExists(fooDir, "do");
       fs.givenExecutableFileExists(fooDir, "ray");
@@ -183,14 +183,14 @@ class SystemPathBinaryResolverTest {
       fs.givenExecutableFileExists(bazDir, "soh");
 
       fs.givenFileExists(fooDir, "bash");
-      var expectedResult = fs.givenExecutableFileExists(barDir, "bash");
+      final var expectedResult = fs.givenExecutableFileExists(barDir, "bash");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("bash");
+      final var result = underTest.resolve("bash");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -208,10 +208,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenExecutableFileExists(fooDir, "do");
       fs.givenExecutableFileExists(fooDir, "ray");
@@ -220,14 +220,14 @@ class SystemPathBinaryResolverTest {
       fs.givenExecutableFileExists(barDir, "soh");
       fs.givenExecutableFileExists(bazDir, "soh");
 
-      var expectedResult = fs.givenExecutableFileExists(borkDir, "protoc-gen-grpc-java");
+      final var expectedResult = fs.givenExecutableFileExists(borkDir, "protoc-gen-grpc-java");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("protoc-gen-grpc-java");
+      final var result = underTest.resolve("protoc-gen-grpc-java");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -245,10 +245,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenExecutableFileExists(fooDir, "do");
       fs.givenExecutableFileExists(fooDir, "ray");
@@ -257,14 +257,14 @@ class SystemPathBinaryResolverTest {
       fs.givenExecutableFileExists(barDir, "soh");
       fs.givenExecutableFileExists(bazDir, "soh");
 
-      var expectedResult = fs.givenExecutableFileExists(borkDir, "fah");
+      final var expectedResult = fs.givenExecutableFileExists(borkDir, "fah");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("fah");
+      final var result = underTest.resolve("fah");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -282,10 +282,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenFileExists(fooDir, "do");
       fs.givenFileExists(fooDir, "ray");
@@ -293,7 +293,7 @@ class SystemPathBinaryResolverTest {
       fs.givenFileExists(barDir, "soh");
       fs.givenFileExists(bazDir, "soh");
 
-      var expectedResult = fs.givenFileExists(fooDir, "trojan-horse.EXE");
+      final var expectedResult = fs.givenFileExists(fooDir, "trojan-horse.EXE");
       fs.givenFileExists(barDir, "trojan-horse.COM");
       fs.givenFileExists(bazDir, "trojan-horse.BAT");
 
@@ -321,10 +321,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenFileExists(fooDir, "do");
       fs.givenFileExists(fooDir, "ray.CMD");
@@ -333,7 +333,7 @@ class SystemPathBinaryResolverTest {
       fs.givenFileExists(barDir, "soh.EXE");
       fs.givenFileExists(bazDir, "soh");
 
-      var expectedResult = fs.givenFileExists(barDir, "pROtOc-GeN-sCAlA.ExE");
+      final var expectedResult = fs.givenFileExists(barDir, "pROtOc-GeN-sCAlA.ExE");
       fs.givenFileExists(bazDir, "pROtOc-GeN-sCAlA.com");
       fs.givenFileExists(borkDir, "pROtOc-GeN-sCAlA.MSC");
 
@@ -343,9 +343,9 @@ class SystemPathBinaryResolverTest {
           .configure(hostSystem);
 
       // When
-      var result1 = underTest.resolve("protoc-gen-scala");
-      var result2 = underTest.resolve("PROTOC-GEN-SCALA");
-      var result3 = underTest.resolve("pRoToC-gen-sCaLa");
+      final var result1 = underTest.resolve("protoc-gen-scala");
+      final var result2 = underTest.resolve("PROTOC-GEN-SCALA");
+      final var result3 = underTest.resolve("pRoToC-gen-sCaLa");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -369,10 +369,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenFileExists(fooDir, "do");
       fs.givenFileExists(fooDir, "ray");
@@ -384,7 +384,7 @@ class SystemPathBinaryResolverTest {
       fs.givenFileExists(barDir, "protoc.png");
       fs.givenFileExists(barDir, "protoc.BIN");
       fs.givenFileExists(bazDir, "protoc.TXT");
-      var expectedResult = fs.givenFileExists(borkDir, "protoc.EXE");
+      final var expectedResult = fs.givenFileExists(borkDir, "protoc.EXE");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(pathExtensions(".COM", ".EXE", ".BAT", ".CMD", ".VBS", ".JS", ".MSC"))
@@ -392,7 +392,7 @@ class SystemPathBinaryResolverTest {
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("protoc");
+      final var result = underTest.resolve("protoc");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes
@@ -411,10 +411,10 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenFileExists(fooDir, "do");
       fs.givenFileExists(fooDir, "ray");
@@ -425,7 +425,7 @@ class SystemPathBinaryResolverTest {
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("protoc");
+      final var result = underTest.resolve("protoc");
 
       // Then
       assertThat(result).isEmpty();
@@ -442,10 +442,10 @@ class SystemPathBinaryResolverTest {
   ) {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenFileExists(fooDir, "do");
       fs.givenFileExists(fooDir, "ray");
@@ -476,24 +476,24 @@ class SystemPathBinaryResolverTest {
   ) throws ResolutionException {
     try (var fs = fileSystemSupplier.get()) {
       // Given
-      var fooDir = fs.givenDirectoryExists("foo");
-      var barDir = fs.givenDirectoryExists("bar");
-      var bazDir = fs.givenDirectoryExists("baz");
-      var borkDir = fs.givenDirectoryExists("bork");
+      final var fooDir = fs.givenDirectoryExists("foo");
+      final var barDir = fs.givenDirectoryExists("bar");
+      final var bazDir = fs.givenDirectoryExists("baz");
+      final var borkDir = fs.givenDirectoryExists("bork");
 
       fs.givenFileExists(fooDir, "do");
       fs.givenFileExists(fooDir, "ray");
       fs.givenFileExists(fooDir, "me");
       fs.givenExecutableFileExists(fooDir, "protoc");
       fs.changePermissions(fooDir, Set::clear);
-      var expected = fs.givenExecutableFileExists(borkDir, "protoc");
+      final var expected = fs.givenExecutableFileExists(borkDir, "protoc");
 
       path(fooDir, barDir, bazDir, borkDir)
           .and(osConfigurer)
           .configure(hostSystem);
 
       // When
-      var result = underTest.resolve("protoc");
+      final var result = underTest.resolve("protoc");
 
       // Then
       //noinspection AssertBetweenInconvertibleTypes

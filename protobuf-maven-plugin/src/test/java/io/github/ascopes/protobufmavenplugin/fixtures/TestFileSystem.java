@@ -75,6 +75,10 @@ public final class TestFileSystem implements Closeable {
     return givenDirectoryExists(getRoot(), bits);
   }
 
+  public Path givenFileExists(String... bits) {
+    return givenFileExists(getRoot(), bits);
+  }
+
   public Path givenFileExists(Path root, String... bits) {
     return unchecked(() -> {
       var file = reduce(root, bits);
@@ -129,10 +133,6 @@ public final class TestFileSystem implements Closeable {
 
       return source;
     });
-  }
-
-  public Path givenFileExists(String... bits) {
-    return givenFileExists(getRoot(), bits);
   }
 
   public void changePermissions(
