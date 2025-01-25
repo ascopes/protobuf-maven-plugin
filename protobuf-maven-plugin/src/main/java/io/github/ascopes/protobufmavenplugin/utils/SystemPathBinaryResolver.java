@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -49,17 +49,22 @@ public final class SystemPathBinaryResolver {
         ? isWindowsMatch(name)
         : isPosixMatch(name);
 
-    for (var dir : hostSystem.getSystemPath()) {
-      try (var files = Files.walk(dir, 1)) {
-        var result = files.filter(predicate).findFirst();
+    try {
+      for (var dir : hostSystem.getSystemPath()) {
+        try (var files = Files.walk(dir, 1)) {
+          var result = files.filter(predicate).findFirst();
 
-        if (result.isPresent()) {
-          log.debug("Result for lookup of '{}' on PATH was {}", name, result.get());
-          return result;
+          if (result.isPresent()) {
+            log.debug("Result for lookup of '{}' on PATH was {}", name, result.get());
+            return result;
+          }
+
+        } catch (AccessDeniedException ex) {
+          log.debug("Ignoring directory '{}' as access is denied", dir, ex);
         }
-      } catch (IOException ex) {
-        throw new ResolutionException("An exception occurred while scanning the system PATH", ex);
       }
+    } catch (Exception ex) {
+      throw new ResolutionException("An exception occurred while scanning the system PATH", ex);
     }
 
     log.debug("No match found for '{}' on PATH", name);
@@ -75,7 +80,7 @@ public final class SystemPathBinaryResolver {
           .filter(hostSystem.getSystemPathExtensions()::contains)
           .isPresent();
 
-      log.debug(
+      log.trace(
           "Path '{}' matches name = {}, matches executable extension = {}",
           path,
           matchesName,
@@ -91,7 +96,7 @@ public final class SystemPathBinaryResolver {
       var matchesName = path.getFileName().toString().equals(name);
       var matchesExecutableFlag = Files.isExecutable(path);
 
-      log.debug(
+      log.trace(
           "Path '{}' matches name = {}, matches executable flag = {}",
           path,
           matchesName,
