@@ -19,6 +19,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -100,11 +101,11 @@ public final class ProjectInputResolver {
         request.isFailOnInvalidDependencies()
     );
 
-    var filter = new SourceGlobFilter();
-
     var importPaths = Stream
         .concat(request.getImportPaths().stream(), artifactPaths.stream())
         .collect(Collectors.toUnmodifiableList());
+
+    var filter = new SourceGlobFilter(List.of(), List.of());
 
     return sourceResolver.resolveSources(importPaths, filter);
   }

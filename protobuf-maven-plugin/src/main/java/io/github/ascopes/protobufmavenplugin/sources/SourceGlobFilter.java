@@ -35,10 +35,6 @@ final class SourceGlobFilter {
   private final List<PathMatcher> includes;
   private final List<PathMatcher> excludes;
 
-  SourceGlobFilter() {
-    this(List.of(), List.of());
-  }
-
   SourceGlobFilter(List<String> includes, List<String> excludes) {
     this.includes = compileMatchers(includes);
     this.excludes = compileMatchers(excludes);
@@ -47,12 +43,12 @@ final class SourceGlobFilter {
   boolean matches(Path relativeRoot, Path file) {
     var relativeFile = relativeRoot.relativize(file);
 
-    if (excludes.stream().anyMatch(checking(relativeFile))) {
+    if (excludes.stream().anyMatch(forPath(relativeFile))) {
       // File was explicitly excluded.
       return false;
     }
 
-    if (!includes.isEmpty() && includes.stream().noneMatch(checking(relativeFile))) {
+    if (!includes.isEmpty() && includes.stream().noneMatch(forPath(relativeFile))) {
       // File was not explicitly included when inclusions were present.
       return false;
     }
@@ -70,7 +66,7 @@ final class SourceGlobFilter {
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private static Predicate<PathMatcher> checking(Path path) {
+  private static Predicate<PathMatcher> forPath(Path path) {
     return matcher -> matcher.matches(path);
   }
 }
