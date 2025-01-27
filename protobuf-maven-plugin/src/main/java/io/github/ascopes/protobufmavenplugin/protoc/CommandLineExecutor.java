@@ -54,7 +54,7 @@ public final class CommandLineExecutor {
   ) throws IOException {
     var argumentFile = writeArgumentFile(argumentFileBuilder);
 
-    log.info("Invoking protoc");
+    log.info("Invoking protoc (enable debug logs for more details)");
     log.debug("Protoc binary is located at {}", protocPath);
     log.debug("Protoc argument file:\n{},", argumentFileBuilder);
 
@@ -71,49 +71,6 @@ public final class CommandLineExecutor {
     }
   }
 
-  private boolean runProcess(ProcessBuilder procBuilder) throws InterruptedException, IOException {
-    var startTimeNs = System.nanoTime();
-    var proc = procBuilder.start();
-
-    var stdoutThread = redirectOutput(proc.getInputStream(), log::info);
-    var stderrThread = redirectOutput(proc.getErrorStream(), log::warn);
-
-    var exitCode = proc.waitFor();
-    var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
-
-    // Ensure we've flushed the logs through before continuing.
-    stdoutThread.join();
-    stderrThread.join();
-
-    if (exitCode == 0) {
-      log.info("protoc returned exit code 0 (success) after {}ms", elapsedTimeMs);
-      return true;
-    } else {
-      log.error("protoc returned exit code {} (error) after {}ms", exitCode, elapsedTimeMs);
-      return false;
-    }
-  }
-
-  private Thread redirectOutput(InputStream stream, Consumer<String> logger) {
-    // We shouldn't need to flag to these threads to stop as they should immediately
-    // terminate once the input streams are closed.
-    var thread = new Thread(() -> {
-      String line;
-      try (var reader = new BufferedReader(new InputStreamReader(stream))) {
-        while ((line = reader.readLine()) != null) {
-          logger.accept(line.stripTrailing());
-        }
-      } catch (IOException ex) {
-        log.error("Stream error, output will be discarded", ex);
-      }
-    });
-
-    thread.setDaemon(true);
-    thread.setName("protoc output redirector thread for " + stream);
-    thread.start();
-    return thread;
-  }
-
   private Path writeArgumentFile(ArgumentFileBuilder argumentFileBuilder) throws IOException {
     var file = temporarySpace.createTemporarySpace("protoc").resolve("args.txt");
     log.debug("Writing to protoc argument file at {}", file);
@@ -125,5 +82,71 @@ public final class CommandLineExecutor {
 
     log.debug("Written arguments were:\n{}", writer);
     return file;
+  }
+
+  private boolean runProcess(ProcessBuilder procBuilder) throws InterruptedException, IOException {
+    final var startTimeNs = System.nanoTime();
+    final var proc = procBuilder.start();
+
+    final var stdoutThread = redirectOutput("stdout", proc.pid(), proc.getInputStream(), log::info);
+    final var stderrThread = redirectOutput("stderr", proc.pid(), proc.getErrorStream(), log::warn);
+
+    final var exitCode = proc.waitFor();
+    final var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
+
+    // Ensure we've flushed the logs through before continuing.
+    log.trace("Waiting for stdout and stderr threads to terminate...");
+    stdoutThread.join();
+    stderrThread.join();
+    log.trace("Stdout and stderr threads terminated");
+
+    if (exitCode == 0) {
+      log.info(
+          "protoc (pid {}) returned exit code 0 (success) after {}ms",
+          proc.pid(),
+          elapsedTimeMs
+      );
+      return true;
+
+    } else {
+      log.error(
+          "protoc (pid {)} returned exit code {} (error) after {}ms",
+          proc.pid(),
+          exitCode,
+          elapsedTimeMs
+      );
+      return false;
+    }
+  }
+
+  private Thread redirectOutput(
+      String streamName,
+      long pid,
+      InputStream stream,
+      Consumer<String> logger
+  ) {
+    // We shouldn't need to flag to these threads to stop as they should immediately
+    // terminate once the input streams are closed.
+    var thread = new Thread(() -> {
+      String line;
+      try (var reader = new BufferedReader(new InputStreamReader(stream))) {
+        while ((line = reader.readLine()) != null) {
+          var entry = String.format(
+              "[protoc (pid %d) - %s] %s",
+              pid,
+              streamName,
+              line.stripTrailing()
+          );
+          logger.accept(entry);
+        }
+      } catch (IOException ex) {
+        log.error("Stream error, output will be discarded", ex);
+      }
+    });
+
+    thread.setDaemon(true);
+    thread.setName("protoc output redirector thread for " + stream);
+    thread.start();
+    return thread;
   }
 }
