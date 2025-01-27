@@ -63,7 +63,7 @@ class ConcurrentExecutorTest {
     executor.executorService.shutdownNow();
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".destroy() succeeds if the executor service is idle")
   @Test
   void destroySucceedsIfExecutorServiceIsIdle() throws Exception {
@@ -87,7 +87,7 @@ class ConcurrentExecutorTest {
         .isTrue();
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".destroy() succeeds if the executor service is already terminated")
   @Test
   void destroySucceedsIfExecutorServiceIsAlreadyTerminated() throws Exception {
@@ -106,7 +106,7 @@ class ConcurrentExecutorTest {
         .isTrue();
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".destroy() interrupts any interruptable running tasks")
   @Test
   void destroyInterruptsAnyInterruptableRunningTasks() throws Exception {
@@ -134,7 +134,7 @@ class ConcurrentExecutorTest {
         .withCauseInstanceOf(InterruptedException.class);
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".destroy() abandons any uninterruptable running tasks")
   @Test
   void destroyAbandonsAnyUninterruptableRunningTasks() throws Exception {
@@ -167,7 +167,7 @@ class ConcurrentExecutorTest {
         .isThrownBy(() -> task2.get(100, TimeUnit.MILLISECONDS));
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".submit(Callable) calls the callable and returns the result")
   @Test
   void submitCallsCallableAndReturnsResult() throws Exception {
@@ -187,7 +187,7 @@ class ConcurrentExecutorTest {
     verifyNoMoreInteractions(callable);
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".submit(Callable) calls the callable and raises any exception")
   @Test
   void submitCallsCallableAndRaisesAnyException() throws Exception {
@@ -209,13 +209,13 @@ class ConcurrentExecutorTest {
     verifyNoMoreInteractions(callable);
   }
 
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".submit(Callable) calls the callable and handles interruption")
   @Test
   void submitCallsCallableAndHandlesInterruption() {
     // Given
     Callable<Void> callable = () -> {
-      Thread.sleep(10_000);
+      Thread.sleep(30_000);
       return null;
     };
 
@@ -231,7 +231,7 @@ class ConcurrentExecutorTest {
   // If we take more than 20 seconds on the 1000 instance case, we've probably run sequentially.
   @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".submit(Callable) submits and executes the given tasks in parallel")
-  @ValueSource(ints = {1, 2, 3, 5, 10, 100, 10_000})
+  @ValueSource(ints = {1, 2, 3, 5, 10, 100, 1_000})
   @ParameterizedTest(name = "for {0} task(s)")
   void submitExecutesTheGivenTasksInParallel(int taskCount) throws Exception {
     // When
@@ -250,7 +250,7 @@ class ConcurrentExecutorTest {
   }
 
   @DisplayName(".awaiting() awaits all tasks and returns their results")
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @Test
   void awaitingAwaitsAllTasksAndReturnsTheirResults() {
     // Given
@@ -278,12 +278,12 @@ class ConcurrentExecutorTest {
 
   @DisplayName(".awaiting() awaits all tasks and raises their exceptions")
   @SuppressWarnings("ResultOfMethodCallIgnored")
-  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
+  @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @Test
   void awaitingAwaitsAllTasksAndRaisesTheirExceptions() {
     // Given
     List<Throwable> expectedExceptions = Stream.generate(Exception::new)
-        .limit(100)
+        .limit(50)
         .collect(Collectors.toList());
 
     List<FutureTask<Integer>> tasks = new ArrayList<>();

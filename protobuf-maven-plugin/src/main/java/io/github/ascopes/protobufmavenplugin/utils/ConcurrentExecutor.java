@@ -18,12 +18,16 @@ package io.github.ascopes.protobufmavenplugin.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
@@ -50,35 +54,8 @@ public final class ConcurrentExecutor {
 
   @Inject
   public ConcurrentExecutor() {
-    ExecutorService executorService;
-
-    try {
-      log.debug("Trying to create new Loom virtual thread pool");
-      executorService = (ExecutorService) Executors.class
-          .getMethod("newVirtualThreadPerTaskExecutor")
-          .invoke(null);
-
-      log.debug("Loom virtual thread pool creation was successful!");
-
-    } catch (Exception ex) {
-      var threadGroup = new ThreadGroup(getClass().getName());
-      // As of v2.7.0, we use a cached thread pool as the majority of our operations are
-      // short-lived IO bound tasks. The unbound nature reduces the risk of deadlocking in
-      // some cases on older hardware.
-      executorService = Executors.newCachedThreadPool(runnable -> {
-        var thread = new Thread(threadGroup, runnable);
-        thread.setDaemon(true);
-        return thread;
-      });
-      log.debug(
-          "Falling back to new cached thread pool (group={}, reason={}: {})",
-          threadGroup,
-          ex.getClass().getName(),
-          ex.getMessage()
-      );
-    }
-
-    this.executorService = executorService;
+    executorService = newVirtualThreadExecutor()
+        .orElseGet(ConcurrentExecutor::newPlatformThreadExecutor);
   }
 
   /**
@@ -139,5 +116,41 @@ public final class ConcurrentExecutor {
         task.cancel(true);
       }
     }
+  }
+
+  private static Optional<ExecutorService> newVirtualThreadExecutor() {
+    try {
+      log.debug("Trying to create new Loom virtual thread pool");
+      var executorService = Executors.class
+          .getMethod("newVirtualThreadPerTaskExecutor")
+          .invoke(null);
+
+      log.debug("Loom virtual thread pool creation was successful!");
+      return Optional.of(executorService)
+          .map(ExecutorService.class::cast);
+
+    } catch (Exception ex) {
+      log.debug(
+          "Loom virtual thread pool is not available on this platform, continuing anyway...",
+          ex
+      );
+      return Optional.empty();
+    }
+  }
+
+  private static ExecutorService newPlatformThreadExecutor() {
+    var cpuCores = Runtime.getRuntime().availableProcessors();
+    var initialThreads = 8;
+    var maxThreads = cpuCores * 8;
+    var keepAliveSeconds = 15;
+    var workQueue = new LinkedBlockingQueue<Runnable>();
+
+    return new ThreadPoolExecutor(
+        initialThreads,
+        maxThreads,
+        keepAliveSeconds,
+        TimeUnit.SECONDS,
+        workQueue
+    );
   }
 }
