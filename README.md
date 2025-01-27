@@ -11,14 +11,98 @@
 
 # protobuf-maven-plugin
 
-A scratch-built and modern Maven plugin for seamless protoc integration, with support for custom plugins, including gRPC.
+A scratch-built, modern Maven plugin for seamless protoc integration. Provides support for native
+and JVM-based protoc plugins, as well as automatic dependency resolution and incremental code
+generation.
+
+Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
+and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
+
+## Features
+
+- Maven 4 support.
+- Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
+- Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
+- Supports Java and JVM Kotlin sources out of the box.
+- Plugin support. Need reactive support, Scala support, or gRPC? Just add the plugin and away you go.
+  - Ability to use plugins implemented for the JVM (JAR plugins and classpath plugins) without needing them to be bundled as
+    native binaries first.
+  - Ability to use regular `protoc` plugins (native binaries).
+  - Plugins can be resolved from Maven repositories, URLs, or the system path.
+- Generation of main and test sources.
+- Importing of `*.proto` sources from classpath dependencies.
+- Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
+  PHP, Ruby, and Rust.
+- Aims to keep builds reproducible and easily debuggable where possible.
+- Incremental compilation.
+
+## Quick examples
+
+### Basic generation
+
+Getting started is very simple. The following will compile any sources that are found in
+`src/main/protobuf` to Java classes and pop them in `target/generated-sources` where Maven
+will automatically discover them and compile them to Java bytecode.
 
 ```xml
-
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>${protobuf-maven-plugin.version}</version>
+
+  <configuration>
+    <protocVersion>${protobuf-java.version}</protocVersion>
+  </configuration>
+
+  <executions>
+    <execution>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+```
+
+Any `*.proto` files that are discovered in project dependencies will be made available to `protoc`,
+so you can import them in exactly the same way you would with Java classes!
+
+### Other language support
+
+Other language generation targets are also available. This plugin provides support for generating all
+the languages that protoc supports out of the box, including Kotlin, Python, Python typeshed stubs,
+Ruby, PHP, C#, C++, and Rust.
+
+The following will generate Java classes and corresponding Kotlin wrappers:
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+
+  <configuration>
+    <kotlinEnabled>true</kotlinEnabled>
+    <protocVersion>${protobuf-java.version}</protocVersion>
+  </configuration>
+
+  <executions>
+    <execution>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+```
+
+### Plugins
+
+The following snippet will compile any protobuf sources in `src/main/protobuf` to Java source code,
+and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
     <protocVersion>${protobuf-java.version}</protocVersion>
@@ -49,29 +133,6 @@ A scratch-built and modern Maven plugin for seamless protoc integration, with su
   </executions>
 </plugin>
 ```
-
-## Features
-
-- Maven 4 support.
-- Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
-- Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
-- Supports Java and JVM Kotlin sources out of the box.
-- Plugin support. Need reactive support, Scala support, or gRPC? Just add the plugin and away you go.
-  - Ability to use plugins implemented for the JVM (JAR plugins and classpath plugins) without needing them to be bundled as
-    native binaries first.
-  - Ability to use regular `protoc` plugins (native binaries).
-  - Plugins can be resolved from Maven repositories, URLs, or the system path.
-- Generation of main and test sources.
-- Importing of `*.proto` sources from classpath dependencies.
-- Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
-  PHP, Ruby, and Rust.
-- Aims to keep builds reproducible and easily debuggable where possible.
-- Incremental compilation.
-
-## Usage
-
-Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
-and  examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
 ## Why do we need _another_ plugin?
 
