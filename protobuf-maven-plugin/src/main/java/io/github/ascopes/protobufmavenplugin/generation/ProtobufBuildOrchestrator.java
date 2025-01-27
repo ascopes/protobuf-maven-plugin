@@ -226,8 +226,8 @@ public final class ProtobufBuildOrchestrator {
     log.info(
         "Generating source code from {} (discovered {} within {})",
         pluralize(sourcesToCompile.size(), "source file"),
-        pluralize(projectInputs.getCompilableSources().size(), "source path"),
-        pluralize(totalSourceFileCount, "source file")
+        pluralize(totalSourceFileCount, "source file"),
+        pluralize(projectInputs.getCompilableSources().size(), "source path")
     );
 
     return sourcesToCompile;
