@@ -77,7 +77,7 @@ public final class ProtobufBuildOrchestrator {
   }
 
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
-    log.debug("Protobuf GenerationRequest is: {}", request);
+    log.debug("The provided protobuf GenerationRequest is: {}", request);
 
     final var protocPath = discoverProtocPath(request);
 
@@ -90,7 +90,7 @@ public final class ProtobufBuildOrchestrator {
             + "configuration and try again.");
         return false;
       } else {
-        log.warn("No protobuf sources were found. There is nothing to do!");
+        log.warn("No protobuf sources found.");
         return true;
       }
     }
@@ -217,17 +217,17 @@ public final class ProtobufBuildOrchestrator {
 
     if (sourcesToCompile.isEmpty()) {
       log.info(
-          "Found {} source files, but none have any changes, so there is nothing to do",
+          "Found {} source files, all are up-to-date, none will be regenerated this time",
           totalSourceFileCount
       );
       return List.of();
     }
 
     log.info(
-        "Generating source code from {} (discovered within {}, from a total of {})",
+        "Generating source code from {} (discovered {} within {})",
         pluralize(sourcesToCompile.size(), "source file"),
-        pluralize(projectInputs.getCompilableSources().size(), "source root"),
-        pluralize(totalSourceFileCount, "candidate source file")
+        pluralize(projectInputs.getCompilableSources().size(), "source path"),
+        pluralize(totalSourceFileCount, "source file")
     );
 
     return sourcesToCompile;
@@ -243,8 +243,8 @@ public final class ProtobufBuildOrchestrator {
       // Protoc does not selectively update an existing descriptor with differentiated
       // changes. Using incremental compilation will result in behaviour that is
       // inconsistent, so do not allow it here.
-      log.info("Incremental compilation will be disabled since proto descriptor generation "
-          + "was requested.");
+      log.info("Incremental compilation is disabled since proto descriptor generation "
+          + "has been requested.");
       return false;
     }
 
