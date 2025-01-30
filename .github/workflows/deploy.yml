@@ -54,7 +54,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 23
+          java-version: 21
           distribution: temurin
           server-id: ossrh
           server-username: OSSRH_USERNAME
