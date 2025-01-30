@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * @since 2.6.0
  */
 @Named
-public final class JvmPluginResolver {
+final class JvmPluginResolver {
 
   private static final Set<String> ALLOWED_SCOPES = Set.of("compile", "runtime", "system");
   private static final List<String> DEFAULT_JVM_ARGS = List.of();
@@ -83,7 +83,7 @@ public final class JvmPluginResolver {
   private final SystemPathBinaryResolver pathResolver;
 
   @Inject
-  public JvmPluginResolver(
+  JvmPluginResolver(
       HostSystem hostSystem,
       MavenArtifactPathResolver artifactPathResolver,
       TemporarySpace temporarySpace,
@@ -95,7 +95,7 @@ public final class JvmPluginResolver {
     this.pathResolver = pathResolver;
   }
 
-  public Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
+  Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
       Collection<? extends MavenProtocPlugin> pluginDescriptors
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();

@@ -33,12 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Protoc plugin resolver for native binaries on the system.
+ * Protoc plugin resolver that resolves executable platform binaries.
  *
  * @author Ashley Scopes
  */
 @Named
-public final class BinaryPluginResolver {
+final class BinaryPluginResolver {
 
   private static final Logger log = LoggerFactory.getLogger(BinaryPluginResolver.class);
 
@@ -48,7 +48,7 @@ public final class BinaryPluginResolver {
   private final UrlResourceFetcher urlResourceFetcher;
 
   @Inject
-  public BinaryPluginResolver(
+  BinaryPluginResolver(
       MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
@@ -60,19 +60,19 @@ public final class BinaryPluginResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
+  Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
       Collection<? extends MavenProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveMavenPlugin);
   }
 
-  public Collection<? extends ResolvedProtocPlugin> resolvePathPlugins(
+  Collection<? extends ResolvedProtocPlugin> resolvePathPlugins(
       Collection<? extends PathProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolvePathPlugin);
   }
 
-  public Collection<? extends ResolvedProtocPlugin> resolveUrlPlugins(
+  Collection<? extends ResolvedProtocPlugin> resolveUrlPlugins(
       Collection<? extends UrlProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveUrlPlugin);
