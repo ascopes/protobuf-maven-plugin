@@ -65,13 +65,13 @@ public final class PlatformClassifierFactory {
 
     if (hostSystem.isProbablyLinux()) {
       osMapping = LINUX_MAPPING;
-  
+
     } else if (hostSystem.isProbablyMacOs()) {
       osMapping = MAC_OS_MAPPING;
-  
+
     } else if (hostSystem.isProbablyWindows()) {
       osMapping = WINDOWS_MAPPING;
-  
+
     } else {
       osMapping = FALLBACK_MAPPING;
     }
