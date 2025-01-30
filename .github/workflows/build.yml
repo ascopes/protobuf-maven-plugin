@@ -166,3 +166,23 @@ jobs:
           retention-days: 7
           include-hidden-files: true
           if-no-files-found: error
+
+  notify-coverage:
+    name: Notify of coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - build
+      - validate-codecov
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Publish code coverage
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          run_command: send-notifications
