@@ -19,6 +19,7 @@ import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -44,7 +45,16 @@ public final class ProjectPluginResolver {
     this.jvmPluginResolver = jvmPluginResolver;
   }
 
-  public Collection<ResolvedProtocPlugin> resolveProjectPlugins(
+  /**
+   * Resolve all {@code protoc} plugins.
+   *
+   * <p>Note that duplicates are allowed.
+   *
+   * @param request the generation request.
+   * @return the list of plugins.
+   * @throws ResolutionException if resolution fails.
+   */
+  public List<ResolvedProtocPlugin> resolveProjectPlugins(
       GenerationRequest request
   ) throws ResolutionException {
     return Stream.<Collection<? extends ResolvedProtocPlugin>>builder()
