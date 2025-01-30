@@ -45,7 +45,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 23
+          java-version: 21
           distribution: temurin
           cache: maven
 
@@ -61,9 +61,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-name: [ubuntu-latest]
-        java-version: [11, 23]
-        maven: [default]
         include:
           # Cross-OS tests
           - os-name: macos-latest
@@ -73,22 +70,40 @@ jobs:
             java-version: 11
             maven: default
           - os-name: ubuntu-latest
+            java-version: 17
+            maven: default
+          - os-name: ubuntu-latest
+            java-version: 21
+            maven: default
+          - os-name: ubuntu-latest
+            java-version: GA
+            maven: default
+          # Testing other versions of Maven
+          - os-name: ubuntu-latest
             java-version: 11
             maven: 3.8.8
           - os-name: ubuntu-latest
-            java-version: 17
+            java-version: 21
             maven: 4.0.0-rc-2
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set up Temurin JDK
+        if: matrix.java-version != 'GA'
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ matrix.java-version }}
-          distribution: 'temurin'
           cache: maven
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+
+      - name: Set up Oracle JDK
+        if: matrix.java-version == 'GA'
+        uses: oracle-actions/setup-java@v1
+        with:
+          website: jdk.java.net
+          release: ${{ matrix.java-version }}
 
       - name: Set Maven version
         shell: bash
