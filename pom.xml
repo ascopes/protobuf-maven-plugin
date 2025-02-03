@@ -90,8 +90,7 @@
   <scm>
     <url>https://github.com/ascopes/protobuf-maven-plugin</url>
     <connection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</connection>
-    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin
-    </developerConnection>
+    <developerConnection>scm:git:https://github.com/ascopes/protobuf-maven-plugin</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
