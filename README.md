@@ -15,8 +15,9 @@ A scratch-built, modern Maven plugin for seamless protoc integration. Provides s
 and JVM-based protoc plugins, as well as automatic dependency resolution and incremental code
 generation.
 
-Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
-and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
+> [!NOTE]
+> Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
+> and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
 ## Features
 
@@ -63,8 +64,9 @@ will automatically discover them and compile them to Java bytecode.
 </plugin>
 ```
 
-Any `*.proto` files that are discovered in project dependencies will be made available to `protoc`,
-so you can import them in exactly the same way you would with Java classes!
+> [!TIP]
+> Any `*.proto` files that are discovered in project dependencies will be made available to `protoc`,
+> so you can import them in exactly the same way you would with Java classes!
 
 ### Other language support
 
