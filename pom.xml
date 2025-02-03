@@ -179,6 +179,12 @@
 
       <dependency>
         <groupId>org.apache.maven</groupId>
+        <artifactId>maven-core</artifactId>
+        <version>${maven-core.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
         <artifactId>maven-plugin-api</artifactId>
         <version>${maven-plugin-api.version}</version>
       </dependency>
@@ -193,12 +199,6 @@
         <groupId>org.apache.maven.resolver</groupId>
         <artifactId>maven-resolver-api</artifactId>
         <version>${maven-resolver-api.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-core</artifactId>
-        <version>${maven-core.version}</version>
       </dependency>
 
       <dependency>
@@ -382,7 +382,7 @@
 
           <configuration>
             <compilerArgs>
-              <compilerArg>-Xlint:all,-classfile,-processing,-requires-automatic,-serial</compilerArg>
+              <compilerArg>-Xlint:all,-classfile,-processing,-serial</compilerArg>
             </compilerArgs>
             <failOnWarning>true</failOnWarning>
             <proc>full</proc>
