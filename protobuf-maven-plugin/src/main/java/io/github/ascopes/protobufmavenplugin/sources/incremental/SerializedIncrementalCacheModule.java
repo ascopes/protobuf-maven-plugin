@@ -39,7 +39,7 @@ final class SerializedIncrementalCacheModule extends SimpleModule {
 
   private static final class PathKeyDeserializer extends KeyDeserializer {
     @Override
-    public Object deserializeKey(String key, DeserializationContext context) {
+    public Path deserializeKey(String key, DeserializationContext context) {
       return Path.of(URI.create(key));
     }
   }
