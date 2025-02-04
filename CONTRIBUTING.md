@@ -18,8 +18,9 @@ Make sure you provide full details of what you are trying to do and why. Include
 what you expect to happen, versus what actually happens. Run `mvn` or `mvnw` in your project
 with the `--errors` flag to get full exception stacktraces.
 
-If possible and appropriate, try to show `protoc` being called directly and producing the output you
-expect.
+> [!IMPORTANT]
+> If possible and appropriate, try to show `protoc` being called directly and producing the output you
+> expect.
 
 Please include the name of your OS (`uname -o`), the CPU architecture (`uname -m`), the version
 of Maven in use (`mvn --version` or `./mvnw --version`), and the version of Java in use
@@ -86,7 +87,8 @@ This project uses semantic versioning!
 If you need to add a new user-facing feature (i.e. something that is accessible via the interface used in
 a `pom.xml` when using this plugin), you should bump the minor version of this plugin.
 
-If you are making a breaking API change, you need to bump the major version.
+> [!NOTE]
+> If you are making a breaking API change, you need to bump the major version.
 
 I'll advise about this during PR reviews as needed, but you can use the `scripts/bump-versions.sh` script
 to do this for you. It will not change anything if the versions are already set up correctly.
