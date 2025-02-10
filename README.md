@@ -1,4 +1,5 @@
 ![Java 11+](https://img.shields.io/badge/Java-11+-red?logo=openjdk&logoColor=white)
+![Maven 3.8](https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven)
 ![GitHub License](https://img.shields.io/github/license/ascopes/protobuf-maven-plugin)
 [![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
