@@ -18,15 +18,12 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.slf4j.Logger;
@@ -86,19 +83,32 @@ public final class CommandLineExecutor {
 
   private boolean runProcess(ProcessBuilder procBuilder) throws InterruptedException, IOException {
     final var startTimeNs = System.nanoTime();
+
+    log.trace("Starting protoc subprocess");
     final var proc = procBuilder.start();
 
-    final var stdoutThread = redirectOutput("stdout", proc.pid(), proc.getInputStream(), log::info);
-    final var stderrThread = redirectOutput("stderr", proc.pid(), proc.getErrorStream(), log::warn);
+    final var stdoutRedirector = new OutputRedirectorDaemon(
+        "protoc - stdout",
+        proc.pid(),
+        proc.getInputStream(),
+        log::info
+    );
+    final var stderrRedirector = new OutputRedirectorDaemon(
+        "protoc - stderr",
+        proc.pid(),
+        proc.getErrorStream(),
+        log::warn
+    );
 
+    log.trace("Waiting for protoc to exit...");
     final var exitCode = proc.waitFor();
     final var elapsedTimeMs = (System.nanoTime() - startTimeNs) / 1_000_000L;
 
     // Ensure we've flushed the logs through before continuing.
-    log.trace("Waiting for stdout and stderr threads to terminate...");
-    stdoutThread.join();
-    stderrThread.join();
-    log.trace("Stdout and stderr threads terminated");
+    log.trace("Waiting for stdout and stderr redirectors to terminate...");
+    stdoutRedirector.await();
+    stderrRedirector.await();
+    log.trace("Stdout and stderr redirectors terminated");
 
     if (exitCode == 0) {
       log.info(
@@ -110,43 +120,12 @@ public final class CommandLineExecutor {
 
     } else {
       log.error(
-          "protoc (pid {)} returned exit code {} (error) after {}ms",
+          "protoc (pid {}) returned exit code {} (error) after {}ms",
           proc.pid(),
           exitCode,
           elapsedTimeMs
       );
       return false;
     }
-  }
-
-  private Thread redirectOutput(
-      String streamName,
-      long pid,
-      InputStream stream,
-      Consumer<String> logger
-  ) {
-    // We shouldn't need to flag to these threads to stop as they should immediately
-    // terminate once the input streams are closed.
-    var thread = new Thread(() -> {
-      String line;
-      try (var reader = new BufferedReader(new InputStreamReader(stream))) {
-        while ((line = reader.readLine()) != null) {
-          var entry = String.format(
-              "[protoc (pid %d) - %s] %s",
-              pid,
-              streamName,
-              line.stripTrailing()
-          );
-          logger.accept(entry);
-        }
-      } catch (IOException ex) {
-        log.error("Stream error, output will be discarded", ex);
-      }
-    });
-
-    thread.setDaemon(true);
-    thread.setName("protoc output redirector thread for " + stream);
-    thread.start();
-    return thread;
   }
 }
