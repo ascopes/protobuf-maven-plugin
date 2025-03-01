@@ -15,8 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.nio.file.Path;
 import java.util.Map;
 import org.immutables.value.Value.Immutable;
@@ -31,9 +29,8 @@ import org.immutables.value.Value.Immutable;
  * @since 2.7.0
  */
 @Immutable
-@JsonDeserialize(builder = ImmutableSerializedIncrementalCache.Builder.class)
-@JsonSerialize(as = ImmutableSerializedIncrementalCache.class)
-interface SerializedIncrementalCache {
+interface IncrementalCache {
+
   Map<Path, String> getDependencies();
 
   Map<Path, String> getSources();

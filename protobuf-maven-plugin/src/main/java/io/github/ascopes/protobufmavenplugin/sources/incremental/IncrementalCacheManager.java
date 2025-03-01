@@ -17,9 +17,6 @@ package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
 import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
@@ -55,24 +52,22 @@ public final class IncrementalCacheManager {
 
   // If we make breaking changes to the format of the cache, increment this value. This prevents
   // builds failing for users between versions if they do not perform a clean install first.
-  private static final String SPEC_VERSION = "1.1";
+  private static final String SPEC_VERSION = "2.0";
   private static final Logger log = LoggerFactory.getLogger(IncrementalCacheManager.class);
 
   private final ConcurrentExecutor concurrentExecutor;
   private final TemporarySpace temporarySpace;
-  private final ObjectMapper objectMapper;
+  private final IncrementalCacheSerializer serializedIncrementalCacheSerializer;
 
   @Inject
-  public IncrementalCacheManager(
+  IncrementalCacheManager(
       ConcurrentExecutor concurrentExecutor,
-      TemporarySpace temporarySpace
+      TemporarySpace temporarySpace,
+      IncrementalCacheSerializer serializedIncrementalCacheSerializer
   ) {
     this.concurrentExecutor = concurrentExecutor;
     this.temporarySpace = temporarySpace;
-
-    objectMapper = new JsonMapper()
-        .configure(SerializationFeature.INDENT_OUTPUT, true)
-        .registerModule(new SerializedIncrementalCacheModule());
+    this.serializedIncrementalCacheSerializer = serializedIncrementalCacheSerializer;
   }
 
   public void updateIncrementalCache() throws IOException {
@@ -112,9 +107,7 @@ public final class IncrementalCacheManager {
 
     var sourceFilesChanged = nextBuildCache.getSources().keySet()
         .stream()
-        .filter(isSourceFileDifferent(previousBuildCache, nextBuildCache))
-        .findAny()
-        .isPresent();
+        .anyMatch(isSourceFileDifferent(previousBuildCache, nextBuildCache));
 
     if (sourceFilesChanged) {
       log.info("Detected that source files have changed, all sources will be recompiled.");
@@ -125,8 +118,8 @@ public final class IncrementalCacheManager {
   }
 
   private Predicate<Path> isSourceFileDifferent(
-      SerializedIncrementalCache previousBuildCache,
-      SerializedIncrementalCache nextBuildCache
+      IncrementalCache previousBuildCache,
+      IncrementalCache nextBuildCache
   ) {
     return file -> !Objects.equals(
         previousBuildCache.getSources().get(file),
@@ -134,11 +127,11 @@ public final class IncrementalCacheManager {
     );
   }
 
-  private Optional<SerializedIncrementalCache> readIncrementalCache(Path path) throws IOException {
+  private Optional<IncrementalCache> readIncrementalCache(Path path) throws IOException {
     log.debug("Reading incremental cache in from {}", path);
 
-    try (var inputStream = Files.newInputStream(path)) {
-      return Optional.of(objectMapper.readValue(inputStream, SerializedIncrementalCache.class));
+    try (var reader = Files.newBufferedReader(path)) {
+      return Optional.of(serializedIncrementalCacheSerializer.deserialize(reader));
     } catch (NoSuchFileException ex) {
       log.debug("No file found at {}", path);
       return Optional.empty();
@@ -147,16 +140,16 @@ public final class IncrementalCacheManager {
 
   private void writeIncrementalCache(
       Path path,
-      SerializedIncrementalCache cache
+      IncrementalCache cache
   ) throws IOException {
     log.debug("Writing incremental cache out to {}", path);
 
-    try (var outputStream = Files.newOutputStream(path)) {
-      objectMapper.writeValue(outputStream, cache);
+    try (var writer = Files.newBufferedWriter(path)) {
+      serializedIncrementalCacheSerializer.serialize(cache, writer);
     }
   }
 
-  private SerializedIncrementalCache buildIncrementalCache(ProjectInputListing listing) {
+  private IncrementalCache buildIncrementalCache(ProjectInputListing listing) {
     // Done this way for now to propagate errors correctly. Probably worth refactoring in the future
     // to be less of a hack?
     var results = Stream.of(listing.getDependencySources(), listing.getCompilableSources())
@@ -164,7 +157,7 @@ public final class IncrementalCacheManager {
         .collect(concurrentExecutor.awaiting())
         .iterator();
 
-    return ImmutableSerializedIncrementalCache.builder()
+    return ImmutableIncrementalCache.builder()
         .dependencies(results.next())
         .sources(results.next())
         .build();
