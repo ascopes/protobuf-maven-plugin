@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -192,6 +193,18 @@ public final class ProtobufBuildOrchestrator {
         });
 
     Files.createDirectories(directory);
+
+    Optional.ofNullable(request.getOutputDescriptorFile())
+        .map(p -> p.toAbsolutePath().getParent())
+        .ifPresent(p -> {
+          try {
+            Files.createDirectories(p);
+          } catch (IOException e) {
+            throw new IllegalStateException(
+                "Failed to create output directory for descriptor file '"
+                    + p + "'", e);
+          }
+        });
   }
 
   private void registerSourceRoots(GenerationRequest request) {
