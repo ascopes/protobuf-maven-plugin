@@ -148,6 +148,15 @@ public final class ProtobufBuildOrchestrator {
           request.isOutputDescriptorIncludeSourceInfo(),
           request.isOutputDescriptorRetainOptions()
       );
+
+      if (request.isOutputDescriptorAttached()) {
+        request.getOutputDescriptorAttachmentRegistrar().registerAttachedArtifact(
+            mavenSession,
+            request.getOutputDescriptorFile(),
+            request.getOutputDescriptorAttachmentType(),
+            request.getOutputDescriptorAttachmentClassifier()
+        );
+      }
     }
 
     if (!commandLineExecutor.execute(protocPath, args.build())) {

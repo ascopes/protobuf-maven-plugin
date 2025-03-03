@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.mojo;
 
+import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import java.nio.file.Path;
 import java.util.Set;
@@ -49,6 +50,13 @@ public final class MainGenerateMojo extends AbstractGenerateMojo {
   @Override
   SourceRootRegistrar sourceRootRegistrar() {
     return SourceRootRegistrar.MAIN;
+  }
+
+  @Override
+  OutputDescriptorAttachmentRegistrar outputDescriptorAttachmentRegistrar() {
+    return new OutputDescriptorAttachmentRegistrar(
+        mavenProjectHelper, "protobin", null
+    );
   }
 
   @Override
