@@ -295,9 +295,39 @@ class HostSystemTest {
     var actualPath = hostSystemBean.getSystemPath();
 
     // Then
-
     // Expect only the existing directories, and only in the exact order they were specified.
     assertThat(actualPath).containsExactly(existingDir1, existingDir2, existingDir3);
+  }
+
+  // GH-557, if the user has junk in their $PATH, we do not want to crash the plugin.
+  @DisplayName(".getSystemPath() ignores invalid file paths")
+  @Test
+  void getSystemPathIgnoresInvalidFilePaths(@TempDir Path tempDir) throws IOException {
+
+    // Given
+    // Use OS specific to avoid weirdness with OS path escaping (looking at you, Windows).
+    var pathSeparator = File.pathSeparator;
+    var fooDir = Files.createDirectories(tempDir.resolve("foo"));
+    var barDir = Files.createDirectories(tempDir.resolve("bar"));
+    var borkDir = Files.createDirectories(tempDir.resolve("bork"));
+
+    var path = fooDir + pathSeparator
+        + barDir + pathSeparator
+        // Hopefully invalid on all platforms
+        + "bazInvalid&&%$\0\r\n!?#broken" + pathSeparator
+        + borkDir;
+
+    var env = Map.of("PATH", path);
+    var properties = new Properties();
+    properties.put("path.separator", pathSeparator);
+
+    var hostSystemBean = new HostSystem(properties, env::get);
+
+    // When
+    var actualPath = hostSystemBean.getSystemPath();
+
+    // Then
+    assertThat(actualPath).containsExactly(fooDir, barDir, borkDir);
   }
 
   @DisplayName(".getPathSeparator() returns the expected platform-specific separator")
