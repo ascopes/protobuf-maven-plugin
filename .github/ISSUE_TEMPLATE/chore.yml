@@ -1,0 +1,30 @@
+name: Create a chore
+description: Document a piece of tech debt.
+title: "[Chore]: "
+labels: ["proposal", "chore"]
+assignees:
+  - ascopes
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        This issue documents an internal chore/tech debt that should be addressed to
+        improve the codebase quality.
+        
+  - type: textarea
+    id: brief-description
+    attributes:
+      label: Brief description
+      description: >- 
+        Please describe briefly what you would like to do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Aims and goals
+      description: >-
+        What is the goal of this work?
+    validations:
+      required: true
