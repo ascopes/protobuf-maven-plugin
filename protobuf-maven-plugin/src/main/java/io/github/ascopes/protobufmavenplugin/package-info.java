@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * A modern Maven plugin for generating source code from Protocol Buffers
  * sources.
@@ -25,6 +26,7 @@
     defaultAsDefault = true,
     deferCollectionAllocation = true,
     headerComments = true,
+    jacksonIntegration = false,
     jdkOnly = true,
     jdk9Collections = true,
     nullableAnnotation = "org.jspecify.annotations.Nullable",

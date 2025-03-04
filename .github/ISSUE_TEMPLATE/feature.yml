@@ -1,7 +1,7 @@
 name: Feature Request
-description: Request a new feature in this project
+description: Request a new feature in this project.
 title: "[Feature]: "
-labels: ["proposal", "new feature"]
+labels: ["new feature"]
 assignees:
   - ascopes
 body:
@@ -47,5 +47,5 @@ body:
         are unfamiliar with the codebase, help is always welcome and we are happy to
         provide any assistance you may need!
       options:
-        - label: Yes, I'd like to contribute this change!
+        - label: Yes, I'd like to contribute this change myself!
           required: false

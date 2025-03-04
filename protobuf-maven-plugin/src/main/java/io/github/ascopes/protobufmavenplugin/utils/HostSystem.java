@@ -15,10 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -33,17 +36,19 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A bean that exposes information about the underlying platform and the context of the invocation.
- *
- * <p>Unlike most beans, this can be a global singleton.
  *
  * @author Ashley Scopes
  */
 @Named
 @Singleton  // Global singleton, shared between plugin instances potentially.
 public final class HostSystem {
+
+  private static final Logger log = LoggerFactory.getLogger(HostSystem.class);
 
   private final String operatingSystem;
   private final String cpuArchitecture;
@@ -60,6 +65,7 @@ public final class HostSystem {
     this(System.getProperties(), System::getenv);
   }
 
+  // Visible for testing only.
   public HostSystem(Properties properties, Function<String, String> envProvider) {
     operatingSystem = properties.getProperty("os.name", "");
     cpuArchitecture = properties.getProperty("os.arch", "");
@@ -67,22 +73,8 @@ public final class HostSystem {
     workingDirectory = FileUtils.normalize(Path.of(""));
     javaHome = FileUtils.normalize(Path.of(properties.getProperty("java.home", "")));
     javaVendor = properties.getProperty("java.vendor", "");
-
-    path = tokenizeFilePath(
-        pathSeparator,
-        Objects.requireNonNullElse(envProvider.apply("PATH"), ""),
-        paths -> paths
-            .map(Path::of)
-            .map(FileUtils::normalize)
-            .distinct()
-            .filter(Files::isDirectory)
-            .collect(Collectors.toUnmodifiableList()));
-
-    pathExt = tokenizeFilePath(
-        pathSeparator,
-        Objects.requireNonNullElse(envProvider.apply("PATHEXT"), ""),
-        extensions -> extensions
-            .collect(Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase))));
+    path = parsePath(requireNonNullElse(envProvider.apply("PATH"), ""), pathSeparator);
+    pathExt = parsePathExt(requireNonNullElse(envProvider.apply("PATHEXT"), ""), pathSeparator);
   }
 
   public String getOperatingSystem() {
@@ -129,9 +121,34 @@ public final class HostSystem {
     return pathExt;
   }
 
+  private static List<Path> parsePath(String rawPath, String pathSeparator) {
+    return tokenizeFilePath(
+        rawPath,
+        pathSeparator,
+        paths -> paths
+            .flatMap(tryParseSystemFilePath())
+            .distinct()
+            .filter(Files::isDirectory)
+            .collect(Collectors.toUnmodifiableList())
+    );
+  }
+
+  private static SortedSet<String> parsePathExt(String rawPathExt, String pathSeparator) {
+    return tokenizeFilePath(
+        rawPathExt,
+        pathSeparator,
+        extensions -> extensions
+            .map(String::toLowerCase)
+            .collect(Collectors.collectingAndThen(
+                Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
+                Collections::unmodifiableSortedSet
+            ))
+    );
+  }
+
   private static <T> T tokenizeFilePath(
-      String separator,
       String rawValue,
+      String separator,
       Function<Stream<String>, T> mapper
   ) {
     var separatorRegex = Pattern.quote(separator);
@@ -143,5 +160,30 @@ public final class HostSystem {
 
       return mapper.apply(stream);
     }
+  }
+
+  private static Function<String, Stream<Path>> tryParseSystemFilePath() {
+    return path -> {
+      return Stream.of(path)
+          .map(String::trim)
+          .filter(not(String::isBlank))
+          .map(trimmedPath -> {
+            try {
+              return Path.of(trimmedPath);
+            } catch (InvalidPathException ex) {
+              // GH-557: Do not crash if the user has garbage contents in their $PATH.
+              // Warn and drop instead.
+              log.warn(
+                  "Ignoring path {} in $PATH environment variable. "
+                      + "Please check your system settings!",
+                  trimmedPath,
+                  ex
+              );
+              return null;
+            }
+          })
+          .filter(Objects::nonNull)
+          .map(FileUtils::normalize);
+    };
   }
 }
