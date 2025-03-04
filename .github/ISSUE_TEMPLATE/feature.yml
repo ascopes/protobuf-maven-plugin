@@ -1,7 +1,7 @@
 name: Feature Request
 description: Request a new feature in this project
 title: "[Feature]: "
-labels: ["proposal", "new feature"]
+labels: ["new feature"]
 assignees:
   - ascopes
 body:
