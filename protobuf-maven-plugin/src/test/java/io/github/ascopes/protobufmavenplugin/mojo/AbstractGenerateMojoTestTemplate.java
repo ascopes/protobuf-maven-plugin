@@ -651,6 +651,52 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.isOutputDescriptorRetainOptions()).isEqualTo(value);
   }
 
+  @DisplayName("outputDescriptorAttached is set to the specified value")
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest(name = "for {0}")
+  void outputDescriptorAttachedIsSetToSpecifiedValue(boolean value) throws Throwable {
+    mojo.outputDescriptorAttached = value;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.isOutputDescriptorAttached()).isEqualTo(value);
+  }
+
+  @DisplayName("outputDescriptorAttachmentType is set to the specified value")
+  @Test
+  void outputDescriptorAttachmentTypeIsSetToSpecifiedValue() throws Throwable {
+    mojo.outputDescriptorAttachmentType = "mytype";
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getOutputDescriptorAttachmentType()).isEqualTo("mytype");
+  }
+
+  @DisplayName("outputDescriptorAttachmentClassifier is set to the specified value")
+  @Test
+  void outputDescriptorAttachmentClassifierIsSetToSpecifiedValue() throws Throwable {
+    mojo.outputDescriptorAttachmentClassifier = "myclassifier";
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getOutputDescriptorAttachmentClassifier()).isEqualTo("myclassifier");
+  }
+
   @DisplayName(
       "when outputDirectory is not provided, expect the default output directory to be used"
   )

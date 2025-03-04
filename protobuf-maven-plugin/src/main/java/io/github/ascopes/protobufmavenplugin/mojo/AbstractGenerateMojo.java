@@ -594,6 +594,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Whether to attach the generated protobin descriptor as a Maven project artifact.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
+   *
+   * @see #outputDescriptorFile
+   * @since 2.11.0
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean outputDescriptorAttached;
@@ -603,6 +606,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * attached to the Maven project.
    *
    * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
+   *
+   * @see #outputDescriptorFile
+   * @since 2.11.0
    */
   @Parameter
   @Nullable String outputDescriptorAttachmentType;
@@ -612,6 +618,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * attached to the Maven project.
    *
    * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
+   *
+   * @see #outputDescriptorFile
+   * @since 2.11.0
    */
   @Parameter
   @Nullable String outputDescriptorAttachmentClassifier;
