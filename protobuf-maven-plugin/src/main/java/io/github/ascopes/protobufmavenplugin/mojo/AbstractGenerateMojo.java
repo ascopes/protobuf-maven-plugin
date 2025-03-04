@@ -23,6 +23,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDe
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
+import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
@@ -44,6 +45,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +88,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Inject
   MavenProject mavenProject;
+
+  /**
+   * The active MavenProjectHelper.
+   */
+  @Inject
+  MavenProjectHelper mavenProjectHelper;
 
   /*
    * User parameters.
@@ -583,6 +591,41 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable File outputDescriptorFile;
 
   /**
+   * Whether to attach the generated protobin descriptor as a Maven project artifact.
+   *
+   * <p>This is ignored if {@code outputDescriptorFile} is not provided.
+   *
+   * @see #outputDescriptorFile
+   * @since 2.11.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean outputDescriptorAttached;
+
+  /**
+   * Defines the Maven artifact type for the protobin descriptor when
+   * attached to the Maven project.
+   *
+   * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
+   *
+   * @see #outputDescriptorFile
+   * @since 2.11.0
+   */
+  @Parameter
+  @Nullable String outputDescriptorAttachmentType;
+
+  /**
+   * Defines the Maven artifact classifier for the protobin descriptor when
+   * attached to the Maven project.
+   *
+   * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
+   *
+   * @see #outputDescriptorFile
+   * @since 2.11.0
+   */
+  @Parameter
+  @Nullable String outputDescriptorAttachmentClassifier;
+
+  /**
    * Enable including imports in generated protobin descriptor files.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
@@ -821,6 +864,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   abstract SourceRootRegistrar sourceRootRegistrar();
 
+  abstract OutputDescriptorAttachmentRegistrar outputDescriptorAttachmentRegistrar();
+
   /*
    * Core implementation.
    */
@@ -871,10 +916,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .isIncrementalCompilationEnabled(incrementalCompilation)
         .isIgnoreProjectDependencies(ignoreProjectDependencies)
         .isLiteEnabled(liteOnly)
+        .isOutputDescriptorAttached(outputDescriptorAttached)
         .isOutputDescriptorIncludeImports(outputDescriptorIncludeImports)
         .isOutputDescriptorIncludeSourceInfo(outputDescriptorIncludeSourceInfo)
         .isOutputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .isRegisterAsCompilationRoot(registerAsCompilationRoot)
+        .outputDescriptorAttachmentRegistrar(outputDescriptorAttachmentRegistrar())
+        .outputDescriptorAttachmentType(outputDescriptorAttachmentType)
+        .outputDescriptorAttachmentClassifier(outputDescriptorAttachmentClassifier)
         .outputDescriptorFile(outputDescriptorFile())
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())

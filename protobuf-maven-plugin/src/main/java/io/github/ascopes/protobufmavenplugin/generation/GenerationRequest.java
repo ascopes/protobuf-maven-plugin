@@ -136,6 +136,29 @@ public interface GenerationRequest {
   @Nullable Path getOutputDescriptorFile();
 
   /**
+   * Whether to attach output {@code protobin} descriptor file to Maven project.
+   *
+   * @return flag indicating if descriptor file should be attached.
+   */
+  boolean isOutputDescriptorAttached();
+
+  /**
+   * The Maven artifact type to use when attaching the {@code protobin} descriptor
+   * file to the Maven project.
+   *
+   * @return the artifact type, or {@code null}.
+   */
+  @Nullable String getOutputDescriptorAttachmentType();
+
+  /**
+   * The Maven artifact classifier to use when attaching the {@code protobin}
+   * descriptor file to the Maven project.
+   *
+   * @return the artifact classifier, or {@code null}.
+   */
+  @Nullable String getOutputDescriptorAttachmentClassifier();
+
+  /**
    * The version of {@code protoc} to use.
    *
    * <p>This will be one of:
@@ -174,6 +197,13 @@ public interface GenerationRequest {
    * @return the registrar strategy.
    */
   SourceRootRegistrar getSourceRootRegistrar();
+
+  /**
+   * The registrar strategy to use to notify Maven of attached artifacts.
+   *
+   * @return the registrar strategy.
+   */
+  OutputDescriptorAttachmentRegistrar getOutputDescriptorAttachmentRegistrar();
 
   /**
    * Whether to include input {@code proto} sources in the output class

@@ -28,3 +28,13 @@ You can also specify the following boolean options:
 - `outputDescriptorRetainOptions` - passes the `--retain_options` flag to `protoc`.
 
 For more information see [descriptor production](https://protobuf.com/docs/descriptors#descriptor-production).
+
+Generated descriptor files can optionally be attached to the Maven build as artifacts. The default 
+artifact type is `protobin`. For the `generate-test` goal, the default artifact type is `test-protobin`, 
+and default classifier is `test`.
+
+The following options configure descriptor attachment:
+
+- `outputDescriptorAttached` - attaches the descriptor file to the build.
+- `outputDescriptorAttachmentClassifier` - artifact classifier for attached descriptor
+- `outputDescriptorAttachmentType` - artifact type for attached descriptor
