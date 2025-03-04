@@ -110,7 +110,7 @@
     <memoryfilesystem.version>2.8.1</memoryfilesystem.version>
     <mockito.version>5.15.2</mockito.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <wiremock.version>3.12.0</wiremock.version>
+    <wiremock.version>3.12.1</wiremock.version>
 
     <!-- Plugins -->
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
