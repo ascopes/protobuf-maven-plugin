@@ -311,9 +311,6 @@ repository_id="$(find-correct-repository-id)"
 close-staging-repository "${repository_id}"
 wait-for-closure-to-end "${repository_id}"
 ensure-closure-succeeded "${repository_id}"
-# It would appear that Nexus now automatically promotes after closure completes,
-# causing this step to always fail. Keeping it disabled for now just in case we
-# suddenly need it again one day.
-#trigger-drop-or-promote "${repository_id}"
+trigger-drop-or-promote "${repository_id}" || :
 
 echo -e "\e[1;32mRelease ${operation} for repository ${repository_id} completed. Have a nice day :-)\e[0m" >&2
