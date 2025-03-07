@@ -26,37 +26,51 @@ import org.slf4j.LoggerFactory;
 /**
  * Strategy for registration of additional artifacts to attach
  * to the Maven project.
+ *
+ * @since 2.11.0
  */
 public class OutputDescriptorAttachmentRegistrar {
-  private static final Logger log = LoggerFactory.getLogger(
-      OutputDescriptorAttachmentRegistrar.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(OutputDescriptorAttachmentRegistrar.class);
 
   private final MavenProjectHelper mavenProjectHelper;
-
   private final String defaultArtifactType;
   private final String defaultArtifactClassifier;
 
-  public OutputDescriptorAttachmentRegistrar(MavenProjectHelper mavenProjectHelper,
-      String defaultArtifactType, String defaultArtifactClassifier) {
+  public OutputDescriptorAttachmentRegistrar(
+      MavenProjectHelper mavenProjectHelper,
+      String defaultArtifactType,
+      String defaultArtifactClassifier
+  ) {
     this.mavenProjectHelper = mavenProjectHelper;
     this.defaultArtifactType = defaultArtifactType;
     this.defaultArtifactClassifier = defaultArtifactClassifier;
   }
 
-  public void registerAttachedArtifact(MavenSession session, Path artifactPath,
-      @Nullable String artifactType, @Nullable String artifactClassifier) {
+  public void registerAttachedArtifact(
+      MavenSession session,
+      Path artifactPath,
+      @Nullable String artifactType,
+      @Nullable String artifactClassifier
+  ) {
 
-    String resolvedArtifactType = Optional.ofNullable(artifactType)
-            .orElse(defaultArtifactType);
-    String resolvedArtifactClassifier = Optional.ofNullable(artifactClassifier)
-            .orElse(defaultArtifactClassifier);
+    var resolvedArtifactType = Optional.ofNullable(artifactType)
+        .orElse(defaultArtifactType);
+    var resolvedArtifactClassifier = Optional.ofNullable(artifactClassifier)
+        .orElse(defaultArtifactClassifier);
 
-    log.info("Registering {} as an attached artifact with type: {}, classifier: {}",
-        artifactPath, resolvedArtifactType, resolvedArtifactClassifier);
+    log.info(
+        "Registering {} as an attached artifact with type: {}, classifier: {}",
+        artifactPath,
+        resolvedArtifactType,
+        resolvedArtifactClassifier
+    );
 
-    mavenProjectHelper.attachArtifact(session.getCurrentProject(),
+    mavenProjectHelper.attachArtifact(
+        session.getCurrentProject(),
         resolvedArtifactType,
         resolvedArtifactClassifier,
-        artifactPath.toFile());
+        artifactPath.toFile()
+    );
   }
 }
