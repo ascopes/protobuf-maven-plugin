@@ -4,7 +4,7 @@
 
 This plugin requires that you meet the following requirements at a minimum:
 
-- Apache Maven 3.8.2 or newer
+- Apache Maven 3.8 or newer
 - Java 11 or newer
 
 While this plugin itself will work with many operating systems and architectures,
