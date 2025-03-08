@@ -96,6 +96,45 @@ The following will generate Java classes and corresponding Kotlin wrappers:
 </plugin>
 ```
 
+### Dependencies
+
+Native Maven dependency management is supported out of the box, allowing you to use Maven as an
+artifact registry for bundles of Proto files seamlessly.
+
+```xml
+<project>
+  ...
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.example.protos</groupId>
+      <artifactId>user-protos</artifactId>
+      <version>...</version>
+      <classifier>zip</classifier>
+    </dependency>
+  </dependencies>
+  
+  <plugins>
+    <plugin>
+      <groupId>io.github.ascopes</groupId>
+      <artifactId>protobuf-maven-plugin</artifactId>
+
+      <configuration>
+        <protocVersion>...</protocVersion>
+      </configuration>
+
+      <executions>
+        <execution>
+          <goals>
+            <goal>generate</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</project>
+```
+
 ### Plugins
 
 The following snippet will compile any protobuf sources in `src/main/protobuf` to Java source code,
