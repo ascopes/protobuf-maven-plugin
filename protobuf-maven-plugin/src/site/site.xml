@@ -54,6 +54,7 @@
       <item name="Requirements" href="requirements.html"/>
       <item name="Basic Usage" href="basic-usage.html"/>
       <item name="Additional Language Support" href="additional-language-support.html"/>
+      <item name="Dependencies" href="dependencies.html"/>
       <item name="Descriptor Files" href="descriptor-files.html"/>
       <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
       <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>

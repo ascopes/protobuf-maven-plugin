@@ -418,7 +418,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code artifactId} - the artifact ID to exclude</li>
    *   <li>{@code classifier} - optional - the classifier to exclude. If omitted, any classifiers
    *      are matched.</li>
-   *    <li>{@code type} - optional - the type of the artifact to exclude. If omitted, any types
+   *   <li>{@code type} - optional - the type of the artifact to exclude. If omitted, any types
    *      are matched.</li>
    * </ul>
    *
@@ -828,7 +828,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code artifactId} - the artifact ID to exclude</li>
    *   <li>{@code classifier} - optional - the classifier to exclude. If omitted, any classifiers
    *      are matched.</li>
-   *    <li>{@code type} - optional - the type of the artifact to exclude. If omitted, any types
+   *   <li>{@code type} - optional - the type of the artifact to exclude. If omitted, any types
    *      are matched.</li>
    * </ul>
    *
