@@ -15,29 +15,30 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
-import java.util.Set;
-import org.jspecify.annotations.Nullable;
-
+import org.immutables.value.Value.Modifiable;
 
 /**
- * Base interface for a parameter that consumes Maven artifact details.
+ * Marker to exclude a specific transitive dependency.
+ *
+ * <p>Holds an optional classifier and optional extension, in addition to the group ID and
+ * artifact ID.
  *
  * @author Ashley Scopes
- * @since 1.2.0
+ * @since 2.12.0
  */
-public interface MavenArtifact {
-
+@Modifiable
+public interface MavenExclusion {
   String getGroupId();
 
   String getArtifactId();
 
-  String getVersion();
+  default String getClassifier() {
+    // Eclipse uses an asterisk wildcard to imply all classifiers.
+    return "*";
+  }
 
-  @Nullable String getType();
-
-  @Nullable String getClassifier();
-
-  @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
-
-  Set<MavenExclusionBean> getExcludes();
+  default String getType() {
+    // Eclipse uses an asterisk wildcard to imply all types.
+    return "*";
+  }
 }
