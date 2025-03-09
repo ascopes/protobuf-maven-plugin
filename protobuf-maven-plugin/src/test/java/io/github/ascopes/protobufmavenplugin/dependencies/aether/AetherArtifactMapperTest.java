@@ -24,12 +24,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusionBean;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.maven.RepositoryUtils;
 import org.jspecify.annotations.Nullable;
@@ -456,9 +458,19 @@ class AetherArtifactMapperTest {
             .singleElement()
             .isSameAs(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION);
       } else {
+        var expectedExclusions = inputMavenArtifact.getExclusions()
+            .stream()
+            .map(exclusion -> new org.eclipse.aether.graph.Exclusion(
+                exclusion.getGroupId(),
+                exclusion.getArtifactId(),
+                exclusion.getClassifier(),
+                exclusion.getType()
+            ))
+            .collect(Collectors.toList());
+
         softly.assertThat(actualOutputDependency.getExclusions())
             .as("exclusions")
-            .isEmpty();
+            .containsExactlyInAnyOrderElementsOf(expectedExclusions);
       }
     });
   }
@@ -504,6 +516,68 @@ class AetherArtifactMapperTest {
         argumentSet(
             "DIRECT explicit depth, TRANSITIVE default depth",
             mavenArtifact("xxx", "bar", "420", null, null, DependencyResolutionDepth.TRANSITIVE),
+            DependencyResolutionDepth.TRANSITIVE,
+            false
+        ),
+        argumentSet(
+            "TRANSITIVE explicit depth, exclusions present",
+            mavenArtifact(
+                "xxx",
+                "bar",
+                "420",
+                null,
+                null,
+                DependencyResolutionDepth.TRANSITIVE,
+                mavenExclusion(
+                    "org.springframework.boot",
+                    "spring-boot-starter-webflux",
+                    "*",
+                    "*"
+                ),
+                mavenExclusion(
+                    "org.springframework.boot",
+                    "spring-boot-starter-logging",
+                    "*",
+                    "jar"
+                ),
+                mavenExclusion(
+                    "org.springframework.boot",
+                    "spring-boot-starter-parent",
+                    "test",
+                    "pom"
+                )
+            ),
+            DependencyResolutionDepth.DIRECT,
+            false
+        ),
+        argumentSet(
+            "TRANSITIVE default depth, exclusions present",
+            mavenArtifact(
+                "xxx",
+                "bar",
+                "420",
+                null,
+                null,
+                null,
+                mavenExclusion(
+                    "org.springframework.boot",
+                    "spring-boot-starter-webflux",
+                    "*",
+                    "*"
+                ),
+                mavenExclusion(
+                    "org.springframework.boot",
+                    "spring-boot-starter-logging",
+                    "*",
+                    "jar"
+                ),
+                mavenExclusion(
+                    "org.springframework.boot",
+                    "spring-boot-starter-parent",
+                    "test",
+                    "pom"
+                )
+            ),
             DependencyResolutionDepth.TRANSITIVE,
             false
         )
@@ -559,7 +633,8 @@ class AetherArtifactMapperTest {
       String version,
       @Nullable String classifier,
       @Nullable String type,
-      @Nullable DependencyResolutionDepth dependencyResolutionDepth
+      @Nullable DependencyResolutionDepth dependencyResolutionDepth,
+      MavenExclusionBean... exclusions
   ) {
     var artifact = mock(
         io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact.class,
@@ -571,7 +646,27 @@ class AetherArtifactMapperTest {
     when(artifact.getType()).thenReturn(type);
     when(artifact.getClassifier()).thenReturn(classifier);
     when(artifact.getDependencyResolutionDepth()).thenReturn(dependencyResolutionDepth);
+    when(artifact.getExclusions()).thenReturn(Set.of(exclusions));
     return artifact;
+  }
+
+  static io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusionBean mavenExclusion(
+      String groupId,
+      String artifactId,
+      @Nullable String classifier,
+      @Nullable String extension
+  ) {
+    // Kind of gross that we have to return MavenExclusionBean here but Maven forces our hand
+    // due to not being able to cope with interface types.
+    var exclusion = mock(
+        io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusionBean.class,
+        withSettings().strictness(Strictness.LENIENT)
+    );
+    when(exclusion.getGroupId()).thenReturn(groupId);
+    when(exclusion.getArtifactId()).thenReturn(artifactId);
+    when(exclusion.getClassifier()).thenReturn(classifier);
+    when(exclusion.getType()).thenReturn(extension);
+    return exclusion;
   }
 
   static org.eclipse.aether.artifact.ArtifactType eclipseArtifactType(

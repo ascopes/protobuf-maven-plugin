@@ -408,6 +408,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code classifier} - the artifact classifier - optional</li>
    *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
    *      the project settings with - optional</li>
+   *   <li>{@code excludes} - a set of exclusions to apply to transitive dependencies</li>
+   * </ul>
+   *
+   * <p>Exclusions are a set of objects, each with the following fields:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID to exclude</li>
+   *   <li>{@code artifactId} - the artifact ID to exclude</li>
+   *   <li>{@code classifier} - optional - the classifier to exclude. If omitted, any classifiers
+   *      are matched.</li>
+   *   <li>{@code type} - optional - the type of the artifact to exclude. If omitted, any types
+   *      are matched.</li>
    * </ul>
    *
    * @since 1.2.0
@@ -806,6 +818,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code classifier} - the artifact classifier - optional</li>
    *   <li>{@code dependencyResolutionDepth} - the dependency resolution depth to override
    *      the project settings with - optional</li>
+   *   <li>{@code excludes} - a set of exclusions to apply to transitive dependencies</li>
+   * </ul>
+   *
+   * <p>Exclusions are a set of objects, each with the following fields:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID to exclude</li>
+   *   <li>{@code artifactId} - the artifact ID to exclude</li>
+   *   <li>{@code classifier} - optional - the classifier to exclude. If omitted, any classifiers
+   *      are matched.</li>
+   *   <li>{@code type} - optional - the type of the artifact to exclude. If omitted, any types
+   *      are matched.</li>
    * </ul>
    *
    * @since 1.2.0
@@ -855,6 +879,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   abstract Set<String> defaultDependencyScopes();
 
   /**
+   * Provides the registrar for output descriptor files to attach them to the Maven project
+   * as additional artifacts.
+   *
+   * @return the registrar to use.
+   */
+  abstract OutputDescriptorAttachmentRegistrar outputDescriptorAttachmentRegistrar();
+
+  /**
    * Provides the source root registrar for this Mojo.
    *
    * <p>This specifies where to attach generated sources to in order for it
@@ -863,8 +895,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @return the registrar to use.
    */
   abstract SourceRootRegistrar sourceRootRegistrar();
-
-  abstract OutputDescriptorAttachmentRegistrar outputDescriptorAttachmentRegistrar();
 
   /*
    * Core implementation.
