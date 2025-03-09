@@ -191,11 +191,19 @@
               <failIfNoProjects>true</failIfNoProjects>
               <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
               <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
+              <parallelThreads>0.5C</parallelThreads>
               <postBuildHookScript>test</postBuildHookScript>
+              <properties>
+                <!-- Acquire locks where-ever we run Maven to avoid parallel tests trampling across eachother. -->
+                <aether.syncContext.named.factory>file-lock</aether.syncContext.named.factory>
+                <aether.syncContext.named.nameMapper>file-gav</aether.syncContext.named.nameMapper>
+              </properties>
+              <setupIncludes>
+                <setupInclude>setup</setupInclude>
+              </setupIncludes>
               <settingsFile>${project.basedir}/src/it/settings.xml</settingsFile>
               <showErrors>true</showErrors>
-              <showVersion>true</showVersion>
-              <streamLogs>true</streamLogs>
+              <streamLogs>false</streamLogs>
               <streamLogsOnFailures>true</streamLogsOnFailures>
               <writeJunitReport>true</writeJunitReport>
             </configuration>
