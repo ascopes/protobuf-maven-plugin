@@ -458,7 +458,7 @@ class AetherArtifactMapperTest {
             .singleElement()
             .isSameAs(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION);
       } else {
-        var expectedExclusions = inputMavenArtifact.getExcludes()
+        var expectedExclusions = inputMavenArtifact.getExclusions()
             .stream()
             .map(exclusion -> new org.eclipse.aether.graph.Exclusion(
                 exclusion.getGroupId(),
@@ -646,7 +646,7 @@ class AetherArtifactMapperTest {
     when(artifact.getType()).thenReturn(type);
     when(artifact.getClassifier()).thenReturn(classifier);
     when(artifact.getDependencyResolutionDepth()).thenReturn(dependencyResolutionDepth);
-    when(artifact.getExcludes()).thenReturn(Set.of(exclusions));
+    when(artifact.getExclusions()).thenReturn(Set.of(exclusions));
     return artifact;
   }
 

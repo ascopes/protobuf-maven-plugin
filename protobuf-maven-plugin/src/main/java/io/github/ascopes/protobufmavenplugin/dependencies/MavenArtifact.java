@@ -39,5 +39,5 @@ public interface MavenArtifact {
 
   @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
 
-  Set<MavenExclusionBean> getExcludes();
+  Set<MavenExclusionBean> getExclusions();
 }

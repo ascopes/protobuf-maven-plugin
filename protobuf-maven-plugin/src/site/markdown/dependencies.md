@@ -193,12 +193,12 @@ unique use cases for it.
         <classifier>zip</classifier>
         <scope>compile</scope>
       
-        <excludes>
-          <exclude>
+        <exclusions>
+          <exclusion>
             <groupId>org.example</groupId>
             <artifactId>ticketsystem-beta-user-protos</artifactId>
-          </exclude>
-        </excludes>
+          </exclusion>
+        </exclusions>
       </includeDependency>
     </includeDependencies>
   </configuration>

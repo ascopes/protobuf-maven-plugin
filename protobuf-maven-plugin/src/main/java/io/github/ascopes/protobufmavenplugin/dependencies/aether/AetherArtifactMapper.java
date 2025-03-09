@@ -108,7 +108,7 @@ final class AetherArtifactMapper {
 
     var exclusions = effectiveDependencyResolutionDepth == DependencyResolutionDepth.DIRECT
         ? Set.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
-        : mapPmpExclusionsToEclipseExclusions(mavenArtifact.getExcludes());
+        : mapPmpExclusionsToEclipseExclusions(mavenArtifact.getExclusions());
 
     var artifact = mapPmpArtifactToEclipseArtifact(mavenArtifact);
 
