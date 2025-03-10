@@ -19,12 +19,14 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import org.eclipse.aether.graph.Exclusion;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,8 +107,8 @@ final class AetherArtifactMapper {
     );
 
     var exclusions = effectiveDependencyResolutionDepth == DependencyResolutionDepth.DIRECT
-        ? List.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
-        : List.<Exclusion>of();
+        ? Set.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
+        : mapPmpExclusionsToEclipseExclusions(mavenArtifact.getExclusions());
 
     var artifact = mapPmpArtifactToEclipseArtifact(mavenArtifact);
 
@@ -124,5 +126,18 @@ final class AetherArtifactMapper {
     // maven-core recommended tool to perform these kind of conversions
     return org.apache.maven.RepositoryUtils
         .toDependency(mavenDependency, artifactTypeRegistry);
+  }
+
+  private Set<org.eclipse.aether.graph.Exclusion> mapPmpExclusionsToEclipseExclusions(
+      Collection<? extends MavenExclusion> exclusions
+  ) {
+    return exclusions.stream()
+        .map(exclusion -> new org.eclipse.aether.graph.Exclusion(
+            exclusion.getGroupId(),
+            exclusion.getArtifactId(),
+            exclusion.getClassifier(),
+            exclusion.getType()
+        ))
+        .collect(Collectors.toUnmodifiableSet());
   }
 }
