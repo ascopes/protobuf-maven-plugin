@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.RepositoryUtils;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.graph.Dependency;
@@ -54,8 +53,13 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       MavenSession mavenSession,
       RepositorySystem repositorySystem
   ) {
-    var artifactRepositories = mavenSession.getProjectBuildingRequest().getRemoteRepositories();
-    var remoteRepositories = RepositoryUtils.toRepos(artifactRepositories);
+    // Prior to v2.12.0, we used the ProjectBuildingRequest on the MavenSession
+    // and used RepositoryUtils.toRepos to create the repository list. GH-579
+    // was raised to report that the <repositories> block in the POM was being
+    // ignored. This appears to be due to the project building request only
+    // looking at what is in ~/.m2/settings.xml. The current project remote
+    // repositories seems to be what we need to use instead here.
+    var remoteRepositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
 
     this.mavenSession = mavenSession;
 

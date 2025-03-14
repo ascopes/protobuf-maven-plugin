@@ -21,13 +21,12 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.util.List;
-import org.apache.maven.RepositoryUtils;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.ArtifactTypeRegistry;
+import org.eclipse.aether.repository.RemoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,29 +38,26 @@ import org.mockito.quality.Strictness;
  * @author Ashley Scopes
  */
 @DisplayName("AetherMavenArtifactPathResolver tests")
-@SuppressWarnings("deprecation")
 class AetherMavenArtifactPathResolverTest {
 
   MavenSession mavenSession;
-  ProjectBuildingRequest projectBuildingRequest;
-  List<ArtifactRepository> remoteRepositories;
+  MavenProject currentProject;
+  List<RemoteRepository> remoteRepositories;
   RepositorySystemSession repositorySystemSession;
   ArtifactTypeRegistry artifactTypeRegistry;
-
   RepositorySystem repositorySystem;
-
   AetherMavenArtifactPathResolver underTest;
 
   @BeforeEach
   void setUp() {
     mavenSession = mock(lenient());
-    projectBuildingRequest = mock(lenient());
+    currentProject = mock(lenient());
     remoteRepositories = List.of(mock(deep()), mock(deep()), mock(deep()));
     repositorySystemSession = mock(lenient());
     artifactTypeRegistry = mock(lenient());
 
-    when(mavenSession.getProjectBuildingRequest()).thenReturn(projectBuildingRequest);
-    when(projectBuildingRequest.getRemoteRepositories()).thenReturn(remoteRepositories);
+    when(mavenSession.getCurrentProject()).thenReturn(currentProject);
+    when(currentProject.getRemoteProjectRepositories()).thenReturn(remoteRepositories);
     when(mavenSession.getRepositorySession()).thenReturn(repositorySystemSession);
     when(repositorySystemSession.getArtifactTypeRegistry()).thenReturn(artifactTypeRegistry);
 
@@ -96,7 +92,7 @@ class AetherMavenArtifactPathResolverTest {
     assertThat(underTest.getAetherResolver().getRepositorySystemSession().getSession())
         .isSameAs(repositorySystemSession);
     assertThat(underTest.getAetherResolver().getRemoteRepositories())
-        .isEqualTo(RepositoryUtils.toRepos(remoteRepositories));
+        .isEqualTo(remoteRepositories);
   }
 
   static MockSettings lenient() {
