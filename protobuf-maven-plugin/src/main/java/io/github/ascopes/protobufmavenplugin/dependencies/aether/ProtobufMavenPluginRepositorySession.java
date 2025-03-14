@@ -16,7 +16,9 @@
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
+import org.eclipse.aether.RepositoryCache;
 import org.eclipse.aether.RepositorySystemSession;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Custom repository session for the Protobuf Maven Plugin which injects some special components to
@@ -39,6 +41,14 @@ final class ProtobufMavenPluginRepositorySession
   @Override
   protected RepositorySystemSession getSession() {
     return delegate;
+  }
+
+  @Nullable
+  @Override
+  public RepositoryCache getCache() {
+    // GH-579: Temporarily disabled all caching to help debug issues with repository
+    // resolution. This may be enabled in the future again.
+    return null;
   }
 
   @Override
