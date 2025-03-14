@@ -44,6 +44,25 @@ class ResolutionExceptionTest {
         .hasNoSuppressedExceptions();
   }
 
+  @DisplayName("I can late bind a cause to a causeless exception")
+  @Test
+  void canLateBindCauseToCauselessException() {
+    // Given
+    var message = someBasicString();
+    var cause = new RuntimeException();
+
+    // When
+    var ex = new ResolutionException(message);
+    ex.initCause(cause);
+
+    // Then
+    assertThat(ex)
+        .hasMessage(message)
+        .hasCause(cause)
+        .hasNoSuppressedExceptions();
+  }
+
+
   @DisplayName("I can initialize the exception with a message and a cause")
   @Test
   void canInitializeExceptionWithMessageAndCause() {

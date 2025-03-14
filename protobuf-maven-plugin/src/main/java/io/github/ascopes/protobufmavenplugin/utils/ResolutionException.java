@@ -30,7 +30,9 @@ public final class ResolutionException extends Exception {
    * @param message the exception message.
    */
   public ResolutionException(String message) {
-    this(message, null);
+    // Do not pass null to this(String, Throwable), as it initialises the exception
+    // cause such that it can no longer be overridden.
+    super(message);
   }
 
   /**
