@@ -90,7 +90,8 @@ final class AetherResolver {
       }
 
       throw resolutionException(
-          "failed to resolve artifact " + unresolvedArtifact, response.getExceptions());
+          "failed to resolve artifact " + unresolvedArtifact, response.getExceptions()
+      );
 
     } catch (ArtifactResolutionException ex) {
       throw new ResolutionException("Failed to resolve artifact " + unresolvedArtifact, ex);
@@ -113,7 +114,7 @@ final class AetherResolver {
     );
 
     var response = resolveDependencies(request, failOnInvalidDependencies);
-    return extractArtifactsFromResolvedDependencies(response);
+    return extractArtifactsFromResolvedDependencies(response, failOnInvalidDependencies);
   }
 
   private DependencyResult resolveDependencies(
@@ -136,13 +137,17 @@ final class AetherResolver {
       response = ex.getResult();
 
       if (response == null || failOnInvalidDependencies) {
-        throw new ResolutionException("Failed to resolve dependencies from repositories", ex);
+        throw resolutionException("Failed to resolve dependencies from repositories", List.of(ex));
       }
 
-      // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
       log.warn(
-          "Error resolving one or more dependencies, dependencies may be missing during "
-              + "protobuf compilation! {}", ex.getMessage(), ex
+          "Failed to resolve one or more dependencies, this operation will be a best-effort "
+              + "attempt, and dependencies may be missing during protobuf compilation. "
+              + "Error was: {}",
+          // Exceptions are hidden if we don't pass --error to Maven, so we report the
+          // message as well.
+          ex.getMessage(),
+          ex
       );
     }
 
@@ -150,7 +155,8 @@ final class AetherResolver {
   }
 
   private List<Artifact> extractArtifactsFromResolvedDependencies(
-      DependencyResult response
+      DependencyResult response,
+      boolean failOnInvalidDependencies
   ) throws ResolutionException {
     var artifacts = new ArrayList<Artifact>();
     var exceptions = new ArrayList<Exception>();
@@ -167,9 +173,16 @@ final class AetherResolver {
     }
 
     if (failedAtLeastOnce) {
-      throw resolutionException("Failed to resolve artifacts for dependencies", exceptions);
+      if (failOnInvalidDependencies) {
+        throw resolutionException("Failed to resolve artifacts for dependencies", exceptions);
+      } else {
+        log.warn(
+            "Encountered {} problem(s) resolving artifacts. Enable debug logs for more details",
+            exceptions.size()
+        );
+        exceptions.forEach(ex -> log.debug("Ignoring artifact resolution exception", ex));
+      }
     }
-
     return artifacts;
   }
 
