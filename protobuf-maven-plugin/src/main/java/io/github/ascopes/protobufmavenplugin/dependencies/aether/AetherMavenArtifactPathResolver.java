@@ -89,7 +89,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
 
   @Override
   public Path resolveArtifact(MavenArtifact mavenArtifact) throws ResolutionException {
-    log.trace("Resolving artifact: {}", mavenArtifact);
+    log.debug("Resolving artifact: {}", mavenArtifact);
     var unresolvedArtifact = aetherMapper.mapPmpArtifactToEclipseArtifact(mavenArtifact);
     var resolvedArtifact = aetherResolver.resolveArtifact(unresolvedArtifact);
     return aetherMapper.mapEclipseArtifactToPath(resolvedArtifact);
@@ -106,7 +106,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     var unresolvedDependencies = new ArrayList<Dependency>();
 
     artifacts.stream()
-        .peek(artifact -> log.trace("Resolving artifact as dependency: {}", artifact))
+        .peek(artifact -> log.debug("Resolving artifact as dependency: {}", artifact))
         .map(artifact -> aetherMapper.mapPmpArtifactToEclipseDependency(artifact, defaultDepth))
         .forEach(unresolvedDependencies::add);
 
