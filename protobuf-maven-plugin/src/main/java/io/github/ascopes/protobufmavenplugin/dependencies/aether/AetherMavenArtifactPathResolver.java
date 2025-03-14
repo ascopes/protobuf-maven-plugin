@@ -113,6 +113,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     if (includeProjectDependencies) {
       mavenSession.getCurrentProject().getDependencies()
           .stream()
+          .peek(dependency -> log.debug("Resolving project dependency: {}", dependency))
           .map(aetherMapper::mapMavenDependencyToEclipseDependency)
           .forEach(unresolvedDependencies::add);
     }
