@@ -31,6 +31,8 @@ import org.apache.maven.RepositoryUtils;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.graph.Dependency;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@link MavenArtifactPathResolver} that integrates with the Eclipse Aether
@@ -41,6 +43,8 @@ import org.eclipse.aether.graph.Dependency;
  */
 @Named
 final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver {
+  private static final Logger log = LoggerFactory.getLogger(AetherMavenArtifactPathResolver.class);
+
   private final MavenSession mavenSession;
   private final AetherArtifactMapper aetherMapper;
   private final AetherResolver aetherResolver;
@@ -63,6 +67,9 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
 
     aetherResolver = new AetherResolver(
         repositorySystem, repositorySystemSession, remoteRepositories);
+
+    log.debug("Using remote repositories: {}", remoteRepositories);
+    log.debug("Using repository system session: {}", repositorySystemSession);
   }
 
   // Visible for testing only.
@@ -82,6 +89,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
 
   @Override
   public Path resolveArtifact(MavenArtifact mavenArtifact) throws ResolutionException {
+    log.trace("Resolving artifact: {}", mavenArtifact);
     var unresolvedArtifact = aetherMapper.mapPmpArtifactToEclipseArtifact(mavenArtifact);
     var resolvedArtifact = aetherResolver.resolveArtifact(unresolvedArtifact);
     return aetherMapper.mapEclipseArtifactToPath(resolvedArtifact);
@@ -98,6 +106,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     var unresolvedDependencies = new ArrayList<Dependency>();
 
     artifacts.stream()
+        .peek(artifact -> log.trace("Resolving artifact as dependency: {}", artifact))
         .map(artifact -> aetherMapper.mapPmpArtifactToEclipseDependency(artifact, defaultDepth))
         .forEach(unresolvedDependencies::add);
 
@@ -109,7 +118,10 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     }
 
     var resolvedArtifacts = aetherResolver.resolveDependenciesToArtifacts(
-        unresolvedDependencies, dependencyScopes, failOnInvalidDependencies);
+        unresolvedDependencies,
+        dependencyScopes,
+        failOnInvalidDependencies
+    );
 
     return resolvedArtifacts.stream()
         .map(aetherMapper::mapEclipseArtifactToPath)
