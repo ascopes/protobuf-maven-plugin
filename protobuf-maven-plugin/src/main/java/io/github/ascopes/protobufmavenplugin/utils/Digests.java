@@ -54,7 +54,6 @@ public final class Digests {
     return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
   }
 
-  @SuppressWarnings("SameParameterValue")
   private static MessageDigest createMessageDigest(String algorithm) {
     try {
       return MessageDigest.getInstance(algorithm);
