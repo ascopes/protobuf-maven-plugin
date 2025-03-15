@@ -407,6 +407,9 @@
               <version>${maven-invoker-plugin.version}</version>
               <configuration>
                 <invokerPropertiesFile>invoker-path-protoc.properties</invokerPropertiesFile>
+                <!-- The remote debugger deadlocks if we don't set this! -->
+                <properties/>
+                <parallelThreads>1</parallelThreads>
               </configuration>
             </plugin>
           </plugins>
