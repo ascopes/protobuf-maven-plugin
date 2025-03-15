@@ -27,6 +27,7 @@ import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.sources.incremental.IncrementalCacheManager;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -247,9 +248,9 @@ public final class ProtobufBuildOrchestrator {
 
     log.info(
         "Generating source code from {} (discovered {} within {})",
-        pluralize(sourcesToCompile.size(), "source file"),
-        pluralize(totalSourceFileCount, "source file"),
-        pluralize(projectInputs.getCompilableSources().size(), "source path")
+        StringUtils.pluralize(sourcesToCompile.size(), "source file"),
+        StringUtils.pluralize(totalSourceFileCount, "source file"),
+        StringUtils.pluralize(projectInputs.getCompilableSources().size(), "source path")
     );
 
     return sourcesToCompile;
@@ -288,11 +289,5 @@ public final class ProtobufBuildOrchestrator {
         );
       }
     }
-  }
-
-  private static String pluralize(int count, String name) {
-    return count == 1
-        ? "1 " + name
-        : count + " " + name + "s";
   }
 }
