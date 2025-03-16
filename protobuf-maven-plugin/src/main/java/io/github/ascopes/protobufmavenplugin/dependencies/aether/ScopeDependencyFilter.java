@@ -32,6 +32,7 @@ import org.eclipse.aether.graph.DependencyNode;
  * @since 2.4.0
  */
 final class ScopeDependencyFilter implements DependencyFilter {
+
   private final Set<String> includedScopes;
 
   /**

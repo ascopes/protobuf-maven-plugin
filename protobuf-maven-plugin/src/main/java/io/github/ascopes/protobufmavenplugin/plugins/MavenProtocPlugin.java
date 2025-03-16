@@ -21,6 +21,7 @@ import java.util.List;
 import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 
@@ -34,6 +35,16 @@ import org.jspecify.annotations.Nullable;
 @Immutable
 @Modifiable
 public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
+
+  /**
+   * Get the version of the {@code protoc} plugin.
+   *
+   * <p>This <strong>must</strong> be specified for plugins.
+   *
+   * @return the protoc plugin version to use.
+   */
+  @Override
+  @NonNull String getVersion();
 
   /**
    * Get the command line arguments to pass to the JVM.

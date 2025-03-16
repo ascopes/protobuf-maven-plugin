@@ -128,6 +128,13 @@ final class AetherArtifactMapper {
         .toDependency(mavenDependency, artifactTypeRegistry);
   }
 
+  org.eclipse.aether.artifact.Artifact mapMavenDependencyToEclipseArtifact(
+      org.apache.maven.model.Dependency mavenDependency
+  ) {
+    // maven-core recommended tool to perform these kind of conversions
+    return mapMavenDependencyToEclipseDependency(mavenDependency).getArtifact();
+  }
+
   private Set<org.eclipse.aether.graph.Exclusion> mapPmpExclusionsToEclipseExclusions(
       Collection<? extends MavenExclusion> exclusions
   ) {

@@ -25,6 +25,7 @@ import org.eclipse.aether.artifact.ArtifactType;
  * @since 2.10.2
  */
 final class FallbackEclipseArtifactType implements ArtifactType {
+
   private static final Map<String, String> NO_PROPERTIES = Map.of();
   private static final String NO_CLASSIFIER = "";
 

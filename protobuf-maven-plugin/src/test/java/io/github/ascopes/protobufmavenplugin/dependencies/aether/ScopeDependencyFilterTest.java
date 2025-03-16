@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("ScopeDependencyFilter tests")
 class ScopeDependencyFilterTest {
+
   @DisplayName("Null dependencies return true to match the Aether implementation behaviour")
   @Test
   void nullDependenciesReturnTrueToMatchTheAetherImplementationBehaviour() {
