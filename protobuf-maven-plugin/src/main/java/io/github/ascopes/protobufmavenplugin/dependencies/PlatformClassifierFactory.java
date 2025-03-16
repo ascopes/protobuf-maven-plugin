@@ -20,12 +20,16 @@ import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 
 /**
  * Factory that can produce classifiers for dependencies based on the current platform.
  *
  * @author Ashley Scopes
  */
+@Description("Generates classifiers for protoc binaries based on the current platform")
+@MojoExecutionScoped
 @Named
 public final class PlatformClassifierFactory {
 

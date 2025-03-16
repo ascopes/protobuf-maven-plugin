@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,19 +45,21 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Discovers proto sources in various packaging formats on the file system")
+@MojoExecutionScoped
 @Named
-public final class SourcePathResolver {
+final class ProtoSourceResolver {
 
   private static final Set<String> POM_FILE_EXTENSIONS = Set.of(".pom", ".xml");
   private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
 
-  private static final Logger log = LoggerFactory.getLogger(SourcePathResolver.class);
+  private static final Logger log = LoggerFactory.getLogger(ProtoSourceResolver.class);
 
   private final ConcurrentExecutor concurrentExecutor;
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public SourcePathResolver(
+  ProtoSourceResolver(
       ConcurrentExecutor concurrentExecutor,
       TemporarySpace temporarySpace
   ) {
@@ -63,7 +67,7 @@ public final class SourcePathResolver {
     this.temporarySpace = temporarySpace;
   }
 
-  public Collection<SourceListing> resolveSources(
+  Collection<SourceListing> resolveSources(
       Collection<Path> rootPaths,
       SourceGlobFilter filter
   ) {

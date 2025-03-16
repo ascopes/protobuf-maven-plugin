@@ -29,6 +29,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Finds or downloads the required version of protoc from various locations")
+@MojoExecutionScoped
 @Named
 public final class ProtocResolver {
 
