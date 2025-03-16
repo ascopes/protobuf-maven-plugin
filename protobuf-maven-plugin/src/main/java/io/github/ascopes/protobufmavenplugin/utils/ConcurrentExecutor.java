@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.2.0
  */
+@MojoExecutionScoped
 @Named
-@Singleton  // Only one instance globally to avoid resource exhaustion
 public final class ConcurrentExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);

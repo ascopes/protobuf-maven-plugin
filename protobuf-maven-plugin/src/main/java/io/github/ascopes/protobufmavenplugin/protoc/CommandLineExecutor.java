@@ -19,13 +19,13 @@ import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@MojoExecutionScoped
 @Named
 public final class CommandLineExecutor {
 

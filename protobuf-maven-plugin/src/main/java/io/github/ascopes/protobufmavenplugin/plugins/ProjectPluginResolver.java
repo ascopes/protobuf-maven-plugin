@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 
 /**
  * Resolver for plugins within a project.
@@ -31,13 +32,14 @@ import javax.inject.Named;
  * @author Ashley Scopes
  * @since 2.7.0
  */
+@MojoExecutionScoped
 @Named
 public final class ProjectPluginResolver {
   private final BinaryPluginResolver binaryPluginResolver;
   private final JvmPluginResolver jvmPluginResolver;
 
   @Inject
-  public ProjectPluginResolver(
+  ProjectPluginResolver(
       BinaryPluginResolver binaryPluginResolver,
       JvmPluginResolver jvmPluginResolver
   ) {

@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.7.0
  */
+@MojoExecutionScoped
 @Named
 public final class ProjectInputResolver {
   private static final Logger log = LoggerFactory.getLogger(ProjectInputResolver.class);

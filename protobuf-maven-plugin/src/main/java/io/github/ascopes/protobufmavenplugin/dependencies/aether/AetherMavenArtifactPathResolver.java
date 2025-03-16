@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.graph.Dependency;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.4.4, many iterations of this existed in the past with different names.
  */
+@MojoExecutionScoped
 @Named
 final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver {
   private static final Logger log = LoggerFactory.getLogger(AetherMavenArtifactPathResolver.class);
