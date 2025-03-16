@@ -27,10 +27,10 @@ class GreetingServiceImplTest {
     // Given
     var service = new GreetingServiceImpl();
     var server = ServerBuilder
-        .forPort(8080)
+        .forPort(8081)
         .addService(service)
         .build();
-    var channel = ManagedChannelBuilder.forAddress("localhost", 8080)
+    var channel = ManagedChannelBuilder.forAddress("localhost", 8081)
         .usePlaintext()
         .build();
     var stub = GreetingServiceGrpc.newBlockingStub(channel);

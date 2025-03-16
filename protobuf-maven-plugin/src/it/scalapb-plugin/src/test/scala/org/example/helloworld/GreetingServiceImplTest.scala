@@ -27,12 +27,12 @@ class GreetingServiceImplTest:
   def greetingServiceWorksAsExpected: Unit =
     // Given
     val server = ServerBuilder
-        .forPort(8080)
+        .forPort(8082)
         .addService(GreetingServiceGrpc.bindService(new GreetingServiceImpl, ExecutionContext.global))
         .build
 
     val channel = ManagedChannelBuilder
-        .forAddress("localhost", 8080)
+        .forAddress("localhost", 8082)
         .usePlaintext
         .build
 
