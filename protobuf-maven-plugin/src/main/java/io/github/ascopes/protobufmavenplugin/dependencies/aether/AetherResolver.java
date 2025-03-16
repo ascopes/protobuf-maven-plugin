@@ -43,8 +43,8 @@ import org.slf4j.LoggerFactory;
  * Integration layer with the Eclipse Aether resolver.
  *
  * <p>Warning: the code in this class is very fragile and changing it can easily result in the
- * introduction of regressions for users. If you need to alter it, be very sure that you know
- * what you are doing!
+ * introduction of regressions for users. If you need to alter it, be very sure that you know what
+ * you are doing!
  *
  * @author Ashley Scopes
  * @since 2.4.4
@@ -65,21 +65,6 @@ final class AetherResolver {
     this.repositorySystem = repositorySystem;
     this.repositorySystemSession = repositorySystemSession;
     this.remoteRepositories = remoteRepositories;
-  }
-
-  // Visible for testing only.
-  RepositorySystem getRepositorySystem() {
-    return repositorySystem;
-  }
-
-  // Visible for testing only.
-  ProtobufMavenPluginRepositorySession getRepositorySystemSession() {
-    return repositorySystemSession;
-  }
-
-  // Visible for testing only.
-  List<RemoteRepository> getRemoteRepositories() {
-    return Collections.unmodifiableList(remoteRepositories);
   }
 
   Artifact resolveRequiredArtifact(Artifact artifact) throws ResolutionException {
@@ -127,7 +112,6 @@ final class AetherResolver {
   ) throws ResolutionException {
     var collectRequest = new CollectRequest();
     collectRequest.setDependencies(dependencies);
-    collectRequest.setManagedDependencies(null);  // TODO: dependency management in GH-555
     collectRequest.setRepositories(remoteRepositories);
 
     var dependencyRequest = new DependencyRequest();

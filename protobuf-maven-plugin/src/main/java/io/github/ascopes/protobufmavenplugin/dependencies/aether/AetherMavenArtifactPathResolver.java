@@ -42,10 +42,12 @@ import org.slf4j.LoggerFactory;
  */
 @Named
 final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver {
+
   private static final Logger log = LoggerFactory.getLogger(AetherMavenArtifactPathResolver.class);
 
   private final MavenSession mavenSession;
   private final AetherArtifactMapper aetherMapper;
+  private final AetherDependencyManagement aetherDependencyManagement;
   private final AetherResolver aetherResolver;
 
   @Inject
@@ -53,6 +55,15 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       MavenSession mavenSession,
       RepositorySystem repositorySystem
   ) {
+    this.mavenSession = mavenSession;
+
+    var repositorySystemSession = new ProtobufMavenPluginRepositorySession(
+        mavenSession.getRepositorySession());
+
+    aetherMapper = new AetherArtifactMapper(
+        repositorySystemSession.getArtifactTypeRegistry());
+    aetherDependencyManagement = new AetherDependencyManagement(mavenSession, aetherMapper);
+
     // Prior to v2.12.0, we used the ProjectBuildingRequest on the MavenSession
     // and used RepositoryUtils.toRepos to create the repository list. GH-579
     // was raised to report that the <repositories> block in the POM was being
@@ -61,34 +72,11 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     // repositories seems to be what we need to use instead here.
     var remoteRepositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
 
-    this.mavenSession = mavenSession;
-
-    var repositorySystemSession = new ProtobufMavenPluginRepositorySession(
-        mavenSession.getRepositorySession());
-
-    aetherMapper = new AetherArtifactMapper(
-        repositorySystemSession.getArtifactTypeRegistry());
-
     aetherResolver = new AetherResolver(
         repositorySystem, repositorySystemSession, remoteRepositories);
 
     log.debug("Using remote repositories: {}", remoteRepositories);
     log.debug("Using repository system session: {}", repositorySystemSession);
-  }
-
-  // Visible for testing only.
-  MavenSession getMavenSession() {
-    return mavenSession;
-  }
-
-  // Visible for testing only.
-  AetherArtifactMapper getAetherMapper() {
-    return aetherMapper;
-  }
-
-  // Visible for testing only.
-  AetherResolver getAetherResolver() {
-    return aetherResolver;
   }
 
   @Override
@@ -112,6 +100,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     artifacts.stream()
         .peek(artifact -> log.debug("Resolving artifact as dependency: {}", artifact))
         .map(artifact -> aetherMapper.mapPmpArtifactToEclipseDependency(artifact, defaultDepth))
+        .map(aetherDependencyManagement::fillManagedAttributes)
         .forEach(unresolvedDependencies::add);
 
     if (includeProjectDependencies) {

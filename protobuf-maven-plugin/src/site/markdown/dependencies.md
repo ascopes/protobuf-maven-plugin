@@ -236,3 +236,45 @@ or paths on the local file system:
   </configuration>
 </plugin>
 ```
+
+### Dependency management
+
+The `protobuf-maven-plugin` will respect any `dependencyManagement` blocks in the current or 
+parent project, allowing you to infer versions from a parent POM across numerous projects in your
+team.
+
+This is already valid if you use the `dependencies` block within your pom.xml, but will also apply
+to `importDependencies` blocks as well.
+
+```xml
+<project>
+  ...
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>4.30.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <plugin>
+    <groupId>io.github.ascopes</groupId>
+    <artifactId>protobuf-maven-plugin</artifactId>
+  
+    <configuration>
+      ...
+      
+      <includeDependencies>
+        <includeDependency>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+          <!-- The version here is inferred from <dependencyManagement/>! -->
+        </includeDependency>
+      </includeDependencies>
+    </configuration>
+  </plugin>
+</project>
+```
