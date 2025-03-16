@@ -16,26 +16,108 @@ and JVM-based protoc plugins, as well as automatic dependency resolution and inc
 generation.
 
 > [!NOTE]
-> Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
-> and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
+> Full documentation with usage examples can be
+> found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
+> and examples are
+>
+present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
-## Features
+## Feature Matrix
 
-- Maven 4 support.
-- Pulls `protoc` from Maven Central directly, given a valid version, meaning the plugin is always up-to-date for your use cases.
-- Can alternatively invoke `protoc` from the system PATH if you are using an unsupported platform.
-- Supports Java and JVM Kotlin sources out of the box.
-- Plugin support. Need reactive support, Scala support, or gRPC? Just add the plugin and away you go.
-  - Ability to use plugins implemented for the JVM (JAR plugins and classpath plugins) without needing them to be bundled as
-    native binaries first.
-  - Ability to use regular `protoc` plugins (native binaries).
-  - Plugins can be resolved from Maven repositories, URLs, or the system path.
-- Generation of main and test sources.
-- Importing of `*.proto` sources from classpath dependencies.
-- Additional support for generating sources targeting C++, C#, Objective C, Python (including optional static typechecking stubs),
-  PHP, Ruby, and Rust.
-- Aims to keep builds reproducible and easily debuggable where possible.
-- Incremental compilation.
+- :white_check_mark: - Supported out of the box
+- :thought_balloon: - planned, but not currently supported (please raise an issue!)
+- :x: - not supported, nor planned
+
+### Supported platform versions
+
+| Feature                             | Support                                     |
+|:------------------------------------|:--------------------------------------------|
+| Maven 3.8 Support                   | :white_check_mark:                          |
+| Maven 3.9 Support                   | :white_check_mark:                          |
+| Maven 4.x Support                   | :white_check_mark:                          |
+| Java 11 Support                     | :white_check_mark:                          |
+| Java 17 Support                     | :white_check_mark:                          |
+| Java 21 Support                     | :white_check_mark:                          |
+| Project Loom Virtual Thread support | :white_check_mark: (Java 21 and newer only) |
+
+### Languages and frameworks
+
+| Feature           | Support                                                                                     |
+|:------------------|:--------------------------------------------------------------------------------------------|
+| Java              | :white_check_mark:                                                                          |
+| Kotlin            | :white_check_mark: (JVM shims out of the box, multiplatform via third-party protoc plugins) |
+| C#                | :white_check_mark:                                                                          |
+| C++               | :white_check_mark:                                                                          |
+| Objective C       | :white_check_mark:                                                                          |
+| PHP               | :white_check_mark:                                                                          |
+| Ruby              | :white_check_mark:                                                                          |
+| Rust              | :white_check_mark:                                                                          |
+| Python            | :white_check_mark:                                                                          |
+| Python MyPy Stubs | :white_check_mark:                                                                          |
+| Scala             | :white_check_mark: (via third-party scalapb protoc plugin)                                  |
+| gRPC              | :white_check_mark: (via third-party gRPC protoc plugin)                                     |
+| Reactor gRPC      | :white_check_mark: (via third-party Salesforce gRPC protoc plugin)                          |
+| Other languages   | :white_check_mark: (via third-party protoc plugins)                                         |
+
+### Protoc support
+
+| Feature                 | Support                                                       |
+|:------------------------|:--------------------------------------------------------------|
+| From Maven repositories | :white_check_mark: (any Google-released version)              |
+| From system path        | :white_check_mark: (as long as it is installed first)         |
+| From a URL              | :white_check_mark: (no SOCKS/HTTP proxy support at this time) |
+
+### Protoc features
+
+| Feature                                                 | Support                                              | 
+|:--------------------------------------------------------|:-----------------------------------------------------|
+| Proto2                                                  | :white_check_mark:                                   |
+| Proto3                                                  | :white_check_mark:                                   |
+| Editions                                                | :white_check_mark:                                   |
+| Failing on warnings                                     | :white_check_mark: (opt-in via plugin configuration) |
+| Lite builds                                             | :white_check_mark: (opt-in via plugin configuration) |                 
+| Generation of binary descriptors                        | :white_check_mark: (opt-in via plugin configuration) |
+| Controlling import inclusion in binary descriptors      | :white_check_mark: (opt-in via plugin configuration) |
+| Controlling source info inclusion in binary descriptors | :white_check_mark: (opt-in via plugin configuration) |
+| Importing from binary descriptors                       | :thought_balloon:                                    |
+| Building from binary descriptors                        | :thought_balloon:                                    |
+
+### Maven integrations
+
+| Feature                                                          | Support                     | 
+|:-----------------------------------------------------------------|:----------------------------|
+| Incremental compilation                                          | :white_check_mark:          |
+| Attaching protobuf sources to generated JARs                     | :white_check_mark:          |
+| Attaching generated binary descriptors to builds                 | :white_check_mark:          |
+| Detecting importable dependencies from project `<dependencies/>` | :white_check_mark:          |
+| Detecting importable dependencies from provided filesystem paths | :white_check_mark:          |
+| Respecting project `<dependencyManagement/>`                     | :white_check_mark:          |
+| Compiling `proto` files from dependencies                        | :white_check_mark: (opt-in) |
+| Controlling binary descriptor type                               | :white_check_mark:          |
+| Controlling binary descriptor classifier                         | :white_check_mark:          |
+| Controlling binary descriptor attachment                         | :white_check_mark:          |
+| Generation of main sources                                       | :white_check_mark:          | 
+| Generation of test sources                                       | :white_check_mark:          | 
+| Controlling the dependencies that are resolved by Maven scope    | :white_check_mark:          |
+| Marking generates sources as compilation candidates              | :white_check_mark:          |
+
+### Protoc plugin integrations
+
+| Feature                             | Support                                                                                                      | 
+|:------------------------------------|:-------------------------------------------------------------------------------------------------------------|
+| Calling pre-compiled protoc plugins | :white_check_mark: (from Maven repositories, URLs, system path)                                              |
+| Calling JVM-based protoc plugins    | :white_check_mark: (from Maven repositories, URLs, system path -- generates the shims automatically for you) |
+
+### Additional dependency management integrations
+
+| Feature                                                                   | Support                                                                   | 
+|:--------------------------------------------------------------------------|:--------------------------------------------------------------------------|
+| Importing paths without adding to the Maven project                       | :white_check_mark: (via plugin configuration)                             |
+| Generating code from additional paths without adding to the Maven project | :white_check_mark: (via plugin configuration)                             |
+| Controlling includes and excludes by path                                 | :white_check_mark: (via Glob expressions in plugin configuration)         |
+| Failing on invalid dependencies                                           | :white_check_mark: (opt-in via plugin configuration)                      |
+| Failing on missing sources                                                | :white_check_mark: (opt-out via plugin configuration)                     |
+| Controlling whether transitive dependencies are included                  | :white_check_mark: (globally, or per dependency via plugin configuration) |
 
 ## Quick examples
 
@@ -46,6 +128,7 @@ Getting started is very simple. The following will compile any sources that are 
 will automatically discover them and compile them to Java bytecode.
 
 ```xml
+
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
@@ -65,18 +148,21 @@ will automatically discover them and compile them to Java bytecode.
 ```
 
 > [!TIP]
-> Any `*.proto` files that are discovered in project dependencies will be made available to `protoc`,
+> Any `*.proto` files that are discovered in project dependencies will be made available
+> to `protoc`,
 > so you can import them in exactly the same way you would with Java classes!
 
 ### Other language support
 
-Other language generation targets are also available. This plugin provides support for generating all
+Other language generation targets are also available. This plugin provides support for generating
+all
 the languages that protoc supports out of the box, including Kotlin, Python, Python typeshed stubs,
 Ruby, PHP, C#, C++, and Rust.
 
 The following will generate Java classes and corresponding Kotlin wrappers:
 
 ```xml
+
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
@@ -102,9 +188,10 @@ Native Maven dependency management is supported out of the box, allowing you to 
 artifact registry for bundles of Proto files seamlessly.
 
 ```xml
+
 <project>
   ...
-  
+
   <dependencies>
     <dependency>
       <groupId>org.example.protos</groupId>
@@ -113,7 +200,7 @@ artifact registry for bundles of Proto files seamlessly.
       <classifier>zip</classifier>
     </dependency>
   </dependencies>
-  
+
   <plugins>
     <plugin>
       <groupId>io.github.ascopes</groupId>
@@ -141,6 +228,7 @@ The following snippet will compile any protobuf sources in `src/main/protobuf` t
 and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
 
 ```xml
+
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
@@ -174,23 +262,3 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
   </executions>
 </plugin>
 ```
-
-## Why do we need _another_ plugin?
-
-At the time of writing, the existing Maven plugins that provide Protobuf support are not kept up to date. This poses a risk for any applications depending on these plugins as they
-are either constrained to outdated versions of Protoc, or are not guaranteed to work in the future.
-
-Many of these existing plugins will not be compatible with the Maven v4.0 APIs.
-
-Some plugins are highly specific to certain CPU architectures as well, which produces issues when using Apple Silicon devices.
-
-All of these issues lingered over the projects I work on that make use of Protobuf. In an attempt to mediate those issues, I have created this Maven
-plugin with the following requirements:
-
-- It must support for arbitrary versions of Protoc, including those on the system path.
-- It must support invoking binary Protobuf plugins from dependencies, URLs, or the system path.
-- It must support invoking Protobuf plugins that are packaged as JARs, without the need to compile native binaries first.
-- It must support compiling Protobuf sources from archives and from the local filesystem tree.
-- It must be able to allow Protoc to import Protobuf files from other file trees, archives, and JARs transparently.
-- It must be aware of the Maven project dependencies.
-- It must be compatible with Maven 4.0 once a stable version is released.
