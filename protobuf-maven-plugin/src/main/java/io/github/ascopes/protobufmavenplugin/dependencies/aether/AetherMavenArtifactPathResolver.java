@@ -31,6 +31,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.graph.Dependency;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.4.4, many iterations of this existed in the past with different names.
  */
+@Description("Integrates with Eclipse Aether to resolve and download dependencies locally")
 @MojoExecutionScoped
 @Named
 final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver {

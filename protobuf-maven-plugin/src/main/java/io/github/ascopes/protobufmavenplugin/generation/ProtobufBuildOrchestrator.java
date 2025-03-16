@@ -39,6 +39,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Orchestrator for the entire generation process, gluing all components together")
 @MojoExecutionScoped
 @Named
 public final class ProtobufBuildOrchestrator {

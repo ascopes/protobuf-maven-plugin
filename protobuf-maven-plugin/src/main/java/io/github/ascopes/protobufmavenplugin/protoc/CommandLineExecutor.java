@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Executes protoc in a subprocess, intercepting any outputs")
 @MojoExecutionScoped
 @Named
 public final class CommandLineExecutor {

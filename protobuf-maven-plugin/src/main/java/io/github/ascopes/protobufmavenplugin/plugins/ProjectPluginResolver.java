@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 
 /**
  * Resolver for plugins within a project.
@@ -32,6 +33,7 @@ import org.apache.maven.execution.scope.MojoExecutionScoped;
  * @author Ashley Scopes
  * @since 2.7.0
  */
+@Description("Resolves and packages protoc plugins from various remote and local locations")
 @MojoExecutionScoped
 @Named
 public final class ProjectPluginResolver {

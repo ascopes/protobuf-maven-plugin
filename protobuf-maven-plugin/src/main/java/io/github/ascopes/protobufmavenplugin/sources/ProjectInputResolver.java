@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,18 +36,19 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.7.0
  */
+@Description("Resolves all protobuf sources to compile and/or make importable in the project")
 @MojoExecutionScoped
 @Named
 public final class ProjectInputResolver {
   private static final Logger log = LoggerFactory.getLogger(ProjectInputResolver.class);
 
   private final MavenArtifactPathResolver artifactPathResolver;
-  private final SourcePathResolver sourceResolver;
+  private final ProtoSourceResolver sourceResolver;
 
   @Inject
-  public ProjectInputResolver(
+  ProjectInputResolver(
       MavenArtifactPathResolver artifactPathResolver,
-      SourcePathResolver sourceResolver
+      ProtoSourceResolver sourceResolver
   ) {
     this.artifactPathResolver = artifactPathResolver;
     this.sourceResolver = sourceResolver;

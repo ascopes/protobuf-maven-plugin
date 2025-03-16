@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.SessionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Discovers information about the platform that the plugin is being invoked on")
 @Named
 @SessionScoped
 public final class HostSystem {

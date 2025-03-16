@@ -30,6 +30,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.2.0
  */
+@Description("Manages an execution-wide thread pool for concurrent task execution")
 @MojoExecutionScoped
 @Named
 public final class ConcurrentExecutor {

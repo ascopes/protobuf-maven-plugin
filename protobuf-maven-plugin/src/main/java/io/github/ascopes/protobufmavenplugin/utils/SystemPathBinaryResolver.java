@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.SessionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Discovers executables on the system-path using OS-aware resolution techniques")
 @Named
 @SessionScoped
 public final class SystemPathBinaryResolver {

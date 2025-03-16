@@ -25,6 +25,7 @@ import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ashley Scopes
  */
+@Description("Manages build-scoped reusable temporary directories for processing")
 @MojoExecutionScoped
 @Named
 public final class TemporarySpace {
@@ -58,10 +60,10 @@ public final class TemporarySpace {
         "unknown-goal"
     );
     var executionId = Objects.requireNonNullElse(
-        mojoExecution.getExecutionId(), 
+        mojoExecution.getExecutionId(),
         "unknown-execution-id"
     );
-    
+
     var dir = Path.of(mavenProject.getBuild().getDirectory())
         .resolve(FRAG)
         // GH-421: Include the execution ID and goal to keep file paths unique
