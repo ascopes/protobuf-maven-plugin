@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 import static java.util.Objects.requireNonNull;
 
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
@@ -39,6 +41,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Integration layer with the Eclipse Aether resolver.
+ *
+ * <p>Warning: the code in this class is very fragile and changing it can easily result in the
+ * introduction of regressions for users. If you need to alter it, be very sure that you know
+ * what you are doing!
  *
  * @author Ashley Scopes
  * @since 2.4.4
@@ -76,115 +82,133 @@ final class AetherResolver {
     return Collections.unmodifiableList(remoteRepositories);
   }
 
-  Artifact resolveArtifact(Artifact unresolvedArtifact) throws ResolutionException {
-    log.info("Resolving artifact {} from repositories", unresolvedArtifact);
-    var request = new ArtifactRequest(unresolvedArtifact, remoteRepositories, null);
+  Artifact resolveRequiredArtifact(Artifact artifact) throws ResolutionException {
+    log.info("Attempting to resolve artifact {}", artifact);
+
+    var request = new ArtifactRequest();
+    request.setArtifact(artifact);
+    request.setRepositories(remoteRepositories);
+
+    ArtifactResult result;
 
     try {
-      var response = repositorySystem.resolveArtifact(repositorySystemSession, request);
-      if (response.isResolved()) {
-        // Almost certain this shouldn't happen, but knowing my luck, some weird edge case will
-        // exist with this.
-        logWarnings("resolving artifact " + unresolvedArtifact, response.getExceptions());
-        return requireNonNull(response.getArtifact(), "No artifact was returned! Panic!");
-      }
-
-      throw resolutionException(
-          "failed to resolve artifact " + unresolvedArtifact, response.getExceptions());
-
+      result = repositorySystem.resolveArtifact(repositorySystemSession, request);
     } catch (ArtifactResolutionException ex) {
-      throw new ResolutionException("Failed to resolve artifact " + unresolvedArtifact, ex);
+      log.debug("Discarding internal exception", ex);
+      result = ex.getResult();
     }
-  }
 
-  // Include project dependencies via flag in callee, don't do it here, it is a mess.
-  Collection<Artifact> resolveDependenciesToArtifacts(
-      List<Dependency> unresolvedDependencies,
-      Set<String> dependencyScopes,
-      boolean failOnInvalidDependencies
-  ) throws ResolutionException {
-    var scopeFilter = new ScopeDependencyFilter(dependencyScopes);
-    var collectRequest = new CollectRequest(unresolvedDependencies, null, remoteRepositories);
-    var request = new DependencyRequest(collectRequest, scopeFilter);
-
-    log.debug(
-        "Attempting to resolve the following dependencies in this pass: {}",
-        unresolvedDependencies
-    );
-
-    var response = resolveDependencies(request, failOnInvalidDependencies);
-    return extractArtifactsFromResolvedDependencies(response);
-  }
-
-  private DependencyResult resolveDependencies(
-      DependencyRequest request,
-      boolean failOnInvalidDependencies
-  ) throws ResolutionException {
-    DependencyResult response;
-
-    // Part 1: resolve the dependencies directly.
-    try {
-      response = repositorySystem.resolveDependencies(repositorySystemSession, request);
-
-    } catch (DependencyResolutionException ex) {
-      // GH-299: if this exception is raised, we may still have some results we can use. If this is
-      // the case then resolution only partially failed, so continue for now unless strict
-      // resolution is enabled. We do not fail-fast here anymore (since 2.4.0) as any resolution
-      // errors should be dealt with by the maven-compiler-plugin later on if needed.
-      //
-      // If we didn't get any result, then something more fatal has occurred, so raise.
-      response = ex.getResult();
-
-      if (response == null || failOnInvalidDependencies) {
-        throw new ResolutionException("Failed to resolve dependencies from repositories", ex);
-      }
-
-      // Log the message as well here as we omit it by default if `--errors' is not passed to Maven.
-      log.warn(
-          "Error resolving one or more dependencies, dependencies may be missing during "
-              + "protobuf compilation! {}", ex.getMessage(), ex
+    // Looks like we can get resolution exceptions even if things resolve correctly, as it appears
+    // to raise for the local repository first.
+    // If this happens, don't bother raising or reporting it as it is normal behaviour. If anything
+    // else goes wrong, then we can panic about it.
+    if (result.isMissing()) {
+      throw mapExceptions(
+          "Failed to resolve artifact " + artifact,
+          result.getExceptions()
       );
     }
 
-    return response;
+    reportWarnings(result.getExceptions());
+
+    // This shouldn't happen, but I do not trust that Aether isn't hiding some wild edge cases
+    // for me here.
+    return requireNonNull(
+        result.getArtifact(),
+        () -> "No resolution exceptions raised, but no artifact was returned "
+            + "by Aether while resolving " + artifact
+    );
   }
 
-  private List<Artifact> extractArtifactsFromResolvedDependencies(
-      DependencyResult response
+  Collection<Artifact> resolveDependencies(
+      List<Dependency> dependencies,
+      Set<String> allowedDependencyScopes,
+      boolean failOnResolutionErrors
   ) throws ResolutionException {
-    var artifacts = new ArrayList<Artifact>();
-    var exceptions = new ArrayList<Exception>();
-    var failedAtLeastOnce = false;
+    var collectRequest = new CollectRequest();
+    collectRequest.setDependencies(dependencies);
+    collectRequest.setManagedDependencies(null);  // TODO: dependency management in GH-555
+    collectRequest.setRepositories(remoteRepositories);
 
-    for (var artifactResponse : response.getArtifactResults()) {
-      exceptions.addAll(artifactResponse.getExceptions());
-      var artifact = artifactResponse.getArtifact();
-      if (artifact == null) {
-        failedAtLeastOnce = true;
-      } else {
+    var dependencyRequest = new DependencyRequest();
+    dependencyRequest.setCollectRequest(collectRequest);
+    dependencyRequest.setFilter(new ScopeDependencyFilter(allowedDependencyScopes));
+
+    log.info(
+        "Resolving {}",
+        StringUtils.pluralize(dependencies.size(), "dependency", "dependencies")
+    );
+    log.debug("Attempting to resolve the following dependencies: {}", dependencies);
+
+    DependencyResult dependencyResult;
+
+    try {
+      dependencyResult = repositorySystem
+          .resolveDependencies(repositorySystemSession, dependencyRequest);
+    } catch (DependencyResolutionException ex) {
+      log.debug("Discarding internal exception", ex);
+      dependencyResult = ex.getResult();
+    }
+
+    var artifacts = new ArrayList<Artifact>();
+    var exceptions = new ArrayList<>(dependencyResult.getCollectExceptions());
+    var isMissing = false;
+
+    // Why oh why can't we return a simple result type for this...
+    for (var artifactResult : dependencyResult.getArtifactResults()) {
+      var artifact = artifactResult.getArtifact();
+      if (artifact != null) {
+        log.debug("Resolution of {} returned artifact {}", dependencies, artifact);
         artifacts.add(artifact);
       }
+
+      if (artifactResult.isMissing()) {
+        isMissing = true;
+      }
+
+      exceptions.addAll(artifactResult.getExceptions());
     }
 
-    if (failedAtLeastOnce) {
-      throw resolutionException("Failed to resolve artifacts for dependencies", exceptions);
+    // Looks like we can get resolution exceptions even if things resolve correctly, as it appears
+    // to raise for the local repository first.
+    // If this happens, don't bother raising as it is normal behaviour. If anything else goes wrong,
+    // then we can panic about it.
+    if (isMissing && failOnResolutionErrors) {
+      throw mapExceptions("Failed to resolve dependencies", exceptions);
     }
 
-    return artifacts;
+    reportWarnings(exceptions);
+
+    return Collections.unmodifiableList(artifacts);
   }
 
-  private ResolutionException resolutionException(String errorMessage, Iterable<Exception> causes) {
-    var ex = new ResolutionException(errorMessage);
-    var iterator = causes.iterator();
-    if (iterator.hasNext()) {
-      ex.initCause(iterator.next());
-      iterator.forEachRemaining(ex::addSuppressed);
-    }
-    return ex;
+  private ResolutionException mapExceptions(String message, Collection<Exception> causes) {
+    var causeIterator = causes.iterator();
+
+    // Assumption: this is always possible. If it isn't, we screwed up somewhere.
+    var cause = causeIterator.next();
+    var exception = new ResolutionException(
+        message
+            + " - resolution failed with "
+            + StringUtils.pluralize(causes.size(), "error: ", "errors - first was: ")
+            + cause.getMessage(),
+        cause
+    );
+    causeIterator.forEachRemaining(exception::addSuppressed);
+    return exception;
   }
 
-  private void logWarnings(String descriptionOfAction, Iterable<Exception> exceptions) {
-    exceptions.iterator().forEachRemaining(ex -> log.debug(
-        "Encountered a non-fatal resolution error while {}", descriptionOfAction, ex));
+  private void reportWarnings(Iterable<? extends Exception> exceptions) {
+    exceptions.forEach(exception -> {
+      // We purposely log the warning class and message twice, since exception tracebacks are
+      // hidden unless Maven was invoked with --errors.
+      //noinspection LoggingPlaceholderCountMatchesArgumentCount
+      log.warn(
+          "Dependency resolution warning was reported - {}: {}",
+          exception.getClass().getName(),
+          exception.getMessage(),
+          exception
+      );
+    });
   }
 }
