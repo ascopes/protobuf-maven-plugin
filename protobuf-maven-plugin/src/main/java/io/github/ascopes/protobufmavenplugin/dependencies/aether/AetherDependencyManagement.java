@@ -60,10 +60,17 @@ final class AetherDependencyManagement {
 
   Dependency fillManagedAttributes(Dependency dependency) {
     var artifact = dependency.getArtifact();
+
+    if (artifact.getVersion() != null && !artifact.getVersion().isBlank()) {
+      // Nothing to override here.
+      return dependency;
+    }
+
     var key = getDependencyManagementKey(artifact);
     var managedArtifact = effectiveDependencyManagement.get(key);
 
     if (managedArtifact == null) {
+      // Nothing that can override us here.
       return dependency;
     }
 
@@ -94,8 +101,8 @@ final class AetherDependencyManagement {
   }
 
   private static Artifact newestArtifact(Artifact a, Artifact b) {
-    var versionA = new ComparableVersion(requireNonNullElse(a.getVersion(), "LATEST"));
-    var versionB = new ComparableVersion(requireNonNullElse(b.getVersion(), "LATEST"));
+    var versionA = new ComparableVersion(requireNonNullElse(a.getVersion(), "0"));
+    var versionB = new ComparableVersion(requireNonNullElse(b.getVersion(), "0"));
     return versionA.compareTo(versionB) < 0 ? b : a;
   }
 }
