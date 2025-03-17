@@ -15,11 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Function.identity;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.graph.Dependency;
@@ -49,7 +51,8 @@ final class AetherDependencyManagement {
         .collect(Collectors.collectingAndThen(
             Collectors.toMap(
                 AetherDependencyManagement::getDependencyManagementKey,
-                identity()
+                identity(),
+                AetherDependencyManagement::newestArtifact
             ),
             Collections::unmodifiableMap
         ));
@@ -88,5 +91,11 @@ final class AetherDependencyManagement {
     }
 
     return builder.toString();
+  }
+
+  private static Artifact newestArtifact(Artifact a, Artifact b) {
+    var versionA = new ComparableVersion(requireNonNullElse(a.getVersion(), "LATEST"));
+    var versionB = new ComparableVersion(requireNonNullElse(b.getVersion(), "LATEST"));
+    return versionA.compareTo(versionB) < 0 ? b : a;
   }
 }
