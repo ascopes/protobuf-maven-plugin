@@ -138,6 +138,7 @@
 
     <!-- Plugin dependencies -->
     <checkstyle.version>10.21.4</checkstyle.version>
+    <maven-fluido-skin.version>2.1.0</maven-fluido-skin.version>
     <maven-surefire-junit5-tree-reporter.version>1.4.0</maven-surefire-junit5-tree-reporter.version>
 
     <!--
@@ -191,6 +192,21 @@
         <groupId>org.apache.maven.resolver</groupId>
         <artifactId>maven-resolver-api</artifactId>
         <version>${maven-resolver-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <!--
+            This is a bit of a hack: we do not technically depend
+            on this in any project but we reference it in our
+            site.xml that is consumed by Maven Site Plugin. Usually
+            we'd declare the version in there directly, but by doing
+            it here with a property, we cal allow dependabot to
+            start to manage this automatically for us. The property
+            is then filtered into the site.xml automatically.
+        -->  
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>${maven-fluido-skin.version}</version>
       </dependency>
 
       <dependency>
