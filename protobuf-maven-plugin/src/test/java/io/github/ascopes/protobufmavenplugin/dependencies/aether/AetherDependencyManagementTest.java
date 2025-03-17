@@ -77,8 +77,12 @@ class AetherDependencyManagementTest {
   }
 
   @DisplayName("Dependency management is applied to relevant dependencies with missing versions")
-  @Test
-  void dependencyManagementIsAppliedToRelevantDependenciesWithMissingVersions() {
+  @NullAndEmptySource
+  @ValueSource(strings = " ")
+  @ParameterizedTest(name = "for version = {0}")
+  void dependencyManagementIsAppliedToRelevantDependenciesWithMissingVersions(
+      String missingVersion
+  ) {
     when(mavenSession.getCurrentProject().getDependencyManagement().getDependencies())
         .thenAnswer(ctx -> List.of(
             mavenDependency(),
@@ -97,7 +101,7 @@ class AetherDependencyManagementTest {
     var inputDependency = eclipseDependency(
         "org.springframework.boot",
         "spring-boot",
-        null,
+        missingVersion,
         "",
         "jar",
         "compile",
@@ -175,14 +179,13 @@ class AetherDependencyManagementTest {
     assertThat(outputDependency).isSameAs(inputDependency);
   }
 
-
   @DisplayName(
       "Dependency management is not applied to relevant dependencies with different classifiers"
   )
   @NullAndEmptySource
   @ValueSource(strings = "bar")
   @ParameterizedTest(name = "for classifier = {0}")
-  void dependencyManagementIsAppliedToRelevantDependenciesWithDifferentClassifiers(
+  void dependencyManagementIsNotAppliedToRelevantDependenciesWithDifferentClassifiers(
       String classifier
   ) {
     when(mavenSession.getCurrentProject().getDependencyManagement().getDependencies())
@@ -206,6 +209,45 @@ class AetherDependencyManagementTest {
         null,
         "foo",
         "jar",
+        "compile",
+        null
+    );
+
+    var aetherDependencyManagement = new AetherDependencyManagement(mavenSession, artifactMapper);
+
+    // When
+    var outputDependency = aetherDependencyManagement.fillManagedAttributes(inputDependency);
+
+    // Then
+    assertThat(outputDependency).isSameAs(inputDependency);
+  }
+
+  @DisplayName(
+      "Dependency management is not applied to relevant dependencies with provided versions"
+  )
+  @Test
+  void dependencyManagementIsNotAppliedToRelevantDependenciesWithProvidedVersions() {
+    when(mavenSession.getCurrentProject().getDependencyManagement().getDependencies())
+        .thenAnswer(ctx -> List.of(
+            mavenDependency(),
+            mavenDependency(),
+            mavenDependency(),
+            mavenDependency(
+                "org.springframework.boot",
+                "spring-boot",
+                "3.0.0",
+                "jar",
+                null
+            ),
+            mavenDependency()
+        ));
+
+    var inputDependency = eclipseDependency(
+        "org.springframework.boot",
+        "spring-boot",
+        "3.0.1",
+        null,
+        "war",
         "compile",
         null
     );
