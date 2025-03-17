@@ -243,7 +243,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<UrlProtocPluginBean> binaryUrlPlugins;
 
   /**
-   * Enable generating C++ sources from the protobuf sources.
+   * Enable generating C++ sources and headers from the protobuf sources.
    *
    * @since 1.1.0
    */
