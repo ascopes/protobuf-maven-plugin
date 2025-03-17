@@ -45,6 +45,8 @@
           document.addEventListener("DOMContentLoaded", initSyntaxHighlighting);
         }
       </script>
+      <!-- Table of contents generation -->
+      <script src="/js/fluido-toc-generator.js"></script>
       ]]>
     </head>
 
