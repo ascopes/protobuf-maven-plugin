@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures;
+import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 
@@ -61,6 +63,71 @@ class ConcurrentExecutorTest {
   @AfterEach
   void tearDown() throws InterruptedException {
     executor.executorService.shutdownNow();
+  }
+
+  @DisplayName("concurrency respects the system processor count by default")
+  @CsvSource({
+      " 0,  4",
+      " 1,  8",
+      " 2, 16",
+      " 3, 24",
+      " 4, 32",
+      " 5, 40",
+      " 6, 48",
+      " 7, 56",
+      " 8, 64",
+      " 9, 72",
+      "10, 80",
+      "11, 80",
+      "12, 80",
+      "99, 80",
+  })
+  @ParameterizedTest(name = "when CPU count is {0}, expect a concurrency of {1}")
+  @UsesSystemProperties
+  void concurrencyRespectsSystemProcessorCountByDefault(int cpus, int expectedConcurrency) {
+    // Given
+    // When
+    var effectiveConcurrency = ConcurrentExecutor.determineConcurrency(cpus);
+
+    // Then
+    assertThat(effectiveConcurrency)
+        .isEqualTo(expectedConcurrency);
+  }
+
+  @DisplayName("concurrency is overridden by sensible system properties")
+  @CsvSource({
+      "-65535,      4, non-sensible",
+      "  -100,      4, non-sensible",
+      "    -1,      4, non-sensible",
+      "     0,      4, non-sensible",
+      "     1,      1,     sensible",
+      "     2,      2,     sensible",
+      "     3,      3,     sensible",
+      "     4,      4,     sensible",
+      "     5,      5,     sensible",
+      "   500,    500,     sensible",
+      "500000, 500000,     sensible",
+  })
+  @ParameterizedTest(
+      name = "when the system property is a {2} value {0}, expect a concurrency of {1}"
+  )
+  @UsesSystemProperties
+  void concurrencyIsOverriddenBySensibleSystemProperties(
+      int property,
+      int expectedConcurrency,
+      String ignored
+  ) {
+    // Given
+    System.setProperty("protobuf.executor.maxThreads", String.valueOf(property));
+    var runtime = Runtime.getRuntime();
+
+    // When
+    var effectiveConcurrency = ConcurrentExecutor
+        .determineConcurrency(runtime.availableProcessors());
+
+    // Then
+    assertThat(effectiveConcurrency)
+        .isEqualTo(expectedConcurrency);
   }
 
   @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
