@@ -118,11 +118,11 @@ final class AetherResolver {
     dependencyRequest.setCollectRequest(collectRequest);
     dependencyRequest.setFilter(new ScopeDependencyFilter(allowedDependencyScopes));
 
-    log.info(
-        "Resolving {}",
-        StringUtils.pluralize(dependencies.size(), "dependency", "dependencies")
+    log.debug(
+        "Resolving {} - {}",
+        StringUtils.pluralize(dependencies.size(), "dependency", "dependencies"),
+        dependencies
     );
-    log.debug("Attempting to resolve the following dependencies: {}", dependencies);
 
     DependencyResult dependencyResult;
 
