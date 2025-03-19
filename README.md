@@ -38,7 +38,6 @@ present [in the integration tests](https://github.com/ascopes/protobuf-maven-plu
 | Java 11 Support                     | :white_check_mark:                          |
 | Java 17 Support                     | :white_check_mark:                          |
 | Java 21 Support                     | :white_check_mark:                          |
-| Project Loom Virtual Thread support | :white_check_mark: (Java 21 and newer only) |
 
 ### Languages and frameworks
 

@@ -45,6 +45,11 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class ConcurrentExecutor {
 
+  private static int DEFAULT_MAXIMUM_CONCURRENCY = 80;
+  private static int DEFAULT_MINIMUM_CONCURRENCY = 4;
+  private static int DEFAULT_CONCURRENCY_MULTIPLIER = 8;
+  private static final String CONCURRENCY_PROPERTY = "protobuf.executor.maxThreads";
+
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
 
   // Visible for testing only.
@@ -52,35 +57,21 @@ public final class ConcurrentExecutor {
 
   @Inject
   public ConcurrentExecutor() {
-    ExecutorService executorService;
+    // Prior to 2.13.0, we used unbounded thread pools, utilising virtual threads when
+    // available. This was somewhat risky in hindsight as we could easily load a large
+    // number of things into memory when analysing dependencies and then run
+    // out of heap space to consume.
+    //
+    // As of 2.13.0, I have removed all of this and reverted to a basic work stealing pool
+    // so that we have full control of the concurrency.
+    //
+    // Concurrency will be determined by a multiplier of the number of physical
+    // CPU cores available, and is overridable via a system property if the user
+    // wishes to take further control of this.
 
-    try {
-      log.debug("Trying to create new Loom virtual thread pool");
-      executorService = (ExecutorService) Executors.class
-          .getMethod("newVirtualThreadPerTaskExecutor")
-          .invoke(null);
-
-      log.debug("Loom virtual thread pool creation was successful!");
-
-    } catch (Exception ex) {
-      var threadGroup = new ThreadGroup(getClass().getName());
-      // As of v2.7.0, we use a cached thread pool as the majority of our operations are
-      // short-lived IO bound tasks. The unbound nature reduces the risk of deadlocking in
-      // some cases on older hardware.
-      executorService = Executors.newCachedThreadPool(runnable -> {
-        var thread = new Thread(threadGroup, runnable);
-        thread.setDaemon(true);
-        return thread;
-      });
-      log.debug(
-          "Falling back to new cached thread pool (group={}, reason={}: {})",
-          threadGroup,
-          ex.getClass().getName(),
-          ex.getMessage()
-      );
-    }
-
-    this.executorService = executorService;
+    var runtime = Runtime.getRuntime();
+    var concurrency = determineConcurrency(runtime.availableProcessors());
+    executorService = Executors.newWorkStealingPool(concurrency);
   }
 
   /**
@@ -141,5 +132,41 @@ public final class ConcurrentExecutor {
         task.cancel(true);
       }
     }
+  }
+
+  // Visible for testing only.
+  static int determineConcurrency(int cpuCount) {
+    var defaultConcurrency = Math.min(
+        Math.max(
+            DEFAULT_CONCURRENCY_MULTIPLIER * cpuCount,
+            DEFAULT_MINIMUM_CONCURRENCY
+        ),
+        DEFAULT_MAXIMUM_CONCURRENCY
+    );
+
+    var concurrency = Integer.getInteger(
+        CONCURRENCY_PROPERTY,
+        defaultConcurrency
+    );
+
+    if (concurrency < 1) {
+      log.warn(
+          "Concurrency has been overridden to an invalid value ({}). "
+              + "This will be ignored and a concurrency of {} will be used instead.",
+          concurrency,
+          DEFAULT_MINIMUM_CONCURRENCY
+      );
+      concurrency = DEFAULT_MINIMUM_CONCURRENCY;
+    }
+
+    log.debug(
+        "Effective concurrency is {}, default concurrency is {}. "
+            + "Override this by passing -D{}=value",
+        concurrency,
+        defaultConcurrency,
+        CONCURRENCY_PROPERTY
+    );
+
+    return concurrency;
   }
 }
