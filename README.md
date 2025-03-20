@@ -19,8 +19,7 @@ generation.
 > Full documentation with usage examples can be
 > found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
 > and examples are
->
-present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
+> present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
 ## Feature Matrix
 
