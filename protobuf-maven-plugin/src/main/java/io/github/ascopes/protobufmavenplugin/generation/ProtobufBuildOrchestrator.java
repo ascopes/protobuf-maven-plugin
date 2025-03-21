@@ -85,20 +85,19 @@ public final class ProtobufBuildOrchestrator {
   public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
     log.debug("The provided protobuf GenerationRequest is: {}", request);
 
+    // GH-596: Short circuit and avoid expensive dependency resolution if
+    // we can exit early.
+    if (request.getSourceRoots().isEmpty() && request.getSourceDependencies().isEmpty()) {
+      return handleMissingInputs(request);
+    }
+
     final var protocPath = discoverProtocPath(request);
 
     final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
     if (projectInputs.getCompilableSources().isEmpty()) {
-      if (request.isFailOnMissingSources()) {
-        log.error("No protobuf sources found. If this is unexpected, check your "
-            + "configuration and try again.");
-        return false;
-      } else {
-        log.warn("No protobuf sources found.");
-        return true;
-      }
+      return handleMissingInputs(request);
     }
 
     if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()
@@ -181,6 +180,17 @@ public final class ProtobufBuildOrchestrator {
     }
 
     return true;
+  }
+
+  private boolean handleMissingInputs(GenerationRequest request) {
+    if (request.isFailOnMissingSources()) {
+      log.error("No protobuf sources found. If this is unexpected, check your "
+          + "configuration and try again.");
+      return false;
+    } else {
+      log.warn("No protobuf sources found.");
+      return true;
+    }
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
