@@ -25,6 +25,7 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.graph.Dependency;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Helper that determines the Maven dependency management in a way that Aether can understand, and
@@ -61,7 +62,7 @@ final class AetherDependencyManagement {
   Dependency fillManagedAttributes(Dependency dependency) {
     var artifact = dependency.getArtifact();
 
-    if (artifact.getVersion() != null && !artifact.getVersion().isBlank()) {
+    if (!isUnspecified(artifact.getVersion())) {
       // Nothing to override here.
       return dependency;
     }
@@ -92,7 +93,7 @@ final class AetherDependencyManagement {
         .append(":")
         .append(artifact.getExtension());
 
-    if (artifact.getClassifier() != null) {
+    if (!isUnspecified(artifact.getClassifier())) {
       builder.append(":")
           .append(artifact.getClassifier());
     }
@@ -101,8 +102,19 @@ final class AetherDependencyManagement {
   }
 
   private static Artifact newestArtifact(Artifact a, Artifact b) {
-    var versionA = new ComparableVersion(requireNonNullElse(a.getVersion(), "0"));
-    var versionB = new ComparableVersion(requireNonNullElse(b.getVersion(), "0"));
+    var versionA = parseVersion(a.getVersion());
+    var versionB = parseVersion(b.getVersion());
     return versionA.compareTo(versionB) < 0 ? b : a;
+  }
+
+  private static boolean isUnspecified(@Nullable String value) {
+    return value == null || value.isBlank();
+  }
+
+  private static ComparableVersion parseVersion(@Nullable String version) {
+    if (isUnspecified(version)) {
+      version = "0.0.0-SNAPSHOT";
+    }
+    return new ComparableVersion(version);
   }
 }
