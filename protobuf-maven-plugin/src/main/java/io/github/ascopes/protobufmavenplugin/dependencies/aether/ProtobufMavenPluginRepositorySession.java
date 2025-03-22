@@ -17,9 +17,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.resolution.ArtifactDescriptorPolicy;
 import org.eclipse.aether.resolution.ResolutionErrorPolicy;
-import org.eclipse.aether.util.repository.SimpleResolutionErrorPolicy;
 
 /**
  * Custom repository session for the Protobuf Maven Plugin which injects some special components to
@@ -54,6 +52,6 @@ final class ProtobufMavenPluginRepositorySession
     // As of 2.13.0, we do not want to cache invalid dependencies between builds. This gets a bit
     // confusing for users if it collides with logic that Maven itself is performing, so lets just
     // totally avoid it.
-    return new SimpleResolutionErrorPolicy(ResolutionErrorPolicy.CACHE_DISABLED);
+    return new NoCacheResolutionErrorPolicy();
   }
 }

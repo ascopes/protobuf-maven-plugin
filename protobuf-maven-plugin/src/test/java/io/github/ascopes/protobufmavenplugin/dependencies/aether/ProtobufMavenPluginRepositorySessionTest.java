@@ -82,14 +82,6 @@ class ProtobufMavenPluginRepositorySessionTest {
   void getResolutionErrorPolicyReturnsTheExpectedValue() {
     // Then
     assertThat(underTest.getResolutionErrorPolicy())
-        .isNotNull()
-        .satisfies(
-            policy -> assertThat(policy.getArtifactPolicy(mock(), mock()))
-                .as("artifact policy")
-                .isZero(),
-            policy -> assertThat(policy.getMetadataPolicy(mock(), mock()))
-                .as("metadata policy")
-                .isZero()
-        );
+        .isInstanceOf(NoCacheResolutionErrorPolicy.class);
   }
 }
