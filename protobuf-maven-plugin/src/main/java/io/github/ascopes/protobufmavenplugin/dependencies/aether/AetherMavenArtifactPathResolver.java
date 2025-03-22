@@ -97,7 +97,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDepth,
       Set<String> dependencyScopes,
-      boolean includeProjectDependencies,
+      boolean includeProjectArtifacts,
       boolean failOnInvalidDependencies
   ) throws ResolutionException {
     var unresolvedDependencies = new ArrayList<Dependency>();
@@ -116,14 +116,15 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         )
         .stream();
 
-    if (includeProjectDependencies) {
+    if (includeProjectArtifacts) {
       // As of 2.13.0, we enforce that dependencies are resolved by Maven
-      // first. This is less error prone and a bit faster for regular builds
+      // first. This is less error-prone and a bit faster for regular builds
       // as Maven can cache this stuff however they want.
-      var projectArtifacts = mavenSession.getCurrentProject().getDependencies()
+      var projectArtifacts = mavenSession.getCurrentProject().getArtifacts()
           .stream()
-          .peek(dependency -> log.debug("Including project dependency: {}", dependency))
-          .map(aetherMapper::mapMavenDependencyToEclipseArtifact);
+          .filter(artifact -> dependencyScopes.contains(artifact.getScope()))
+          .peek(artifact -> log.debug("Including project artifact: {}", artifact))
+          .map(aetherMapper::mapMavenArtifactToEclipseArtifact);
 
       resolvedArtifacts = Stream.concat(projectArtifacts, resolvedArtifacts);
     }

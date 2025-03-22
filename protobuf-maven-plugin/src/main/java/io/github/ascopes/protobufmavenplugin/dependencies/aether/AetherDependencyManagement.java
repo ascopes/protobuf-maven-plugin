@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
-import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Function.identity;
 
 import java.util.Collections;

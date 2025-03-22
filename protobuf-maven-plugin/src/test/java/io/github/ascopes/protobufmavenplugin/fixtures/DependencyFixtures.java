@@ -99,6 +99,25 @@ public final class DependencyFixtures {
     return exclusion;
   }
 
+  public static org.apache.maven.artifact.Artifact mavenArtifact(
+      String groupId,
+      String artifactId,
+      String version,
+      @Nullable String classifier,
+      @Nullable String type
+  ) {
+    var artifact = mock(
+        org.apache.maven.artifact.Artifact.class,
+        defaultSettings("some maven artifact")
+    );
+    when(artifact.getGroupId()).thenReturn(groupId);
+    when(artifact.getArtifactId()).thenReturn(artifactId);
+    when(artifact.getVersion()).thenReturn(version);
+    when(artifact.getType()).thenReturn(type);
+    when(artifact.getClassifier()).thenReturn(classifier);
+    return artifact;
+  }
+
   public static org.apache.maven.model.Dependency mavenDependency() {
     return mavenDependency(
         someBasicString(),
