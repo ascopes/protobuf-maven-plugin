@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -96,7 +97,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDepth,
       Set<String> dependencyScopes,
-      boolean includeProjectDependencies,
+      boolean includeProjectArtifacts,
       boolean failOnInvalidDependencies
   ) throws ResolutionException {
     var unresolvedDependencies = new ArrayList<Dependency>();
@@ -107,23 +108,32 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         .map(aetherDependencyManagement::fillManagedAttributes)
         .forEach(unresolvedDependencies::add);
 
-    if (includeProjectDependencies) {
-      mavenSession.getCurrentProject().getDependencies()
+    var resolvedArtifacts = aetherResolver
+        .resolveDependencies(
+            unresolvedDependencies,
+            dependencyScopes,
+            failOnInvalidDependencies
+        )
+        .stream();
+
+    if (includeProjectArtifacts) {
+      // As of 2.13.0, we enforce that dependencies are resolved by Maven
+      // first. This is less error-prone and a bit faster for regular builds
+      // as Maven can cache this stuff however they want.
+      var projectArtifacts = mavenSession.getCurrentProject().getArtifacts()
           .stream()
-          .peek(dependency -> log.debug("Resolving project dependency: {}", dependency))
-          .map(aetherMapper::mapMavenDependencyToEclipseDependency)
-          .forEach(unresolvedDependencies::add);
+          .filter(artifact -> dependencyScopes.contains(artifact.getScope()))
+          .peek(artifact -> log.debug("Including project artifact: {}", artifact))
+          .map(aetherMapper::mapMavenArtifactToEclipseArtifact);
+
+      resolvedArtifacts = Stream.concat(projectArtifacts, resolvedArtifacts);
     }
 
-    var resolvedArtifacts = aetherResolver.resolveDependencies(
-        unresolvedDependencies,
-        dependencyScopes,
-        failOnInvalidDependencies
-    );
-
-    return resolvedArtifacts.stream()
+    return resolvedArtifacts
+        .collect(AetherDependencyManagement.deduplicateArtifacts())
+        .values()
+        .stream()
         .map(aetherMapper::mapEclipseArtifactToPath)
-        .distinct()
         .collect(Collectors.toUnmodifiableList());
   }
 }

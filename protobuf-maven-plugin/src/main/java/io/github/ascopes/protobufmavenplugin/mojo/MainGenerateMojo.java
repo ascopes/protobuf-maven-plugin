@@ -41,7 +41,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     name = "generate",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-    requiresDependencyResolution = ResolutionScope.NONE,
+    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
     requiresOnline = true,
     threadSafe = true
 )
