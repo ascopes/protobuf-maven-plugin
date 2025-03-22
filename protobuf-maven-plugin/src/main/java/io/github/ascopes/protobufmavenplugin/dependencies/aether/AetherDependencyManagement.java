@@ -20,6 +20,7 @@ import static java.util.function.Function.identity;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.execution.MavenSession;
@@ -49,14 +50,7 @@ final class AetherDependencyManagement {
         .getDependencies()
         .stream()
         .map(artifactMapper::mapMavenDependencyToEclipseArtifact)
-        .collect(Collectors.collectingAndThen(
-            Collectors.toMap(
-                AetherDependencyManagement::getDependencyManagementKey,
-                identity(),
-                AetherDependencyManagement::newestArtifact
-            ),
-            Collections::unmodifiableMap
-        ));
+        .collect(deduplicateArtifacts());
   }
 
   Dependency fillManagedAttributes(Dependency dependency) {
@@ -80,6 +74,17 @@ final class AetherDependencyManagement {
         dependency.getScope(),
         dependency.getOptional(),
         dependency.getExclusions()
+    );
+  }
+
+  public static Collector<Artifact, ?, Map<String, Artifact>> deduplicateArtifacts() {
+    return Collectors.collectingAndThen(
+        Collectors.toMap(
+            AetherDependencyManagement::getDependencyManagementKey,
+            identity(),
+            AetherDependencyManagement::newestArtifact
+        ),
+        Collections::unmodifiableMap
     );
   }
 
