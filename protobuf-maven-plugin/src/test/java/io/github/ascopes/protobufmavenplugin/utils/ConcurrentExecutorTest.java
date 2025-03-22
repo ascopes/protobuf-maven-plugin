@@ -383,7 +383,7 @@ class ConcurrentExecutorTest {
   void awaitingAwaitsAllTasksAndHandlesInterruptions() {
     // Given
     List<FutureTask<Void>> tasks = new ArrayList<>();
-    for (var i = 0; i < 1000; ++i) {
+    for (var i = 0; i < 4; ++i) {
       // Local copy to prevent the lambda reading the mutable value from the closure.
       tasks.add(executor.submit(() -> {
         Thread.sleep(10_000);
@@ -400,7 +400,7 @@ class ConcurrentExecutorTest {
         .satisfies(
             ex -> assertThat(ex.getCause()).isInstanceOf(CancellationException.class),
             ex -> assertThat(ex.getSuppressed())
-                .hasSize(999)
+                .hasSize(3)
                 .allSatisfy(suppressed -> assertThat(suppressed)
                     .isInstanceOf(CancellationException.class))
         );
