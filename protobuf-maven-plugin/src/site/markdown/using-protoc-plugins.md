@@ -1,5 +1,7 @@
 # Using `protoc` Plugins
 
+<div id="pmp-toc"></div>
+
 If you wish to generate gRPC stubs, or outputs for other languages like Scala that are not already
 covered by the protoc executable, you can add custom plugins to your build.
 

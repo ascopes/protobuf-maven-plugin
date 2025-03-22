@@ -27,24 +27,19 @@
   <body>
     <head>
       <![CDATA[
-      <!-- Highlight.js -->
-      <link rel="icon" type="image/png" href="images/favicon.png"/>
-      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-      <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-      <script>
-        "use strict";
+        <!-- Highlight.js -->
+        <link rel="icon" type="image/png" href="images/favicon.png"/>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
 
-        function initSyntaxHighlighting() {
-          hljs.configure({languages: ["clojure", "groovy", "java", "kotlin", "protobuf", "scala", "xml"]});
-          hljs.highlightAll();
-        }
+        <!-- Anchor injection -->
+        <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
 
-        if (document.readyState === "complete" || document.readyState === "interactive") {
-          setTimeout(initSyntaxHighlighting, 1);
-        } else {
-          document.addEventListener("DOMContentLoaded", initSyntaxHighlighting);
-        }
-      </script>
+        <!-- Table of contents generation -->
+        <script src="/js/fluido-toc-generator.js"></script>
+
+        <!-- Configure integrations on page load -->
+        <script src="/js/configure.js"></script>
       ]]>
     </head>
 
@@ -71,6 +66,9 @@
 
   <custom>
     <fluidoSkin>
+      <anchorJs>
+        <cssSelector>h1, h2, h3, h4, h5, h6</cssSelector>
+      </anchorJs>
       <profile>production</profile>
     </fluidoSkin>
   </custom>

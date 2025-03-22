@@ -1,5 +1,7 @@
 # Known Issues
 
+<div id="pmp-toc"></div>
+
 While every attempt is made to ensure this plugin is as functional and complete as possible,
 some known issues exist.
 

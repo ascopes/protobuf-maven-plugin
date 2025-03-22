@@ -1,5 +1,7 @@
 # Faster builds
 
+<div id="pmp-toc"></div>
+
 When you have large numbers of proto files, builds can become slow and hinder development. To work
 around this, there are a few things you can do.
 

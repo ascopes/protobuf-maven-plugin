@@ -1,5 +1,7 @@
 # Basic Usage
 
+<div id="pmp-toc"></div>
+
 This plugin is designed with simplicity in mind. As a result, you do not need
 to do much to get this working.
 
