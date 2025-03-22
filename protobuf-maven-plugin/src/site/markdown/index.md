@@ -1,5 +1,7 @@
 # Introduction
 
+<div id="pmp-toc"></div>
+
 The Protobuf Maven Plugin is a modern Maven plugin that attempts to reduce the hassle needed to
 integrate Protobuf compilation into your build process.
 
@@ -15,12 +17,12 @@ for you automatically.
 
 In addition to generating Java sources, this plugin can also generate Kotlin sources.
 
-# Bugs and feature requests
+## Bugs and feature requests
 
 Please raise any bugs or feature requests on 
 [the GitHub project for this plugin](https://github.com/ascopes/protobuf-maven-plugin/issues).
 
-# Detailed examples
+## Detailed examples
 
 If you need detailed working examples to use as reference, then the 
 [integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it)

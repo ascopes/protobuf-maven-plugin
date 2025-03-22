@@ -1,5 +1,7 @@
 # Requirements
 
+<div id="pmp-toc"></div>
+
 ## Minimum requirements
 
 This plugin requires that you meet the following requirements at a minimum:

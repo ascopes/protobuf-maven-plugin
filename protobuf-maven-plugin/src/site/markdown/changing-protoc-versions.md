@@ -1,5 +1,7 @@
 # Changing `protoc` versions
 
+<div id="pmp-toc"></div>
+
 Sometimes, it may not be possible to use the version of `protoc` that is available on Maven.
 If you are in this situation, a few alternatives exist.
 

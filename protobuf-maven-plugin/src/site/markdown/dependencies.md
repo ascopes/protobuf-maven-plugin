@@ -1,5 +1,7 @@
 # Dependencies
 
+<div id="pmp-toc"></div>
+
 Like any other Java project in Maven, your Protobuf project may need to depend on other dependencies
 located in a Maven repository or some other location. This has first-class support within this
 plugin without you needing to do anything special.

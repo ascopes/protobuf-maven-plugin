@@ -1,5 +1,7 @@
 # Other language support
 
+<div id="pmp-toc"></div>
+
 While Maven does not provide official plugins for most other programming
 languages, the protobuf-maven-plugin allows you to generate source code for
 a number of other programming languages.
