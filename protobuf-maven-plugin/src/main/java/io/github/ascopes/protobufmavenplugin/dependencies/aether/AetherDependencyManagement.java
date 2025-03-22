@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Function.identity;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -82,7 +83,9 @@ final class AetherDependencyManagement {
         Collectors.toMap(
             AetherDependencyManagement::getDependencyManagementKey,
             identity(),
-            AetherDependencyManagement::newestArtifact
+            AetherDependencyManagement::newestArtifact,
+            // Retain order. It matters!
+            LinkedHashMap::new
         ),
         Collections::unmodifiableMap
     );
