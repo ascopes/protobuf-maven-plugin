@@ -76,4 +76,20 @@ class ProtobufMavenPluginRepositorySessionTest {
     assertThat(underTest.getDependencyTraverser())
         .isNotSameAs(underTest.getDependencyTraverser());
   }
+
+  @DisplayName(".getResolutionErrorPolicy() returns the expected value")
+  @Test
+  void getResolutionErrorPolicyReturnsTheExpectedValue() {
+    // Then
+    assertThat(underTest.getResolutionErrorPolicy())
+        .isNotNull()
+        .satisfies(
+            policy -> assertThat(policy.getArtifactPolicy(mock(), mock()))
+                .as("artifact policy")
+                .isZero(),
+            policy -> assertThat(policy.getMetadataPolicy(mock(), mock()))
+                .as("metadata policy")
+                .isZero()
+        );
+  }
 }
