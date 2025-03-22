@@ -76,4 +76,12 @@ class ProtobufMavenPluginRepositorySessionTest {
     assertThat(underTest.getDependencyTraverser())
         .isNotSameAs(underTest.getDependencyTraverser());
   }
+
+  @DisplayName(".getResolutionErrorPolicy() returns the expected value")
+  @Test
+  void getResolutionErrorPolicyReturnsTheExpectedValue() {
+    // Then
+    assertThat(underTest.getResolutionErrorPolicy())
+        .isInstanceOf(NoCacheResolutionErrorPolicy.class);
+  }
 }
