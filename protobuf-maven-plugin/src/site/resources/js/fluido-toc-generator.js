@@ -54,7 +54,6 @@ function getParentSection(element) {
 }
 
 function buildHeadingTree(section) {
-  // Purposely don't get the h1 heading for the page itself.
   const headings = section.querySelectorAll("h1, h2, h3, h4, h5, h6");
   const roots = [];
   const stack = [];
