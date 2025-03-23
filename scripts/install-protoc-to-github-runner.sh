@@ -24,10 +24,10 @@ case "$(uname)" in
     ;;
 esac
 
-readonly url="https://repo1.maven.org/maven2/com/google/protobuf/protoc/${version}/protoc-${version}-${os_name}-x86_64.exe"
+readonly url=https://repo1.maven.org/maven2/com/google/protobuf/protoc/${version}/protoc-${version}-${os_name}-x86_64.exe
 # shellcheck disable=SC2155
 readonly target_dir=$(mktemp -d)
-readonly target="${target_dir}/protoc"
+readonly target=${target_dir}/protoc
 echo "${target_dir}" >> "${GITHUB_PATH}"
 export PATH="${PATH}:${target_dir}"
 
@@ -35,7 +35,7 @@ echo "Installing ${url} to ${target}"
 curl --fail "${url}" -o "${target}"
 chmod -v 777 "${target}"
 
-if [[ "$(command -v protoc)" = "${target}" ]]; then
+if [[ $(command -v protoc) = ${target} ]]; then
   echo "Installation successful"
   protoc --version
 else
