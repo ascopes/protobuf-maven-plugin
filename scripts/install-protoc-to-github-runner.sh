@@ -35,7 +35,7 @@ echo "Installing ${url} to ${target}"
 curl --fail "${url}" -o "${target}"
 chmod -v 777 "${target}"
 
-if [[ $(command -v protoc) = ${target} ]]; then
+if [[ $(command -v protoc) = "${target}" ]]; then
   echo "Installation successful"
   protoc --version
 else
