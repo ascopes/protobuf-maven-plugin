@@ -109,11 +109,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         .forEach(unresolvedDependencies::add);
 
     var resolvedArtifacts = aetherResolver
-        .resolveDependencies(
-            unresolvedDependencies,
-            dependencyScopes,
-            failOnInvalidDependencies
-        )
+        .resolveDependencies(unresolvedDependencies, dependencyScopes, failOnInvalidDependencies)
         .stream();
 
     if (includeProjectArtifacts) {
