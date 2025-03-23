@@ -21,6 +21,7 @@ import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
@@ -29,9 +30,7 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -962,15 +961,26 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .sourceRoots(sourceDirectories())
         .build();
 
+    GenerationResult result;
+
     try {
-      if (!sourceCodeGenerator.generate(request)) {
-        throw new MojoExecutionException("Protoc invocation failed");
-      }
-    } catch (ResolutionException | IOException ex) {
-      var mojoFailureException = new MojoFailureException(this, ex.getMessage(), ex.getMessage());
-      mojoFailureException.initCause(ex);
-      throw mojoFailureException;
+      result = sourceCodeGenerator.generate(request);
+    } catch (Exception ex) {
+      // Log the message separately so that it appears even if the user did not pass --errors
+      // to Maven.
+      log.error("Generation failed due to an unexpected error - {}", ex.getMessage(), ex);
+      throw new MojoFailureException(
+          "Generation failed due to an unexpected error - " + ex.getMessage(),
+          ex
+      );
     }
+
+    if (!result.isOk()) {
+      log.error("Generation failed - {}", result);
+      throw new MojoExecutionException("Generation failed - " + result);
+    }
+
+    log.info("{}", result);
   }
 
   private Set<String> dependencyScopes() {
