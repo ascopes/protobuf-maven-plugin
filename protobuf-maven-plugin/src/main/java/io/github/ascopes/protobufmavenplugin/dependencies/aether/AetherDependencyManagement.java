@@ -120,7 +120,8 @@ final class AetherDependencyManagement {
 
   private static ComparableVersion parseVersion(@Nullable String version) {
     if (isUnspecified(version)) {
-      version = "0.0.0-SNAPSHOT";
+      // Lowest possible priority version.
+      version = "0.0.0-a0";
     }
     return new ComparableVersion(version);
   }
