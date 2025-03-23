@@ -29,15 +29,15 @@ generation.
 
 ### Supported platform versions
 
-| Feature                             | Support                                     |
-|:------------------------------------|:--------------------------------------------|
-| Maven 3.8 Support                   | :white_check_mark:                          |
-| Maven 3.9 Support                   | :white_check_mark:                          |
-| Maven 4.x Support                   | :white_check_mark:                          |
-| Java 11 Support                     | :white_check_mark:                          |
-| Java 17 Support                     | :white_check_mark:                          |
-| Java 21 Support                     | :white_check_mark:                          |
-| Java 23 Support                     | :white_check_mark:                          |
+| Feature           | Support                                     |
+|:------------------|:--------------------------------------------|
+| Maven 3.8 Support | :white_check_mark:                          |
+| Maven 3.9 Support | :white_check_mark:                          |
+| Maven 4.x Support | :white_check_mark:                          |
+| Java 11 Support   | :white_check_mark:                          |
+| Java 17 Support   | :white_check_mark:                          |
+| Java 21 Support   | :white_check_mark:                          |
+| Java 24 Support   | :white_check_mark:                          |
 
 > [!NOTE]
 > Maven integration is tested with the newest bugfix of each minor version that is listed (e.g. 3.9.9).
