@@ -15,7 +15,7 @@ extracted and made visible to `protoc` relative to their file hierarchy.
 For example, suppose you are writing a ticketing system, and you are working on the user profiles
 functionality. You may have the following project structure:
 
-```
+```plaintext
 ┣━ pom.xml  (org.example/ticketsystem-users-parent)
 ┗━ ticketsystem-user-protos/
     ┣━ pom.xml  (org.example/ticketsystem-user-protos)
@@ -61,7 +61,7 @@ message Team {
 Luckily for us, the `ticket_board.proto` is published in our Maven repository in a ZIP file with
 the following hierarchy:
 
-```
+```plaintext
 ┣━ pom.xml  (org.example/ticketsystem-users-parent)
 ┗━ ticket_board_protos.zip
     ┣━ META_INF/

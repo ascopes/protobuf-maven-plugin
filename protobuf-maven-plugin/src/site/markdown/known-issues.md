@@ -17,7 +17,7 @@ extensions triggers an issue within Maven where `plexus-utils` becomes a require
 A current known case occurs when users make use of the Maven Cache Extension. The
 following error may be observed if this issue is encountered:
 
-```
+```plaintext
 [ERROR] org.apache.maven.plugin.PluginContainerException: Unable to load the mojo 'generate' (or one of its required components) from the plugin 'io.github.ascopes:protobuf-maven-plugin:2.7.0': com.google.inject.ProvisionException: Unable to provision, see the following errors:
 [ERROR] 
 [ERROR] 1) [Guice/ErrorInCustomProvider]: IllegalStateException

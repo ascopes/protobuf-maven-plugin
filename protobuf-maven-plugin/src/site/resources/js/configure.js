@@ -30,6 +30,5 @@ function initTableOfContents() {
 }
 
 function initHighlightJs() {
-  hljs.configure({languages: ["clojure", "groovy", "java", "kotlin", "protobuf", "scala", "xml"]});
   hljs.highlightAll();
 }
