@@ -16,7 +16,6 @@
 package io.github.ascopes.protobufmavenplugin.sources;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.io.TempDir;
 
 @DisplayName("SourceGlobFilter tests")
 class SourceGlobFilterTest {
