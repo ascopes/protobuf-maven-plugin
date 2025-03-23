@@ -30,5 +30,6 @@ function initTableOfContents() {
 }
 
 function initHighlightJs() {
+  hljs.addPlugin(new CopyButtonPlugin());
   hljs.highlightAll();
 }
