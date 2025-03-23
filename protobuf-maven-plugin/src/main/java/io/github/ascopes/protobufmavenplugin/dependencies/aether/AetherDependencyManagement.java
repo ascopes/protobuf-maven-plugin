@@ -56,7 +56,7 @@ final class AetherDependencyManagement {
   Dependency fillManagedAttributes(Dependency dependency) {
     var artifact = dependency.getArtifact();
 
-    if (!isUnspecified(artifact.getVersion())) {
+    if (isSpecified(artifact.getVersion())) {
       // Nothing to override here.
       return dependency;
     }
@@ -100,7 +100,7 @@ final class AetherDependencyManagement {
         .append(":")
         .append(artifact.getExtension());
 
-    if (!isUnspecified(artifact.getClassifier())) {
+    if (isSpecified(artifact.getClassifier())) {
       builder.append(":")
           .append(artifact.getClassifier());
     }
@@ -114,12 +114,12 @@ final class AetherDependencyManagement {
     return versionA.compareTo(versionB) < 0 ? b : a;
   }
 
-  private static boolean isUnspecified(@Nullable String value) {
-    return value == null || value.isBlank();
+  private static boolean isSpecified(@Nullable String value) {
+    return value != null && !value.isBlank();
   }
 
   private static ComparableVersion parseVersion(@Nullable String version) {
-    if (isUnspecified(version)) {
+    if (!isSpecified(version)) {
       // Lowest possible priority version.
       version = "0.0.0-a0";
     }
