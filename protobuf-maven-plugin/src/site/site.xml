@@ -36,10 +36,10 @@
         <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
 
         <!-- Table of contents generation -->
-        <script src="/js/fluido-toc-generator.js"></script>
+        <script src="js/fluido-toc-generator.js"></script>
 
         <!-- Configure integrations on page load -->
-        <script src="/js/configure.js"></script>
+        <script src="js/configure.js"></script>
       ]]>
     </head>
 
