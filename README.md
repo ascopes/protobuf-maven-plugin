@@ -23,7 +23,7 @@ generation.
 
 ## Feature Matrix
 
-- :white_check_mark: - Supported out of the box
+- :white_check_mark: - actively supported/available
 - :thought_balloon: - planned, but not currently supported (please raise an issue!)
 - :x: - not supported, nor planned
 
@@ -37,6 +37,10 @@ generation.
 | Java 11 Support                     | :white_check_mark:                          |
 | Java 17 Support                     | :white_check_mark:                          |
 | Java 21 Support                     | :white_check_mark:                          |
+| Java 23 Support                     | :white_check_mark:                          |
+
+> [!NOTE]
+> Maven integration is tested with the newest bugfix of each minor version that is listed (e.g. 3.9.9).
 
 ### Languages and frameworks
 
@@ -55,6 +59,7 @@ generation.
 | Scala             | :white_check_mark: (via third-party scalapb protoc plugin)                                  |
 | gRPC              | :white_check_mark: (via third-party gRPC protoc plugin)                                     |
 | Reactor gRPC      | :white_check_mark: (via third-party Salesforce gRPC protoc plugin)                          |
+| Golang            | :white_check_mark: (via Golang protoc plugin)                                               |
 | Other languages   | :white_check_mark: (via third-party protoc plugins)                                         |
 
 ### Protoc support
@@ -98,6 +103,14 @@ generation.
 | Generation of test sources                                       | :white_check_mark:          | 
 | Controlling the dependencies that are resolved by Maven scope    | :white_check_mark:          |
 | Marking generates sources as compilation candidates              | :white_check_mark:          |
+| Creating protobuf ZIP archives\*                                 | :thought_balloon:           |
+| Generating JAR-based `protoc` plugins\*\*                        | :thought_balloon:           |
+| Consuming TAR archives for imports and source                    | :thought_balloon:           |
+
+> [!TIP]
+> \* This can currently be performed using `maven-assembly-plugin`.
+>
+> \*\* Set the `Main-Class` attribute in the MANIFEST.MF to do this. Use `maven-shade-plugin` if you need a fat JAR.
 
 ### Protoc plugin integrations
 
