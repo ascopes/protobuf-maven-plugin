@@ -38,6 +38,11 @@ generation.
 | Java 17 Support   | :white_check_mark:                          |
 | Java 21 Support   | :white_check_mark:                          |
 | Java 24 Support   | :white_check_mark:                          |
+| Linux x86_64      | :white_check_mark:                          |
+| Linux ARM64       | :white_check_mark:                          |
+| macOS x86_64      | :white_check_mark:                          |
+| macOS ARM64       | :white_check_mark:                          |
+| Windows x86_64    | :white_check_mark:                          |
 
 > [!NOTE]
 > Maven integration is tested with the newest bugfix of each minor version that is listed (e.g. 3.9.9).
