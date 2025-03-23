@@ -50,6 +50,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+
+        <configuration>
+          <!-- Don't fall over if we use protoc 3.x with 4.x libraries. -->
+          <failOnWarning>false</failOnWarning>
+          <showWarnings>false</showWarnings>
+        </configuration>
       </plugin>
 
       <plugin>
