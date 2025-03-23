@@ -22,7 +22,7 @@ window.addEventListener("load", () => {
 });
 
 function initAnchorJs() {
-  anchors.add("h1, h2, h3, h4, h5, h6");
+  anchors.add("main h1, main h2, main h3, main h4, main h5, main h6");
 }
 
 function initTableOfContents() {
