@@ -45,7 +45,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 23
+          java-version: 24
           distribution: temurin
           cache: maven
 
@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
       matrix:
         os-name: [ubuntu-latest]
-        java-version: [11, 23]
+        java-version: [11, 17, 21, 24]
         maven: [default]
         include:
           # Cross-OS tests
@@ -144,7 +144,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 23
+          java-version: 24
           distribution: temurin
           cache: maven
 
