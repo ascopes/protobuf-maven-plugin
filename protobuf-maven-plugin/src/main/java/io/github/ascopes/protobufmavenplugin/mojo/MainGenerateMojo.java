@@ -40,8 +40,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 @Mojo(
     name = "generate",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-    requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
-    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+    // We require resolving TEST scope here since the user can control the overall scope
+    // we use for dependencies. The TEST scope is documented to cover all other scopes.
+    requiresDependencyCollection = ResolutionScope.TEST,
+    requiresDependencyResolution = ResolutionScope.TEST,
     requiresOnline = true,
     threadSafe = true
 )
