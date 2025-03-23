@@ -56,19 +56,20 @@
       <item name="Faster Builds" href="faster-builds.html"/>
       <item name="Known Issues" href="known-issues.html"/>
     </menu>
-    <menu name="Links">
-      <item name="CodeCov" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
-      <item name="GitHub" href="https://github.com/ascopes/protobuf-maven-plugin"/>
+    <menu name="Deployments">
+      <item name="Releases" href="https://github.com/ascopes/protobuf-maven-plugin/releases"/>
       <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
+    </menu>
+    <menu name="Development">
+      <item name="Issue Tracker" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
+      <item name="Source Code" href="https://github.com/ascopes/protobuf-maven-plugin"/>
+      <item name="Code Test Coverage" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
     </menu>
     <menu ref="reports"/>
   </body>
 
   <custom>
     <fluidoSkin>
-      <anchorJs>
-        <cssSelector>h1, h2, h3, h4, h5, h6</cssSelector>
-      </anchorJs>
       <profile>production</profile>
     </fluidoSkin>
   </custom>
