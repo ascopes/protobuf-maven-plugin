@@ -62,6 +62,7 @@
     </menu>
     <menu name="Development">
       <item name="Issue Tracker" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
+      <item name="Discussions" href="https://github.com/ascopes/protobuf-maven-plugin/discussions"/>
       <item name="Source Code" href="https://github.com/ascopes/protobuf-maven-plugin"/>
       <item name="Code Test Coverage" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
     </menu>
