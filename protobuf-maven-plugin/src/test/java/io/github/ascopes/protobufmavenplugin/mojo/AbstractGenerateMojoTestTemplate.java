@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.mojo;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
+import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -31,6 +32,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDe
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
 import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
+import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
@@ -56,7 +58,9 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -85,7 +89,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         MavenProject.class,
         withSettings().strictness(Strictness.LENIENT)
     );
-    final var sourceCodeGenerator = sourceCodeGenerator(true);
+    final var sourceCodeGenerator
+        = sourceCodeGenerator(GenerationResult.PROTOC_SUCCEEDED);
 
     when(mockBuild.getDirectory())
         .thenReturn(tempDir.toString());
@@ -147,28 +152,37 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     verifyNoInteractions(mojo.sourceCodeGenerator);
   }
 
-  @DisplayName("no exception is raised when the sourceCodeGenerator returns true")
-  @Test
-  void noExceptionRaisedWhenSourceCodeGeneratorReturnsTrue() throws Throwable {
-    // Given
-    mojo.sourceCodeGenerator = sourceCodeGenerator(true);
+  @DisplayName("no exception is raised when the sourceCodeGenerator is successful")
+  @TestFactory
+  Stream<DynamicTest> noExceptionRaisedWhenSourceCodeGeneratorReturnsSuccessful() {
+    return Stream.of(GenerationResult.values())
+        .filter(GenerationResult::isOk)
+        .map(result -> DynamicTest.dynamicTest("for result " + result, () -> {
+          // Given
+          mojo.sourceCodeGenerator = sourceCodeGenerator(result);
 
-    // Then
-    assertThatNoException()
-        .isThrownBy(() -> mojo.execute());
+          // Then
+          assertThatNoException()
+              .isThrownBy(mojo::execute);
+        }));
   }
 
-  @DisplayName("a MojoExecutionException is raised when the sourceCodeGenerator returns false")
-  @Test
-  void mojoExecutionExceptionRaisedWhenSourceCodeGeneratorReturnsFalse() throws Throwable {
-    // Given
-    mojo.sourceCodeGenerator = sourceCodeGenerator(false);
+  @DisplayName("a MojoExecutionException is raised when the sourceCodeGenerator returns an error")
+  @TestFactory
+  Stream<DynamicTest> mojoExecutionExceptionRaisedWhenSourceCodeGeneratorReturnsError() {
+    return Stream.of(GenerationResult.values())
+        .filter(not(GenerationResult::isOk))
+        .map(result -> DynamicTest.dynamicTest("for result " + result, () -> {
+          // Given
+          mojo.sourceCodeGenerator = sourceCodeGenerator(result);
 
-    // Then
-    assertThatException()
-        .isThrownBy(() -> mojo.execute())
-        .isInstanceOf(MojoExecutionException.class)
-        .withMessage("Protoc invocation failed");
+          // Then
+          assertThatException()
+              .isThrownBy(mojo::execute)
+              .isInstanceOf(MojoExecutionException.class)
+              .withNoCause()
+              .withMessage("Generation failed - %s", result);
+        }));
   }
 
   @DisplayName("a MojoFailureException is raised when the sourceCodeGenerator raises")
@@ -184,12 +198,10 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
     // Then
     assertThatException()
-        .isThrownBy(() -> mojo.execute())
+        .isThrownBy(mojo::execute)
         .isInstanceOf(MojoFailureException.class)
-        .withMessage(message)
-        .withCause(exceptionCause)
-        .hasFieldOrPropertyWithValue("source", mojo)
-        .hasFieldOrPropertyWithValue("longMessage", message);
+        .withMessage("Generation failed due to an unexpected error - %s", message)
+        .withCause(exceptionCause);
   }
 
   @DisplayName("when binaryMavenPlugins is null, expect an empty list in the request")
@@ -995,7 +1007,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     return consumer;
   }
 
-  static ProtobufBuildOrchestrator sourceCodeGenerator(boolean result) throws Throwable {
+  static ProtobufBuildOrchestrator sourceCodeGenerator(GenerationResult result) throws Throwable {
     var sourceCodeGenerator = mock(
         ProtobufBuildOrchestrator.class,
         withSettings().strictness(Strictness.LENIENT)

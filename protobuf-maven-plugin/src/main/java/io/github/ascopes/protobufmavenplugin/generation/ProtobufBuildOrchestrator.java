@@ -82,7 +82,10 @@ public final class ProtobufBuildOrchestrator {
     this.commandLineExecutor = commandLineExecutor;
   }
 
-  public boolean generate(GenerationRequest request) throws ResolutionException, IOException {
+  public GenerationResult generate(
+      GenerationRequest request
+  ) throws ResolutionException, IOException {
+
     log.debug("The provided protobuf GenerationRequest is: {}", request);
 
     // GH-600: Short circuit and avoid expensive dependency resolution if
@@ -92,7 +95,6 @@ public final class ProtobufBuildOrchestrator {
     }
 
     final var protocPath = discoverProtocPath(request);
-
     final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
@@ -100,16 +102,11 @@ public final class ProtobufBuildOrchestrator {
       return handleMissingInputs(request);
     }
 
-    if (resolvedPlugins.isEmpty() && request.getEnabledLanguages().isEmpty()
+    if (resolvedPlugins.isEmpty()
+        && request.getEnabledLanguages().isEmpty()
         && request.getOutputDescriptorFile() == null) {
-      if (request.isFailOnMissingTargets()) {
-        log.error("No languages are enabled and no plugins found, check your "
-            + "configuration and try again.");
-        return false;
-      } else {
-        log.warn("No languages are enabled and no plugins were found. There is nothing to do!");
-        return true;
-      }
+
+      return handleMissingTargets(request);
     }
 
     createOutputDirectories(request);
@@ -126,7 +123,7 @@ public final class ProtobufBuildOrchestrator {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
       // incremental compilation and nothing changed since the last build.
       incrementalCacheManager.updateIncrementalCache();
-      return true;
+      return GenerationResult.NOTHING_TO_DO;
     }
 
     var args = new ProtocArgumentFileBuilderBuilder()
@@ -165,7 +162,7 @@ public final class ProtobufBuildOrchestrator {
     }
 
     if (!commandLineExecutor.execute(protocPath, args.build())) {
-      return false;
+      return GenerationResult.PROTOC_FAILED;
     }
 
     // Since we've succeeded in the codegen phase, we can replace the old incremental cache
@@ -179,18 +176,33 @@ public final class ProtobufBuildOrchestrator {
       );
     }
 
-    return true;
+    return GenerationResult.PROTOC_SUCCEEDED;
   }
 
-  private boolean handleMissingInputs(GenerationRequest request) {
+  private GenerationResult handleMissingInputs(GenerationRequest request) {
+    var message = "No protobuf sources found. If this is unexpected, check your "
+        + "configuration and try again.";
+
     if (request.isFailOnMissingSources()) {
-      log.error("No protobuf sources found. If this is unexpected, check your "
-          + "configuration and try again.");
-      return false;
-    } else {
-      log.warn("No protobuf sources found.");
-      return true;
+      log.error("{}", message);
+      return GenerationResult.NO_SOURCES;
     }
+
+    log.warn("{}", message);
+    return GenerationResult.NOTHING_TO_DO;
+  }
+
+  private GenerationResult handleMissingTargets(GenerationRequest request) {
+    var message = "No output languages or descriptors are enabled and no plugins were found. "
+        + "If this is unexpected, check your configuration and try again.";
+
+    if (request.isFailOnMissingTargets()) {
+      log.error("{}", message);
+      return GenerationResult.NO_TARGETS;
+    }
+
+    log.warn("{}", message);
+    return GenerationResult.NOTHING_TO_DO;
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
