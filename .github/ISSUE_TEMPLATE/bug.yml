@@ -9,14 +9,14 @@ body:
     attributes:
       value: >-
         Hey there! Thanks for taking the time to fill out this bug report form.
-        
+
         We just need a few details on the issue you are facing.
 
   - type: textarea
     id: brief-description
     attributes:
       label: Brief description
-      description: >- 
+      description: >-
         Try to explain the overall nature of the problem briefly. This should include
         what you expect to happen and what actually happens.
     validations:

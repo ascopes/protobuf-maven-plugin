@@ -10,12 +10,12 @@ body:
       value: >-
         This issue documents an internal chore/tech debt that should be addressed to
         improve the codebase quality.
-        
+
   - type: textarea
     id: brief-description
     attributes:
       label: Brief description
-      description: >- 
+      description: >-
         Please describe briefly what you would like to do.
     validations:
       required: true
