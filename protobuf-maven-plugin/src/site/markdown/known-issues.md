@@ -62,12 +62,20 @@ The workaround for now appears to be to include `plexus-utils` explicitly as a d
 </plugin>
 ```
 
-- See https://github.com/ascopes/protobuf-maven-plugin/issues/472 for tracking this issue.
+See [GH-472](https://github.com/ascopes/protobuf-maven-plugin/issues/472) for tracking
+this issue.
 
-## Incremental compilation with descriptor files
+## Heap exhaustion under some configurations
 
-Using incremental compilation when creating descriptor files is not supported due to limitations
-with `protoc`. The entire descriptor must be rebuilt on each build to remain valid.
+[GH-596](https://github.com/ascopes/protobuf-maven-plugin/issues/596) tracks an issue
+some users have raised when utilising large numbers of dependencies in their projects.
+The issue results in Eclipse Aether APIs exhausting heap memory, but so far appears
+to only occur if invoking Maven via IntelliJ IDEA.
 
-As of 2.10.0, incremental compilation will be disabled automatically if this condition is
-detected.
+We suspect this is an issue with Eclipse Aether itself, which is provided by Maven to
+allow plugins to perform custom dependency resolution.
+
+The v2.13.0 release of this Maven plugin has moved most of the dependency resolution over
+to Maven to perform prior to invoking the plugin, but we still do not have a working
+reproduction of this issue at the time of writing. If you are able to provide a minimal working
+reproduction, please submit it at the link above.
