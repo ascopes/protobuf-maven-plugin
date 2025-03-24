@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.graph.Dependency;
 import org.jspecify.annotations.Nullable;
