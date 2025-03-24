@@ -51,7 +51,7 @@ final class AetherDependencyManagement {
     // managed dependencies (e.g. projects that inherit from spring-boot-starter-parent).
     //
     // These attributes may be null if excluded from the Maven model recursively.
-    effectiveDependencyManagement = Optional.of(mavenSession.getProject())
+    effectiveDependencyManagement = Optional.of(mavenSession.getCurrentProject())
           .map(MavenProject::getDependencyManagement)
           .map(DependencyManagement::getDependencies)
           .stream()
