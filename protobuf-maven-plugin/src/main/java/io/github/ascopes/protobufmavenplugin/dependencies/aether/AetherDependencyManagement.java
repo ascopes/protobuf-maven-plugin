@@ -17,13 +17,17 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import static java.util.function.Function.identity;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.DependencyManagement;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.graph.Dependency;
 import org.jspecify.annotations.Nullable;
@@ -45,12 +49,15 @@ final class AetherDependencyManagement {
     // Do this on initialization to avoid repeatedly computing the same thing on each dependency.
     // This logic may become expensive to perform for large projects if they have a large number of
     // managed dependencies (e.g. projects that inherit from spring-boot-starter-parent).
-    effectiveDependencyManagement = mavenSession.getCurrentProject()
-        .getDependencyManagement()
-        .getDependencies()
-        .stream()
-        .map(artifactMapper::mapMavenDependencyToEclipseArtifact)
-        .collect(deduplicateArtifacts());
+    //
+    // These attributes may be null if excluded from the Maven model recursively.
+    effectiveDependencyManagement = Optional.of(mavenSession.getCurrentProject())
+          .map(MavenProject::getDependencyManagement)
+          .map(DependencyManagement::getDependencies)
+          .stream()
+          .flatMap(Collection::stream)
+          .map(artifactMapper::mapMavenDependencyToEclipseArtifact)
+          .collect(deduplicateArtifacts());
   }
 
   Dependency fillManagedAttributes(Dependency dependency) {
