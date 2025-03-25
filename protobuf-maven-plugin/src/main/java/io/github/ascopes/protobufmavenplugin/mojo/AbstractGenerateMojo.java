@@ -135,7 +135,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
    *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 100,000. Higher numbers run later than lower numbers.</li>
+   *       to 0. Higher numbers run later than lower numbers. The built-in
+   *       code generators in {@code protoc} and descriptor generation has
+   *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
@@ -169,7 +171,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
    *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 100,000. Higher numbers run later than lower numbers.</li>
+   *       to 0. Higher numbers run later than lower numbers. The built-in
+   *       code generators in {@code protoc} and descriptor generation has
+   *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
@@ -230,7 +234,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code options} - a string of options to pass to the plugin
    *       - optional.</li>
    *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 100,000. Higher numbers run later than lower numbers.</li>
+   *       to 0. Higher numbers run later than lower numbers. The built-in
+   *       code generators in {@code protoc} and descriptor generation has
+   *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
@@ -529,7 +535,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       uses the standard {@code protoc} interface for specifying options
    *       - optional.</li>
    *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 100,000. Higher numbers run later than lower numbers.</li>
+   *       to 0. Higher numbers run later than lower numbers. The built-in
+   *       code generators in {@code protoc} and descriptor generation has
+   *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>

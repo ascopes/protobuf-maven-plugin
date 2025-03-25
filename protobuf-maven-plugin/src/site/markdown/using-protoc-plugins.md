@@ -268,6 +268,28 @@ then you can provide the following:
 
 It would also be valid to use a binary plugin for Salesforce here if you prefer.
 
+## Plugin ordering
+
+Plugins are inheriantly orderable and can be ordered relative to eachother, as well as
+relative to the built-in generators in `protoc` and the generation of descriptors.
+
+By default, plugins are applied with the same precedence as descriptors and languages,
+which have an order of `0`, but this can be overridden to a negative integer to run the
+plugin first, or to a positive integer to run the plugin last.
+
+The order can be specified with the `order` attribute on any plugin block. For example:
+
+```xml
+<jvmMavenPlugin>
+  ...
+  <!-- Always run before generating Java sources. -->
+  <order>-999</order>
+</jvmMavenPlugin>
+```
+
+The order that generation is performed in for equally-ordered plugins is undefined, but
+guaranteed to be stable between builds on the same system in the same location.
+
 ## Running plugins without default Java code generation
 
 You can turn the default Java code generation step off by setting `<javaEnabled>false</javaEnabled>` on the

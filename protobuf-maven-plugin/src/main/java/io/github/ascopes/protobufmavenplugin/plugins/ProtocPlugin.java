@@ -31,9 +31,7 @@ public interface ProtocPlugin {
   @Nullable String getOptions();
 
   default int getOrder() {
-    // A semi-sensible default value that can allow users to easily
-    // place values before or after the default order.
-    return 100_000;
+    return 0;
   }
 
   default boolean isSkip() {
