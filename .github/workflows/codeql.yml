@@ -1,11 +1,9 @@
 name: CodeQL analysis
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main, "v*"]
   push:
-    branches:
-      - main
+    branches: [main, "v*"]
   workflow_call: {}
   workflow_dispatch: {}
 
