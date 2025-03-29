@@ -62,11 +62,10 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
   ) {
     this.mavenSession = mavenSession;
 
-    var repositorySystemSession = new ProtobufMavenPluginRepositorySession(
-        mavenSession.getRepositorySession());
-
-    aetherMapper = new AetherArtifactMapper(
-        repositorySystemSession.getArtifactTypeRegistry());
+    var repositorySession = mavenSession.getRepositorySession();
+    var repositorySystemSession = new ProtobufMavenPluginRepositorySession(repositorySession);
+    var artifactTypeRegistry = repositorySystemSession.getArtifactTypeRegistry();
+    aetherMapper = new AetherArtifactMapper(artifactTypeRegistry);
     aetherDependencyManagement = new AetherDependencyManagement(mavenSession, aetherMapper);
 
     // Prior to v2.12.0, we used the ProjectBuildingRequest on the MavenSession
@@ -78,7 +77,10 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     var remoteRepositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
 
     aetherResolver = new AetherResolver(
-        repositorySystem, repositorySystemSession, remoteRepositories);
+        repositorySystem, 
+        repositorySystemSession, 
+        remoteRepositories
+    );
 
     log.debug("Using remote repositories: {}", remoteRepositories);
     log.debug("Using repository system session: {}", repositorySystemSession);
@@ -115,11 +117,15 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     if (includeProjectArtifacts) {
       // As of 2.13.0, we enforce that dependencies are resolved by Maven
       // first. This is less error-prone and a bit faster for regular builds
-      // as Maven can cache this stuff however they want.
+      // as Maven can cache this stuff however it wants to. This also seems to
+      // help avoid GH-596 which can cause heap exhaustion from within Aether
+      // for some reason.
+      log.debug("Querying project dependencies from Maven model...");
+
       var projectArtifacts = mavenSession.getCurrentProject().getArtifacts()
           .stream()
           .filter(artifact -> dependencyScopes.contains(artifact.getScope()))
-          .peek(artifact -> log.debug("Including project artifact: {}", artifact))
+          .peek(artifact -> log.trace("Including project artifact: {}", artifact))
           .map(aetherMapper::mapMavenArtifactToEclipseArtifact);
 
       resolvedArtifacts = Stream.concat(projectArtifacts, resolvedArtifacts);
@@ -130,6 +136,8 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         .values()
         .stream()
         .map(aetherMapper::mapEclipseArtifactToPath)
+        // Order matters here, so don't convert to an unordered container in the
+        // future. We make assumptions on the order of this elsewhere.
         .collect(Collectors.toUnmodifiableList());
   }
 }
