@@ -17,18 +17,17 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collections;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
 
 /**
- * Resolver for plugins within a project.
+ * Resolver for plugins within a project that may be located in several
+ * different places.
  *
  * @author Ashley Scopes
  * @since 2.7.0
@@ -52,24 +51,21 @@ public final class ProjectPluginResolver {
   /**
    * Resolve all {@code protoc} plugins.
    *
-   * <p>Note that duplicates are allowed.
+   * <p>Note that duplicates are allowed, but the return order is arbitrary.
+   * The expectation is that these will be logically ordered elsewhere.
    *
    * @param request the generation request.
-   * @return the list of plugins.
+   * @return the collection of plugins.
    * @throws ResolutionException if resolution fails.
    */
-  public List<ResolvedProtocPlugin> resolveProjectPlugins(
+  public Collection<ResolvedProtocPlugin> resolveProjectPlugins(
       GenerationRequest request
   ) throws ResolutionException {
-    return Stream.<Collection<? extends ResolvedProtocPlugin>>builder()
-        .add(binaryPluginResolver.resolveMavenPlugins(request.getBinaryMavenPlugins()))
-        .add(binaryPluginResolver.resolvePathPlugins(request.getBinaryPathPlugins()))
-        .add(binaryPluginResolver.resolveUrlPlugins(request.getBinaryUrlPlugins()))
-        .add(jvmPluginResolver.resolveMavenPlugins(request.getJvmMavenPlugins()))
-        .build()
-        .flatMap(Collection::stream)
-        // Sort by precedence then by initial order (sort is stable which guarantees this property).
-        .sorted(Comparator.comparingInt(ResolvedProtocPlugin::getOrder))
-        .collect(Collectors.toUnmodifiableList());
+    var plugins = new ArrayList<ResolvedProtocPlugin>();
+    plugins.addAll(binaryPluginResolver.resolveMavenPlugins(request.getBinaryMavenPlugins()));
+    plugins.addAll(binaryPluginResolver.resolvePathPlugins(request.getBinaryPathPlugins()));
+    plugins.addAll(binaryPluginResolver.resolveUrlPlugins(request.getBinaryUrlPlugins()));
+    plugins.addAll(jvmPluginResolver.resolveMavenPlugins(request.getJvmMavenPlugins()));
+    return Collections.unmodifiableList(plugins);
   }
 }

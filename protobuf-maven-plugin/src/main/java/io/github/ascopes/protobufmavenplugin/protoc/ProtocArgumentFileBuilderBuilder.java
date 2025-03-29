@@ -21,7 +21,10 @@ import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Builder for a {@code protoc} command line invocation {@link ArgumentFileBuilder}.
@@ -33,13 +36,13 @@ public final class ProtocArgumentFileBuilderBuilder {
   private boolean fatalWarnings;
   private final List<Path> importPaths;
   private final List<Path> sourcePaths;
-  private final List<Target> targets;
+  private final Set<Target> targets;
 
   public ProtocArgumentFileBuilderBuilder() {
     fatalWarnings = false;
     importPaths = new ArrayList<>();
     sourcePaths = new ArrayList<>();
-    targets = new ArrayList<>();
+    targets = new TreeSet<>();
   }
 
   public ProtocArgumentFileBuilderBuilder addImportPaths(Collection<Path> importPaths) {
@@ -119,25 +122,45 @@ public final class ProtocArgumentFileBuilderBuilder {
     return argumentFileBuilder;
   }
 
-  private interface Target {
+  private abstract static class Target implements Comparable<Target> {
 
-    void addArgsTo(ArgumentFileBuilder argumentFileBuilder);
+    private final String key;
+
+    Target(String key) {
+      this.key = key;
+    }
+
+    abstract void addArgsTo(ArgumentFileBuilder argumentFileBuilder);
+
+    abstract int getOrder();
+
+    @Override
+    public final int compareTo(Target that) {
+      // Compare by order first, then by the key string representation. The latter
+      // enables stable ordering between instances of the same class and
+      // instances of different classes between builds and machines.
+      return Comparator
+          .comparingInt(Target::getOrder)
+          .thenComparing(target -> target.key)
+          .compare(this, that);
+    }
   }
 
-  private static final class LanguageTarget implements Target {
+  private static final class LanguageTarget extends Target {
 
     private final Language language;
     private final Path outputPath;
     private final boolean lite;
 
     private LanguageTarget(Language language, Path outputPath, boolean lite) {
+      super("language:" + language);
       this.language = language;
       this.outputPath = outputPath;
       this.lite = lite;
     }
 
     @Override
-    public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
+    void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
       var flag = "--" + language.getFlagName() + "_out"
           + "="
           + (lite ? "lite:" : "")
@@ -145,14 +168,20 @@ public final class ProtocArgumentFileBuilderBuilder {
 
       argumentFileBuilder.add(flag);
     }
+
+    @Override
+    int getOrder() {
+      return 0;
+    }
   }
 
-  private static final class PluginTarget implements Target {
+  private static final class PluginTarget extends Target {
 
     private final ResolvedProtocPlugin plugin;
     private final Path outputPath;
 
     private PluginTarget(ResolvedProtocPlugin plugin, Path outputPath) {
+      super("plugin:" + plugin + ":" + outputPath);
       this.plugin = plugin;
       this.outputPath = outputPath;
     }
@@ -167,9 +196,14 @@ public final class ProtocArgumentFileBuilderBuilder {
           .map(options -> "--" + plugin.getId() + "_opt=" + options)
           .ifPresent(argumentFileBuilder::add);
     }
+
+    @Override
+    public int getOrder() {
+      return plugin.getOrder();
+    }
   }
 
-  private static final class ProtoDescriptorTarget implements Target {
+  private static final class ProtoDescriptorTarget extends Target {
 
     private final Path outputDescriptorFile;
     private final boolean includeImports;
@@ -182,6 +216,7 @@ public final class ProtocArgumentFileBuilderBuilder {
         boolean includeSourceInfo,
         boolean retainOptions
     ) {
+      super("descriptor:" + outputDescriptorFile);
       this.outputDescriptorFile = outputDescriptorFile;
       this.includeImports = includeImports;
       this.includeSourceInfo = includeSourceInfo;
@@ -189,7 +224,7 @@ public final class ProtocArgumentFileBuilderBuilder {
     }
 
     @Override
-    public void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
+    void addArgsTo(ArgumentFileBuilder argumentFileBuilder) {
       argumentFileBuilder.add("--descriptor_set_out=" + outputDescriptorFile);
 
       if (includeImports) {
@@ -203,6 +238,11 @@ public final class ProtocArgumentFileBuilderBuilder {
       if (retainOptions) {
         argumentFileBuilder.add("--retain_options");
       }
+    }
+
+    @Override
+    int getOrder() {
+      return 0;
     }
   }
 }
