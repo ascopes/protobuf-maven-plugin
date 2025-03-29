@@ -18,8 +18,6 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -106,7 +104,10 @@ final class AetherArtifactMapper {
         defaultDepth
     );
 
-    var exclusions = effectiveDependencyResolutionDepth == DependencyResolutionDepth.DIRECT
+    var isDirectDepth = io.github.ascopes.protobufmavenplugin.dependencies
+        .DependencyResolutionDepth.DIRECT == effectiveDependencyResolutionDepth;
+
+    var exclusions = isDirectDepth
         ? Set.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
         : mapPmpExclusionsToEclipseExclusions(mavenArtifact.getExclusions());
 
@@ -136,7 +137,8 @@ final class AetherArtifactMapper {
   }
 
   private Set<org.eclipse.aether.graph.Exclusion> mapPmpExclusionsToEclipseExclusions(
-      Collection<? extends MavenExclusion> exclusions
+      Collection<? extends io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion>
+          exclusions
   ) {
     return exclusions.stream()
         .map(exclusion -> new org.eclipse.aether.graph.Exclusion(
