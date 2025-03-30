@@ -29,18 +29,18 @@ import org.slf4j.LoggerFactory;
  *
  * @since 2.11.0
  */
-public class OutputDescriptorAttachmentRegistrar {
+public final class OutputDescriptorAttachmentRegistrar {
   private static final Logger log = LoggerFactory
       .getLogger(OutputDescriptorAttachmentRegistrar.class);
 
   private final MavenProjectHelper mavenProjectHelper;
   private final String defaultArtifactType;
-  private final String defaultArtifactClassifier;
+  private final @Nullable String defaultArtifactClassifier;
 
   public OutputDescriptorAttachmentRegistrar(
       MavenProjectHelper mavenProjectHelper,
       String defaultArtifactType,
-      String defaultArtifactClassifier
+      @Nullable String defaultArtifactClassifier
   ) {
     this.mavenProjectHelper = mavenProjectHelper;
     this.defaultArtifactType = defaultArtifactType;
