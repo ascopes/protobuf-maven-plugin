@@ -138,7 +138,6 @@ final class AetherResolver {
     var exceptions = new ArrayList<>(dependencyResult.getCollectExceptions());
     var isMissing = false;
 
-    // Why oh why can't we return a simple result type for this...
     for (var artifactResult : dependencyResult.getArtifactResults()) {
       var artifact = artifactResult.getArtifact();
       if (artifact != null) {
