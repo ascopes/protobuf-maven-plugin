@@ -40,7 +40,7 @@
     <proto-google-common-protos.version>2.54.1</proto-google-common-protos.version>
     <scala.version>3.6.4</scala.version>
     <scalapb.version>0.11.17</scalapb.version>
-    <scala-maven-plugin.version>4.9.2</scala-maven-plugin.version>
+    <scala-maven-plugin.version>4.9.5</scala-maven-plugin.version>
     <reactor-core.version>3.7.4</reactor-core.version>
     <reactor-grpc.version>1.2.4</reactor-grpc.version>
   </properties>
