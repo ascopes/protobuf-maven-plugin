@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.SortedSet;
@@ -35,8 +35,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.SessionScoped;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +47,8 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  */
 @Description("Discovers information about the platform that the plugin is being invoked on")
+@MojoExecutionScoped
 @Named
-@SessionScoped
 public final class HostSystem {
 
   private static final Logger log = LoggerFactory.getLogger(HostSystem.class);
@@ -63,18 +64,48 @@ public final class HostSystem {
   @Inject
   public HostSystem() {
     // GH-271: Use System.getenv(String) for retrieving case insensitive environment variables
-    this(System.getProperties(), System::getenv);
+    this(
+        optionalFunction(System::getProperty),
+        optionalFunction(System::getenv)
+    );
   }
 
   // Visible for testing only.
-  public HostSystem(Properties properties, Function<String, String> envProvider) {
-    operatingSystem = properties.getProperty("os.name", "");
-    cpuArchitecture = properties.getProperty("os.arch", "");
-    pathSeparator = properties.getProperty("path.separator", "");
-    javaHome = FileUtils.normalize(Path.of(properties.getProperty("java.home", "")));
-    javaVendor = properties.getProperty("java.vendor", "");
-    path = parsePath(requireNonNullElse(envProvider.apply("PATH"), ""), pathSeparator);
-    pathExt = parsePathExt(requireNonNullElse(envProvider.apply("PATHEXT"), ""), pathSeparator);
+  HostSystem(
+      Function<String, Optional<String>> propertyProvider,
+      Function<String, Optional<String>> envProvider
+  ) {
+    operatingSystem = propertyProvider.apply("os.name")
+        .orElse("");
+    log.debug("Reported OS: '{}'", operatingSystem);
+
+    cpuArchitecture = propertyProvider.apply("os.arch")
+        .orElse("");
+    log.debug("Reported CPU: '{}'", cpuArchitecture);
+
+    pathSeparator = propertyProvider.apply("path.separator")
+        .orElse(":");
+    log.debug("Reported path separator: '{}'", pathSeparator);
+
+    javaHome = propertyProvider.apply("java.home")
+        .map(Path::of)
+        .map(FileUtils::normalize)
+        .orElseGet(() -> FileUtils.normalize(Path.of("")));
+    log.debug("Reported java.home: '{}'", javaHome);
+
+    javaVendor = propertyProvider.apply("java.vendor")
+        .orElse("");
+    log.debug("Reported java.vendor: '{}'", javaVendor);
+
+    path = envProvider.apply("PATH")
+        .map(value -> parsePath(value, pathSeparator))
+        .orElseGet(Collections::emptyList);
+    log.debug("Parsed system path: {}", path);
+
+    pathExt = envProvider.apply("PATHEXT")
+        .map(value -> parsePathExt(value, pathSeparator))
+        .orElseGet(Collections::emptySortedSet);
+    log.debug("Parsed path extensions: {}", pathExt);
   }
 
   public String getOperatingSystem() {
@@ -102,7 +133,10 @@ public final class HostSystem {
   }
 
   public Path getJavaExecutablePath() {
-    return javaHome.resolve("bin").resolve(isProbablyWindows() ? "java.exe" : "java");
+    var executableName = isProbablyWindows()
+        ? "java.exe"
+        : "java";
+    return javaHome.resolve("bin").resolve(executableName);
   }
 
   public List<Path> getSystemPath() {
@@ -163,9 +197,9 @@ public final class HostSystem {
       return Stream.of(path)
           .map(String::trim)
           .filter(not(String::isBlank))
-          .map(trimmedPath -> {
+          .flatMap(trimmedPath -> {
             try {
-              return Path.of(trimmedPath);
+              return Stream.of(Path.of(trimmedPath));
             } catch (InvalidPathException ex) {
               // GH-557: Do not crash if the user has garbage contents in their $PATH.
               // Warn and drop instead.
@@ -175,11 +209,14 @@ public final class HostSystem {
                   trimmedPath,
                   ex
               );
-              return null;
+              return Stream.empty();
             }
           })
-          .filter(Objects::nonNull)
           .map(FileUtils::normalize);
     };
+  }
+
+  private static <A, R> Function<A, Optional<R>> optionalFunction(Function<A, @Nullable R> fn) {
+    return fn.andThen(Optional::ofNullable);
   }
 }

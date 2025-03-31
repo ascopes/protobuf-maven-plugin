@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -47,7 +49,7 @@ class HostSystemTest {
     properties.put("os.name", osName);
 
     // When
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // Then
     assertThat(hostSystemBean.getOperatingSystem()).isEqualTo(osName);
@@ -63,7 +65,7 @@ class HostSystemTest {
     properties.put("os.arch", cpuArch);
 
     // When
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // Then
     assertThat(hostSystemBean.getCpuArchitecture()).isEqualTo(cpuArch);
@@ -101,7 +103,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = Map.<String, String>of();
     properties.put("os.name", osName);
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualResult = hostSystemBean.isProbablyLinux();
@@ -142,7 +144,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = Map.<String, String>of();
     properties.put("os.name", osName);
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualResult = hostSystemBean.isProbablyMacOs();
@@ -183,7 +185,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = Map.<String, String>of();
     properties.put("os.name", osName);
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualResult = hostSystemBean.isProbablyWindows();
@@ -206,7 +208,7 @@ class HostSystemTest {
     var properties = new Properties();
     var env = Map.<String, String>of();
     properties.put("java.vendor", javaVendor);
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualResult = hostSystemBean.isProbablyTermux();
@@ -231,7 +233,7 @@ class HostSystemTest {
     var env = Map.<String, String>of();
     properties.put("os.name", osName);
     properties.put("java.home", Path.of("foo", "bar", "baz", "jdk").toString());
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualExecutablePath = hostSystemBean.getJavaExecutablePath();
@@ -272,7 +274,7 @@ class HostSystemTest {
     var properties = new Properties();
     properties.put("path.separator", pathSeparator);
 
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualPath = hostSystemBean.getSystemPath();
@@ -304,7 +306,7 @@ class HostSystemTest {
     var properties = new Properties();
     properties.put("path.separator", pathSeparator);
 
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualPath = hostSystemBean.getSystemPath();
@@ -320,7 +322,7 @@ class HostSystemTest {
     var env = Map.<String, String>of();
     var properties = new Properties();
     properties.setProperty("path.separator", "$!");
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // Then
     assertThat(hostSystemBean.getPathSeparator())
@@ -333,7 +335,7 @@ class HostSystemTest {
     // Given
     var env = Map.of("ANYTHING_EXCEPT", "PATHEXT");
     var properties = new Properties();
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
@@ -346,7 +348,6 @@ class HostSystemTest {
   @Test
   void getSystemPathExtensionsReturnsExtensionsCaseInsensitiveWhenSet() {
     // Given
-
     var pathExt = ".foo;"
         + ".bar;"
         + ".BAZ;"
@@ -356,7 +357,7 @@ class HostSystemTest {
     var env = Map.of("PATHEXT", pathExt);
     var properties = new Properties();
     properties.setProperty("path.separator", ";");
-    var hostSystemBean = new HostSystem(properties, env::get);
+    var hostSystemBean = newInstance(properties, env);
 
     // When
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
@@ -365,5 +366,16 @@ class HostSystemTest {
     assertThat(actualPathExt)
         .hasSize(4)
         .contains(".foo", ".bar", ".baz", ".bork", ".BORK");
+  }
+
+  static HostSystem newInstance(Properties properties, Map<String, String> env) {
+    return new HostSystem(
+        optionalFunction(properties::getProperty),
+        optionalFunction(env::get)
+    );
+  }
+
+  static <A, R> Function<A, Optional<R>> optionalFunction(Function<A, R> fn) {
+    return fn.andThen(Optional::ofNullable);
   }
 }
