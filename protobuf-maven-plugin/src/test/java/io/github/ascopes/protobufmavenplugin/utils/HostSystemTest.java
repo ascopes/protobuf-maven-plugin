@@ -215,22 +215,6 @@ class HostSystemTest {
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
-  @DisplayName(".getWorkingDirectory() returns the working directory")
-  @Test
-  void getWorkingDirectoryReturnsTheWorkingDirectory() {
-    // Given
-    var hostSystemBean = new HostSystem();
-
-    // When
-    var actualWorkingDirectory = hostSystemBean.getWorkingDirectory();
-
-    // Then
-    assertThat(actualWorkingDirectory)
-        .isNormalized()
-        .isAbsolute()
-        .isEqualTo(Path.of("").toAbsolutePath().normalize());
-  }
-
   @DisplayName(".getJavaExecutablePath() returns the Java executable")
   @CsvSource({
       " Windows, java.exe",

@@ -55,7 +55,6 @@ public final class HostSystem {
   private final String operatingSystem;
   private final String cpuArchitecture;
   private final String pathSeparator;
-  private final Path workingDirectory;
   private final Path javaHome;
   private final String javaVendor;
   private final List<Path> path;
@@ -72,7 +71,6 @@ public final class HostSystem {
     operatingSystem = properties.getProperty("os.name", "");
     cpuArchitecture = properties.getProperty("os.arch", "");
     pathSeparator = properties.getProperty("path.separator", "");
-    workingDirectory = FileUtils.normalize(Path.of(""));
     javaHome = FileUtils.normalize(Path.of(properties.getProperty("java.home", "")));
     javaVendor = properties.getProperty("java.vendor", "");
     path = parsePath(requireNonNullElse(envProvider.apply("PATH"), ""), pathSeparator);
@@ -101,10 +99,6 @@ public final class HostSystem {
 
   public boolean isProbablyWindows() {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("windows");
-  }
-
-  public Path getWorkingDirectory() {
-    return workingDirectory;
   }
 
   public Path getJavaExecutablePath() {
