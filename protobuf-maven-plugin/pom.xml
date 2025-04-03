@@ -160,15 +160,6 @@
         <!-- Used for Mockito agent support in JDK21+. We have to know the JAR path of the dependency. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-
-        <executions>
-          <execution>
-            <phase>initialize</phase>
-            <goals>
-              <goal>properties</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -257,6 +248,10 @@
         <artifactId>maven-surefire-plugin</artifactId>
 
         <configuration>
+          <!-- 
+              Needed in Java 24 as the dynamic agent attachment mechanism
+              is deprecated, so we have to attach Mockito expliciyly.
+          -->
           <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
         </configuration>
       </plugin>
@@ -278,109 +273,16 @@
             <exclude>**/*HelpMojo.*</exclude>
           </excludes>
         </configuration>
-
-        <executions>
-          <execution>
-            <id>prepare-coverage-agent-surefire</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-
-          <execution>
-            <id>prepare-coverage-agent-invoker</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>prepare-agent-integration</goal>
-            </goals>
-            <configuration>
-              <!-- Append to ensure multiple invoker test calls are included. -->
-              <append>true</append>
-              <!-- Ensure `${invoker.mavenOpts}` is set in the invoker.properties as well
-                  if maven.argLine is overridden. -->
-              <includes>io.github.ascopes.protobufmavenplugin.*</includes>
-              <propertyName>invoker.mavenOpts</propertyName>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>generate-coverage-reports</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>report</goal>
-              <goal>report-integration</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <!-- Generate source documentation listings. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven-javadoc-plugin.version}</version>
-        <configuration>
-          <doclint>all,-missing</doclint>
-          <show>private</show>
-        </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>javadoc-no-fork</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-
-      <plugin>
-        <!-- Used to generate source code cross-references with other reporting plugins. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>${maven-jxr-plugin.version}</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>jxr-no-fork</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-
-      <plugin>
-        <!-- Compile src/main/site and generate the goals site pages. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-report-plugin</artifactId>
-        <version>${maven-plugin-report-plugin.version}</version>
-      </plugin>
-
-      <plugin>
-        <!-- Generate the base project reports for the site. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>${maven-project-info-reports-plugin.version}</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>ci-management</report>
-              <report>index</report>
-              <report>issue-management</report>
-              <report>licenses</report>
-              <report>scm</report>
-              <report>summary</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
-
   <profiles>
     <profile>
+      <!--
+          Enabling this profile will enable the Java debugger socket and pause
+          execution of test projects until a remote debugger is attached.
+      -->
       <id>invoker-debug</id>
       <build>
         <pluginManagement>
@@ -391,13 +293,22 @@
               <version>${maven-invoker-plugin.version}</version>
               <configuration>
                 <invokerPropertiesFile>invoker-debug.properties</invokerPropertiesFile>
+                <!-- The remote debugger deadlocks if we don't set this! -->
+                <parallelThreads>1</parallelThreads>
+                <!-- Disable object locking that we enabled elsewhere. -->
+                <properties />
               </configuration>
             </plugin>
           </plugins>
         </pluginManagement>
       </build>
     </profile>
+
     <profile>
+      <!--
+          Enabling this profile will force all tests to run using the
+          protoc binary that is on the system path.
+      -->
       <id>invoker-path-protoc</id>
       <build>
         <pluginManagement>
@@ -408,9 +319,6 @@
               <version>${maven-invoker-plugin.version}</version>
               <configuration>
                 <invokerPropertiesFile>invoker-path-protoc.properties</invokerPropertiesFile>
-                <!-- The remote debugger deadlocks if we don't set this! -->
-                <properties />
-                <parallelThreads>1</parallelThreads>
               </configuration>
             </plugin>
           </plugins>

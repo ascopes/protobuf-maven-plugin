@@ -272,29 +272,6 @@
   </dependencyManagement>
 
   <build>
-    <!-- Plugins to run on all subprojects implicitly. -->
-    <plugins>
-      <plugin>
-        <!-- This is an aggregate so only needs to be applied once. -->
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <inherited>false</inherited>
-      </plugin>
-
-      <plugin>
-        <!-- This has no option for aggregation but derived projects must specify the
-            relativePath attribute so that locations of the checkstyle config file resolve
-            correctly from the parent in ITs -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-      </plugin>
-    </plugins>
-
     <!-- Management for optional plugins. -->
     <pluginManagement>
       <plugins>
@@ -468,7 +445,6 @@
           <version>${maven-project-info-reports-plugin.version}</version>
         </plugin>
 
-
         <plugin>
           <!-- Deployments and version incrementing. -->
           <groupId>org.apache.maven.plugins</groupId>
@@ -573,10 +549,159 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco-maven-plugin.version}</version>
+
+          <executions>
+            <execution>
+              <id>prepare-coverage-agent-surefire</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+
+            <execution>
+              <id>prepare-coverage-agent-invoker</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>prepare-agent-integration</goal>
+              </goals>
+              <configuration>
+                <!-- Append to ensure multiple invoker test calls are included. -->
+                <append>true</append>
+                <!-- Ensure `${invoker.mavenOpts}` is set in the invoker.properties as well
+                    if maven.argLine is overridden. -->
+                <includes>io.github.ascopes.protobufmavenplugin.*</includes>
+                <propertyName>invoker.mavenOpts</propertyName>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>generate-coverage-reports</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report</goal>
+                <goal>report-integration</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <!-- This is an aggregate so only needs to be applied once. -->
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <inherited>false</inherited>
+      </plugin>
+
+      <plugin>
+        <!-- This has no option for aggregation but derived projects must specify the
+            relativePath attribute so that locations of the checkstyle config file resolve
+            correctly from the parent in ITs -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <!-- Add details about JAR paths to project properties.
+                This is needed for things like Mockito where we have to
+                explicitly enable the JVM agent at runtime in Java 24. -->
+            <id>inject-project-properties</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+
+          <execution>
+            <!-- Fail the build if exclusions exist and are invalid. -->
+            <id>fail-on-invalid-exclusions</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>analyze-exclusions</goal>
+            </goals>
+            <configuration>
+              <exclusionFail>true</exclusionFail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
+  
+  <reporting>
+    <plugins>
+      <plugin>
+        <!-- Generate source documentation listings. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <configuration>
+          <doclint>all,-missing</doclint>
+          <show>private</show>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc-no-fork</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <plugin>
+        <!-- Used to generate source code cross-references with other reporting plugins. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>${maven-jxr-plugin.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>jxr-no-fork</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <plugin>
+        <!-- Compile src/main/site and generate the goals site pages. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-report-plugin</artifactId>
+        <version>${maven-plugin-report-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <!-- Generate the base project reports for the site. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>${maven-project-info-reports-plugin.version}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>ci-management</report>
+              <report>index</report>
+              <report>issue-management</report>
+              <report>licenses</report>
+              <report>scm</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <profiles>
     <profile>

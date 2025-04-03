@@ -74,6 +74,25 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+
+        <executions>
+          <execution>
+            <!-- This is in protobuf-maven-plugin-parent as a default, but we exclude this
+                 here as the broken ehcache dependency will cause this to topple over and
+                 fail the test. -->
+            <id>fail-on-invalid-exclusions</id>
+            <goals/>
+            <configuration>
+              <exclusionFail>false</exclusionFail>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
 
