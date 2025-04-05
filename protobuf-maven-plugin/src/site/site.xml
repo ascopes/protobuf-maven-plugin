@@ -30,7 +30,7 @@
         <link rel="icon" type="image/png" href="images/favicon.png"/>
 
         <!-- Highlight.js -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/base16/material-lighter.min.css"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/base16/unikitty-light.min.css"/>
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/java.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/plaintext.min.js"></script>
