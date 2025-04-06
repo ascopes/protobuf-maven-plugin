@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
-import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import java.nio.file.Files;
@@ -25,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.SortedSet;
 import java.util.TreeSet;

@@ -72,7 +72,7 @@ public final class ProjectInputResolver {
     var filter = new SourceGlobFilter(request.getIncludes(), request.getExcludes());
 
     var sourcePathsListings = sourceResolver.resolveSources(
-        request.getSourceRoots(),
+        request.getSourceDirectories(),
         filter
     );
 

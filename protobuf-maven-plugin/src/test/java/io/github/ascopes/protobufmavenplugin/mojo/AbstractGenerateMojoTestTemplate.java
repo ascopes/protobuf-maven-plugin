@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -109,7 +110,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
   abstract SourceRootRegistrar expectedSourceRootRegistrar();
 
-  abstract Path expectedDefaultSourceDirectory();
+  abstract Collection<Path> expectedDefaultSourceDirectories();
 
   abstract Path expectedDefaultOutputDirectory();
 
@@ -125,10 +126,10 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
 
   @DisplayName("the default source directory is the expected path")
   @Test
-  void defaultSourceDirectoryIsTheExpectedPath() {
+  void defaultSourceDirectoriesIsTheExpectedPath() {
     // Given
-    assertThat(mojo.defaultSourceDirectory())
-        .isEqualTo(expectedDefaultSourceDirectory());
+    assertThat(mojo.defaultSourceDirectories())
+        .isEqualTo(expectedDefaultSourceDirectories());
   }
 
   @DisplayName("the default output directory is the expected path")
@@ -848,15 +849,14 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.getSourceDependencies()).isSameAs(plugins);
   }
 
-  @DisplayName("when sourceDirectories is null, expect the default path in the request")
+  @DisplayName("when sourceDescriptorDependencies is null, expect an empty list in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
-  void whenSourceDirectoriesNullExpectDefaultValueInRequest(
-      List<File> sourceDirectories
+  void whenSourceDescriptorDependenciesNullExpectEmptyListInRequest(
+      List<MavenArtifactBean> dependencies
   ) throws Throwable {
     // Given
-    mojo.sourceDirectories = sourceDirectories;
-    Files.createDirectories(expectedDefaultSourceDirectory());
+    mojo.sourceDescriptorDependencies = dependencies;
 
     // When
     mojo.execute();
@@ -865,7 +865,116 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getSourceRoots()).containsExactly(expectedDefaultSourceDirectory());
+    assertThat(actualRequest.getSourceDescriptorDependencies()).isEmpty();
+  }
+
+  @DisplayName(
+      "when sourceDescriptorDependencies is provided, expect the dependencies in the request"
+  )
+  @Test
+  void whenSourceDescriptorDependenciesProvidedExpectDependenciesInRequest() throws Throwable {
+    // Given
+    List<MavenArtifactBean> plugins = mock();
+    mojo.sourceDescriptorDependencies = plugins;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSourceDescriptorDependencies()).isSameAs(plugins);
+  }
+
+  @DisplayName("when sourceDescriptorPaths is null, expect an empty collection in the request")
+  @NullAndEmptySource
+  @ParameterizedTest(name = "when {0}")
+  void whenSourceDescriptorPathsNullExpectEmptyCollectionInRequest(
+      List<File> sourceDescriptorPaths
+  ) throws Throwable {
+    // Given
+    mojo.sourceDescriptorPaths = sourceDescriptorPaths;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSourceDescriptorPaths()).isEmpty();
+  }
+
+  @DisplayName("when sourceDescriptorPaths is provided, expect the paths in the request")
+  @Test
+  void whenSourceDescriptorPathsProvidedExpectPathsInRequest(
+      @TempDir Path someTempDir
+  ) throws Throwable {
+    // Given
+    var path1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
+    var path2 = Files.createDirectories(someTempDir.resolve("do").resolve("ray"));
+    var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
+
+    mojo.sourceDescriptorPaths = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSourceDescriptorPaths()).containsExactly(path1, path2, path3);
+  }
+
+  @DisplayName("missing sourceDescriptorPaths are not provided to the generator")
+  @Test
+  void missingSourceDescriptorPathsAreNotProvidedToTheGenerator(
+      @TempDir Path someTempDir
+  ) throws Throwable {
+    // Given
+    var dir1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
+    var dir2 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
+
+    var path1 = Files.createFile(dir1.resolve("file1.binpb"));
+    var path2 = someTempDir.resolve("do").resolve("ray");
+    var path3 = Files.createFile(dir2.resolve("file2.binpb"));
+    assertThat(path2).doesNotExist();
+
+    mojo.sourceDescriptorPaths = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSourceDescriptorPaths()).containsExactly(path1, path3);
+  }
+  
+  @DisplayName("when sourceDirectories is null, expect the default path in the request")
+  @NullAndEmptySource
+  @ParameterizedTest(name = "when {0}")
+  void whenSourceDirectoriesNullExpectDefaultValueInRequest(
+      List<File> sourceDirectories
+  ) throws Throwable {
+    // Given
+    mojo.sourceDirectories = sourceDirectories;
+    for (var directory : expectedDefaultSourceDirectories()) {
+      Files.createDirectories(directory);
+    }
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSourceDirectories()).containsExactlyElementsOf(
+        expectedDefaultSourceDirectories());
   }
 
   @DisplayName("when sourceDirectories is provided, expect the paths in the request")
@@ -887,7 +996,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getSourceRoots()).containsExactly(path1, path2, path3);
+    assertThat(actualRequest.getSourceDirectories()).containsExactly(path1, path2, path3);
   }
 
   @DisplayName("missing sourceDirectories are not provided to the generator")
@@ -910,7 +1019,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getSourceRoots()).containsExactly(path1, path3);
+    assertThat(actualRequest.getSourceDirectories()).containsExactly(path1, path3);
   }
 
   @DisplayName("languages are enabled and disabled as expected")

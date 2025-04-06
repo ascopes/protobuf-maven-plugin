@@ -17,6 +17,8 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 
@@ -34,11 +36,12 @@ class TestGenerateMojoTest extends AbstractGenerateMojoTestTemplate<TestGenerate
   }
 
   @Override
-  Path expectedDefaultSourceDirectory() {
-    return mojo.mavenProject.getBasedir().toPath()
+  Collection<Path> expectedDefaultSourceDirectories() {
+    var basePath = mojo.mavenProject.getBasedir().toPath()
         .resolve("src")
         .resolve("test")
         .resolve("protobuf");
+    return List.of(basePath);
   }
 
   @Override

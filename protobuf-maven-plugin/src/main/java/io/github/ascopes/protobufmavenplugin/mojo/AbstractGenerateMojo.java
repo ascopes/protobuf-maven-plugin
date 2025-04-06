@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.maven.plugin.AbstractMojo;
@@ -845,6 +846,37 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<MavenArtifactBean> sourceDependencies;
 
   /**
+   * Protobuf Descriptor files to compile.
+   *
+   * <p>For example:
+   * <pre>{@code
+   * <sourceDescriptorDependencies>
+   *   <sourceDescriptorDependency>
+   *     <groupId>com.mycompany</groupId>
+   *     <artifactId>common-protos</artifactId>
+   *     <version>1.2.4</version>
+   *     <type>protobin</type>
+   *   </sourceDescriptorDependency>
+   * </sourceDescriptorDependencies>
+   * }</pre>
+   *
+   * <p>Objects support the following attributes:
+   *
+   * <ul>
+   *   <li>{@code groupId} - the group ID - required</li>
+   *   <li>{@code artifactId} - the artifact ID - required</li>
+   *   <li>{@code version} - the version - required</li>
+   *   <li>{@code type} - the artifact type - optional</li>
+   *   <li>{@code classifier} - the artifact classifier - optional</li>
+   *   <li>{@code excludes} - a set of exclusions to apply to transitive dependencies</li>
+   * </ul>
+   *
+   * @since 3.1.0
+   */
+  @Parameter
+  @Nullable List<MavenArtifactBean> sourceDescriptorDependencies;
+
+  /**
    * Override the source directories to compile from.
    *
    * <p>Leave unspecified or explicitly null/empty to use the defaults.
@@ -853,6 +885,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable List<File> sourceDirectories;
+
+  /**
+   * Specify paths to descriptor files to compile from.
+   *
+   * @since 3.1.0
+   */
+  @Parameter
+  @Nullable List<File> sourceDescriptorPaths;
 
   /*
    * Implementation-specific details.
@@ -866,7 +906,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @return the path to the directory.
    */
-  abstract Path defaultSourceDirectory();
+  abstract Collection<Path> defaultSourceDirectories();
 
   /**
    * Provides the default output directory to write generated code to.
@@ -965,8 +1005,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
         .sourceDependencies(nonNullList(sourceDependencies))
+        .sourceDescriptorDependencies(nonNullList(sourceDescriptorDependencies))
+        .sourceDescriptorPaths(sourceDescriptorPaths())
+        .sourceDirectories(sourceDirectories())
         .sourceRootRegistrar(sourceRootRegistrar())
-        .sourceRoots(sourceDirectories())
         .build();
 
     GenerationResult result;
@@ -1010,28 +1052,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   }
 
   private Collection<Path> sourceDirectories() {
-    var transformedSourceDirectories = Optional.ofNullable(sourceDirectories)
-        .filter(not(Collection::isEmpty))
-        .stream()
-        .flatMap(Collection::stream)
-        .map(File::toPath)
-        .collect(Collectors.toUnmodifiableList());
-
-    var finalDirectories = transformedSourceDirectories.isEmpty()
-        ? List.of(defaultSourceDirectory())
-        : transformedSourceDirectories;
-
-    return finalDirectories.stream()
-        .filter(this::sourceDirectoryExists)
-        .collect(Collectors.toUnmodifiableList());
+    return parseSourcePaths(sourceDirectories, this::defaultSourceDirectories);
   }
 
-  private boolean sourceDirectoryExists(Path path) {
-    if (Files.notExists(path)) {
-      log.info("Ignoring source directory {} as it does not appear to actually exist", path);
-      return false;
-    }
-    return true;
+  private Collection<Path> sourceDescriptorPaths() {
+    return parseSourcePaths(sourceDescriptorPaths, List::of);
   }
 
   private Collection<Path> importPaths() {
@@ -1049,7 +1074,33 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : overriddenVersion;
   }
 
-  private <T> List<T> nonNullList(@Nullable List<T> list) {
+  private static Collection<Path> parseSourcePaths(
+      @Nullable Collection<File> sourcePaths,
+      Supplier<Collection<Path>> defaultIfMissing
+  ) {
+    var transformed = Optional.ofNullable(sourcePaths)
+        .filter(not(Collection::isEmpty))
+        .stream()
+        .flatMap(Collection::stream)
+        .map(File::toPath)
+        .collect(Collectors.toUnmodifiableList());
+
+    var finalValue = transformed.isEmpty()
+        ? defaultIfMissing.get()
+        : transformed;
+
+    return finalValue.stream()
+        .filter(path -> {
+          if (Files.notExists(path)) {
+            log.info("Ignoring provided path {} as it does not appear to actually exist", path);
+            return false;
+          }
+          return true;
+        })
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  private static <T> List<T> nonNullList(@Nullable List<T> list) {
     return requireNonNullElseGet(list, List::of);
   }
 }
