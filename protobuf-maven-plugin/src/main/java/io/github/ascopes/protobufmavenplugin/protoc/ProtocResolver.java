@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactBean;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
@@ -134,14 +134,12 @@ public final class ProtocResolver {
       );
     }
 
-    var artifact = ImmutableMavenDependency.builder()
-        .groupId(GROUP_ID)
-        .artifactId(ARTIFACT_ID)
-        .version(version)
-        .type(TYPE)
-        .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
-        .build();
-
+    var artifact = new MavenArtifactBean();
+    artifact.setGroupId(GROUP_ID);
+    artifact.setArtifactId(ARTIFACT_ID);
+    artifact.setVersion(version);
+    artifact.setType(TYPE);
+    artifact.setClassifier(platformClassifierFactory.getClassifier(ARTIFACT_ID));
     return Optional.of(artifactPathResolver.resolveArtifact(artifact));
   }
 }

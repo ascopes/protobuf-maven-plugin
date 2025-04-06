@@ -16,7 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.generation;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPlugin;
@@ -94,7 +94,7 @@ public interface GenerationRequest {
    *
    * @return the collection of dependencies.
    */
-  Collection<? extends MavenDependency> getImportDependencies();
+  Collection<? extends MavenArtifact> getImportDependencies();
 
   /**
    * Additional user-defined paths relative to the project root to include in the
@@ -181,7 +181,7 @@ public interface GenerationRequest {
    *
    * @return the collection of dependencies.
    */
-  Collection<? extends MavenDependency> getSourceDependencies();
+  Collection<? extends MavenArtifact> getSourceDependencies();
 
   /**
    * Paths relative to the project root that contain {@code *.proto} sources to
