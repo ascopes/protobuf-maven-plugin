@@ -98,7 +98,7 @@ public final class ProtobufBuildOrchestrator {
 
     // GH-600: Short circuit and avoid expensive dependency resolution if
     // we can exit early.
-    if (request.getSourceRoots().isEmpty() && request.getSourceDependencies().isEmpty()) {
+    if (request.getSourceDirectories().isEmpty() && request.getSourceDependencies().isEmpty()) {
       return handleMissingInputs(request);
     }
 
