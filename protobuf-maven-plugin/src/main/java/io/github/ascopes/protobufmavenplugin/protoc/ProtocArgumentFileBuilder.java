@@ -31,26 +31,27 @@ import java.util.TreeSet;
  *
  * @author Ashley Scopes
  */
-public final class ProtocArgumentFileBuilderBuilder {
+@SuppressWarnings("UnusedReturnValue")
+public final class ProtocArgumentFileBuilder {
 
   private boolean fatalWarnings;
   private final List<Path> importPaths;
   private final List<Path> sourcePaths;
   private final Set<Target> targets;
 
-  public ProtocArgumentFileBuilderBuilder() {
+  public ProtocArgumentFileBuilder() {
     fatalWarnings = false;
     importPaths = new ArrayList<>();
     sourcePaths = new ArrayList<>();
     targets = new TreeSet<>();
   }
 
-  public ProtocArgumentFileBuilderBuilder addImportPaths(Collection<Path> importPaths) {
+  public ProtocArgumentFileBuilder addImportPaths(Collection<Path> importPaths) {
     this.importPaths.addAll(importPaths);
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder addLanguages(
+  public ProtocArgumentFileBuilder addLanguages(
       Collection<Language> languages,
       Path outputPath,
       boolean lite
@@ -61,7 +62,7 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder addPlugins(
+  public ProtocArgumentFileBuilder addPlugins(
       Collection<ResolvedProtocPlugin> plugins,
       Path outputPath
   ) {
@@ -71,17 +72,17 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder addSourcePaths(Collection<Path> sourcePaths) {
+  public ProtocArgumentFileBuilder addSourcePaths(Collection<Path> sourcePaths) {
     this.sourcePaths.addAll(sourcePaths);
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder setFatalWarnings(boolean fatalWarnings) {
+  public ProtocArgumentFileBuilder setFatalWarnings(boolean fatalWarnings) {
     this.fatalWarnings = fatalWarnings;
     return this;
   }
 
-  public ProtocArgumentFileBuilderBuilder setOutputDescriptorFile(
+  public ProtocArgumentFileBuilder setOutputDescriptorFile(
       Path outputDescriptorFile,
       boolean includeImports,
       boolean includeSourceInfo,
@@ -96,7 +97,7 @@ public final class ProtocArgumentFileBuilderBuilder {
     return this;
   }
 
-  public ArgumentFileBuilder build() {
+  public ArgumentFileBuilder toArgumentFileBuilder() {
     if (targets.isEmpty()) {
       throw new IllegalStateException("No output target operations were provided");
     }

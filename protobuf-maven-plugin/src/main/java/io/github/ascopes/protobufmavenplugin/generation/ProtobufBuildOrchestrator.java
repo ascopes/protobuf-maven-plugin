@@ -19,7 +19,7 @@ import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flatte
 
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
-import io.github.ascopes.protobufmavenplugin.protoc.ProtocArgumentFileBuilderBuilder;
+import io.github.ascopes.protobufmavenplugin.protoc.ProtocArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
@@ -126,7 +126,7 @@ public final class ProtobufBuildOrchestrator {
       return GenerationResult.NOTHING_TO_DO;
     }
 
-    var args = new ProtocArgumentFileBuilderBuilder()
+    var args = new ProtocArgumentFileBuilder()
         .addLanguages(
             request.getEnabledLanguages(),
             request.getOutputDirectory(),
@@ -161,7 +161,7 @@ public final class ProtobufBuildOrchestrator {
       }
     }
 
-    if (!commandLineExecutor.execute(protocPath, args.build())) {
+    if (!commandLineExecutor.execute(protocPath, args.toArgumentFileBuilder())) {
       return GenerationResult.PROTOC_FAILED;
     }
 
