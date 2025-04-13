@@ -18,9 +18,15 @@ package io.github.ascopes.protobufmavenplugin.generation;
 import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
 
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
-import io.github.ascopes.protobufmavenplugin.protoc.CommandLineExecutor;
-import io.github.ascopes.protobufmavenplugin.protoc.ProtocArgumentFileBuilder;
+import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.protoc.ImmutableProtocInvocation;
+import io.github.ascopes.protobufmavenplugin.protoc.ProtocExecutor;
+import io.github.ascopes.protobufmavenplugin.protoc.ProtocInvocation;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocResolver;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableDescriptorFileProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableLanguageProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutablePluginProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
@@ -34,7 +40,9 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -63,7 +71,7 @@ public final class ProtobufBuildOrchestrator {
   private final ProjectInputResolver projectInputResolver;
   private final ProjectPluginResolver projectPluginResolver;
   private final IncrementalCacheManager incrementalCacheManager;
-  private final CommandLineExecutor commandLineExecutor;
+  private final ProtocExecutor protocExecutor;
 
   @Inject
   public ProtobufBuildOrchestrator(
@@ -72,14 +80,14 @@ public final class ProtobufBuildOrchestrator {
       ProjectInputResolver projectInputResolver,
       ProjectPluginResolver projectPluginResolver,
       IncrementalCacheManager incrementalCacheManager,
-      CommandLineExecutor commandLineExecutor
+      ProtocExecutor protocExecutor
   ) {
     this.mavenSession = mavenSession;
     this.protocResolver = protocResolver;
     this.projectInputResolver = projectInputResolver;
     this.projectPluginResolver = projectPluginResolver;
     this.incrementalCacheManager = incrementalCacheManager;
-    this.commandLineExecutor = commandLineExecutor;
+    this.protocExecutor = protocExecutor;
   }
 
   public GenerationResult generate(
@@ -126,48 +134,36 @@ public final class ProtobufBuildOrchestrator {
       return GenerationResult.NOTHING_TO_DO;
     }
 
-    var args = new ProtocArgumentFileBuilder()
-        .addLanguages(
-            request.getEnabledLanguages(),
-            request.getOutputDirectory(),
-            request.isLiteEnabled())
-        .addImportPaths(projectInputs.getCompilableSources()
-            .stream()
-            .map(SourceListing::getSourceRoot)
-            .collect(Collectors.toUnmodifiableList()))
-        .addImportPaths(projectInputs.getDependencySources()
-            .stream()
-            .map(SourceListing::getSourceRoot)
-            .collect(Collectors.toUnmodifiableList()))
-        .addPlugins(resolvedPlugins, request.getOutputDirectory())
-        .addSourcePaths(compilableSources)
-        .setFatalWarnings(request.isFatalWarnings());
+    var importPaths = Stream
+        .of(projectInputs.getCompilableSources(), projectInputs.getDependencySources())
+        .flatMap(Collection::stream)
+        .map(SourceListing::getSourceRoot)
+        .collect(Collectors.toUnmodifiableList());
 
-    if (request.getOutputDescriptorFile() != null) {
-      args.setOutputDescriptorFile(
-          request.getOutputDescriptorFile(),
-          request.isOutputDescriptorIncludeImports(),
-          request.isOutputDescriptorIncludeSourceInfo(),
-          request.isOutputDescriptorRetainOptions()
-      );
+    var invocation = createProtocInvocation(
+        request, 
+        protocPath, 
+        resolvedPlugins, 
+        importPaths, 
+        compilableSources
+    );
 
-      if (request.isOutputDescriptorAttached()) {
-        request.getOutputDescriptorAttachmentRegistrar().registerAttachedArtifact(
-            mavenSession,
-            request.getOutputDescriptorFile(),
-            request.getOutputDescriptorAttachmentType(),
-            request.getOutputDescriptorAttachmentClassifier()
-        );
-      }
-    }
-
-    if (!commandLineExecutor.execute(protocPath, args.toArgumentFileBuilder())) {
+    if (!protocExecutor.invoke(invocation)) {
       return GenerationResult.PROTOC_FAILED;
     }
 
     // Since we've succeeded in the codegen phase, we can replace the old incremental cache
     // with the new one.
     incrementalCacheManager.updateIncrementalCache();
+
+    if (request.getOutputDescriptorFile() != null && request.isOutputDescriptorAttached()) {
+      request.getOutputDescriptorAttachmentRegistrar().registerAttachedArtifact(
+          mavenSession,
+          request.getOutputDescriptorFile(),
+          request.getOutputDescriptorAttachmentType(),
+          request.getOutputDescriptorAttachmentClassifier()
+      );
+    }
 
     if (request.isEmbedSourcesInClassOutputs()) {
       embedSourcesInClassOutputs(
@@ -315,5 +311,50 @@ public final class ProtobufBuildOrchestrator {
         );
       }
     }
+  }
+
+  private ProtocInvocation createProtocInvocation(
+      GenerationRequest request,
+      Path protocPath,
+      Collection<ResolvedProtocPlugin> resolvedPlugins,
+      Collection<Path> importPaths,
+      Collection<Path> compilableSources
+  ) {
+    var targets = new TreeSet<ProtocTarget>();
+    
+    request.getEnabledLanguages()
+        .stream()
+        .map(language -> ImmutableLanguageProtocTarget.builder()
+            .isLite(request.isLiteEnabled())
+            .language(language)
+            .outputPath(request.getOutputDirectory())
+            .build())
+        .forEach(targets::add);
+
+    resolvedPlugins.stream()
+        .map(plugin -> ImmutablePluginProtocTarget.builder()
+            .plugin(plugin)
+            .outputPath(request.getOutputDirectory())
+            .build())
+        .forEach(targets::add);
+
+    if (request.getOutputDescriptorFile() != null) {
+      var descriptorFileTarget = ImmutableDescriptorFileProtocTarget.builder()
+          .isIncludeImports(request.isOutputDescriptorIncludeImports())
+          .isIncludeSourceInfo(request.isOutputDescriptorIncludeSourceInfo())
+          .isRetainOptions(request.isOutputDescriptorRetainOptions())
+          .outputFile(request.getOutputDescriptorFile())
+          .build();
+
+      targets.add(descriptorFileTarget);
+    }
+
+    return ImmutableProtocInvocation.builder()
+        .importPaths(importPaths)
+        .isFatalWarnings(request.isFatalWarnings())
+        .protocPath(protocPath)
+        .sourcePaths(compilableSources)
+        .targets(targets)
+        .build();
   }
 }

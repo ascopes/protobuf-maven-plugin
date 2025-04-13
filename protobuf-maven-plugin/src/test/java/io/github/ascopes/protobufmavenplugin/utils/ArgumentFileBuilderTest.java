@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -73,6 +74,54 @@ class ArgumentFileBuilderTest {
 
     // Then
     assertThat(actualResult).asString().isEqualTo(expectedResult);
+  }
+
+  @DisplayName(".applyForEach() applies the builder to each item")
+  @Test
+  void applyForEachAppliesTheBuilderToEachItem() {
+    // Given
+    var builder = new ArgumentFileBuilder();
+    var items = List.of("foo", "bar", "baz");
+
+    // When
+    builder.applyForEach(items, ArgumentFileBuilder::add);
+
+    // Then
+    assertThat(builder).asString().isEqualTo(String.join("\n", "foo", "bar", "baz"));
+  }
+
+  @DisplayName(".addIfTrue() adds to the builder when the condition is met")
+  @Test
+  void addIfTrueAddsToTheBuilderWhenTheConditionIsMet() {
+    // Given
+    var builder = new ArgumentFileBuilder();
+
+    // When
+    builder
+        .add("foo")
+        .add("bar")
+        .addIfTrue(true, "baz")
+        .add("bork");
+
+    // Then
+    assertThat(builder).asString().isEqualTo(String.join("\n", "foo", "bar", "baz", "bork"));
+  }
+
+  @DisplayName(".addIfTrue() does not add to the builder when the condition is not met")
+  @Test
+  void addIfTrueDoesNotAddToTheBuilderWhenTheConditionIsNotMet() {
+    // Given
+    var builder = new ArgumentFileBuilder();
+
+    // When
+    builder
+        .add("foo")
+        .add("bar")
+        .addIfTrue(false, "baz")
+        .add("bork");
+
+    // Then
+    assertThat(builder).asString().isEqualTo(String.join("\n", "foo", "bar", "bork"));
   }
 
   @DisplayName(".toString() returns the expected result")

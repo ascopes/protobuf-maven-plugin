@@ -15,6 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc;
 
+import io.github.ascopes.protobufmavenplugin.protoc.targets.DescriptorFileProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.LanguageProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.PluginProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
@@ -38,37 +42,97 @@ import org.slf4j.LoggerFactory;
 @Description("Executes protoc in a subprocess, intercepting any outputs")
 @MojoExecutionScoped
 @Named
-public final class CommandLineExecutor {
+public final class ProtocExecutor {
 
-  private static final Logger log = LoggerFactory.getLogger(CommandLineExecutor.class);
+  private static final Logger log = LoggerFactory.getLogger(ProtocExecutor.class);
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public CommandLineExecutor(TemporarySpace temporarySpace) {
+  public ProtocExecutor(TemporarySpace temporarySpace) {
     this.temporarySpace = temporarySpace;
   }
 
-  public boolean execute(
-      Path protocPath,
-      ArgumentFileBuilder argumentFileBuilder
-  ) throws IOException {
+  public boolean invoke(ProtocInvocation invocation) throws IOException {
+    var argumentFileBuilder = createArgumentFileBuilder(invocation);
     var argumentFile = writeArgumentFile(argumentFileBuilder);
 
     log.info("Invoking protoc (enable debug logs for more details)");
-    log.debug("Protoc binary is located at {}", protocPath);
+    log.debug("Protoc binary is located at {}", invocation.getProtocPath());
     log.debug("Protoc argument file:\n{},", argumentFileBuilder);
 
-    var procBuilder = new ProcessBuilder(protocPath.toString(), "@" + argumentFile);
+    var procBuilder = new ProcessBuilder(invocation.getProtocPath().toString(), "@" + argumentFile);
     procBuilder.environment().putAll(System.getenv());
 
     try {
       return runProcess(procBuilder);
+
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       var newEx = new InterruptedIOException("Execution was interrupted");
       newEx.initCause(ex);
       throw newEx;
     }
+  }
+
+  private ArgumentFileBuilder createArgumentFileBuilder(ProtocInvocation invocation) {
+    return new ArgumentFileBuilder()
+        .addIfTrue(invocation.isFatalWarnings(), "--fatal_warnings")
+        .applyForEach(invocation.getTargets(), this::applyProtocTargetArguments)
+        .applyForEach(invocation.getSourcePaths(), this::applySourcePathArgument)
+        .applyForEach(invocation.getImportPaths(), this::applyImportPathArgument);
+  }
+
+  private void applyProtocTargetArguments(ArgumentFileBuilder builder, ProtocTarget target) {
+    if (target instanceof DescriptorFileProtocTarget) {
+      applyDescriptorFileProtocTargetArguments(builder, (DescriptorFileProtocTarget) target);
+    } else if (target instanceof LanguageProtocTarget) {
+      applyLanguageProtocTargetArguments(builder, (LanguageProtocTarget) target);
+    } else if (target instanceof PluginProtocTarget) {
+      applyPluginProtocTargetArguments(builder, (PluginProtocTarget) target);
+    } else {
+      throw new IllegalStateException("Unknown target " + target);
+    }
+  }
+
+  private void applyDescriptorFileProtocTargetArguments(
+      ArgumentFileBuilder builder, 
+      DescriptorFileProtocTarget target
+  ) {
+    builder.add("--descriptor_set_out=" + target.getOutputFile())
+        .addIfTrue(target.isIncludeImports(), "--include_imports")
+        .addIfTrue(target.isIncludeSourceInfo(), "--include_source_info")
+        .addIfTrue(target.isRetainOptions(), "--retain_options");
+  }
+
+  private void applyLanguageProtocTargetArguments(
+      ArgumentFileBuilder builder, 
+      LanguageProtocTarget target
+  ) {
+    var flag = "--" + target.getLanguage().getFlagName() + "_out="
+        + (target.isLite() ? "lite:" : "")
+        + target.getOutputPath();
+    builder.add(flag);
+  }
+
+  private void applyPluginProtocTargetArguments(
+      ArgumentFileBuilder builder, 
+      PluginProtocTarget target
+  ) {
+    var plugin = target.getPlugin();
+    builder
+        .add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath())
+        .add("--" + plugin.getId() + "_out=" + target.getOutputPath());
+    plugin.getOptions()
+        .map(options -> "--" + plugin.getId() + "_opt=" + options)
+        .ifPresent(builder::add);
+  }
+
+  private void applyImportPathArgument(ArgumentFileBuilder builder, Path importPath) {
+    builder.add("--proto_path=" + importPath);
+  }
+
+  private void applySourcePathArgument(ArgumentFileBuilder builder, Path sourcePath) {
+    builder.add(sourcePath);
   }
 
   private Path writeArgumentFile(ArgumentFileBuilder argumentFileBuilder) throws IOException {
