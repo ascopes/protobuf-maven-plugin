@@ -17,6 +17,8 @@ package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
 import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
 
+import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
+import io.github.ascopes.protobufmavenplugin.sources.ImmutableFilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.FutureTask;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,7 +55,7 @@ public final class IncrementalCacheManager {
 
   // If we make breaking changes to the format of the cache, increment this value. This prevents
   // builds failing for users between versions if they do not perform a clean install first.
-  private static final String SPEC_VERSION = "2.0";
+  private static final String SPEC_VERSION = "3.0";
   private static final Logger log = LoggerFactory.getLogger(IncrementalCacheManager.class);
 
   private final ConcurrentExecutor concurrentExecutor;
@@ -81,49 +84,68 @@ public final class IncrementalCacheManager {
     }
   }
 
-  public Collection<Path> determineSourcesToCompile(
+  public FilesToCompile determineSourcesToCompile(
       ProjectInputListing listing
   ) throws IOException {
     // Always update the cache to catch changes in the next builds.
-    var nextBuildCache = buildIncrementalCache(listing);
-    writeIncrementalCache(getNextIncrementalCachePath(), nextBuildCache);
+    var nextCache = buildIncrementalCache(listing);
+    writeIncrementalCache(getNextIncrementalCachePath(), nextCache);
     var maybePreviousBuildCache = readIncrementalCache(getPreviousIncrementalCachePath());
 
     // If we lack a cache from a previous build, then we cannot determine what we should compile
     // and what we should ignore, so we'll have to rebuild everything anyway.
     if (maybePreviousBuildCache.isEmpty()) {
       log.info("All sources will be compiled, as no previous build data was detected");
-      return flattenSourceProtoFiles(listing.getCompilableSources());
+      return allFiles(listing);
     }
 
-    var previousBuildCache = maybePreviousBuildCache.get();
+    var previousCache = maybePreviousBuildCache.get();
 
     // If dependencies change, we should recompile everything so that we can spot any compilation
     // failures that have been created by changes to imported messages.
-    if (!previousBuildCache.getDependencies().equals(nextBuildCache.getDependencies())) {
+    if (!previousCache.getProtoDependencies().equals(nextCache.getProtoDependencies())) {
       log.info("Detected a change in dependencies, all sources will be recompiled");
-      return flattenSourceProtoFiles(listing.getCompilableSources());
+      return allFiles(listing);
     }
 
-    var sourceFilesChanged = nextBuildCache.getSources().keySet()
+    var protoSourceFilesChanged = nextCache.getProtoSources().keySet()
         .stream()
-        .anyMatch(isSourceFileDifferent(previousBuildCache, nextBuildCache));
+        .anyMatch(isFileUpdated(IncrementalCache::getProtoSources, previousCache, nextCache));
 
-    if (sourceFilesChanged) {
+    var descriptorSourceFilesChanged = nextCache.getDescriptorFiles().keySet()
+        .stream()
+        .anyMatch(isFileUpdated(IncrementalCache::getDescriptorFiles, previousCache, nextCache));
+
+    if (protoSourceFilesChanged || descriptorSourceFilesChanged) {
       log.info("Detected that source files have changed, all sources will be recompiled.");
-      return flattenSourceProtoFiles(listing.getCompilableSources());
+      return allFiles(listing);
     }
 
-    return List.of();
+    return noFiles();
   }
 
-  private Predicate<Path> isSourceFileDifferent(
+  private FilesToCompile allFiles(ProjectInputListing listing) {
+    return ImmutableFilesToCompile.builder()
+        .protoSources(flattenSourceProtoFiles(listing.getCompilableProtoSources()))
+        .descriptorFiles(flattenSourceProtoFiles(listing.getCompilableDescriptorFiles()))
+        .build();
+  }
+
+  private FilesToCompile noFiles() {
+    return ImmutableFilesToCompile.builder()
+        .protoSources(List.of())
+        .descriptorFiles(List.of())
+        .build();
+  }
+
+  private Predicate<Path> isFileUpdated(
+      Function<IncrementalCache, Map<Path, String>> cacheAccessor,
       IncrementalCache previousBuildCache,
       IncrementalCache nextBuildCache
   ) {
     return file -> !Objects.equals(
-        previousBuildCache.getSources().get(file),
-        nextBuildCache.getSources().get(file)
+        cacheAccessor.apply(previousBuildCache).get(file),
+        cacheAccessor.apply(nextBuildCache).get(file)
     );
   }
 
@@ -152,14 +174,20 @@ public final class IncrementalCacheManager {
   private IncrementalCache buildIncrementalCache(ProjectInputListing listing) {
     // Done this way for now to propagate errors correctly. Probably worth refactoring in the future
     // to be less of a hack?
-    var results = Stream.of(listing.getDependencySources(), listing.getCompilableSources())
+    var results = Stream
+        .of(
+            listing.getDependencyProtoSources(),
+            listing.getCompilableProtoSources(),
+            listing.getCompilableDescriptorFiles()
+        )
         .map(this::createSerializedFileDigestsAsync)
         .collect(concurrentExecutor.awaiting())
         .iterator();
 
     return ImmutableIncrementalCache.builder()
-        .dependencies(results.next())
-        .sources(results.next())
+        .protoDependencies(results.next())
+        .protoSources(results.next())
+        .descriptorFiles(results.next())
         .build();
   }
 
@@ -167,7 +195,7 @@ public final class IncrementalCacheManager {
       Collection<SourceListing> listings
   ) {
     return concurrentExecutor.submit(() -> listings.stream()
-        .map(SourceListing::getSourceProtoFiles)
+        .map(SourceListing::getSourceFiles)
         .flatMap(Collection::stream)
         .map(this::createSerializedFileDigestAsync)
         .collect(concurrentExecutor.awaiting())

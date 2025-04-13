@@ -36,6 +36,8 @@ public interface ProtocInvocation {
 
   List<Path> getImportPaths();
 
+  List<Path> getInputDescriptorFiles();
+
   List<Path> getSourcePaths();
 
   SortedSet<ProtocTarget> getTargets();

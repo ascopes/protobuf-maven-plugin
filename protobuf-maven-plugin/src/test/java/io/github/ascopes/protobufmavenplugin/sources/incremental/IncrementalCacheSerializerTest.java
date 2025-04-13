@@ -103,56 +103,77 @@ class IncrementalCacheSerializerTest {
             "empty object",
             ImmutableIncrementalCache.builder().build(),
             new JSONObject()
-                .appendField("dependencies", new JSONObject())
-                .appendField("sources", new JSONObject())
+                .appendField("proto_dependencies", new JSONObject())
+                .appendField("proto_sources", new JSONObject())
+                .appendField("descriptor_files", new JSONObject())
         ),
         argumentSet(
             "only dependencies",
             ImmutableIncrementalCache.builder()
-                .dependencies(Map.of(
+                .protoDependencies(Map.of(
                     path(someDir, "foo", "bar"), "1a2b3c4d",
                     path(someDir, "eh", "nah"), "eh-nah-na!"
                 ))
                 .build(),
             new JSONObject()
-                .appendField("dependencies", new JSONObject()
+                .appendField("proto_dependencies", new JSONObject()
                     .appendField(uri(someDir, "foo", "bar"), "1a2b3c4d")
                     .appendField(uri(someDir, "eh", "nah"), "eh-nah-na!"))
-                .appendField("sources", new JSONObject())
+                .appendField("proto_sources", new JSONObject())
+                .appendField("descriptor_files", new JSONObject())
         ),
         argumentSet(
             "only sources",
             ImmutableIncrementalCache.builder()
-                .sources(Map.of(
+                .protoSources(Map.of(
                     path(someDir, "foo", "bar"), "1a2b3c4d",
                     path(someDir, "eh", "nah"), "eh-nah-na!"
                 ))
                 .build(),
             new JSONObject()
-                .appendField("dependencies", new JSONObject())
-                .appendField("sources", new JSONObject()
+                .appendField("proto_dependencies", new JSONObject())
+                .appendField("proto_sources", new JSONObject()
                     .appendField(uri(someDir, "foo", "bar"), "1a2b3c4d")
                     .appendField(uri(someDir, "eh", "nah"), "eh-nah-na!"))
+                .appendField("descriptor_files", new JSONObject())
         ),
         argumentSet(
-            "dependencies and sources",
+            "only descriptors",
             ImmutableIncrementalCache.builder()
-                .dependencies(Map.of(
+                .descriptorFiles(Map.of(
+                    path(someDir, "meep", "bleep.binpb"), "6969420"
+                ))
+                .build(),
+            new JSONObject()
+                .appendField("proto_dependencies", new JSONObject())
+                .appendField("proto_sources", new JSONObject())
+                .appendField("descriptor_files", new JSONObject()
+                    .appendField(uri(someDir, "meep", "bleep.binpb"), "6969420"))
+        ),
+        argumentSet(
+            "dependencies, sources, and descriptors",
+            ImmutableIncrementalCache.builder()
+                .protoDependencies(Map.of(
                     path(someDir, "kimi", "wa"), "sudeni shinde iru",
                     path(someDir, "watashi", "wa"), "taikutsudesu"
                 ))
-                .sources(Map.of(
+                .protoSources(Map.of(
                     path(someDir, "foo", "bar"), "1a2b3c4d",
                     path(someDir, "eh", "nah"), "eh-nah-na!"
                 ))
+                .descriptorFiles(Map.of(
+                    path(someDir, "meep", "bleep.binpb"), "6969420"
+                ))
                 .build(),
             new JSONObject()
-                .appendField("dependencies", new JSONObject()
+                .appendField("proto_dependencies", new JSONObject()
                     .appendField(uri(someDir, "kimi", "wa"), "sudeni shinde iru")
                     .appendField(uri(someDir, "watashi", "wa"), "taikutsudesu"))
-                .appendField("sources", new JSONObject()
+                .appendField("proto_sources", new JSONObject()
                     .appendField(uri(someDir, "foo", "bar"), "1a2b3c4d")
                     .appendField(uri(someDir, "eh", "nah"), "eh-nah-na!"))
+                .appendField("descriptor_files", new JSONObject()
+                    .appendField(uri(someDir, "meep", "bleep.binpb"), "6969420"))
         )
     );
   }

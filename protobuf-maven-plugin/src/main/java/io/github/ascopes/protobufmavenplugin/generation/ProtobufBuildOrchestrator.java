@@ -27,6 +27,8 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableDescriptorF
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableLanguageProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutablePluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
+import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
+import io.github.ascopes.protobufmavenplugin.sources.ImmutableFilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
@@ -106,7 +108,7 @@ public final class ProtobufBuildOrchestrator {
     final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
-    if (projectInputs.getCompilableSources().isEmpty()) {
+    if (projectInputs.getCompilableProtoSources().isEmpty()) {
       return handleMissingInputs(request);
     }
 
@@ -126,8 +128,8 @@ public final class ProtobufBuildOrchestrator {
     // Determine the sources we need to regenerate. This will be all the sources usually but
     // if incremental compilation is enabled then we will only output the files that have changed
     // unless we deem a full rebuild necessary.
-    var compilableSources = computeActualSourcesToCompile(request, projectInputs);
-    if (compilableSources.isEmpty()) {
+    var compilableFiles = computeFilesToCompile(request, projectInputs);
+    if (compilableFiles.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
       // incremental compilation and nothing changed since the last build.
       incrementalCacheManager.updateIncrementalCache();
@@ -135,17 +137,17 @@ public final class ProtobufBuildOrchestrator {
     }
 
     var importPaths = Stream
-        .of(projectInputs.getCompilableSources(), projectInputs.getDependencySources())
+        .of(projectInputs.getCompilableProtoSources(), projectInputs.getDependencyProtoSources())
         .flatMap(Collection::stream)
         .map(SourceListing::getSourceRoot)
         .collect(Collectors.toUnmodifiableList());
 
     var invocation = createProtocInvocation(
-        request, 
-        protocPath, 
-        resolvedPlugins, 
-        importPaths, 
-        compilableSources
+        request,
+        protocPath,
+        resolvedPlugins,
+        importPaths,
+        compilableFiles
     );
 
     if (!protocExecutor.invoke(invocation)) {
@@ -168,7 +170,7 @@ public final class ProtobufBuildOrchestrator {
     if (request.isEmbedSourcesInClassOutputs()) {
       embedSourcesInClassOutputs(
           request.getSourceRootRegistrar(),
-          projectInputs.getCompilableSources()
+          projectInputs.getCompilableProtoSources()
       );
     }
 
@@ -248,34 +250,53 @@ public final class ProtobufBuildOrchestrator {
     }
   }
 
-  private Collection<Path> computeActualSourcesToCompile(
+  private FilesToCompile computeFilesToCompile(
       GenerationRequest request,
       ProjectInputListing projectInputs
   ) throws IOException {
-    var totalSourceFileCount = projectInputs.getCompilableSources().stream()
-        .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
+    var totalSourceFileCount = projectInputs.getCompilableProtoSources().stream()
+        .mapToInt(sourcePath -> sourcePath.getSourceFiles().size())
+        .sum();
+    var totalDescriptorFileCount = projectInputs.getCompilableDescriptorFiles().stream()
+        .mapToInt(sourcePath -> sourcePath.getSourceFiles().size())
         .sum();
 
-    var sourcesToCompile = shouldIncrementallyCompile(request)
+    var filesToCompile = shouldIncrementallyCompile(request)
         ? incrementalCacheManager.determineSourcesToCompile(projectInputs)
-        : flattenSourceProtoFiles(projectInputs.getCompilableSources());
+        : allFilesToCompile(projectInputs);
 
-    if (sourcesToCompile.isEmpty()) {
+    if (filesToCompile.isEmpty()) {
       log.info(
-          "Found {} source files, all are up-to-date, none will be regenerated this time",
-          totalSourceFileCount
+          "Found {} and {} to compile, but all are up-to-date so none will be built this time",
+          StringUtils.pluralize(totalSourceFileCount, "proto source file"),
+          StringUtils.pluralize(totalDescriptorFileCount, "descriptor file")
       );
-      return List.of();
+      return noFilesToCompile();
     }
 
     log.info(
-        "Generating source code from {} (discovered {} within {})",
-        StringUtils.pluralize(sourcesToCompile.size(), "source file"),
-        StringUtils.pluralize(totalSourceFileCount, "source file"),
-        StringUtils.pluralize(projectInputs.getCompilableSources().size(), "source path")
+        "Generating source code from {} and {} (discovered a total of {} and {})",
+        StringUtils.pluralize(filesToCompile.getProtoSources().size(), "proto source file"),
+        StringUtils.pluralize(filesToCompile.getDescriptorFiles().size(), "descriptor file"),
+        StringUtils.pluralize(totalSourceFileCount, "proto source file"),
+        StringUtils.pluralize(totalDescriptorFileCount, "descriptor file")
     );
 
-    return sourcesToCompile;
+    return filesToCompile;
+  }
+
+  private FilesToCompile allFilesToCompile(ProjectInputListing projectInputs) {
+    return ImmutableFilesToCompile.builder()
+        .protoSources(flattenSourceProtoFiles(projectInputs.getCompilableProtoSources()))
+        .descriptorFiles(flattenSourceProtoFiles(projectInputs.getCompilableDescriptorFiles()))
+        .build();
+  }
+
+  private FilesToCompile noFilesToCompile() {
+    return ImmutableFilesToCompile.builder()
+        .protoSources(List.of())
+        .descriptorFiles(List.of())
+        .build();
   }
 
   private boolean shouldIncrementallyCompile(GenerationRequest request) {
@@ -317,11 +338,11 @@ public final class ProtobufBuildOrchestrator {
       GenerationRequest request,
       Path protocPath,
       Collection<ResolvedProtocPlugin> resolvedPlugins,
-      Collection<Path> importPaths,
-      Collection<Path> compilableSources
+      Collection<Path> protoImportPaths,
+      FilesToCompile filesToCompile
   ) {
     var targets = new TreeSet<ProtocTarget>();
-    
+
     request.getEnabledLanguages()
         .stream()
         .map(language -> ImmutableLanguageProtocTarget.builder()
@@ -350,10 +371,11 @@ public final class ProtobufBuildOrchestrator {
     }
 
     return ImmutableProtocInvocation.builder()
-        .importPaths(importPaths)
+        .importPaths(protoImportPaths)
+        .inputDescriptorFiles(filesToCompile.getDescriptorFiles())
         .isFatalWarnings(request.isFatalWarnings())
         .protocPath(protocPath)
-        .sourcePaths(compilableSources)
+        .sourcePaths(filesToCompile.getProtoSources())
         .targets(targets)
         .build();
   }

@@ -35,14 +35,16 @@ import org.json.JSONTokener;
  */
 @Named
 final class IncrementalCacheSerializer {
-  private static final String DEPENDENCIES = "dependencies";
-  private static final String SOURCES = "sources";
+  private static final String PROTO_DEPENDENCIES = "proto_dependencies";
+  private static final String PROTO_SOURCES = "proto_sources";
+  private static final String DESCRIPTOR_FILES = "descriptor_files";
 
   void serialize(IncrementalCache cache, Writer writer) throws IOException {
     try {
       new JSONObject()
-          .put(DEPENDENCIES, pathMappingToJson(cache.getDependencies()))
-          .put(SOURCES, pathMappingToJson(cache.getSources()))
+          .put(PROTO_DEPENDENCIES, pathMappingToJson(cache.getProtoDependencies()))
+          .put(PROTO_SOURCES, pathMappingToJson(cache.getProtoSources()))
+          .put(DESCRIPTOR_FILES, pathMappingToJson(cache.getDescriptorFiles()))
           .write(writer, 2, 2);
     } catch (Exception ex) {
       throw new IOException("Failed to write JSON file", ex);
@@ -53,8 +55,9 @@ final class IncrementalCacheSerializer {
     try {
       var object = new JSONObject(new JSONTokener(reader));
       return ImmutableIncrementalCache.builder()
-          .dependencies(jsonToPathMapping(object.getJSONObject(DEPENDENCIES)))
-          .sources(jsonToPathMapping(object.getJSONObject(SOURCES)))
+          .protoDependencies(jsonToPathMapping(object.getJSONObject(PROTO_DEPENDENCIES)))
+          .protoSources(jsonToPathMapping(object.getJSONObject(PROTO_SOURCES)))
+          .descriptorFiles(jsonToPathMapping(object.getJSONObject(DESCRIPTOR_FILES)))
           .build();
     } catch (Exception ex) {
       throw new IOException("Failed to read JSON file", ex);

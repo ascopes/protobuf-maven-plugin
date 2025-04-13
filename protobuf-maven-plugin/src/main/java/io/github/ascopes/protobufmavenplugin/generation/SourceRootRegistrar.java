@@ -78,7 +78,7 @@ public final class SourceRootRegistrar {
     FileUtils.rebaseFileTree(
         listing.getSourceRoot(),
         targetDirectory,
-        listing.getSourceProtoFiles().stream()
+        listing.getSourceFiles().stream()
     );
   }
 

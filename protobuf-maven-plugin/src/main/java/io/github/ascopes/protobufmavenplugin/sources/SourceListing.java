@@ -31,11 +31,11 @@ public interface SourceListing {
 
   Path getSourceRoot();
 
-  Set<Path> getSourceProtoFiles();
+  Set<Path> getSourceFiles();
 
   static Collection<Path> flattenSourceProtoFiles(Collection<SourceListing> listings) {
     return listings.stream()
-        .map(SourceListing::getSourceProtoFiles)
+        .map(SourceListing::getSourceFiles)
         .flatMap(Collection::stream)
         .collect(Collectors.toUnmodifiableList());
   }

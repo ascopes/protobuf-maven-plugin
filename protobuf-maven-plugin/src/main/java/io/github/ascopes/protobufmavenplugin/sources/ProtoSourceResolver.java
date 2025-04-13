@@ -142,7 +142,7 @@ final class ProtoSourceResolver {
       var relocatedSourceFiles = FileUtils.rebaseFileTree(
           vfsRoot,
           extractionRoot,
-          sourceFiles.get().getSourceProtoFiles().stream()
+          sourceFiles.get().getSourceFiles().stream()
       );
 
       return Optional.of(createSourceListing(relocatedSourceFiles, extractionRoot));
@@ -174,7 +174,7 @@ final class ProtoSourceResolver {
 
   private SourceListing createSourceListing(Collection<Path> sourceFiles, Path rootPath) {
     return ImmutableSourceListing.builder()
-        .addAllSourceProtoFiles(sourceFiles)
+        .addAllSourceFiles(sourceFiles)
         .sourceRoot(rootPath)
         .build();
   }

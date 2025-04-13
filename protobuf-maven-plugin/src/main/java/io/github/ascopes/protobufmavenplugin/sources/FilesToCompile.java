@@ -13,27 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.sources.incremental;
+package io.github.ascopes.protobufmavenplugin.sources;
 
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.Collection;
+import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 
 /**
- * Serialized format of the incremental compilation cache.
- *
- * <p>If changing the structure of this, update the {@code SPEC_VERSION} within
- * {@link IncrementalCacheManager} to avoid breaking changes for users.
+ * Collection of sources to compile which can be passed to protoc. This is derived from zero or more
+ * source listings.
  *
  * @author Ashley Scopes
- * @since 2.7.0
+ * @since 3.1.0
  */
 @Immutable
-interface IncrementalCache {
+public interface FilesToCompile {
 
-  Map<Path, String> getProtoDependencies();
+  Collection<Path> getProtoSources();
 
-  Map<Path, String> getProtoSources();
+  Collection<Path> getDescriptorFiles();
 
-  Map<Path, String> getDescriptorFiles();
+  @Derived
+  default boolean isEmpty() {
+    return getProtoSources().isEmpty() && getDescriptorFiles().isEmpty();
+  }
 }
