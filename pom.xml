@@ -203,7 +203,7 @@
             it here with a property, we cal allow dependabot to
             start to manage this automatically for us. The property
             is then filtered into the site.xml automatically.
-        -->  
+        -->
         <groupId>org.apache.maven.skins</groupId>
         <artifactId>maven-fluido-skin</artifactId>
         <version>${maven-fluido-skin.version}</version>
@@ -640,7 +640,7 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <reporting>
     <plugins>
       <plugin>
