@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Builder for Java argument files that deals with the quoting and escaping rules Java expects.
@@ -35,6 +36,23 @@ public final class ArgumentFileBuilder {
 
   public ArgumentFileBuilder add(Object argument) {
     arguments.add(argument.toString());
+    return this;
+  }
+
+  public <T> ArgumentFileBuilder applyForEach(
+      Iterable<T> items, 
+      BiConsumer<ArgumentFileBuilder, T> operator
+  ) {
+    for (var item : items) {
+      operator.accept(this, item);
+    }
+    return this;
+  }
+
+  public ArgumentFileBuilder addIfTrue(boolean condition, String content) {
+    if (condition) {
+      add(content);
+    }
     return this;
   }
 
