@@ -33,7 +33,7 @@ public interface SourceListing {
 
   Set<Path> getSourceFiles();
 
-  static Collection<Path> flattenSourceProtoFiles(Collection<SourceListing> listings) {
+  static Collection<Path> flatten(Collection<? extends SourceListing> listings) {
     return listings.stream()
         .map(SourceListing::getSourceFiles)
         .flatMap(Collection::stream)

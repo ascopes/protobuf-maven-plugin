@@ -15,8 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.generation;
 
-import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
-
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ImmutableProtocInvocation;
@@ -28,7 +26,6 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableLanguagePro
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutablePluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
-import io.github.ascopes.protobufmavenplugin.sources.ImmutableFilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
@@ -263,7 +260,7 @@ public final class ProtobufBuildOrchestrator {
 
     var filesToCompile = shouldIncrementallyCompile(request)
         ? incrementalCacheManager.determineSourcesToCompile(projectInputs)
-        : allFilesToCompile(projectInputs);
+        : FilesToCompile.allOf(projectInputs);
 
     if (filesToCompile.isEmpty()) {
       log.info(
@@ -271,7 +268,7 @@ public final class ProtobufBuildOrchestrator {
           StringUtils.pluralize(totalSourceFileCount, "proto source file"),
           StringUtils.pluralize(totalDescriptorFileCount, "descriptor file")
       );
-      return noFilesToCompile();
+      return FilesToCompile.empty();
     }
 
     log.info(
@@ -283,20 +280,6 @@ public final class ProtobufBuildOrchestrator {
     );
 
     return filesToCompile;
-  }
-
-  private FilesToCompile allFilesToCompile(ProjectInputListing projectInputs) {
-    return ImmutableFilesToCompile.builder()
-        .protoSources(flattenSourceProtoFiles(projectInputs.getCompilableProtoSources()))
-        .descriptorFiles(flattenSourceProtoFiles(projectInputs.getCompilableDescriptorFiles()))
-        .build();
-  }
-
-  private FilesToCompile noFilesToCompile() {
-    return ImmutableFilesToCompile.builder()
-        .protoSources(List.of())
-        .descriptorFiles(List.of())
-        .build();
   }
 
   private boolean shouldIncrementallyCompile(GenerationRequest request) {

@@ -15,10 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
-import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
-
 import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
-import io.github.ascopes.protobufmavenplugin.sources.ImmutableFilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
@@ -96,7 +93,7 @@ public final class IncrementalCacheManager {
     // and what we should ignore, so we'll have to rebuild everything anyway.
     if (maybePreviousBuildCache.isEmpty()) {
       log.info("All sources will be compiled, as no previous build data was detected");
-      return allFiles(listing);
+      return FilesToCompile.allOf(listing);
     }
 
     var previousCache = maybePreviousBuildCache.get();
@@ -105,7 +102,7 @@ public final class IncrementalCacheManager {
     // failures that have been created by changes to imported messages.
     if (!previousCache.getProtoDependencies().equals(nextCache.getProtoDependencies())) {
       log.info("Detected a change in dependencies, all sources will be recompiled");
-      return allFiles(listing);
+      return FilesToCompile.allOf(listing);
     }
 
     var protoSourceFilesChanged = nextCache.getProtoSources().keySet()
@@ -118,24 +115,10 @@ public final class IncrementalCacheManager {
 
     if (protoSourceFilesChanged || descriptorSourceFilesChanged) {
       log.info("Detected that source files have changed, all sources will be recompiled.");
-      return allFiles(listing);
+      return FilesToCompile.allOf(listing);
     }
 
-    return noFiles();
-  }
-
-  private FilesToCompile allFiles(ProjectInputListing listing) {
-    return ImmutableFilesToCompile.builder()
-        .protoSources(flattenSourceProtoFiles(listing.getCompilableProtoSources()))
-        .descriptorFiles(flattenSourceProtoFiles(listing.getCompilableDescriptorFiles()))
-        .build();
-  }
-
-  private FilesToCompile noFiles() {
-    return ImmutableFilesToCompile.builder()
-        .protoSources(List.of())
-        .descriptorFiles(List.of())
-        .build();
+    return FilesToCompile.empty();
   }
 
   private Predicate<Path> isFileUpdated(

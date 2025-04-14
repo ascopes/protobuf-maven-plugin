@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.sources;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 
@@ -37,5 +38,30 @@ public interface FilesToCompile {
   @Derived
   default boolean isEmpty() {
     return getProtoSources().isEmpty() && getDescriptorFiles().isEmpty();
+  }
+
+  /**
+   * Produce a {@link FilesToCompile} containing all the proto sources and
+   * descriptor files from the given {@link ProjectInputListing}.
+   *
+   * @return the files to compile.
+   */
+  static FilesToCompile allOf(ProjectInputListing listing) {
+    return ImmutableFilesToCompile.builder()
+        .descriptorFiles(SourceListing.flatten(listing.getCompilableDescriptorFiles()))
+        .protoSources(SourceListing.flatten(listing.getCompilableProtoSources()))
+        .build();
+  }
+
+  /**
+   * Produce a {@link FilesToCompile} that is totally empty.
+   *
+   * @return the files to compile.
+   */
+  static FilesToCompile empty() {
+    return ImmutableFilesToCompile.builder()
+        .descriptorFiles(List.of())
+        .protoSources(List.of())
+        .build();
   }
 }
