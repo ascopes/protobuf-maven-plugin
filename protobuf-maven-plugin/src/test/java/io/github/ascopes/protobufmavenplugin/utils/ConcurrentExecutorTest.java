@@ -392,18 +392,16 @@ class ConcurrentExecutorTest {
     }
 
     // When
-    tasks.forEach(task -> task.cancel(true));
+    tasks.get(0).cancel(true);
 
     // Then
     assertThatExceptionOfType(MultipleFailuresException.class)
         .isThrownBy(() -> tasks.stream().collect(executor.awaiting()))
-        .satisfies(
-            ex -> assertThat(ex.getCause()).isInstanceOf(CancellationException.class),
-            ex -> assertThat(ex.getSuppressed())
-                .hasSize(3)
-                .allSatisfy(suppressed -> assertThat(suppressed)
-                    .isInstanceOf(CancellationException.class))
-        );
+        .havingCause()
+        .isInstanceOf(CancellationException.class);
+
+    assertThat(tasks)
+        .allSatisfy(task -> assertThat(task).isCancelled());
   }
 
   // Sleep-based waits can consume thread interrupts and can be cancelled,
