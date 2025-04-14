@@ -18,7 +18,7 @@ import java.nio.file.Path
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseProjectDir = basedir.toPath().toAbsolutePath()
-Path expectedGeneratedFile = baseProjectDir.resolve("target/protobin.desc")
+Path expectedGeneratedFile = baseProjectDir.resolve("target/protobin.binpb")
 
 // Verify the protoc produced the expected output file
 assertThat(expectedGeneratedFile)

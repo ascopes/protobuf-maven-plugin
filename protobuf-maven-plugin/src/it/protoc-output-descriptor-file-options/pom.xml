@@ -28,8 +28,8 @@
     <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
-  <groupId>protoc-descriptor-file</groupId>
-  <artifactId>protoc-descriptor-file</artifactId>
+  <groupId>protoc-output-descriptor-file-options</groupId>
+  <artifactId>protoc-output-descriptor-file-options</artifactId>
 
   <dependencies>
     <dependency>
@@ -62,7 +62,11 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <outputDescriptorFile>${project.build.directory}/protobin.desc</outputDescriptorFile>
+          <javaEnabled>false</javaEnabled>
+          <outputDescriptorFile>${project.build.directory}/protobin.binpb</outputDescriptorFile>
+          <outputDescriptorIncludeImports>true</outputDescriptorIncludeImports>
+          <outputDescriptorIncludeSourceInfo>true</outputDescriptorIncludeSourceInfo>
+          <outputDescriptorRetainOptions>true</outputDescriptorRetainOptions>
         </configuration>
 
         <executions>
