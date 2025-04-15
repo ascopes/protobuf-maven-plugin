@@ -5,6 +5,12 @@ on:
     branches: [main, "v*"]
   push:
     branches: [main, "v*"]
+  schedule:
+    # Run every week on a Sunday. The time we run at (3:57am) is
+    # arbitrary, in the spirit of not contributing to the flood of
+    # GitHub builds that will occur at midnight/on the hour/on the
+    # half hour. 
+    - cron: "43 3 * * 6"
   workflow_dispatch: {}
 
 jobs:
