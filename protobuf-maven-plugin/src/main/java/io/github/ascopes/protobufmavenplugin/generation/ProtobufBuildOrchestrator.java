@@ -97,7 +97,10 @@ public final class ProtobufBuildOrchestrator {
 
     // GH-600: Short circuit and avoid expensive dependency resolution if
     // we can exit early.
-    if (request.getSourceDirectories().isEmpty() && request.getSourceDependencies().isEmpty()) {
+    if (request.getSourceDirectories().isEmpty()
+        && request.getSourceDependencies().isEmpty()
+        && request.getSourceDescriptorPaths().isEmpty()
+        && request.getSourceDescriptorDependencies().isEmpty()) {
       return handleMissingInputs(request);
     }
 
@@ -105,7 +108,8 @@ public final class ProtobufBuildOrchestrator {
     final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
-    if (projectInputs.getCompilableProtoSources().isEmpty()) {
+    if (projectInputs.getCompilableProtoSources().isEmpty()
+        && projectInputs.getCompilableDescriptorFiles().isEmpty()) {
       return handleMissingInputs(request);
     }
 
