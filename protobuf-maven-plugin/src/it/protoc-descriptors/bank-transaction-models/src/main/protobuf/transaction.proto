@@ -1,0 +1,33 @@
+//
+// Copyright (C) 2023 - 2025, Ashley Scopes.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.somebank.models";
+
+import "amount.proto";
+import "payee.proto";
+
+message Transaction {
+  string id = 1;
+  uint64 timestamp = 2;
+  com.somebank.models.Payee payee = 3;
+  reserved 4;
+  reserved 5;
+  com.somebank.models.Amount amount = 6;
+  string reference = 7;
+}
