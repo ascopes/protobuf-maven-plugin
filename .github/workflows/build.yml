@@ -8,34 +8,8 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  shellcheck:
-    name: Shellcheck
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Shellcheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          check_together: 'yes'
-          scandir: ./scripts
-
-  validate-codecov:
-    name: Validate codecov.yml
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Validate codecov.yml
-        shell: bash
-        run: curl -vvv --fail --data-binary @- https://codecov.io/validate < codecov.yml
-
-  validate-checkstyle-and-license-headers:
-    name: Checkstyle and license headers
+  validate:
+    name: Validation
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -49,33 +23,45 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Validate
+      - name: Validate Maven project
         shell: bash
         run: ./mvnw -B validate
 
+      - name: Validate codecov.yml
+        shell: bash
+        if: ${{ !cancelled() }}
+        run: curl -v --fail-with-body --data-binary @- https://codecov.io/validate < codecov.yml
+
+      - name: Run Shellcheck
+        uses: ludeeus/action-shellcheck@master
+        if: ${{ !cancelled() }}
+        with:
+          check_together: 'yes'
+          scandir: ./scripts
+
   build:
-    name: JDK ${{ matrix.java-version }} on ${{ matrix.os-name }} (${{ matrix.maven}} Maven)
-    runs-on: ${{ matrix.os-name }}
+    name: Test (JDK ${{ matrix.java-version }}, Maven ${{ matrix.maven }}, ${{ matrix.os-name }})
+    runs-on: ${{ matrix.os-name }}-latest
     timeout-minutes: 30
 
     strategy:
       fail-fast: false
       matrix:
-        os-name: [ubuntu-latest]
+        os-name: [ubuntu]
         java-version: [11, 17, 21, 24]
         maven: [default]
         include:
           # Cross-OS tests
-          - os-name: macos-latest
+          - os-name: macos
             java-version: 11
             maven: default
-          - os-name: windows-latest
+          - os-name: windows
             java-version: 11
             maven: default
-          - os-name: ubuntu-latest
+          - os-name: ubuntu
             java-version: 11
             maven: 3.8.8
-          - os-name: ubuntu-latest
+          - os-name: ubuntu
             java-version: 17
             maven: 4.0.0-rc-3
 
@@ -112,16 +98,23 @@ jobs:
         shell: bash
         run: ./mvnw -B -Dcheckstyle.skip -Dlicense.skip clean verify
 
-      - name: Publish code coverage
-        uses: codecov/codecov-action@v4
+      - name: Upload test results to Codecov
+        uses: codecov/test-results-action@v1
         continue-on-error: true
-        if: always()
+        if: ${{ !cancelled() }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Publish code coverage to Codecov
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        if: ${{ !cancelled() }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build logs as artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-${{ matrix.maven }}
           path: |-
@@ -152,10 +145,10 @@ jobs:
         shell: bash
         run: |-
           ./mvnw -B site \
-            -Dmaven.test.skip \
-            -Dinvoker.skip \
-            -Dcheckstyle.skip \
-            -Dlicense.skip
+              -Dmaven.test.skip \
+              -Dinvoker.skip \
+              -Dcheckstyle.skip \
+              -Dlicense.skip
 
       - name: Upload generated site as artifacts
         uses: actions/upload-artifact@v4
@@ -173,7 +166,7 @@ jobs:
     timeout-minutes: 30
     needs:
       - build
-      - validate-codecov
+      - validate
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -181,7 +174,7 @@ jobs:
       - name: Publish code coverage
         uses: codecov/codecov-action@v5
         continue-on-error: true
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true

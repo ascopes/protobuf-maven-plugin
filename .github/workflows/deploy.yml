@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload build logs as artifacts
         uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: logs
           path: |-
@@ -171,3 +171,17 @@ jobs:
           retention-days: 90  # Max allowed
           include-hidden-files: true
           if-no-files-found: error
+
+      - name: Upload test results to Codecov
+        uses: codecov/test-results-action@v1
+        continue-on-error: true
+        if: ${{ !cancelled() }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Publish code coverage to Codecov
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        if: ${{ !cancelled() }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
