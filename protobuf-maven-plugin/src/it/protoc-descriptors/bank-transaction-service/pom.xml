@@ -31,16 +31,6 @@
   <artifactId>bank-transaction-service</artifactId>
   <packaging>jar</packaging>
 
-  <dependencies>
-    <dependency>
-      <!-- Required here to avoid quirks with build ordering -->
-      <groupId>${project.groupId}</groupId>
-      <artifactId>bank-transaction-models</artifactId>
-      <version>${project.version}</version>
-      <type>binpb</type>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
       <plugin>
