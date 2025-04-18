@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
+import io.github.ascopes.protobufmavenplugin.sources.DescriptorListing;
 import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
@@ -155,15 +156,19 @@ public final class IncrementalCacheManager {
   }
 
   private IncrementalCache buildIncrementalCache(ProjectInputListing listing) {
-    // Done this way for now to propagate errors correctly. Probably worth refactoring in the future
-    // to be less of a hack?
+    var importFutures = generateProtoFileDigests(listing.getDependencyProtoSources());
+    var sourceFutures = generateProtoFileDigests(listing.getCompilableProtoSources());
+    var descriptorFutures = generateDescriptorDigests(listing.getCompilableDescriptorFiles());
+
     var results = Stream
-        .of(
-            listing.getDependencyProtoSources(),
-            listing.getCompilableProtoSources(),
-            listing.getCompilableDescriptorFiles()
-        )
-        .map(this::createSerializedFileDigestsAsync)
+        .of(importFutures, sourceFutures, descriptorFutures)
+        .map(stream -> concurrentExecutor.submit(() -> stream
+            .collect(concurrentExecutor.awaiting())
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))))
+        // Schedule all concurrent tasks together by using a terminal operation
+        .collect(Collectors.toUnmodifiableList())
+        .stream()
         .collect(concurrentExecutor.awaiting())
         .iterator();
 
@@ -174,19 +179,24 @@ public final class IncrementalCacheManager {
         .build();
   }
 
-  private FutureTask<Map<Path, String>> createSerializedFileDigestsAsync(
+  private Stream<FutureTask<Map.Entry<Path, String>>> generateProtoFileDigests(
       Collection<SourceListing> listings
   ) {
-    return concurrentExecutor.submit(() -> listings.stream()
+    return listings.stream()
         .map(SourceListing::getSourceFiles)
         .flatMap(Collection::stream)
-        .map(this::createSerializedFileDigestAsync)
-        .collect(concurrentExecutor.awaiting())
-        .stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        .map(this::generateFileDigest);
   }
 
-  private FutureTask<Map.Entry<Path, String>> createSerializedFileDigestAsync(Path file) {
+  private Stream<FutureTask<Map.Entry<Path, String>>> generateDescriptorDigests(
+      Collection<DescriptorListing> listings
+  ) {
+    return listings.stream()
+        .map(DescriptorListing::getDescriptorFilePath)
+        .map(this::generateFileDigest);
+  }
+
+  private FutureTask<Map.Entry<Path, String>> generateFileDigest(Path file) {
     return concurrentExecutor.submit(() -> {
       log.trace("Generating digest for {}", file);
       try (var inputStream = Files.newInputStream(file)) {

@@ -22,20 +22,20 @@ import java.util.stream.Collectors;
 import org.immutables.value.Value.Immutable;
 
 /**
- * Listing for a directory tree containing protobuf source files.
+ * Listing for a descriptor file.
  *
  * @author Ashley Scopes
  */
 @Immutable
-public interface SourceListing {
+public interface DescriptorListing {
 
-  Path getSourceRoot();
+  Path getDescriptorFilePath();
 
-  Set<Path> getSourceFiles();
+  Set<String> getSourceFiles();
 
-  static Collection<Path> flatten(Collection<? extends SourceListing> listings) {
+  static Collection<String> flatten(Collection<? extends DescriptorListing> listings) {
     return listings.stream()
-        .map(SourceListing::getSourceFiles)
+        .map(DescriptorListing::getSourceFiles)
         .flatMap(Collection::stream)
         .collect(Collectors.toUnmodifiableList());
   }

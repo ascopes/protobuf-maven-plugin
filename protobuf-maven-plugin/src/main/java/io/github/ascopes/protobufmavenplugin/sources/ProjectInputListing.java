@@ -31,5 +31,5 @@ public interface ProjectInputListing {
 
   Collection<SourceListing> getDependencyProtoSources();
 
-  Collection<SourceListing> getCompilableDescriptorFiles();
+  Collection<DescriptorListing> getCompilableDescriptorFiles();
 }

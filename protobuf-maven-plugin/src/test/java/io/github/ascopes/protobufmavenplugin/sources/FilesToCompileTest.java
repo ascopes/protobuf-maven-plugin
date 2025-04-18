@@ -37,7 +37,7 @@ class FilesToCompileTest {
   @MethodSource("isEmptyTestCases")
   @ParameterizedTest(name = "such that {argumentSetName}")
   void isEmptyReturnsExpectedValue(
-      Collection<Path> descriptorFiles,
+      Collection<String> descriptorFiles,
       Collection<Path> protoSources,
       boolean expected
   ) {
@@ -75,16 +75,16 @@ class FilesToCompileTest {
                 .build()
         ))
         .compilableDescriptorFiles(List.of(
-            ImmutableSourceListing.builder()
-                .sourceRoot(Path.of("aaa", "bbb", "ccc.binpb"))
+            ImmutableDescriptorListing.builder()
+                .descriptorFilePath(Path.of("aaa", "bbb", "ccc.binpb"))
                 .sourceFiles(List.of(
-                    Path.of("aaa", "bbb", "ccc.binpb")
+                    "aaa/bbb/ccc.proto"
                 ))
                 .build(),
-            ImmutableSourceListing.builder()
-                .sourceRoot(Path.of("aaa", "bbb", "ddd.binpb"))
+            ImmutableDescriptorListing.builder()
+                .descriptorFilePath(Path.of("aaa", "bbb", "ddd.binpb"))
                 .sourceFiles(List.of(
-                    Path.of("aaa", "bbb", "ddd.binpb")
+                    "aaa/bbb/ddd.proto"
                 ))
                 .build()
         ))
@@ -106,8 +106,8 @@ class FilesToCompileTest {
       softly.assertThat(files.getDescriptorFiles())
           .as(".getDescriptorFiles()")
           .containsExactlyInAnyOrder(
-              Path.of("aaa", "bbb", "ccc.binpb"),
-              Path.of("aaa", "bbb", "ddd.binpb")
+              "aaa/bbb/ccc.proto",
+              "aaa/bbb/ddd.proto"
           );
       softly.assertThat(files.getProtoSources())
           .as(".getProtoSources()")

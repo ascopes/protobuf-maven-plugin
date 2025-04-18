@@ -25,6 +25,7 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableDescriptorF
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableLanguageProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutablePluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
+import io.github.ascopes.protobufmavenplugin.sources.DescriptorListing;
 import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
@@ -137,17 +138,11 @@ public final class ProtobufBuildOrchestrator {
       return GenerationResult.NOTHING_TO_DO;
     }
 
-    var importPaths = Stream
-        .of(projectInputs.getCompilableProtoSources(), projectInputs.getDependencyProtoSources())
-        .flatMap(Collection::stream)
-        .map(SourceListing::getSourceRoot)
-        .collect(Collectors.toUnmodifiableList());
-
     var invocation = createProtocInvocation(
         request,
         protocPath,
         resolvedPlugins,
-        importPaths,
+        projectInputs,
         compilableFiles
     );
 
@@ -251,6 +246,7 @@ public final class ProtobufBuildOrchestrator {
     }
   }
 
+  // TODO: migrate this logic to a compilation strategy.
   private FilesToCompile computeFilesToCompile(
       GenerationRequest request,
       ProjectInputListing projectInputs
@@ -286,6 +282,7 @@ public final class ProtobufBuildOrchestrator {
     return filesToCompile;
   }
 
+  // TODO: migrate this logic to a compilation strategy
   private boolean shouldIncrementallyCompile(GenerationRequest request) {
     if (!request.isIncrementalCompilationEnabled()) {
       log.debug("Incremental compilation is disabled");
@@ -325,7 +322,7 @@ public final class ProtobufBuildOrchestrator {
       GenerationRequest request,
       Path protocPath,
       Collection<ResolvedProtocPlugin> resolvedPlugins,
-      Collection<Path> protoImportPaths,
+      ProjectInputListing projectInputs,
       FilesToCompile filesToCompile
   ) {
     var targets = new TreeSet<ProtocTarget>();
@@ -357,9 +354,21 @@ public final class ProtobufBuildOrchestrator {
       targets.add(descriptorFileTarget);
     }
 
+    var importPaths = Stream
+        .of(projectInputs.getCompilableProtoSources(), projectInputs.getDependencyProtoSources())
+        .flatMap(Collection::stream)
+        .map(SourceListing::getSourceRoot)
+        .collect(Collectors.toUnmodifiableList());
+
+    var inputDescriptorFiles = projectInputs.getCompilableDescriptorFiles()
+        .stream()
+        .map(DescriptorListing::getDescriptorFilePath)
+        .collect(Collectors.toUnmodifiableList());
+
     return ImmutableProtocInvocation.builder()
-        .importPaths(protoImportPaths)
-        .inputDescriptorFiles(filesToCompile.getDescriptorFiles())
+        .descriptorSourceFiles(filesToCompile.getDescriptorFiles())
+        .importPaths(importPaths)
+        .inputDescriptorFiles(inputDescriptorFiles)
         .isFatalWarnings(request.isFatalWarnings())
         .protocPath(protocPath)
         .sourcePaths(filesToCompile.getProtoSources())

@@ -30,15 +30,29 @@ import org.immutables.value.Value.Immutable;
  */
 @Immutable
 public interface ProtocInvocation {
+
+  // The executable protoc binary.
   Path getProtocPath();
-  
+
+  // Fail if we get warnings, rather than continuing.
   boolean isFatalWarnings();
 
+  // Paths to proto source files on the root file system to compile.
   List<Path> getImportPaths();
 
+  // The physical descriptor files to build.
   List<Path> getInputDescriptorFiles();
 
+  // The files that are described within the provided input descriptors which
+  // we want protoc to generate source code from.
+  List<String> getDescriptorSourceFiles();
+
+  // Paths to proto source files on the root file system to compile.
   List<Path> getSourcePaths();
 
+  // "Things" to make or output. This can be built-in language generators,
+  // protoc plugins, Java plugins that are decorated in an OS-specific set of
+  // scripts to invoke it via the kernel fork/exec mechanism, or descriptor
+  // files to generate.
   SortedSet<ProtocTarget> getTargets();
 }

@@ -86,7 +86,8 @@ public final class ProtocExecutor {
             !invocation.getInputDescriptorFiles().isEmpty(),
             () -> createDescriptorInputArgument(invocation)
         )
-        .applyForEach(invocation.getSourcePaths(), this::applyProtoSourcePathArgument)
+        .applyForEach(invocation.getSourcePaths(), this::applyProtoSourceFileArgument)
+        .applyForEach(invocation.getDescriptorSourceFiles(), this::applyDescriptorSourceArgument)
         .applyForEach(invocation.getImportPaths(), this::applyImportPathArgument);
   }
 
@@ -139,7 +140,14 @@ public final class ProtocExecutor {
     builder.add("--proto_path=" + path);
   }
 
-  private void applyProtoSourcePathArgument(ArgumentFileBuilder builder, Path file) {
+  //
+  private void applyProtoSourceFileArgument(ArgumentFileBuilder builder, Path file) {
+    builder.add(file);
+  }
+
+  // For "virtual" descriptor files, as we have to tell protoc exactly which sources
+  // to generate from any provided descriptor files we give it.
+  private void applyDescriptorSourceArgument(ArgumentFileBuilder builder, String file) {
     builder.add(file);
   }
 

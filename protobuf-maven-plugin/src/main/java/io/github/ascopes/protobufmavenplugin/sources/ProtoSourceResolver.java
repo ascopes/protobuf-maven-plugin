@@ -17,6 +17,8 @@ package io.github.ascopes.protobufmavenplugin.sources;
 
 import static java.util.function.Predicate.not;
 
+import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
+import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
@@ -37,7 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component that can index and resolve protobuf sources in a file tree.
+ * Component that can index and resolve protobuf sources in a file tree and
+ * within descriptor files.
  *
  * <p>In addition, it can discover sources within archives recursively. These results will be
  * extracted to a location within the Maven build directory to enable {@code protoc} and other
@@ -67,6 +70,63 @@ final class ProtoSourceResolver {
     this.temporarySpace = temporarySpace;
   }
 
+  Collection<DescriptorListing> resolveDescriptors(
+      Collection<Path> descriptorFilePaths
+  ) {
+    return descriptorFilePaths
+        .stream()
+        // GH-132: Normalize to ensure different paths to the same file do not
+        //   get duplicated across more than one extraction site.
+        .map(FileUtils::normalize)
+        // GH-132: Avoid running multiple times on the same location.
+        .distinct()
+        .map(path -> concurrentExecutor.submit(() -> resolveDescriptor(path)))
+        .collect(concurrentExecutor.awaiting())
+        .stream()
+        .flatMap(Optional::stream)
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  private Optional<DescriptorListing> resolveDescriptor(
+      Path descriptorFilePath
+  ) throws IOException {
+    if (!Files.exists(descriptorFilePath)) {
+      log.debug("Skipping descriptor lookup in path {} as it does not exist", descriptorFilePath);
+      return Optional.empty();
+    }
+
+    try (var inputStream = Files.newInputStream(descriptorFilePath)) {
+      return FileDescriptorSet.parseFrom(inputStream)
+          .getFileList()
+          .stream()
+          .map(FileDescriptorProto::getName)
+          .peek(protoFile -> log.trace(
+              "Found virtual proto file {} in descriptor {}",
+              protoFile,
+              descriptorFilePath
+          ))
+          // TODO: support filtering on virtual paths in descriptors to enable
+          //   only generating a subset of descriptor files.
+          //.filter(filePath -> filter.matches(filePath))
+          .collect(Collectors.collectingAndThen(
+              Collectors.toCollection(LinkedHashSet::new),
+              Optional::of
+          ))
+          .filter(not(Collection::isEmpty))
+          .map(protoFiles -> ImmutableDescriptorListing.builder()
+              .descriptorFilePath(descriptorFilePath)
+              .sourceFiles(protoFiles)
+              .build());
+
+    } catch (IOException ex) {
+      throw new IOException(
+          "Failed to read/parse input descriptor " + descriptorFilePath
+              + " due to " + ex.getClass().getSimpleName() + ": " + ex.getMessage(),
+          ex
+      );
+    }
+  }
+
   Collection<SourceListing> resolveSources(
       Collection<Path> rootPaths,
       SourceGlobFilter filter
@@ -90,7 +150,7 @@ final class ProtoSourceResolver {
       SourceGlobFilter filter
   ) throws IOException {
     if (!Files.exists(rootPath)) {
-      log.debug("Skipping lookup in path {} as it does not exist", rootPath);
+      log.debug("Skipping source lookup in path {} as it does not exist", rootPath);
       return Optional.empty();
     }
 
@@ -157,9 +217,9 @@ final class ProtoSourceResolver {
       return stream
           .filter(filePath -> filter.matches(rootPath, filePath))
           .peek(protoFile -> log.trace(
-              "Found proto file in root {}: {}", 
-              rootPath.toUri(), 
-              protoFile
+              "Found proto file {} in root {}",
+              protoFile,
+              rootPath.toUri()
           ))
           .collect(Collectors.collectingAndThen(
               // Terminal operation, means we do not return a closed stream

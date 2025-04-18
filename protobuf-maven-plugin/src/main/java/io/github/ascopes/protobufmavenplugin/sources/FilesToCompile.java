@@ -33,7 +33,7 @@ public interface FilesToCompile {
 
   Collection<Path> getProtoSources();
 
-  Collection<Path> getDescriptorFiles();
+  Collection<String> getDescriptorFiles();
 
   @Derived
   default boolean isEmpty() {
@@ -48,7 +48,7 @@ public interface FilesToCompile {
    */
   static FilesToCompile allOf(ProjectInputListing listing) {
     return ImmutableFilesToCompile.builder()
-        .descriptorFiles(SourceListing.flatten(listing.getCompilableDescriptorFiles()))
+        .descriptorFiles(DescriptorListing.flatten(listing.getCompilableDescriptorFiles()))
         .protoSources(SourceListing.flatten(listing.getCompilableProtoSources()))
         .build();
   }

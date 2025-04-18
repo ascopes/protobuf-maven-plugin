@@ -59,7 +59,7 @@ public final class ProjectInputResolver {
   public ProjectInputListing resolveProjectInputs(
       GenerationRequest request
   ) throws ResolutionException {
-    // XXX: We might want to run these three resolution steps in parallel in the future.
+    // TODO(ascopes): run these in parallel
     return ImmutableProjectInputListing.builder()
         .compilableDescriptorFiles(resolveCompilableDescriptorSources(request))
         .compilableProtoSources(resolveCompilableProtoSources(request))
@@ -117,7 +117,7 @@ public final class ProjectInputResolver {
     return sourceResolver.resolveSources(importPaths, filter);
   }
 
-  private Collection<SourceListing> resolveCompilableDescriptorSources(
+  private Collection<DescriptorListing> resolveCompilableDescriptorSources(
       GenerationRequest request
   ) throws ResolutionException {
     var artifactPaths = artifactPathResolver.resolveDependencies(
@@ -128,13 +128,10 @@ public final class ProjectInputResolver {
         request.isFailOnInvalidDependencies()
     );
 
-    // Nothing more to resolve here as we just have flat files.
-    return Stream
+    var descriptorFilePaths = Stream
         .concat(request.getSourceDescriptorPaths().stream(), artifactPaths.stream())
-        .map(file -> ImmutableSourceListing.builder()
-            .sourceRoot(file)
-            .sourceFiles(Set.of(file))
-            .build())
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
+
+    return sourceResolver.resolveDescriptors(descriptorFilePaths);
   }
 }
