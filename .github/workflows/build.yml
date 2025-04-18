@@ -106,7 +106,10 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Publish code coverage to Codecov
-        uses: codecov/codecov-action@v5
+        # Pinned to v4, as v5 ignores the directive
+        # to defer commenting on pull requests before the
+        # builds have completed.
+        uses: codecov/codecov-action@v4
         continue-on-error: true
         if: ${{ !cancelled() }}
         with:
