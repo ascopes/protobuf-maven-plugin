@@ -104,6 +104,8 @@ artifact type is `protobin`. For the `generate-test` goal, the default artifact 
 
 The following options configure descriptor attachment:
 
-- `outputDescriptorAttached` - attaches the descriptor file to the build.
+- `outputDescriptorAttached` - attaches the descriptor file to the build so that it gets published
+  to the local and remote Maven repositories during install and deployment operations. By default,
+  this is disabled.
 - `outputDescriptorAttachmentClassifier` - artifact classifier for attached descriptor.
 - `outputDescriptorAttachmentType` - artifact type for attached descriptor.
