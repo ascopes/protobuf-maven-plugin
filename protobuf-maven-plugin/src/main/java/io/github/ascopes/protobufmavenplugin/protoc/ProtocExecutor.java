@@ -20,6 +20,7 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.LanguageProtocTarget
 import io.github.ascopes.protobufmavenplugin.protoc.targets.PluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
+import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -45,10 +47,12 @@ import org.slf4j.LoggerFactory;
 public final class ProtocExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ProtocExecutor.class);
+  private final HostSystem hostSystem;
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public ProtocExecutor(TemporarySpace temporarySpace) {
+  public ProtocExecutor(HostSystem hostSystem, TemporarySpace temporarySpace) {
+    this.hostSystem = hostSystem;
     this.temporarySpace = temporarySpace;
   }
 
@@ -58,7 +62,7 @@ public final class ProtocExecutor {
 
     log.info("Invoking protoc (enable debug logs for more details)");
     log.debug("Protoc binary is located at {}", invocation.getProtocPath());
-    log.debug("Protoc argument file:\n{},", argumentFileBuilder);
+    log.debug("Protoc argument file:\n{}", argumentFileBuilder);
 
     var procBuilder = new ProcessBuilder(invocation.getProtocPath().toString(), "@" + argumentFile);
     procBuilder.environment().putAll(System.getenv());
@@ -76,9 +80,14 @@ public final class ProtocExecutor {
 
   private ArgumentFileBuilder createArgumentFileBuilder(ProtocInvocation invocation) {
     return new ArgumentFileBuilder()
-        .addIfTrue(invocation.isFatalWarnings(), "--fatal_warnings")
+        .addIfTrue(invocation.isFatalWarnings(), () -> "--fatal_warnings")
         .applyForEach(invocation.getTargets(), this::applyProtocTargetArguments)
-        .applyForEach(invocation.getSourcePaths(), this::applySourcePathArgument)
+        .addIfTrue(
+            !invocation.getInputDescriptorFiles().isEmpty(),
+            () -> createDescriptorInputArgument(invocation)
+        )
+        .applyForEach(invocation.getSourcePaths(), this::applyProtoSourceFileArgument)
+        .applyForEach(invocation.getDescriptorSourceFiles(), this::applyDescriptorSourceArgument)
         .applyForEach(invocation.getImportPaths(), this::applyImportPathArgument);
   }
 
@@ -95,17 +104,17 @@ public final class ProtocExecutor {
   }
 
   private void applyDescriptorFileProtocTargetArguments(
-      ArgumentFileBuilder builder, 
+      ArgumentFileBuilder builder,
       DescriptorFileProtocTarget target
   ) {
     builder.add("--descriptor_set_out=" + target.getOutputFile())
-        .addIfTrue(target.isIncludeImports(), "--include_imports")
-        .addIfTrue(target.isIncludeSourceInfo(), "--include_source_info")
-        .addIfTrue(target.isRetainOptions(), "--retain_options");
+        .addIfTrue(target.isIncludeImports(), () -> "--include_imports")
+        .addIfTrue(target.isIncludeSourceInfo(), () -> "--include_source_info")
+        .addIfTrue(target.isRetainOptions(), () -> "--retain_options");
   }
 
   private void applyLanguageProtocTargetArguments(
-      ArgumentFileBuilder builder, 
+      ArgumentFileBuilder builder,
       LanguageProtocTarget target
   ) {
     var flag = "--" + target.getLanguage().getFlagName() + "_out="
@@ -115,7 +124,7 @@ public final class ProtocExecutor {
   }
 
   private void applyPluginProtocTargetArguments(
-      ArgumentFileBuilder builder, 
+      ArgumentFileBuilder builder,
       PluginProtocTarget target
   ) {
     var plugin = target.getPlugin();
@@ -127,12 +136,25 @@ public final class ProtocExecutor {
         .ifPresent(builder::add);
   }
 
-  private void applyImportPathArgument(ArgumentFileBuilder builder, Path importPath) {
-    builder.add("--proto_path=" + importPath);
+  private void applyImportPathArgument(ArgumentFileBuilder builder, Path path) {
+    builder.add("--proto_path=" + path);
   }
 
-  private void applySourcePathArgument(ArgumentFileBuilder builder, Path sourcePath) {
-    builder.add(sourcePath);
+  //
+  private void applyProtoSourceFileArgument(ArgumentFileBuilder builder, Path file) {
+    builder.add(file);
+  }
+
+  // For "virtual" descriptor files, as we have to tell protoc exactly which sources
+  // to generate from any provided descriptor files we give it.
+  private void applyDescriptorSourceArgument(ArgumentFileBuilder builder, String file) {
+    builder.add(file);
+  }
+
+  private String createDescriptorInputArgument(ProtocInvocation invocation) {
+    return invocation.getInputDescriptorFiles().stream()
+        .map(Path::toString)
+        .collect(Collectors.joining(hostSystem.getPathSeparator(), "--descriptor_set_in=", ""));
   }
 
   private Path writeArgumentFile(ArgumentFileBuilder argumentFileBuilder) throws IOException {

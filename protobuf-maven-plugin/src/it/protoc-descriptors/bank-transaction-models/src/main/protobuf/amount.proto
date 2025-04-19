@@ -16,12 +16,47 @@
 
 syntax = "proto3";
 
+package com.somebank.models;
+
 option java_multiple_files = true;
-option java_package = "org.example.helloworld";
+option java_package = "com.somebank.models";
 
-package org.example.helloworld;
-
-message GreetingRequest {
-  string name = 1;
+message Amount {
+  AmountSign sign = 1;
+  oneof value {
+    AmountUsd usd = 2;
+    AmountAud aud = 3;
+    AmountEur eur = 4;
+    AmountGbp gbp = 5;
+    AmountJpy jpy = 6;
+  }
 }
 
+enum AmountSign {
+  CREDIT = 0;
+  DEBIT = 1;
+}
+
+message AmountUsd {
+  uint64 dollars = 1;
+  uint32 cents = 2;
+}
+
+message AmountAud {
+  uint64 dollars = 1;
+  uint32 cents = 2;
+}
+
+message AmountEur {
+  uint64 euros = 1;
+  uint32 cents = 2;
+}
+
+message AmountGbp {
+  uint64 pounds = 1;
+  uint32 pence = 2;
+}
+
+message AmountJpy {
+  uint64 yen = 1;
+}

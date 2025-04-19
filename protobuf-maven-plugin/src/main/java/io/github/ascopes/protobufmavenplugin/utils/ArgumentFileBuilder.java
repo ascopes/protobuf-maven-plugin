@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Builder for Java argument files that deals with the quoting and escaping rules Java expects.
@@ -39,19 +41,24 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
+  public <T> ArgumentFileBuilder apply(Consumer<ArgumentFileBuilder> operator) {
+    operator.accept(this);
+    return this;
+  }
+
   public <T> ArgumentFileBuilder applyForEach(
       Iterable<T> items, 
       BiConsumer<ArgumentFileBuilder, T> operator
   ) {
     for (var item : items) {
-      operator.accept(this, item);
+      apply(self -> operator.accept(self, item));
     }
     return this;
   }
 
-  public ArgumentFileBuilder addIfTrue(boolean condition, String content) {
+  public ArgumentFileBuilder addIfTrue(boolean condition, Supplier<String> content) {
     if (condition) {
-      add(content);
+      add(content.get());
     }
     return this;
   }

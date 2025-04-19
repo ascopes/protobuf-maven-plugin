@@ -22,51 +22,29 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>@project.groupId@.it</groupId>
-    <artifactId>integration-test-parent</artifactId>
+    <groupId>protoc-descriptors</groupId>
+    <artifactId>parent</artifactId>
     <version>@project.version@</version>
-    <relativePath>../setup/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>protoc-descriptor-file-options</groupId>
-  <artifactId>protoc-descriptor-file-options</artifactId>
-
-  <dependencies>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <artifactId>bank-transaction-models</artifactId>
+  <packaging>pom</packaging>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
           <javaEnabled>false</javaEnabled>
-          <outputDescriptorFile>${project.build.directory}/protobin.desc</outputDescriptorFile>
+          <outputDescriptorAttached>true</outputDescriptorAttached>
+          <outputDescriptorAttachmentType>binpb</outputDescriptorAttachmentType>
+          <outputDescriptorFile>${project.build.directory}/${project.artifactId}-${project.version}.binpb</outputDescriptorFile>
           <outputDescriptorIncludeImports>true</outputDescriptorIncludeImports>
-          <outputDescriptorIncludeSourceInfo>true</outputDescriptorIncludeSourceInfo>
-          <outputDescriptorRetainOptions>true</outputDescriptorRetainOptions>
+          <outputDescriptorIncludeSourceInfo>false</outputDescriptorIncludeSourceInfo>
+          <outputDescriptorRetainOptions>false</outputDescriptorRetainOptions>
         </configuration>
 
         <executions>

@@ -15,8 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.generation;
 
-import static io.github.ascopes.protobufmavenplugin.sources.SourceListing.flattenSourceProtoFiles;
-
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ImmutableProtocInvocation;
@@ -27,6 +25,8 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableDescriptorF
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutableLanguageProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ImmutablePluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
+import io.github.ascopes.protobufmavenplugin.sources.DescriptorListing;
+import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
@@ -98,7 +98,10 @@ public final class ProtobufBuildOrchestrator {
 
     // GH-600: Short circuit and avoid expensive dependency resolution if
     // we can exit early.
-    if (request.getSourceRoots().isEmpty() && request.getSourceDependencies().isEmpty()) {
+    if (request.getSourceDirectories().isEmpty()
+        && request.getSourceDependencies().isEmpty()
+        && request.getSourceDescriptorPaths().isEmpty()
+        && request.getSourceDescriptorDependencies().isEmpty()) {
       return handleMissingInputs(request);
     }
 
@@ -106,7 +109,8 @@ public final class ProtobufBuildOrchestrator {
     final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
-    if (projectInputs.getCompilableSources().isEmpty()) {
+    if (projectInputs.getCompilableProtoSources().isEmpty()
+        && projectInputs.getCompilableDescriptorFiles().isEmpty()) {
       return handleMissingInputs(request);
     }
 
@@ -126,26 +130,20 @@ public final class ProtobufBuildOrchestrator {
     // Determine the sources we need to regenerate. This will be all the sources usually but
     // if incremental compilation is enabled then we will only output the files that have changed
     // unless we deem a full rebuild necessary.
-    var compilableSources = computeActualSourcesToCompile(request, projectInputs);
-    if (compilableSources.isEmpty()) {
+    var compilableFiles = computeFilesToCompile(request, projectInputs);
+    if (compilableFiles.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
       // incremental compilation and nothing changed since the last build.
       incrementalCacheManager.updateIncrementalCache();
       return GenerationResult.NOTHING_TO_DO;
     }
 
-    var importPaths = Stream
-        .of(projectInputs.getCompilableSources(), projectInputs.getDependencySources())
-        .flatMap(Collection::stream)
-        .map(SourceListing::getSourceRoot)
-        .collect(Collectors.toUnmodifiableList());
-
     var invocation = createProtocInvocation(
-        request, 
-        protocPath, 
-        resolvedPlugins, 
-        importPaths, 
-        compilableSources
+        request,
+        protocPath,
+        resolvedPlugins,
+        projectInputs,
+        compilableFiles
     );
 
     if (!protocExecutor.invoke(invocation)) {
@@ -168,7 +166,7 @@ public final class ProtobufBuildOrchestrator {
     if (request.isEmbedSourcesInClassOutputs()) {
       embedSourcesInClassOutputs(
           request.getSourceRootRegistrar(),
-          projectInputs.getCompilableSources()
+          projectInputs.getCompilableProtoSources()
       );
     }
 
@@ -248,36 +246,43 @@ public final class ProtobufBuildOrchestrator {
     }
   }
 
-  private Collection<Path> computeActualSourcesToCompile(
+  // TODO: migrate this logic to a compilation strategy.
+  private FilesToCompile computeFilesToCompile(
       GenerationRequest request,
       ProjectInputListing projectInputs
   ) throws IOException {
-    var totalSourceFileCount = projectInputs.getCompilableSources().stream()
-        .mapToInt(sourcePath -> sourcePath.getSourceProtoFiles().size())
+    var totalSourceFileCount = projectInputs.getCompilableProtoSources().stream()
+        .mapToInt(sourcePath -> sourcePath.getSourceFiles().size())
+        .sum();
+    var totalDescriptorFileCount = projectInputs.getCompilableDescriptorFiles().stream()
+        .mapToInt(sourcePath -> sourcePath.getSourceFiles().size())
         .sum();
 
-    var sourcesToCompile = shouldIncrementallyCompile(request)
+    var filesToCompile = shouldIncrementallyCompile(request)
         ? incrementalCacheManager.determineSourcesToCompile(projectInputs)
-        : flattenSourceProtoFiles(projectInputs.getCompilableSources());
+        : FilesToCompile.allOf(projectInputs);
 
-    if (sourcesToCompile.isEmpty()) {
+    if (filesToCompile.isEmpty()) {
       log.info(
-          "Found {} source files, all are up-to-date, none will be regenerated this time",
-          totalSourceFileCount
+          "Found {} and {} to compile, but all are up-to-date so none will be built this time",
+          StringUtils.pluralize(totalSourceFileCount, "proto source file"),
+          StringUtils.pluralize(totalDescriptorFileCount, "descriptor file")
       );
-      return List.of();
+      return FilesToCompile.empty();
     }
 
     log.info(
-        "Generating source code from {} (discovered {} within {})",
-        StringUtils.pluralize(sourcesToCompile.size(), "source file"),
-        StringUtils.pluralize(totalSourceFileCount, "source file"),
-        StringUtils.pluralize(projectInputs.getCompilableSources().size(), "source path")
+        "Generating source code from {} and {} (discovered a total of {} and {})",
+        StringUtils.pluralize(filesToCompile.getProtoSources().size(), "proto source file"),
+        StringUtils.pluralize(filesToCompile.getDescriptorFiles().size(), "descriptor file"),
+        StringUtils.pluralize(totalSourceFileCount, "proto source file"),
+        StringUtils.pluralize(totalDescriptorFileCount, "descriptor file")
     );
 
-    return sourcesToCompile;
+    return filesToCompile;
   }
 
+  // TODO: migrate this logic to a compilation strategy
   private boolean shouldIncrementallyCompile(GenerationRequest request) {
     if (!request.isIncrementalCompilationEnabled()) {
       log.debug("Incremental compilation is disabled");
@@ -317,11 +322,11 @@ public final class ProtobufBuildOrchestrator {
       GenerationRequest request,
       Path protocPath,
       Collection<ResolvedProtocPlugin> resolvedPlugins,
-      Collection<Path> importPaths,
-      Collection<Path> compilableSources
+      ProjectInputListing projectInputs,
+      FilesToCompile filesToCompile
   ) {
     var targets = new TreeSet<ProtocTarget>();
-    
+
     request.getEnabledLanguages()
         .stream()
         .map(language -> ImmutableLanguageProtocTarget.builder()
@@ -349,11 +354,24 @@ public final class ProtobufBuildOrchestrator {
       targets.add(descriptorFileTarget);
     }
 
+    var importPaths = Stream
+        .of(projectInputs.getCompilableProtoSources(), projectInputs.getDependencyProtoSources())
+        .flatMap(Collection::stream)
+        .map(SourceListing::getSourceRoot)
+        .collect(Collectors.toUnmodifiableList());
+
+    var inputDescriptorFiles = projectInputs.getCompilableDescriptorFiles()
+        .stream()
+        .map(DescriptorListing::getDescriptorFilePath)
+        .collect(Collectors.toUnmodifiableList());
+
     return ImmutableProtocInvocation.builder()
+        .descriptorSourceFiles(filesToCompile.getDescriptorFiles())
         .importPaths(importPaths)
+        .inputDescriptorFiles(inputDescriptorFiles)
         .isFatalWarnings(request.isFatalWarnings())
         .protocPath(protocPath)
-        .sourcePaths(compilableSources)
+        .sourcePaths(filesToCompile.getProtoSources())
         .targets(targets)
         .build();
   }

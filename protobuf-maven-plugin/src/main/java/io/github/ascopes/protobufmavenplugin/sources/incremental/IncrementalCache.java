@@ -31,7 +31,9 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 interface IncrementalCache {
 
-  Map<Path, String> getDependencies();
+  Map<Path, String> getProtoDependencies();
 
-  Map<Path, String> getSources();
+  Map<Path, String> getProtoSources();
+
+  Map<Path, String> getDescriptorFiles();
 }

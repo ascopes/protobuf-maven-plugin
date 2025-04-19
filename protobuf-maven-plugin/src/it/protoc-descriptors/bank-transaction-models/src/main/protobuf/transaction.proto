@@ -17,11 +17,17 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "org.example.helloworld";
+option java_package = "com.somebank.models";
 
-package org.example.helloworld;
+import "amount.proto";
+import "payee.proto";
 
-message GreetingRequest {
-  string name = 1;
+message Transaction {
+  string id = 1;
+  uint64 timestamp = 2;
+  com.somebank.models.Payee payee = 3;
+  reserved 4;
+  reserved 5;
+  com.somebank.models.Amount amount = 6;
+  string reference = 7;
 }
-

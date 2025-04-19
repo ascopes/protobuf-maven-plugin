@@ -76,6 +76,19 @@ class ArgumentFileBuilderTest {
     assertThat(actualResult).asString().isEqualTo(expectedResult);
   }
 
+  @DisplayName(".apply() applies the builder to the consumer")
+  @Test
+  void applyAppliesTheBuilderToTheConsumer() {
+    // Given
+    var builder = new ArgumentFileBuilder();
+
+    // When
+    builder.apply(afb -> afb.add("foo"));
+
+    // Then
+    assertThat(builder).asString().isEqualTo(String.join("\n", "foo"));
+  }
+
   @DisplayName(".applyForEach() applies the builder to each item")
   @Test
   void applyForEachAppliesTheBuilderToEachItem() {
@@ -100,7 +113,7 @@ class ArgumentFileBuilderTest {
     builder
         .add("foo")
         .add("bar")
-        .addIfTrue(true, "baz")
+        .addIfTrue(true, () -> "baz")
         .add("bork");
 
     // Then
@@ -117,7 +130,7 @@ class ArgumentFileBuilderTest {
     builder
         .add("foo")
         .add("bar")
-        .addIfTrue(false, "baz")
+        .addIfTrue(false, () -> "baz")
         .add("bork");
 
     // Then

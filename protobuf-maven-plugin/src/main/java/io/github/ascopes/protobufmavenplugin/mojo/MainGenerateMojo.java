@@ -18,6 +18,8 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -67,11 +69,12 @@ public final class MainGenerateMojo extends AbstractGenerateMojo {
   }
 
   @Override
-  Path defaultSourceDirectory() {
-    return mavenProject.getBasedir().toPath()
+  Collection<Path> defaultSourceDirectories() {
+    var basePath = mavenProject.getBasedir().toPath()
         .resolve("src")
         .resolve("main")
         .resolve("protobuf");
+    return List.of(basePath);
   }
 
   @Override

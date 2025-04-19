@@ -184,12 +184,27 @@ public interface GenerationRequest {
   Collection<? extends MavenArtifact> getSourceDependencies();
 
   /**
+   * Additional user-defined Maven dependencies pointing at protobuf descriptor files to compile.
+   *
+   * @return the collection of dependencies pointing to protobuf descriptor files.
+   * @since 3.1.0
+   */
+  Collection<? extends MavenArtifact> getSourceDescriptorDependencies();
+
+  /**
+   * Paths relative to the project root that are protobuf descriptor files to compile from.
+   *
+   * @return the source descriptor file paths.
+   */
+  Collection<Path> getSourceDescriptorPaths();
+
+  /**
    * Paths relative to the project root that contain {@code *.proto} sources to
    * compile.
    *
-   * @return the source roots.
+   * @return the source directory paths.
    */
-  Collection<Path> getSourceRoots();
+  Collection<Path> getSourceDirectories();
 
   /**
    * The registrar strategy to use to notify Maven of generated sources.
