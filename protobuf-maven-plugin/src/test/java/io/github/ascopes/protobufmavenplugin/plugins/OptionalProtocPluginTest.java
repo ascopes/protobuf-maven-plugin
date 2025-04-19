@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("OptionalProtocPlugin tests")
 class OptionalProtocPluginTest {
 
-  @DisplayName("The default value for isOptional is the expected value")
+  @DisplayName("the default value for isOptional is the expected value")
   @Test
   void theDefaultValueForIsOptionalIsTheExpectedValue() {
     // Given

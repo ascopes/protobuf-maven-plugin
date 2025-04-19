@@ -70,7 +70,7 @@ class UrlResourceFetcherTest {
     wireMockBaseUrl = wireMockInfo.getHttpBaseUrl();
   }
 
-  @DisplayName("File URLs are resolved when they exist")
+  @DisplayName("file URLs are resolved when they exist")
   @Test
   void fileUrlsAreResolvedWhenTheyExist(@TempDir Path tempDir) throws Exception {
     // Given
@@ -87,7 +87,7 @@ class UrlResourceFetcherTest {
         .isEqualTo(file);
   }
 
-  @DisplayName("File URLs are resolved when they do not exist")
+  @DisplayName("file URLs are resolved when they do not exist")
   @Test
   void fileUrlsAreResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
     // Given
@@ -101,7 +101,7 @@ class UrlResourceFetcherTest {
         .isEmpty();
   }
 
-  @DisplayName("File URLs with bad characters result in an exception being raised")
+  @DisplayName("file URLs with bad characters result in an exception being raised")
   @Test
   void fileUrlsWithBadCharactersResultInAnExceptionBeingRaised() throws Exception {
     // Given
@@ -114,7 +114,7 @@ class UrlResourceFetcherTest {
         .withCauseInstanceOf(IllegalArgumentException.class);
   }
 
-  @DisplayName("Other URLs are resolved when they exist")
+  @DisplayName("other URLs are resolved when they exist")
   @ValueSource(strings = {"bar.txt.bin", "foo/bar.txt.bin"})
   @ParameterizedTest(name = "for path {0}")
   void otherUrlsAreResolvedWhenTheyExist(
@@ -151,7 +151,7 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
-  @DisplayName("Other pathless URLs are resolved when they exist")
+  @DisplayName("other pathless URLs are resolved when they exist")
   @Test
   void otherPathlessUrlsAreResolvedWhenTheyExist(
       @TempDir Path tempDir
@@ -183,7 +183,7 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
-  @DisplayName("Other URLs are not resolved when they do not exist")
+  @DisplayName("other URLs are not resolved when they do not exist")
   @Test
   void otherUrlsAreNotResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
     // Given
@@ -205,7 +205,7 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
-  @DisplayName("Other URLs raise exceptions if transfer fails")
+  @DisplayName("other URLs raise exceptions if transfer fails")
   @Test
   void otherUrlsRaiseExceptionsIfTransferFails(@TempDir Path tempDir) throws Exception {
     // Given

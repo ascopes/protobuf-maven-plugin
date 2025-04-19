@@ -33,7 +33,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 @DisplayName("MultipleFailuresException tests")
 class MultipleFailuresExceptionTest {
 
-  @DisplayName("The exception has the expected message for a single exception")
+  @DisplayName("the exception has the expected message for a single exception")
   @Test
   void exceptionHasTheExpectedMessageForSingleException() {
     // Given
@@ -51,7 +51,7 @@ class MultipleFailuresExceptionTest {
         );
   }
 
-  @DisplayName("The exception has the expected message for multiple exceptions")
+  @DisplayName("the exception has the expected message for multiple exceptions")
   @ValueSource(ints = {2, 5, 10})
   @ParameterizedTest(name = "for {0} exception(s)")
   void exceptionHasTheExpectedMessageForMultipleExceptions(int causeCount) {
@@ -76,7 +76,7 @@ class MultipleFailuresExceptionTest {
         );
   }
 
-  @DisplayName("The first exception is treated as the cause")
+  @DisplayName("the first exception is treated as the cause")
   @ValueSource(ints = {1, 5, 10})
   @ParameterizedTest(name = "for {0} exception(s)")
   void firstExceptionIsTreatedAsCause(int causeCount) {
@@ -92,7 +92,7 @@ class MultipleFailuresExceptionTest {
     assertThat(exception).hasCause(causes.get(0));
   }
 
-  @DisplayName("A single exception results in no suppressed exceptions")
+  @DisplayName("a single exception results in no suppressed exceptions")
   @Test
   void singleExceptionResultsInNoSuppressions() {
     // Given
@@ -105,7 +105,7 @@ class MultipleFailuresExceptionTest {
     assertThat(exception).hasNoSuppressedExceptions();
   }
 
-  @DisplayName("The rest of the exceptions are suppressed")
+  @DisplayName("the rest of the exceptions are suppressed")
   @ValueSource(ints = {2, 5, 10})
   @ParameterizedTest(name = "for {0} exception(s)")
   void restOfExceptionsAreSuppressed(int causeCount) {

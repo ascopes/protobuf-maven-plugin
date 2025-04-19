@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("MavenProtocPlugin tests")
 class MavenProtocPluginTest {
 
-  @DisplayName("The default value for getDependencyResolutionDepth is the expected value")
+  @DisplayName("the default value for getDependencyResolutionDepth is the expected value")
   @Test
   void theDefaultValueForGetDependencyResolutionDepthIsTheExpectedValue() {
     // Given

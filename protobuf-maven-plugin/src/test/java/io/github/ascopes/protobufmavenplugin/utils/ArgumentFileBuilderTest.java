@@ -32,7 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @DisplayName("ArgumentFileBuilder tests")
 class ArgumentFileBuilderTest {
 
-  @DisplayName("Java arguments are converted to a string argument file in the expected format")
+  @DisplayName("java arguments are converted to a string argument file in the expected format")
   @MethodSource("javaArgumentFileCases")
   @ParameterizedTest(name = "for argument list {0}")
   void javaArgumentsAreConvertedToStringArgumentFileInExpectedFormat(
@@ -54,7 +54,7 @@ class ArgumentFileBuilderTest {
     assertThat(actualResult).asString().isEqualTo(expectedResult);
   }
 
-  @DisplayName("Protoc arguments are converted to a string argument file in the expected format")
+  @DisplayName("protoc arguments are converted to a string argument file in the expected format")
   @MethodSource("protocArgumentFileCases")
   @ParameterizedTest(name = "for argument list {0}")
   void protocArgumentsAreConvertedToStringArgumentFileInExpectedFormat(

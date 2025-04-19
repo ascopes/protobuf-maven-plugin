@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("ScopeDependencyFilter tests")
 class ScopeDependencyFilterTest {
 
-  @DisplayName("Null dependencies return true to match the Aether implementation behaviour")
+  @DisplayName("null dependencies return true to match the Aether implementation behaviour")
   @Test
   void nullDependenciesReturnTrueToMatchTheAetherImplementationBehaviour() {
     // Given
@@ -48,7 +48,7 @@ class ScopeDependencyFilterTest {
     assertThat(result).isTrue();
   }
 
-  @DisplayName("Dependencies without any of the given scopes are filtered out")
+  @DisplayName("dependencies without any of the given scopes are filtered out")
   @Test
   void dependenciesWithoutAnyOfTheGivenScopesAreFilteredOut() {
     // Given
@@ -67,7 +67,7 @@ class ScopeDependencyFilterTest {
     assertThat(result).isFalse();
   }
 
-  @DisplayName("Dependencies with any of the given scopes are not filtered out")
+  @DisplayName("dependencies with any of the given scopes are not filtered out")
   @Test
   void dependenciesWithAnyOfTheGivenScopesAreNotFilteredOut() {
     // Given

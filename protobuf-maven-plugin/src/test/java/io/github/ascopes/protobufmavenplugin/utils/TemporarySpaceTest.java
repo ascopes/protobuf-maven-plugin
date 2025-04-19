@@ -77,7 +77,7 @@ class TemporarySpaceTest {
     temporarySpace = new TemporarySpace(mavenProject, execution);
   }
 
-  @DisplayName("Temporary spaces are created in the expected place")
+  @DisplayName("temporary spaces are created in the expected place")
   @Test
   void temporarySpacesAreCreatedInTheExpectedPlace() {
     // Given
@@ -99,7 +99,7 @@ class TemporarySpaceTest {
         .isDirectory();
   }
 
-  @DisplayName("Nothing happens if the temporary directory already exists")
+  @DisplayName("nothing happens if the temporary directory already exists")
   @Test
   void nothingHappensIfTheTemporaryDirectoryAlreadyExists() throws IOException {
     // Given
@@ -123,7 +123,7 @@ class TemporarySpaceTest {
         .isDirectory();
   }
 
-  @DisplayName("Directory creation failures are propagated")
+  @DisplayName("directory creation failures are propagated")
   @Test
   void directoryCreationFailuresArePropagated() {
     try (var filesMock = mockStatic(Files.class)) {

@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 @DisplayName("ProtoFileGlobFilter tests")
 class ProtoFileGlobFilterTest {
 
-  @DisplayName("Expect no match if the file does not exist")
+  @DisplayName("expect no match if the file does not exist")
   @Test
   void expectNoMatchIfFileDoesNotExist(@TempDir Path dir) {
     // Given
@@ -40,7 +40,7 @@ class ProtoFileGlobFilterTest {
     assertThat(filter.matches(dir, file)).isFalse();
   }
 
-  @DisplayName("Expect no match if the path is not a file")
+  @DisplayName("expect no match if the path is not a file")
   @Test
   void expectNoMatchIfPathIsNotFile(@TempDir Path dir) throws IOException {
     // Given
@@ -52,7 +52,7 @@ class ProtoFileGlobFilterTest {
     assertThat(filter.matches(dir, nonFile)).isFalse();
   }
 
-  @DisplayName("Expect no match if the file lacks a proto file extension")
+  @DisplayName("expect no match if the file lacks a proto file extension")
   @ValueSource(strings = {
       "foo.png",
       "bar.txt",
@@ -75,7 +75,7 @@ class ProtoFileGlobFilterTest {
     assertThat(filter.matches(dir, file)).isFalse();
   }
 
-  @DisplayName("Expect a match if a proto file extension is present and the file exists")
+  @DisplayName("expect a match if a proto file extension is present and the file exists")
   @ValueSource(strings = {
       "cat.proto",
       "dog.PROTO",

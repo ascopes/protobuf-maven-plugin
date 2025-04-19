@@ -352,7 +352,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         .containsExactlyInAnyOrderElementsOf(expectedDefaultDependencyScopes());
   }
 
-  @DisplayName("User-provided dependencyScopes are used when provided")
+  @DisplayName("user-provided dependencyScopes are used when provided")
   @MethodSource("io.github.ascopes.protobufmavenplugin.mojo.AbstractGenerateMojoTestTemplate"
       + "#scopeCombinations")
   @ParameterizedTest(name = "for {0}")

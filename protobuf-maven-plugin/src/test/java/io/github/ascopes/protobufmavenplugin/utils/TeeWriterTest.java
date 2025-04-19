@@ -35,7 +35,7 @@ import org.junit.jupiter.api.io.TempDir;
 @DisplayName("TeeWriter tests")
 class TeeWriterTest {
 
-  @DisplayName("The expected content is written to the file")
+  @DisplayName("the expected content is written to the file")
   @Test
   void expectedContentWrittenToFile(@TempDir Path tempDir) throws IOException {
     // Given
@@ -54,7 +54,7 @@ class TeeWriterTest {
     assertThat(file).hasContent(text);
   }
 
-  @DisplayName("The expected content is written to the buffer")
+  @DisplayName("the expected content is written to the buffer")
   @Test
   void expectedContentWrittenToBuffer(@TempDir Path tempDir) throws IOException {
     // Given

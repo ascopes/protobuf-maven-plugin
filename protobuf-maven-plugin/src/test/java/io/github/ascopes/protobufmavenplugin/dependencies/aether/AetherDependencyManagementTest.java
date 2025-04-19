@@ -49,7 +49,7 @@ class AetherDependencyManagementTest {
     artifactMapper = new AetherArtifactMapper(mock());
   }
 
-  @DisplayName("Dependency management is not applied to irrelevant dependencies")
+  @DisplayName("dependency management is not applied to irrelevant dependencies")
   @Test
   void dependencyManagementIsNotAppliedToIrrelevantDependencies() {
     // Given
@@ -76,7 +76,7 @@ class AetherDependencyManagementTest {
         .isSameAs(inputDependency);
   }
 
-  @DisplayName("Dependency management is applied to relevant dependencies with missing versions")
+  @DisplayName("dependency management is applied to relevant dependencies with missing versions")
   @NullAndEmptySource
   @ValueSource(strings = " ")
   @ParameterizedTest(name = "for version = {0}")
@@ -142,7 +142,7 @@ class AetherDependencyManagementTest {
     });
   }
 
-  @DisplayName("Dependency management is not applied to relevant dependencies with different types")
+  @DisplayName("dependency management is not applied to relevant dependencies with different types")
   @Test
   void dependencyManagementIsAppliedToRelevantDependenciesWithDifferentTypes() {
     when(mavenSession.getCurrentProject().getDependencyManagement().getDependencies())

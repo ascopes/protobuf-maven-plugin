@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("ProtocPlugin tests")
 class ProtocPluginTest {
 
-  @DisplayName("The default value for isSkip is the expected value")
+  @DisplayName("the default value for isSkip is the expected value")
   @Test
   void theDefaultValueForIsSkipIsTheExpectedValue() {
     // Given
