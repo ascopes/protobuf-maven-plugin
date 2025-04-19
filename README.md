@@ -87,8 +87,7 @@ generation.
 | Generation of binary descriptors                        | :white_check_mark: (opt-in via plugin configuration) |
 | Controlling import inclusion in binary descriptors      | :white_check_mark: (opt-in via plugin configuration) |
 | Controlling source info inclusion in binary descriptors | :white_check_mark: (opt-in via plugin configuration) |
-| Importing from binary descriptors                       | :thought_balloon:                                    |
-| Building from binary descriptors                        | :thought_balloon:                                    |
+| Building from binary descriptors                        | :white_check_mark:                                   |
 
 ### Maven integrations
 
