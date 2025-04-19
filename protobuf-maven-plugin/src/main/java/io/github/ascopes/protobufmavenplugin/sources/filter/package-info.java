@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.sources;
-
-import org.junit.jupiter.api.DisplayName;
-
-@DisplayName("SourceGlobFilter tests")
-class SourceGlobFilterTest {
-  // TODO: implement tests
-}
+/**
+ * Filters for files.
+ */
+package io.github.ascopes.protobufmavenplugin.sources.filter;

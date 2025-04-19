@@ -19,6 +19,7 @@ import static java.util.function.Predicate.not;
 
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
+import io.github.ascopes.protobufmavenplugin.sources.filter.FileFilter;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
@@ -71,7 +72,8 @@ final class ProtoSourceResolver {
   }
 
   Collection<DescriptorListing> resolveDescriptors(
-      Collection<Path> descriptorFilePaths
+      Collection<Path> descriptorFilePaths,
+      FileFilter filter
   ) {
     return descriptorFilePaths
         .stream()
@@ -80,7 +82,7 @@ final class ProtoSourceResolver {
         .map(FileUtils::normalize)
         // GH-132: Avoid running multiple times on the same location.
         .distinct()
-        .map(path -> concurrentExecutor.submit(() -> resolveDescriptor(path)))
+        .map(path -> concurrentExecutor.submit(() -> resolveDescriptor(path, filter)))
         .collect(concurrentExecutor.awaiting())
         .stream()
         .flatMap(Optional::stream)
@@ -88,7 +90,8 @@ final class ProtoSourceResolver {
   }
 
   private Optional<DescriptorListing> resolveDescriptor(
-      Path descriptorFilePath
+      Path descriptorFilePath,
+      FileFilter filter
   ) throws IOException {
     if (!Files.exists(descriptorFilePath)) {
       log.debug("Skipping descriptor lookup in path {} as it does not exist", descriptorFilePath);
@@ -105,9 +108,7 @@ final class ProtoSourceResolver {
               protoFile,
               descriptorFilePath
           ))
-          // TODO: support filtering on virtual paths in descriptors to enable
-          //   only generating a subset of descriptor files.
-          //.filter(filePath -> filter.matches(filePath))
+          .filter(filter::matches)
           .collect(Collectors.collectingAndThen(
               Collectors.toCollection(LinkedHashSet::new),
               Optional::of
@@ -129,7 +130,7 @@ final class ProtoSourceResolver {
 
   Collection<SourceListing> resolveSources(
       Collection<Path> rootPaths,
-      SourceGlobFilter filter
+      FileFilter filter
   ) {
     return rootPaths
         .stream()
@@ -147,7 +148,7 @@ final class ProtoSourceResolver {
 
   private Optional<SourceListing> resolveSources(
       Path rootPath,
-      SourceGlobFilter filter
+      FileFilter filter
   ) throws IOException {
     if (!Files.exists(rootPath)) {
       log.debug("Skipping source lookup in path {} as it does not exist", rootPath);
@@ -161,7 +162,7 @@ final class ProtoSourceResolver {
 
   private Optional<SourceListing> resolveSourcesWithinFile(
       Path rootPath,
-      SourceGlobFilter filter
+      FileFilter filter
   ) throws IOException {
     // XXX: we do not convert the extension to lowercase, as there
     //  is some nuanced logic within the ZipFileSystemProvider that appears
@@ -186,7 +187,7 @@ final class ProtoSourceResolver {
 
   private Optional<SourceListing> resolveSourcesWithinArchive(
       Path rootPath,
-      SourceGlobFilter filter
+      FileFilter filter
   ) throws IOException {
     // We move the source files out of the archive and place them in a location on the root
     // file system so that protoc is able to see their contents.
@@ -211,7 +212,7 @@ final class ProtoSourceResolver {
 
   private Optional<SourceListing> resolveSourcesWithinDirectory(
       Path rootPath,
-      SourceGlobFilter filter
+      FileFilter filter
   ) throws IOException {
     try (var stream = Files.walk(rootPath)) {
       return stream

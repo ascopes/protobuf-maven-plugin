@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.sources;
+package io.github.ascopes.protobufmavenplugin.sources.filter;
 
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.List;
@@ -25,48 +23,43 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Filter for source files to allow including and excluding based on glob patterns.
+ * File filter that handles inclusion and exclusion glob lists.
  *
  * @author Ashley Scopes
- * @since 2.2.0
+ * @since 3.1.0
  */
-final class SourceGlobFilter {
+public final class IncludesExcludesGlobFilter implements FileFilter {
 
   private final List<PathMatcher> includes;
   private final List<PathMatcher> excludes;
 
-  SourceGlobFilter(List<String> includes, List<String> excludes) {
-    this.includes = compileMatchers(includes);
-    this.excludes = compileMatchers(excludes);
+  public IncludesExcludesGlobFilter(List<String> includes, List<String> excludes) {
+    this.includes = compile(includes);
+    this.excludes = compile(excludes);
   }
 
-  boolean matches(Path relativeRoot, Path file) {
-    var relativeFile = relativeRoot.relativize(file);
+  @Override
+  public boolean matches(Path rootPath, Path filePath) {
+    var relativePath = rootPath.relativize(filePath);
 
-    if (excludes.stream().anyMatch(forPath(relativeFile))) {
+    if (excludes.stream().anyMatch(path(relativePath))) {
       // File was explicitly excluded.
       return false;
     }
 
-    if (!includes.isEmpty() && includes.stream().noneMatch(forPath(relativeFile))) {
-      // File was not explicitly included when inclusions were present.
-      return false;
-    }
-
-    return Files.isRegularFile(file)
-        && FileUtils.getFileExtension(file)
-            .filter(".proto"::equalsIgnoreCase)
-            .isPresent();
+    // File was explicitly included when inclusions were present, or no inclusions were present
+    // so we allow all files anyway.
+    return includes.isEmpty() || includes.stream().anyMatch(path(relativePath));
   }
 
-  private static List<PathMatcher> compileMatchers(List<String> patterns) {
-    return patterns.stream()
+  private static List<PathMatcher> compile(List<String> globs) {
+    return globs.stream()
         .map("glob:"::concat)
         .map(FileSystems.getDefault()::getPathMatcher)
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private static Predicate<PathMatcher> forPath(Path path) {
-    return matcher -> matcher.matches(path);
+  private static Predicate<PathMatcher> path(Path path) {
+    return pathMatcher -> pathMatcher.matches(path);
   }
 }

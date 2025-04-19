@@ -18,10 +18,11 @@ package io.github.ascopes.protobufmavenplugin.sources;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
+import io.github.ascopes.protobufmavenplugin.sources.filter.FileFilter;
+import io.github.ascopes.protobufmavenplugin.sources.filter.IncludesExcludesGlobFilter;
+import io.github.ascopes.protobufmavenplugin.sources.filter.ProtoFileGlobFilter;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -59,20 +60,23 @@ public final class ProjectInputResolver {
   public ProjectInputListing resolveProjectInputs(
       GenerationRequest request
   ) throws ResolutionException {
+    var filter = new IncludesExcludesGlobFilter(request.getIncludes(), request.getExcludes());
+
     // TODO(ascopes): run these in parallel
     return ImmutableProjectInputListing.builder()
-        .compilableDescriptorFiles(resolveCompilableDescriptorSources(request))
-        .compilableProtoSources(resolveCompilableProtoSources(request))
-        .dependencyProtoSources(resolveDependencyProtoSources(request))
+        .compilableDescriptorFiles(resolveCompilableDescriptorSources(request, filter))
+        .compilableProtoSources(resolveCompilableProtoSources(request, filter))
+        .dependencyProtoSources(resolveDependencyProtoSources(request, filter))
         .build();
   }
 
   private Collection<SourceListing> resolveCompilableProtoSources(
-      GenerationRequest request
+      GenerationRequest request,
+      FileFilter filter
   ) throws ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
 
-    var filter = new SourceGlobFilter(request.getIncludes(), request.getExcludes());
+    filter = new ProtoFileGlobFilter().and(filter);
 
     var sourcePathsListings = sourceResolver.resolveSources(
         request.getSourceDirectories(),
@@ -98,8 +102,11 @@ public final class ProjectInputResolver {
   }
 
   private Collection<SourceListing> resolveDependencyProtoSources(
-      GenerationRequest request
+      GenerationRequest request,
+      FileFilter filter
   ) throws ResolutionException {
+    filter = new ProtoFileGlobFilter().and(filter);
+
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
@@ -112,14 +119,17 @@ public final class ProjectInputResolver {
         .concat(request.getImportPaths().stream(), artifactPaths.stream())
         .collect(Collectors.toUnmodifiableList());
 
-    var filter = new SourceGlobFilter(List.of(), List.of());
-
     return sourceResolver.resolveSources(importPaths, filter);
   }
 
   private Collection<DescriptorListing> resolveCompilableDescriptorSources(
-      GenerationRequest request
+      GenerationRequest request,
+      FileFilter filter
   ) throws ResolutionException {
+    // We explicitly do not filter by being a valid proto file for descriptors as we do not use
+    // a physical file system to perform our checks, just string paths, and extensions do not
+    // have to be present in the descriptor file names.
+
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getSourceDescriptorDependencies(),
         DependencyResolutionDepth.DIRECT,
@@ -132,6 +142,6 @@ public final class ProjectInputResolver {
         .concat(request.getSourceDescriptorPaths().stream(), artifactPaths.stream())
         .collect(Collectors.toUnmodifiableList());
 
-    return sourceResolver.resolveDescriptors(descriptorFilePaths);
+    return sourceResolver.resolveDescriptors(descriptorFilePaths, filter);
   }
 }
