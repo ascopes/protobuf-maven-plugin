@@ -32,12 +32,24 @@ import java.util.stream.Collectors;
  */
 final class SourceGlobFilter {
 
+  private final List<String> includesStrings;
+  private final List<String> excludesStrings;
   private final List<PathMatcher> includes;
   private final List<PathMatcher> excludes;
 
   SourceGlobFilter(List<String> includes, List<String> excludes) {
+    includesStrings = includes;
+    excludesStrings = excludes;
     this.includes = compileMatchers(includes);
     this.excludes = compileMatchers(excludes);
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + "{"
+        + "includes=" + includesStrings + ","
+        + "excludes=" + excludesStrings
+        + "}";
   }
 
   boolean matches(Path relativeRoot, Path file) {

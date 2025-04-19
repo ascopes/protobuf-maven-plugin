@@ -15,9 +15,54 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @DisplayName("SourceGlobFilter tests")
 class SourceGlobFilterTest {
-  // TODO: implement tests
+
+  @DisplayName("glob patterns match expected paths")
+  @ParameterizedTest(name = "expect matching [{1}]/{2} against {0} to return {3}")
+  @MethodSource("pathTestCases")
+  void globPatternMatchesExpectedPaths(
+      SourceGlobFilter filter,
+      Path root,
+      Path file,
+      boolean expectedResult
+  ) {
+    // Then
+    assertThat(filter.matches(root, file))
+        .isEqualTo(expectedResult);
+  }
+
+  @DisplayName("glob patterns match expected strings")
+  @ParameterizedTest(name = "expect matching \"{1}\" against {0} to return {2}")
+  @MethodSource("stringTestCases")
+  void globPatternMatchesExpectedStrings(
+      SourceGlobFilter filter,
+      String path,
+      boolean expectedResult
+  ) {
+    // Then
+    assertThat(filter.matches(path))
+        .isEqualTo(expectedResult);
+  }
+
+  static Stream<Arguments> pathTestCases() {
+    return Stream.of();
+  }
+
+  static Stream<Arguments> stringTestCases() {
+    return Stream.of();
+  }
+
 }
+
