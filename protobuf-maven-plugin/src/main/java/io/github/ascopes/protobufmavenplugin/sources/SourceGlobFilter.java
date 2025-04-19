@@ -59,6 +59,19 @@ final class SourceGlobFilter {
             .isPresent();
   }
 
+  boolean matches(String path) {
+    // Spoof the matcher into working by using the current working directory
+    // to build a relative path from the path fragments.
+    var spoofedPathRoot = Path.of("");
+    var spoofedPath = spoofedPathRoot;
+
+    for (var part : path.split("/")) {
+      spoofedPath = spoofedPath.resolve(part);
+    }
+
+    return matches(spoofedPathRoot, spoofedPath);
+  }
+
   private static List<PathMatcher> compileMatchers(List<String> patterns) {
     return patterns.stream()
         .map("glob:"::concat)

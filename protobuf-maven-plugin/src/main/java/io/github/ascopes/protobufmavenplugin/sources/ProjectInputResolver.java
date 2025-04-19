@@ -59,20 +59,21 @@ public final class ProjectInputResolver {
   public ProjectInputListing resolveProjectInputs(
       GenerationRequest request
   ) throws ResolutionException {
+    var filter = new SourceGlobFilter(request.getIncludes(), request.getExcludes());
+
     // TODO(ascopes): run these in parallel
     return ImmutableProjectInputListing.builder()
-        .compilableDescriptorFiles(resolveCompilableDescriptorSources(request))
-        .compilableProtoSources(resolveCompilableProtoSources(request))
-        .dependencyProtoSources(resolveDependencyProtoSources(request))
+        .compilableDescriptorFiles(resolveCompilableDescriptorSources(request, filter))
+        .compilableProtoSources(resolveCompilableProtoSources(request, filter))
+        .dependencyProtoSources(resolveDependencyProtoSources(request, filter))
         .build();
   }
 
   private Collection<SourceListing> resolveCompilableProtoSources(
-      GenerationRequest request
+      GenerationRequest request,
+      SourceGlobFilter filter
   ) throws ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
-
-    var filter = new SourceGlobFilter(request.getIncludes(), request.getExcludes());
 
     var sourcePathsListings = sourceResolver.resolveSources(
         request.getSourceDirectories(),
@@ -98,7 +99,8 @@ public final class ProjectInputResolver {
   }
 
   private Collection<SourceListing> resolveDependencyProtoSources(
-      GenerationRequest request
+      GenerationRequest request,
+      SourceGlobFilter filter
   ) throws ResolutionException {
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),
@@ -112,13 +114,12 @@ public final class ProjectInputResolver {
         .concat(request.getImportPaths().stream(), artifactPaths.stream())
         .collect(Collectors.toUnmodifiableList());
 
-    var filter = new SourceGlobFilter(List.of(), List.of());
-
     return sourceResolver.resolveSources(importPaths, filter);
   }
 
   private Collection<DescriptorListing> resolveCompilableDescriptorSources(
-      GenerationRequest request
+      GenerationRequest request,
+      SourceGlobFilter filter
   ) throws ResolutionException {
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getSourceDescriptorDependencies(),
@@ -132,6 +133,6 @@ public final class ProjectInputResolver {
         .concat(request.getSourceDescriptorPaths().stream(), artifactPaths.stream())
         .collect(Collectors.toUnmodifiableList());
 
-    return sourceResolver.resolveDescriptors(descriptorFilePaths);
+    return sourceResolver.resolveDescriptors(descriptorFilePaths, filter);
   }
 }

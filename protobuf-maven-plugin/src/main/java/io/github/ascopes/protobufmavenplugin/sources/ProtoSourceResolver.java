@@ -71,7 +71,8 @@ final class ProtoSourceResolver {
   }
 
   Collection<DescriptorListing> resolveDescriptors(
-      Collection<Path> descriptorFilePaths
+      Collection<Path> descriptorFilePaths,
+      SourceGlobFilter filter
   ) {
     return descriptorFilePaths
         .stream()
@@ -80,7 +81,7 @@ final class ProtoSourceResolver {
         .map(FileUtils::normalize)
         // GH-132: Avoid running multiple times on the same location.
         .distinct()
-        .map(path -> concurrentExecutor.submit(() -> resolveDescriptor(path)))
+        .map(path -> concurrentExecutor.submit(() -> resolveDescriptor(path, filter)))
         .collect(concurrentExecutor.awaiting())
         .stream()
         .flatMap(Optional::stream)
@@ -88,7 +89,8 @@ final class ProtoSourceResolver {
   }
 
   private Optional<DescriptorListing> resolveDescriptor(
-      Path descriptorFilePath
+      Path descriptorFilePath,
+      SourceGlobFilter filter
   ) throws IOException {
     if (!Files.exists(descriptorFilePath)) {
       log.debug("Skipping descriptor lookup in path {} as it does not exist", descriptorFilePath);
@@ -105,9 +107,7 @@ final class ProtoSourceResolver {
               protoFile,
               descriptorFilePath
           ))
-          // TODO: support filtering on virtual paths in descriptors to enable
-          //   only generating a subset of descriptor files.
-          //.filter(filePath -> filter.matches(filePath))
+          .filter(filePath -> filter.matches(filePath))
           .collect(Collectors.collectingAndThen(
               Collectors.toCollection(LinkedHashSet::new),
               Optional::of
