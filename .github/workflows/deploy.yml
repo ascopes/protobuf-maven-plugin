@@ -18,11 +18,6 @@ on:
         default: false
         type: boolean
 
-      skip-nexus-promotion:
-        description: Skip Nexus promotion steps
-        default: false
-        type: boolean
-
       skip-pages:
         description: Skip pages
         default: false
@@ -72,12 +67,6 @@ jobs:
 
       - name: Determine release version details
         run: |-
-          group_id="$(./mvnw help:evaluate -q -DforceStdout -Dexpression="project.groupId")"
-          echo "group_id=${group_id}" >> "${GITHUB_ENV}"
-
-          artifact_id="$(./mvnw help:evaluate -q -DforceStdout -Dexpression="project.artifactId")"
-          echo "artifact_id=${artifact_id}" >> "${GITHUB_ENV}"
-
           if [[ '${{ inputs.version }}' == "" ]]; then
             echo "No explicit version provided, calculating next non-snapshot build from POM"
             release_version="$(./mvnw -B help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//g')"
@@ -119,23 +108,10 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      - name: Promote staging to Maven Central
-        if: ${{ ! inputs.skip-nexus-promotion && ! inputs.dry-run }}
-        run: |-
-          ./scripts/close-nexus-repos.sh \
-              -u "${OSSRH_USERNAME}" \
-              -p "${OSSRH_TOKEN}" \
-              -g "${group_id}" \
-              -a "${artifact_id}" \
-              -v "${release_version}" \
-              -s "https://s01.oss.sonatype.org/"
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Create GitHub release
         uses: ncipollo/release-action@v1
-        if:  ${{ ! inputs.skip-nexus-promotion && ! inputs.dry-run }}
+        if:  ${{ ! inputs.skip-maven-release && ! inputs.dry-run }}
         with:
           tag: v${{ env.release_version }}
           name: v${{ env.release_version }}
