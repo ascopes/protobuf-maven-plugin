@@ -135,6 +135,7 @@
     <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+    <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
 
     <!-- Plugin dependencies -->
@@ -646,6 +647,25 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <!--
+            Intercepts the default deploy phase and replaces it with goals that
+            handle pushing to Sonatype Nexus (Maven Central's registry backend)
+            and then triggering a "closure" operation that will promote it to
+            the public Maven repository.
+        -->
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>${nexus-staging-maven-plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <serverId>ossrh</serverId>
+          <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+        </configuration>
       </plugin>
     </plugins>
   </build>
