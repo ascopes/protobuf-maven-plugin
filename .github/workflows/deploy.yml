@@ -8,13 +8,18 @@ on:
         default: false
         type: boolean
 
+      skip-github-release:
+        description: "Skip creating a GitHub release"
+        default: false
+        type: boolean
+
       skip-maven-release:
-        description: "Skip the Maven release and rollback steps."
+        description: "Skip the Maven release and rollback steps"
         default: false
         type: boolean
 
       skip-pages:
-        description: "Skip the creation and release of the documentation."
+        description: "Skip the creation and release of the documentation"
         default: false
         type: boolean
 
@@ -32,6 +37,8 @@ jobs:
   prepare:
     name: Prepare
     runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.determine_version_to_release.outputs.release_version }}
 
     steps:
       - name: Checkout repository
@@ -46,26 +53,27 @@ jobs:
           java-version: 24
 
       - name: Compute release version
+        id: determine_version_to_release
         run: |-
           if [[ '${{ inputs.version }}' == "" ]]; then
             release_version="$(./mvnw -B help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//g')"
           else
             release_version='${{ inputs.version }}'
           fi
-          echo "release_version=${release_version}" >> "${GITHUB_ENV}"
+          echo "release_version=${release_version}" >> "${GITHUB_OUTPUT}"
 
-  release:
-    name: Release
-    environment:
-      name: maven-central
-      url: https://repo1.maven.org/maven2/io/github/ascopes/protobuf-maven-plugin/
+  maven-central-release:
+    name: Maven Central Release
     runs-on: ubuntu-latest
     needs:
       - prepare
-
     permissions:
       contents: write
       id-token: write
+
+    environment:
+      name: Maven Central
+      url: https://repo1.maven.org/maven2/io/github/ascopes/protobuf-maven-plugin/
 
     steps:
       - name: Checkout repository
@@ -99,10 +107,10 @@ jobs:
               -DdryRun='${{ inputs.dry-run }}' \
               -Dinvoker.skip='${{ inputs.skip-tests }}' \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
-              -DreleaseVersion="${release_version}" \
+              -DreleaseVersion="${{ needs.prepare.outputs.release_version }}" \
               -DsignTag=false \
               -DskipTests='${{ inputs.skip-tests }}' \
-              -Dtag="v${release_version}" \
+              -Dtag="v${{ needs.prepare.outputs.release_version }}" \
               clean verify release:prepare release:perform
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
@@ -114,31 +122,23 @@ jobs:
         run: |-
           ./mvnw -B -e \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
-              -DreleaseVersion="${release_version}" \
-              -Dtag="v${release_version}" \
+              -DreleaseVersion="${{ needs.prepare.outputs.release_version }}" \
+              -Dtag="v${{ needs.prepare.outputs.release_version }}" \
               release:rollback
 
-      - name: Create GitHub release
-        if: ${{ ! inputs.dry-run }}
-        uses: ncipollo/release-action@v1
-        with:
-          tag: v${{ env.release_version }}
-          name: v${{ env.release_version }}
-          generateReleaseNotes: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  documentation:
-    name: Documentation
+  github-pages-release:
+    name: GitHub Pages Release
     runs-on: ubuntu-latest
-    environment:
-      name: GitHub Pages
-      url: https://${{ github.actor }}.github.io/protobuf-maven-plugin
     needs:
       - prepare
-
+      - maven-central-release
     permissions:
       id-token: write
       pages: write
+
+    environment:
+      name: GitHub Pages
+      url: https://${{ github.actor }}.github.io/protobuf-maven-plugin
 
     steps:
       - name: Checkout repository
@@ -149,13 +149,13 @@ jobs:
       - name: Initialize Java
         uses: actions/setup-java@v4
         with:
-          distribution: zulu
+          distribution: temurin
           java-version: 24
 
       - name: Generate site
         if: ${{ ! inputs.skip-pages }}
         run: |-
-          ./mvnw -B versions:set -DnewVersion="${release_version}"
+          ./mvnw -B versions:set -DnewVersion="${{ needs.prepare.outputs.release_version }}"
           ./mvnw -B site -DskipTests -Dinvoker.skip
 
       - name: Upload site to GitHub API
@@ -167,3 +167,27 @@ jobs:
       - name: Deploy site to GitHub Pages
         if: ${{ ! inputs.skip-pages && ! inputs.dry-run }}
         uses: actions/deploy-pages@v4
+
+  github-release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - maven-central-release
+    permissions:
+      contents: write
+      id-token: write
+
+    environment:
+      name: GitHub Releases
+      url: https://github.com/${{ github.repository }}/releases
+
+    steps:
+      - name: Create GitHub release
+        if: ${{ ! inputs.dry-run && ! inputs.skip-github-release  }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ needs.prepare.outputs.release_version }}
+          name: v${{ needs.prepare.outputs.release_version }}
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
