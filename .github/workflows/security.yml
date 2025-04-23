@@ -5,7 +5,7 @@ on:
 
 jobs:
   submit-dependency-snapshot:
-    name: Submit Dependency Snapshot
+    name: Submit dependency snapshot
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,13 +16,14 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Initialize Java environment
+      - name: Initialize Java
         uses: actions/setup-java@v4
         with:
+          cache: maven
           distribution: temurin
           java-version: 24
 
-      - name: Submit Dependency Snapshot
+      - name: Submit dependency snapshot
         uses: advanced-security/maven-dependency-submission-action@v4
         with:
           maven-args: -B
