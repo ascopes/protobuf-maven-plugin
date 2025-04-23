@@ -17,17 +17,19 @@ jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
+    outputs:
+      default_maven_version: ${{ steps.determine_default_maven_version.outputs.default_maven_version }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Initialize Java
         uses: actions/setup-java@v4
         with:
-          java-version: 24
-          distribution: temurin
           cache: maven
+          distribution: temurin
+          java-version: 24
 
       - name: Validate shell scripts
         uses: ludeeus/action-shellcheck@master
@@ -46,8 +48,17 @@ jobs:
         if: always()
         run: ./mvnw -B validate
 
+      - name: Determine default Maven version
+        id: determine_default_maven_version
+        shell: bash
+        if: always()
+        run: |-
+          maven_version=$(./mvnw help:evaluate -Dexpression=maven.version -DforceStdout=true --quiet)
+          echo "Maven Version: ${maven_version}"
+          echo "default_maven_version=${maven_version}" >> "${GITHUB_OUTPUT}"
+
   build:
-    name: mvn ${{ matrix.maven}}/java ${{ matrix.java-version }}/${{ matrix.os-name }}
+    name: mvn ${{ matrix.maven-version }}/java ${{ matrix.java-version }}/${{ matrix.os-name }}
     runs-on: ${{ matrix.os-name }}
     timeout-minutes: 30
     needs:
@@ -58,48 +69,39 @@ jobs:
       matrix:
         os-name: [ubuntu-latest]
         java-version: [11, 17, 21, 24]
-        maven: [default]
+        maven-version: ["${{ needs.validate.outputs.default_maven_version }}"]
         include:
-          # Cross-OS tests
           - os-name: macos-latest
             java-version: 11
-            maven: default
+            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
           - os-name: windows-latest
             java-version: 11
-            maven: default
+            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
           - os-name: ubuntu-latest
             java-version: 11
-            maven: 3.8.8
+            maven-version: 3.8.8
           - os-name: ubuntu-latest
             java-version: 17
-            maven: 4.0.0-rc-3
+            maven-version: 4.0.0-rc-3
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Initialize Java
         uses: actions/setup-java@v4
         with:
+          cache: maven
           java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
-          cache: maven
 
-      - name: Set Maven version
+      - name: Set Maven version to ${{ matrix.maven-version }}
         shell: bash
         run: |-
-          case '${{ matrix.maven }}' in
-            default) :;;
-            *) version='${{ matrix.maven }}';;
-          esac
-
-          if [[ -n ${version+defined} ]]; then
-            ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${version}"
-          fi
-
+          ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${{ matrix.maven-version }}"
           ./mvnw --version
 
-      - name: Install protoc to $PATH
+      - name: Install Protoc to $PATH
         shell: bash
         run: scripts/install-protoc-to-github-runner.sh
 
@@ -118,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-${{ matrix.maven }}
+          name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-${{ matrix.maven-version }}
           path: |-
             **/build.log
             **/maven-status/**
@@ -128,22 +130,25 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
 
-  pages:
-    name: Pages
+  documentation:
+    name: Documentation
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs:
+      - validate
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Initialize Java
         uses: actions/setup-java@v4
         with:
-          java-version: 24
-          distribution: temurin
           cache: maven
+          distribution: temurin
+          java-version: 24
 
-      - name: Build Pages
+      - name: Build site
         shell: bash
         run: |-
           ./mvnw -B site \
@@ -152,7 +157,7 @@ jobs:
             -Dcheckstyle.skip \
             -Dlicense.skip
 
-      - name: Upload generated site as artifacts
+      - name: Upload generated site as artifact
         uses: actions/upload-artifact@v4
         with:
           name: site
@@ -168,10 +173,11 @@ jobs:
     timeout-minutes: 30
     needs:
       - build
-      - pages
+      - documentation
       - validate
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Publish code coverage

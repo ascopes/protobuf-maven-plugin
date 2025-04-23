@@ -61,18 +61,10 @@
 
   <distributionManagement>
     <repository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://central.sonatype.com</url>
     </repository>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <site>
-      <id>github-pages</id>
-      <name>github-pages</name>
-      <url>https://ascopes.github.io/protobuf-maven-plugin</url>
-    </site>
   </distributionManagement>
 
   <issueManagement>
@@ -114,6 +106,7 @@
     <wiremock.version>3.12.1</wiremock.version>
 
     <!-- Plugins -->
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
@@ -135,7 +128,6 @@
     <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-    <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
 
     <!-- Plugin dependencies -->
@@ -656,15 +648,14 @@
             and then triggering a "closure" operation that will promote it to
             the public Maven repository.
         -->
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>${nexus-staging-maven-plugin.version}</version>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>${central-publishing-maven-plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-          <serverId>ossrh</serverId>
-          <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+          <autoPublish>true</autoPublish>
+          <publishingServerId>central</publishingServerId>
+          <waitUntil>published</waitUntil>
         </configuration>
       </plugin>
     </plugins>
