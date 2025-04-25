@@ -66,7 +66,7 @@ public final class ProjectInputResolver {
     return ImmutableProjectInputListing.builder()
         .compilableDescriptorFiles(resolveCompilableDescriptorSources(request, filter))
         .compilableProtoSources(resolveCompilableProtoSources(request, filter))
-        .dependencyProtoSources(resolveDependencyProtoSources(request, filter))
+        .dependencyProtoSources(resolveDependencyProtoSources(request))
         .build();
   }
 
@@ -98,14 +98,17 @@ public final class ProjectInputResolver {
 
     return Stream
         .concat(sourcePathsListings.stream(), sourceDependencyListings.stream())
+        .distinct()
         .collect(Collectors.toUnmodifiableList());
   }
 
   private Collection<SourceListing> resolveDependencyProtoSources(
-      GenerationRequest request,
-      FileFilter filter
+      GenerationRequest request
   ) throws ResolutionException {
-    filter = new ProtoFileGlobFilter().and(filter);
+    // We purposely do not filter by includes/excludes on the request
+    // here as we still want everything on the proto path to be visible,
+    // even if we do not generate code for it.
+    var filter = new ProtoFileGlobFilter();
 
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),
@@ -117,6 +120,7 @@ public final class ProjectInputResolver {
 
     var importPaths = Stream
         .concat(request.getImportPaths().stream(), artifactPaths.stream())
+        .distinct()
         .collect(Collectors.toUnmodifiableList());
 
     return sourceResolver.resolveSources(importPaths, filter);
@@ -140,6 +144,7 @@ public final class ProjectInputResolver {
 
     var descriptorFilePaths = Stream
         .concat(request.getSourceDescriptorPaths().stream(), artifactPaths.stream())
+        .distinct()
         .collect(Collectors.toUnmodifiableList());
 
     return sourceResolver.resolveDescriptors(descriptorFilePaths, filter);
