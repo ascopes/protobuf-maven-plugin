@@ -20,9 +20,11 @@ import static java.util.Objects.requireNonNullElse;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,6 +70,19 @@ public final class UrlResourceFetcher {
     this.temporarySpace = temporarySpace;
   }
 
+  /**
+   * Fetch a file from the given URL, possibly downloading it to the
+   * local file system in a temporary location if it is not on the
+   * root file system.
+   *
+   * @param url the URL of the resource to fetch.
+   * @param extension a hint pointing to the potential file extension to use for the resource.
+   *     This may be ignored if the URL points to a resource that is already
+   *     on the root file system.
+   * @return the URL, or an empty optional if it points to a non-existent
+   *     resource.
+   * @throws ResolutionException if resolution fails for any other reason.
+   */
   public Optional<Path> fetchFileFromUrl(URL url, String extension) throws ResolutionException {
     // This will die if the URL points to a file on the non default file system...
     // probably don't care enough to fix this bug as users should not ever want to do this I guess.
@@ -81,8 +96,9 @@ public final class UrlResourceFetcher {
       return Optional.of(url.toURI())
           .map(Path::of)
           .filter(Files::exists);
+
     } catch (Exception ex) {
-      log.debug("Failed to interrogate local file {}", url, ex);
+      log.debug("Failed to interrogate local file '{}'", url, ex);
       throw new ResolutionException("Failed to resolve '" + url + "' due to malformed syntax", ex);
     }
   }
@@ -101,22 +117,22 @@ public final class UrlResourceFetcher {
       conn.connect();
 
       try (
-          var responseStream = conn.getInputStream();
-          var fileStream = new BufferedOutputStream(Files.newOutputStream(targetFile))
+          var responseStream = new BufferedInputStream(conn.getInputStream());
+          var fileStream = new SizeAwareBufferedOutputStream(Files.newOutputStream(targetFile))
       ) {
         responseStream.transferTo(fileStream);
-        log.info("Copied {} to {}", url, targetFile);
+        log.info("Downloaded '{}' to '{}' ({} bytes)", url, targetFile, fileStream.size);
         return Optional.of(targetFile);
 
       } catch (FileNotFoundException ex) {
-        log.debug("Resource at {} was not found", url);
+        log.warn("No resource at '{}' appears to exist!", url);
         return Optional.empty();
       }
 
     } catch (IOException ex) {
-      log.debug("Failed to copy {} to {}", url, targetFile, ex);
+      log.debug("Failed to download '{}' to '{}'", url, targetFile, ex);
 
-      throw new ResolutionException("Failed to copy '" + url + "' to '" + targetFile + "'", ex);
+      throw new ResolutionException("Failed to download '" + url + "' to '" + targetFile + "'", ex);
     }
   }
 
@@ -131,5 +147,37 @@ public final class UrlResourceFetcher {
     return temporarySpace
         .createTemporarySpace("url", url.getProtocol())
         .resolve(fileName + extension);
+  }
+
+
+  /**
+   * Buffers an output stream, and keeps track of how many bytes
+   * were written.
+   */
+  private static final class SizeAwareBufferedOutputStream extends OutputStream {
+    private final OutputStream delegate;
+    private long size;
+
+    private SizeAwareBufferedOutputStream(OutputStream delegate) {
+      this.delegate = new BufferedOutputStream(delegate);
+      size = 0;
+    }
+
+    @Override
+    public void close() throws IOException {
+      flush();
+      delegate.close();
+    }
+
+    @Override
+    public void flush() throws IOException {
+      delegate.flush();
+    }
+
+    @Override
+    public void write(int nextByte) throws IOException {
+      ++size;
+      delegate.write(nextByte);
+    }
   }
 }
