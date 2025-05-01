@@ -16,7 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 /**
- * Parameter to configure how to resolve dependencies.
+ * Parameter to configure how to resolve transitive dependencies.
  *
  * @author Ashley Scopes
  * @since 1.2.0
@@ -30,6 +30,7 @@ public enum DependencyResolutionDepth {
 
   /**
    * Only resolve direct dependencies that were explicitly included.
+   * No transitive dependencies will be resolved.
    */
   DIRECT,
 }

@@ -42,6 +42,8 @@ public final class PlatformClassifierFactory {
       "zarch_64", "linux-s390_64"
   );
 
+  // TODO(ascopes): do we want to support the universal binary format
+  //   that macOS provides for us as well?
   private static final Map<String, String> MAC_OS_MAPPING = Map.of(
       "aarch64", "osx-aarch_64",
       "amd64", "osx-x86_64",
@@ -64,6 +66,14 @@ public final class PlatformClassifierFactory {
     this.hostSystem = hostSystem;
   }
 
+  /**
+   * Determine the platform-specific classifier for the given
+   * binary name.
+   *
+   * @param binaryName the name of the binary to resolve the classifier for.
+   * @return the classifier value.
+   * @throws ResolutuonException if the classifier cannot be resolved for this platform.
+   */
   public String getClassifier(String binaryName) throws ResolutionException {
     Map<String, String> osMapping;
 

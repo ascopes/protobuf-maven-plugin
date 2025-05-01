@@ -28,17 +28,44 @@ import org.immutables.value.Value.Modifiable;
  */
 @Modifiable
 public interface MavenExclusion {
+
+  /**
+   * Value used by Eclipse Aether internally to imply a match for
+   * any value.
+   */
+  static String WILDCARD = "*";
+
+  /**
+   * Get the group ID.
+   *
+   * @return the group ID.
+   */
   String getGroupId();
 
+  /**
+   * Get the artifact ID.
+   *
+   * @return the artifact ID.
+   */
   String getArtifactId();
 
+  /**
+   * Get the artifact classifier.
+   *
+   * @return the classifier, or {@code *} by default which implies
+   *     a match for any classifier.
+   */
   default String getClassifier() {
-    // Eclipse uses an asterisk wildcard to imply all classifiers.
-    return "*";
+    return WILDCARD;
   }
 
+  /**
+   * Get the artifact type.
+   *
+   * @return the type, or {@code *} by default which implies a match
+   *     for any type.
+   */
   default String getType() {
-    // Eclipse uses an asterisk wildcard to imply all types.
-    return "*";
+    return WILDCARD;
   }
 }
