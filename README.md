@@ -4,7 +4,7 @@
 [![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin)](https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin)
-[![Documentation](https://img.shields.io/badge/-documentation-purple?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
+[![Documentation](https://img.shields.io/badge/documentation-latest-purple?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
 ![GitHub Release Date](https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin)
 
 ![logo](protobuf-maven-plugin/src/site/resources/images/banner.jpg)
