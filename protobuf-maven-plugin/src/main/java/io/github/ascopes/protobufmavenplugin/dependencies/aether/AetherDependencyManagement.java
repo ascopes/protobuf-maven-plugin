@@ -91,6 +91,8 @@ final class AetherDependencyManagement {
             identity(),
             AetherDependencyManagement::newestArtifact,
             // Retain order. It matters!
+            // Luckily, merge on a linked hash map retains the initial
+            // order regardless of the item that is chosen.
             LinkedHashMap::new
         ),
         Collections::unmodifiableMap
