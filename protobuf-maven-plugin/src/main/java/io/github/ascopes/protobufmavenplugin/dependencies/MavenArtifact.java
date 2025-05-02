@@ -82,9 +82,7 @@ public interface MavenArtifact {
   /**
    * Get a set of dependency exclusions to apply when resolving dependencies.
    *
-   * @return the exclusions, which by default is empty.
+   * @return the exclusions, which by default is empty if unspecified.
    */
-  default Set<MavenExclusionBean> getExclusions() {
-    return Set.of();
-  }
+  Set<MavenExclusionBean> getExclusions();
 }
