@@ -61,14 +61,6 @@ class AetherArtifactMapperTest {
   @InjectMocks
   AetherArtifactMapper aetherArtifactMapper;
 
-  @DisplayName(".getArtifactRegistry() returns the artifact registry")
-  @Test
-  void getArtifactRegistryReturnsTheArtifactRegistry() {
-    // Then
-    assertThat(aetherArtifactMapper.getArtifactTypeRegistry())
-        .isSameAs(artifactTypeRegistry);
-  }
-
   @DisplayName(".mapEclipseArtifactToPath(Artifact) returns the artifact path")
   @Test
   @SuppressWarnings("deprecation")
