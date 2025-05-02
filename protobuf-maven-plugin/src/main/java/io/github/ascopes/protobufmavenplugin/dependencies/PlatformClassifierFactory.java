@@ -72,7 +72,7 @@ public final class PlatformClassifierFactory {
    *
    * @param binaryName the name of the binary to resolve the classifier for.
    * @return the classifier value.
-   * @throws ResolutuonException if the classifier cannot be resolved for this platform.
+   * @throws ResolutionException if the classifier cannot be resolved for this platform.
    */
   public String getClassifier(String binaryName) throws ResolutionException {
     Map<String, String> osMapping;
