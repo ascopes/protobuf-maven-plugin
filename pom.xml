@@ -670,7 +670,7 @@
         <version>${maven-javadoc-plugin.version}</version>
         <configuration>
           <doclint>all,-missing</doclint>
-          <show>private</show>
+          <show>protected</show>
         </configuration>
         <reportSets>
           <reportSet>
