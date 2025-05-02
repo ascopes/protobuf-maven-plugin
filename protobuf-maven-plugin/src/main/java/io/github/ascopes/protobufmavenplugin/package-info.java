@@ -27,6 +27,8 @@
     deferCollectionAllocation = true,
     headerComments = true,
     jacksonIntegration = false,
+    // Eventually may be true when Maven upgrades.
+    jakarta = false,
     jdkOnly = true,
     jdk9Collections = true,
     nullableAnnotation = "org.jspecify.annotations.Nullable",
