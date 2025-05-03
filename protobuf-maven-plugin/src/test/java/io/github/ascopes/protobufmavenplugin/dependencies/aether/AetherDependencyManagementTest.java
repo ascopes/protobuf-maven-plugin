@@ -26,27 +26,29 @@ import static org.mockito.Mockito.withSettings;
 
 import java.util.List;
 import org.apache.maven.execution.MavenSession;
+import org.eclipse.aether.artifact.ArtifactTypeRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.quality.Strictness;
 
 @DisplayName("AetherDependencyManagement tests")
 class AetherDependencyManagementTest {
 
   MavenSession mavenSession;
+  ProtobufMavenPluginRepositorySession repositorySession;
+  ArtifactTypeRegistry artifactTypeRegistry;
   AetherArtifactMapper artifactMapper;
 
   @BeforeEach
   void setUp() {
-    var settings = withSettings()
-        .strictness(Strictness.LENIENT)
-        .defaultAnswer(RETURNS_DEEP_STUBS);
-    mavenSession = mock(settings);
-    artifactMapper = new AetherArtifactMapper(mock());
+    mavenSession = mock(withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
+    artifactTypeRegistry = mock();
+    repositorySession = mock();
+    when(repositorySession.getArtifactTypeRegistry()).thenReturn(artifactTypeRegistry);
+    artifactMapper = new AetherArtifactMapper(repositorySession);
   }
 
   @DisplayName("dependency management is not applied to irrelevant dependencies")

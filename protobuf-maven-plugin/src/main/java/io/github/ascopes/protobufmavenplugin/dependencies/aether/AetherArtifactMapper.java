@@ -25,6 +25,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,8 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.4.4
  */
+@MojoExecutionScoped
+@Named
 final class AetherArtifactMapper {
   // If you are changing this file, and are using any types that are ambiguous between the
   // protobuf-maven-plugin, eclipse aether and maven core types, even if just visually, then
@@ -46,10 +51,11 @@ final class AetherArtifactMapper {
 
   private final org.eclipse.aether.artifact.ArtifactTypeRegistry artifactTypeRegistry;
 
+  @Inject
   AetherArtifactMapper(
-      org.eclipse.aether.artifact.ArtifactTypeRegistry artifactTypeRegistry
+      ProtobufMavenPluginRepositorySession protobufMavenPluginRepositorySession
   ) {
-    this.artifactTypeRegistry = artifactTypeRegistry;
+    artifactTypeRegistry = protobufMavenPluginRepositorySession.getArtifactTypeRegistry();
   }
 
   /**
@@ -67,8 +73,7 @@ final class AetherArtifactMapper {
   }
 
   /**
-   * Convert a protobuf-maven-plugin MavenArtifact to an Eclipse Aether
-   * artifact.
+   * Convert a protobuf-maven-plugin MavenArtifact to an Eclipse Aether artifact.
    *
    * @param mavenArtifact the protobuf-maven-plugin artifact.
    * @return the Eclipse Aether artifact.
@@ -105,8 +110,7 @@ final class AetherArtifactMapper {
   }
 
   /**
-   * Convert a protobuf-maven-plugin MavenArtifact to an Eclipse Aether
-   * dependency.
+   * Convert a protobuf-maven-plugin MavenArtifact to an Eclipse Aether dependency.
    *
    * @param mavenArtifact the protobuf-maven-plugin artifact.
    * @return the Eclipse Aether dependency.
@@ -165,8 +169,8 @@ final class AetherArtifactMapper {
   }
 
   /**
-   * Convert a collection of protobuf-maven-plugin exclusions to a set
-   * of Eclipse Aether exclusions.
+   * Convert a collection of protobuf-maven-plugin exclusions to a set of Eclipse Aether
+   * exclusions.
    *
    * @param exclusions the protobuf-maven-plugin exclusions.
    * @return the set of Eclipse Aether exclusions.

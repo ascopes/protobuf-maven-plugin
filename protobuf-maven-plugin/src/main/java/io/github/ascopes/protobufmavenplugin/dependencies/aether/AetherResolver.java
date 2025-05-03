@@ -24,6 +24,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.collection.CollectRequest;
@@ -52,6 +56,8 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.4.4
  */
+@MojoExecutionScoped
+@Named
 final class AetherResolver {
 
   private static final Logger log = LoggerFactory.getLogger(AetherResolver.class);
@@ -60,19 +66,26 @@ final class AetherResolver {
   private final ProtobufMavenPluginRepositorySession repositorySystemSession;
   private final List<RemoteRepository> remoteRepositories;
 
+  @Inject
   AetherResolver(
       RepositorySystem repositorySystem,
-      ProtobufMavenPluginRepositorySession repositorySystemSession,
-      List<RemoteRepository> remoteRepositories
+      MavenSession mavenSession,
+      ProtobufMavenPluginRepositorySession repositorySystemSession
   ) {
     this.repositorySystem = repositorySystem;
     this.repositorySystemSession = repositorySystemSession;
-    this.remoteRepositories = remoteRepositories;
+
+    // Prior to v2.12.0, we used the ProjectBuildingRequest on the MavenSession
+    // and used RepositoryUtils.toRepos to create the repository list. GH-579
+    // was raised to report that the <repositories> block in the POM was being
+    // ignored. This appears to be due to the project building request only
+    // looking at what is in ~/.m2/settings.xml. The current project remote
+    // repositories seems to be what we need to use instead here.
+    remoteRepositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
   }
 
   /**
-   * Resolve the Eclipse Aether artifact, or throw an exception if it
-   * cannot be resolved.
+   * Resolve the Eclipse Aether artifact, or throw an exception if it cannot be resolved.
    *
    * @param artifact the artifact to resolve.
    * @return the artifact with any additional resolved metadata attached.
@@ -119,15 +132,15 @@ final class AetherResolver {
   /**
    * Resolve a collection of dependencies transitively and return the corresponding artifacts.
    *
-   * @param dependencies the dependencies to resolve.
-   * @param allowedDependencyScopes scopes of dependencies to include. Anything not in this
-   *     set will be ignored.
-   * @param failOnResolutionErrors if resolution fails and this is true, an exception will
-   *     be raised. If this is false, then any invalid/unresolvable dependencies will be
-   *     skipped instead.
+   * @param dependencies            the dependencies to resolve.
+   * @param allowedDependencyScopes scopes of dependencies to include. Anything not in this set will
+   *                                be ignored.
+   * @param failOnResolutionErrors  if resolution fails and this is true, an exception will be
+   *                                raised. If this is false, then any invalid/unresolvable
+   *                                dependencies will be skipped instead.
    * @return the resolved artifacts.
    * @throws ResolutionException if resolution fails and is unrecoverable or if
-   *     {@code failOnResolutionErrors} is true.
+   *                             {@code failOnResolutionErrors} is true.
    */
   Collection<Artifact> resolveDependencies(
       List<Dependency> dependencies,

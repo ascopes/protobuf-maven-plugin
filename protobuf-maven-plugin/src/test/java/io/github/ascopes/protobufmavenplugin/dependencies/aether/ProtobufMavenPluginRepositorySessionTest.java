@@ -21,34 +21,37 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.collection.DependencyTraverser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Ashley Scopes
  */
 @DisplayName("ProtobufMavenPluginRepositorySession tests")
-@ExtendWith(MockitoExtension.class)
 class ProtobufMavenPluginRepositorySessionTest {
 
-  @Mock
-  RepositorySystemSession delegate;
+  RepositorySystemSession delegatedRepositorySession;
+  MavenSession mavenSession;
+  ProtobufMavenPluginRepositorySession repositorySession;
 
-  @InjectMocks
-  ProtobufMavenPluginRepositorySession underTest;
+  @BeforeEach
+  void setUp() {
+    delegatedRepositorySession = mock();
+    mavenSession = mock();
+    when(mavenSession.getRepositorySession()).thenReturn(delegatedRepositorySession);
+    repositorySession = new ProtobufMavenPluginRepositorySession(mavenSession);
+  }
 
   @DisplayName(".getSession() returns the delegate RepositorySystemSession")
   @Test
   void getSessionReturnsDelegateRepositorySystemSession() {
     // Then
-    assertThat(underTest.getSession())
-        .isSameAs(delegate);
+    assertThat(repositorySession.getSession())
+        .isSameAs(delegatedRepositorySession);
   }
 
   @DisplayName(".getDependencyTraverser() wraps the RepositorySystemSession DependencyTraverser")
@@ -56,32 +59,32 @@ class ProtobufMavenPluginRepositorySessionTest {
   void getDependencyTraverserWrapsRepositorySystemSessionDependencyTraverser() {
     // Given
     var delegateDependencyTraverser = mock(DependencyTraverser.class);
-    when(delegate.getDependencyTraverser())
+    when(delegatedRepositorySession.getDependencyTraverser())
         .thenReturn(delegateDependencyTraverser);
 
     // When
-    var actualDependencyTraverser = underTest.getDependencyTraverser();
+    var actualDependencyTraverser = repositorySession.getDependencyTraverser();
 
     // Then
     assertThat(actualDependencyTraverser.getDelegate())
         .isSameAs(delegateDependencyTraverser);
-    verify(delegate).getDependencyTraverser();
-    verifyNoMoreInteractions(delegate);
+    verify(delegatedRepositorySession).getDependencyTraverser();
+    verifyNoMoreInteractions(delegatedRepositorySession);
   }
 
   @DisplayName(".getDependencyTraverser() returns new instances on every call")
   @Test
   void getDependencyTraverserReturnsNewInstancesOnEveryCall() {
     // Then
-    assertThat(underTest.getDependencyTraverser())
-        .isNotSameAs(underTest.getDependencyTraverser());
+    assertThat(repositorySession.getDependencyTraverser())
+        .isNotSameAs(repositorySession.getDependencyTraverser());
   }
 
   @DisplayName(".getResolutionErrorPolicy() returns the expected value")
   @Test
   void getResolutionErrorPolicyReturnsTheExpectedValue() {
     // Then
-    assertThat(underTest.getResolutionErrorPolicy())
+    assertThat(repositorySession.getResolutionErrorPolicy())
         .isInstanceOf(NoCacheResolutionErrorPolicy.class);
   }
 }
