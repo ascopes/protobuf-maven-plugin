@@ -39,27 +39,31 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.maven.RepositoryUtils;
+import org.eclipse.aether.artifact.ArtifactTypeRegistry;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("AetherArtifactMapper tests")
-@ExtendWith(MockitoExtension.class)
 class AetherArtifactMapperTest {
 
-  @Mock
-  org.eclipse.aether.artifact.ArtifactTypeRegistry artifactTypeRegistry;
-
-  @InjectMocks
+  ArtifactTypeRegistry artifactTypeRegistry;
+  ProtobufMavenPluginRepositorySession repositorySession;
   AetherArtifactMapper aetherArtifactMapper;
+
+  @BeforeEach
+  void setUp() {
+    artifactTypeRegistry = mock();
+    repositorySession = mock();
+    when(repositorySession.getArtifactTypeRegistry()).thenReturn(artifactTypeRegistry);
+
+    aetherArtifactMapper = new AetherArtifactMapper(repositorySession);
+  }
 
   @DisplayName(".mapEclipseArtifactToPath(Artifact) returns the artifact path")
   @Test

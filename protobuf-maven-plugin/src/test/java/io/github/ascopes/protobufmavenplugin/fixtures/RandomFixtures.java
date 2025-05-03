@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.fixtures;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
@@ -37,5 +38,11 @@ public final class RandomFixtures {
 
   public static int someInt() {
     return random.nextInt();
+  }
+
+  public static <T> T oneOf(Iterable<T> items) {
+    var list = new ArrayList<T>();
+    items.forEach(list::add);
+    return list.get(random.nextInt(list.size()));
   }
 }

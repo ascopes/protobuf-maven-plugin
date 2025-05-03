@@ -15,6 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.resolution.ResolutionErrorPolicy;
@@ -28,13 +32,17 @@ import org.eclipse.aether.resolution.ResolutionErrorPolicy;
  * @author Ashley Scopes
  * @since 2.0.3
  */
-final class ProtobufMavenPluginRepositorySession
-    extends AbstractForwardingRepositorySystemSession {
+@MojoExecutionScoped
+@Named
+final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepositorySystemSession {
 
   private final RepositorySystemSession delegate;
 
-  ProtobufMavenPluginRepositorySession(RepositorySystemSession delegate) {
-    this.delegate = delegate;
+  @Inject
+  ProtobufMavenPluginRepositorySession(
+      MavenSession mavenSession
+  ) {
+    delegate = mavenSession.getRepositorySession();
   }
 
   @Override

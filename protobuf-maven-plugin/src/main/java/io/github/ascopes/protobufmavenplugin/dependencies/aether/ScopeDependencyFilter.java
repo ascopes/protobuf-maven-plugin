@@ -47,7 +47,7 @@ final class ScopeDependencyFilter implements DependencyFilter {
   /**
    * Determine whether to accept the dependency.
    *
-   * @param node the dependency node.
+   * @param node    the dependency node.
    * @param parents the parent dependency nodes.
    * @return true if accepted, or false if ignored.
    */

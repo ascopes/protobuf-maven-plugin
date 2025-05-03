@@ -24,8 +24,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.artifact.Artifact;
@@ -40,10 +43,13 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 2.13.0
  */
+@MojoExecutionScoped
+@Named
 final class AetherDependencyManagement {
 
   private final Map<String, Artifact> effectiveDependencyManagement;
 
+  @Inject
   AetherDependencyManagement(MavenSession mavenSession, AetherArtifactMapper artifactMapper) {
 
     // Do this on initialization to avoid repeatedly computing the same thing on each dependency.
@@ -52,21 +58,21 @@ final class AetherDependencyManagement {
     //
     // These attributes may be null if excluded from the Maven model recursively.
     effectiveDependencyManagement = Optional.of(mavenSession.getCurrentProject())
-          .map(MavenProject::getDependencyManagement)
-          .map(DependencyManagement::getDependencies)
-          .stream()
-          .flatMap(Collection::stream)
-          .map(artifactMapper::mapMavenDependencyToEclipseArtifact)
-          .collect(deduplicateArtifacts());
+        .map(MavenProject::getDependencyManagement)
+        .map(DependencyManagement::getDependencies)
+        .stream()
+        .flatMap(Collection::stream)
+        .map(artifactMapper::mapMavenDependencyToEclipseArtifact)
+        .collect(deduplicateArtifacts());
   }
 
   /**
-   * Take a dependency and, if possible, fill in any missing attributes
-   * from the corresponding project dependency management.
+   * Take a dependency and, if possible, fill in any missing attributes from the corresponding
+   * project dependency management.
    *
    * @param dependency the dependency to inspect.
-   * @return a new dependency with missing fields populated if possible
-   *     and appropriate, or the input dependency if nothing changed.
+   * @return a new dependency with missing fields populated if possible and appropriate, or the
+   *     input dependency if nothing changed.
    */
   Dependency fillManagedAttributes(Dependency dependency) {
     var artifact = dependency.getArtifact();
@@ -93,8 +99,8 @@ final class AetherDependencyManagement {
   }
 
   /**
-   * Generate a collector that produces a map of unique artifacts, mapping from
-   * a unique key to the artifact itself.
+   * Generate a collector that produces a map of unique artifacts, mapping from a unique key to the
+   * artifact itself.
    *
    * <p>This enables de-duplicating artifavts covered by dependency management semantics.
    *
