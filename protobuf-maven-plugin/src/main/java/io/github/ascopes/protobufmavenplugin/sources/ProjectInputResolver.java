@@ -20,7 +20,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.sources.filter.FileFilter;
 import io.github.ascopes.protobufmavenplugin.sources.filter.IncludesExcludesGlobFilter;
-import io.github.ascopes.protobufmavenplugin.sources.filter.ProtoFileGlobFilter;
+import io.github.ascopes.protobufmavenplugin.sources.filter.ProtoFileFilter;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -76,7 +76,7 @@ public final class ProjectInputResolver {
   ) throws ResolutionException {
     log.debug("Discovering all compilable protobuf source files");
 
-    filter = new ProtoFileGlobFilter().and(filter);
+    filter = new ProtoFileFilter().and(filter);
 
     var sourcePathsListings = sourceResolver.resolveSources(
         request.getSourceDirectories(),
@@ -108,7 +108,7 @@ public final class ProjectInputResolver {
     // We purposely do not filter by includes/excludes on the request
     // here as we still want everything on the proto path to be visible,
     // even if we do not generate code for it.
-    var filter = new ProtoFileGlobFilter();
+    var filter = new ProtoFileFilter();
 
     var artifactPaths = artifactPathResolver.resolveDependencies(
         request.getImportDependencies(),

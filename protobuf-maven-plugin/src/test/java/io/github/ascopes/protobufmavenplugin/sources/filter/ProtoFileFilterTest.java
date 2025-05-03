@@ -26,15 +26,15 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-@DisplayName("ProtoFileGlobFilter tests")
-class ProtoFileGlobFilterTest {
+@DisplayName("ProtoFileFilter tests")
+class ProtoFileFilterTest {
 
   @DisplayName("expect no match if the file does not exist")
   @Test
   void expectNoMatchIfFileDoesNotExist(@TempDir Path dir) {
     // Given
     var file = dir.resolve("foo").resolve("bar").resolve("baz.proto");
-    var filter = new ProtoFileGlobFilter();
+    var filter = new ProtoFileFilter();
 
     // Then
     assertThat(filter.matches(dir, file)).isFalse();
@@ -46,7 +46,7 @@ class ProtoFileGlobFilterTest {
     // Given
     var nonFile = dir.resolve("foo").resolve("bar").resolve("baz.proto");
     Files.createDirectories(nonFile);
-    var filter = new ProtoFileGlobFilter();
+    var filter = new ProtoFileFilter();
 
     // Then
     assertThat(filter.matches(dir, nonFile)).isFalse();
@@ -69,7 +69,7 @@ class ProtoFileGlobFilterTest {
     Files.createDirectories(baseDir);
     var file = baseDir.resolve(fileName);
     Files.createFile(file);
-    var filter = new ProtoFileGlobFilter();
+    var filter = new ProtoFileFilter();
 
     // Then
     assertThat(filter.matches(dir, file)).isFalse();
@@ -91,7 +91,7 @@ class ProtoFileGlobFilterTest {
     Files.createDirectories(baseDir);
     var file = baseDir.resolve(fileName);
     Files.createFile(file);
-    var filter = new ProtoFileGlobFilter();
+    var filter = new ProtoFileFilter();
 
     // Then
     assertThat(filter.matches(dir, file)).isTrue();

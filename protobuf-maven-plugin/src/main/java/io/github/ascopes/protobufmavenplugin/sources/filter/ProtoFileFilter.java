@@ -26,7 +26,7 @@ import java.nio.file.Path;
  * @author Ashley Scopes
  * @since 3.1.0
  */
-public final class ProtoFileGlobFilter implements FileFilter {
+public final class ProtoFileFilter implements FileFilter {
 
   @Override
   public boolean matches(Path rootPath, Path filePath) {
