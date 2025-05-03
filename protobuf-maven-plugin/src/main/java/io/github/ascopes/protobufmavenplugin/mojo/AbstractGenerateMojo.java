@@ -100,7 +100,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * Note that for files, we retain the use of java.io.File despite using java.nio.file.Path
    * everywhere else. Maven did not support parsing java.nio.file.Path until v3.9.x, and we
-   * support 3.8.2 out of the box.
+   * support 3.8.x out of the box.
+   *
+   * TODO: simplify this once we drop Maven 3.8 support.
    */
 
   /**
