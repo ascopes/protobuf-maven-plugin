@@ -52,6 +52,12 @@ final class AetherArtifactMapper {
     this.artifactTypeRegistry = artifactTypeRegistry;
   }
 
+  /**
+   * Convert an Eclipse Aether artifact to a file system path.
+   *
+   * @param eclipseArtifact the Aether artifact.
+   * @return the normalized path to the artifact.
+   */
   Path mapEclipseArtifactToPath(org.eclipse.aether.artifact.Artifact eclipseArtifact) {
     // TODO(ascopes): when Maven moves to the v2.0.0 resolver API, replace
     //   this method with calls to Artifact.getPath() directly.
@@ -60,6 +66,13 @@ final class AetherArtifactMapper {
     return FileUtils.normalize(file.toPath());
   }
 
+  /**
+   * Convert a protobuf-maven-plugin MavenArtifact to an Eclipse Aether
+   * artifact.
+   *
+   * @param mavenArtifact the protobuf-maven-plugin artifact.
+   * @return the Eclipse Aether artifact.
+   */
   org.eclipse.aether.artifact.Artifact mapPmpArtifactToEclipseArtifact(
       io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact
   ) {
@@ -91,6 +104,13 @@ final class AetherArtifactMapper {
     );
   }
 
+  /**
+   * Convert a protobuf-maven-plugin MavenArtifact to an Eclipse Aether
+   * dependency.
+   *
+   * @param mavenArtifact the protobuf-maven-plugin artifact.
+   * @return the Eclipse Aether dependency.
+   */
   org.eclipse.aether.graph.Dependency mapPmpArtifactToEclipseDependency(
       io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact,
       io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth defaultDepth
@@ -117,6 +137,12 @@ final class AetherArtifactMapper {
     );
   }
 
+  /**
+   * Convert an Apache Maven artifact to an Eclipse Aether artifact.
+   *
+   * @param mavenArtifact the Apache Maven artifact.
+   * @return the Eclipse Aether artifact.
+   */
   org.eclipse.aether.artifact.Artifact mapMavenArtifactToEclipseArtifact(
       org.apache.maven.artifact.Artifact mavenArtifact
   ) {
@@ -124,6 +150,12 @@ final class AetherArtifactMapper {
     return org.apache.maven.RepositoryUtils.toArtifact(mavenArtifact);
   }
 
+  /**
+   * Convert an Apache Maven dependency to an Eclipse Aether artifact.
+   *
+   * @param mavenDependency the Apache Maven dependency.
+   * @return the Eclipse Aether artifact.
+   */
   org.eclipse.aether.artifact.Artifact mapMavenDependencyToEclipseArtifact(
       org.apache.maven.model.Dependency mavenDependency
   ) {
@@ -132,6 +164,13 @@ final class AetherArtifactMapper {
         .getArtifact();
   }
 
+  /**
+   * Convert a collection of protobuf-maven-plugin exclusions to a set
+   * of Eclipse Aether exclusions.
+   *
+   * @param exclusions the protobuf-maven-plugin exclusions.
+   * @return the set of Eclipse Aether exclusions.
+   */
   private Set<org.eclipse.aether.graph.Exclusion> mapPmpExclusionsToEclipseExclusions(
       Collection<? extends io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion>
           exclusions

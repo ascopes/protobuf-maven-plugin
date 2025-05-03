@@ -35,21 +35,41 @@ final class FallbackEclipseArtifactType implements ArtifactType {
     this.dependencyExtension = dependencyExtension;
   }
 
+  /**
+   * Get the ID of the artifact type.
+   *
+   * @return an identifier.
+   */
   @Override
   public String getId() {
     return dependencyExtension;
   }
 
+  /**
+   * Get the extension of the artifact type.
+   *
+   * @return the extension.
+   */
   @Override
   public String getExtension() {
     return dependencyExtension;
   }
 
+  /**
+   * Get the classifier of the artifact type.
+   *
+   * @return the classifier, which will be an empty string if not applicable.
+   */
   @Override
   public String getClassifier() {
     return NO_CLASSIFIER;
   }
 
+  /**
+   * Get any additional properties associated with the artifact type.
+   *
+   * @return a map of properties which may be empty.
+   */
   @Override
   public Map<String, String> getProperties() {
     return NO_PROPERTIES;

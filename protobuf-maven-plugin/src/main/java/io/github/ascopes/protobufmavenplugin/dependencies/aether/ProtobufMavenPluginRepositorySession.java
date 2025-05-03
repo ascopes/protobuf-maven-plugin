@@ -42,11 +42,21 @@ final class ProtobufMavenPluginRepositorySession
     return delegate;
   }
 
+  /**
+   * Get the dependency traverser.
+   *
+   * @return the dependency traverser.
+   */
   @Override
   public WildcardAwareDependencyTraverser getDependencyTraverser() {
     return new WildcardAwareDependencyTraverser(delegate.getDependencyTraverser());
   }
 
+  /**
+   * Get the resolution error policy.
+   *
+   * @return the resolution error policy.
+   */
   @Override
   public ResolutionErrorPolicy getResolutionErrorPolicy() {
     // As of 2.13.0, we do not want to cache invalid dependencies between builds. This gets a bit

@@ -86,13 +86,39 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     log.debug("Using repository system session: {}", repositorySystemSession);
   }
 
+  /**
+   * Resolve an artifact and return the path to the artifact on the
+   * root file system.
+   *
+   * @param artifact the artifact to resolve.
+   * @return the path to the artifact.
+   * @throws ResolutionException if resolution failed.
+   */
   @Override
-  public Path resolveArtifact(MavenArtifact mavenArtifact) throws ResolutionException {
-    log.debug("Resolving artifact: {}", mavenArtifact);
-    var unresolvedArtifact = aetherMapper.mapPmpArtifactToEclipseArtifact(mavenArtifact);
+  public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
+    log.debug("Resolving artifact: {}", artifact);
+    var unresolvedArtifact = aetherMapper.mapPmpArtifactToEclipseArtifact(artifact);
     var resolvedArtifact = aetherResolver.resolveRequiredArtifact(unresolvedArtifact);
     return aetherMapper.mapEclipseArtifactToPath(resolvedArtifact);
   }
+
+  /**
+   * Resolve a collection of artifacts and return the paths to those artifacts
+   * and their dependencies on the root file system
+   *
+   * @param artifacts the artifacts to resolve.
+   * @param defaultDepth the default preference for how to resolve transitive
+   *     dependencies.
+   * @param dependencyScopes the scopes of dependencies to resolve -- anything
+   *     not in this set is ignored.
+   * @param includeProjectArtifacts whether to also pull the project dependencies
+   *     in the current MavenProject and include those in the result as well.
+   * @param failOnInvalidDependencies if true, invalid or unresolvable dependencies result in an
+   *     exception being raised. If false, a best effort attempt to ignore the dependencies
+   *     is made.
+   * @return the paths to the artifacts, in the order they were provided.
+   * @throws ResolutionException if resolution failed.
+   */
 
   @Override
   public List<Path> resolveDependencies(

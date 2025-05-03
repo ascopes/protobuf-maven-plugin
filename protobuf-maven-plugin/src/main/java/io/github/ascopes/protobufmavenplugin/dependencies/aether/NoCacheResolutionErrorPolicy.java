@@ -32,6 +32,13 @@ import org.eclipse.aether.resolution.ResolutionErrorPolicyRequest;
  */
 final class NoCacheResolutionErrorPolicy implements ResolutionErrorPolicy {
 
+  /**
+   * Get the artifact policy.
+   *
+   * @param session the repository session.
+   * @param request the artifact request.
+   * @return the bitfield artifact policy.
+   */
   @Override
   public int getArtifactPolicy(
       RepositorySystemSession session,
@@ -40,6 +47,13 @@ final class NoCacheResolutionErrorPolicy implements ResolutionErrorPolicy {
     return CACHE_DISABLED;
   }
 
+  /**
+   * Get the metadata policy.
+   *
+   * @param session the repository session.
+   * @param request the metadata request.
+   * @return the bitfield metadata policy.
+   */
   @Override
   public int getMetadataPolicy(
       RepositorySystemSession session,
