@@ -283,7 +283,7 @@ final class JvmPluginResolver {
     // ModuleFinder may be an overkill, so we might eventually want to just
     // discard this and use some other method (e.g. reading the manifest
     // for Automatic-Module-Name, and checking for the presence of a
-    // module-info.class in the root and in META-INF/versions child directories.
+    // module-info.class in the root and in META-INF/versions child directories).
     return ModuleFinder.of(paths.toArray(Path[]::new))
         .findAll()
         .stream()
