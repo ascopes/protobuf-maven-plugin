@@ -51,7 +51,6 @@ public final class TemporarySpace {
     this.mojoExecution = mojoExecution;
   }
 
-  @SuppressWarnings("ExtractMethodRecommender")
   public Path createTemporarySpace(String... bits) {
     // GH-488: Execution ID and goal can potentially be null, e.g. in Quarkus dev mode, so
     // default to a semi-sensible value to prevent a NullPointerException.
