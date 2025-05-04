@@ -18,13 +18,14 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactBean;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
-import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.dependencies.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -55,7 +56,7 @@ public final class ProtocResolver {
   private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
-  private final UrlResourceFetcher urlResourceFetcher;
+  private final UriResourceFetcher urlResourceFetcher;
 
   @Inject
   public ProtocResolver(
@@ -63,7 +64,7 @@ public final class ProtocResolver {
       MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
-      UrlResourceFetcher urlResourceFetcher
+      UriResourceFetcher urlResourceFetcher
   ) {
     this.hostSystem = hostSystem;
     this.artifactPathResolver = artifactPathResolver;
@@ -87,7 +88,7 @@ public final class ProtocResolver {
 
     // It is likely a URL, not a version string.
     var path = version.contains(":")
-        ? resolveFromUrl(version)
+        ? resolveFromUri(version)
         : resolveFromMavenRepositories(version);
 
     if (path.isPresent()) {
@@ -108,15 +109,12 @@ public final class ProtocResolver {
     return path;
   }
 
-  private Optional<Path> resolveFromUrl(String url) throws ResolutionException {
+  private Optional<Path> resolveFromUri(String uriString) throws ResolutionException {
     try {
-      return urlResourceFetcher.fetchFileFromUrl(new URL(url), ".exe");
-
-    } catch (IOException ex) {
-      throw new ResolutionException(
-          "Failed to fetch resource from URL " + url + ": " + ex.getMessage(),
-          ex
-      );
+      var uri = new URI(uriString);
+      return urlResourceFetcher.fetchFileFromUri(uri, ".exe");
+    } catch (URISyntaxException ex) {
+      throw new ResolutionException("Failed to parse URI '" + uriString + "'", ex);
     }
   }
 

@@ -50,74 +50,76 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@DisplayName("UrlResourceFetcher tests")
+@DisplayName("UriResourceFetcher tests")
 @ExtendWith(MockitoExtension.class)
 @WireMockTest
-class UrlResourceFetcherTest {
+class UriResourceFetcherTest {
 
   WireMock wireMockClient;
-  String wireMockBaseUrl;
+  String wireMockBaseUri;
 
   @Mock
   TemporarySpace temporarySpace;
 
   @InjectMocks
-  UrlResourceFetcher urlResourceFetcher;
+  UriResourceFetcher uriResourceFetcher;
 
   @BeforeEach
   void setUp(WireMockRuntimeInfo wireMockInfo) {
     wireMockClient = wireMockInfo.getWireMock();
-    wireMockBaseUrl = wireMockInfo.getHttpBaseUrl();
+    wireMockBaseUri = wireMockInfo.getHttpBaseUrl();
   }
 
-  @DisplayName("file URLs are resolved when they exist")
+  @DisplayName("file URIs are resolved when they exist")
   @Test
-  void fileUrlsAreResolvedWhenTheyExist(@TempDir Path tempDir) throws Exception {
+  void fileUrisAreResolvedWhenTheyExist(@TempDir Path tempDir) throws Exception {
     // Given
     var file = Files.createFile(tempDir.resolve("nekomata.nya"));
 
     // When
-    var result = urlResourceFetcher.fetchFileFromUrl(file.toUri().toURL(), ".thiren");
+    var result = uriResourceFetcher.fetchFileFromUri(file.toUri(), ".thiren");
 
     // Then
-    //noinspection AssertBetweenInconvertibleTypes
     assertThat(result)
         .isPresent()
         .get()
         .isEqualTo(file);
   }
 
-  @DisplayName("file URLs are resolved when they do not exist")
+  @DisplayName("file URIs are resolved when they do not exist")
   @Test
-  void fileUrlsAreResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
+  void fileUrisAreResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
     // Given
     var file = tempDir.resolve("nekomata.nya");
 
     // When
-    var result = urlResourceFetcher.fetchFileFromUrl(file.toUri().toURL(), ".thiren");
+    var result = uriResourceFetcher.fetchFileFromUri(file.toUri(), ".thiren");
 
     // Then
     assertThat(result)
         .isEmpty();
   }
 
-  @DisplayName("file URLs with bad characters result in an exception being raised")
+  @DisplayName("file URIs with bad characters result in an exception being raised")
   @Test
-  void fileUrlsWithBadCharactersResultInAnExceptionBeingRaised() throws Exception {
+  void fileUrisWithBadCharactersResultInAnExceptionBeingRaised() throws Exception {
     // Given
-    var url = URI.create("file://bob@xxxxxx@Xx@X@X.localhost.net/59339785423").toURL();
+    var uri = URI.create("file://bob@xxxxxx@Xx@X@X.localhost.net/59339785423");
 
     // Then
     assertThatExceptionOfType(ResolutionException.class)
-        .isThrownBy(() -> urlResourceFetcher.fetchFileFromUrl(url, "boop"))
-        .withMessage("Failed to resolve '%s' due to malformed syntax", url)
+        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, "boop"))
+        // This varies between Linux and Windows....
+        .withMessageMatching("Failed to discover file at "
+            + "'file://bob@xxxxxx@Xx@X@X\\.localhost\\.net/59339785423': "
+            + "java.lang.IllegalArgumentException: .*")
         .withCauseInstanceOf(IllegalArgumentException.class);
   }
 
-  @DisplayName("other URLs are resolved when they exist")
+  @DisplayName("other URIs are resolved when they exist")
   @ValueSource(strings = {"bar.txt.bin", "foo/bar.txt.bin"})
   @ParameterizedTest(name = "for path {0}")
-  void otherUrlsAreResolvedWhenTheyExist(
+  void otherUrisAreResolvedWhenTheyExist(
       String requestedPath,
       @TempDir Path tempDir
   ) throws Exception {
@@ -130,17 +132,16 @@ class UrlResourceFetcherTest {
     when(temporarySpace.createTemporarySpace(any(), any()))
         .thenReturn(tempDir);
 
-    var url = URI.create(wireMockBaseUrl + "/" + requestedPath).toURL();
-    var digest = Digests.sha1(url.toExternalForm());
+    var uri = URI.create(wireMockBaseUri + "/" + requestedPath);
+    var digest = Digests.sha1(uri.toASCIIString());
     var expectedFileName = requestedPath.contains("/")
         ? requestedPath.substring(requestedPath.lastIndexOf("/") + 1)
         : requestedPath;
 
     // When
-    var finalPath = urlResourceFetcher.fetchFileFromUrl(url, ".textfile");
+    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
 
     // Then
-    //noinspection AssertBetweenInconvertibleTypes
     assertThat(finalPath)
         .isPresent()
         .get(InstanceOfAssertFactories.PATH)
@@ -151,9 +152,9 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
-  @DisplayName("other pathless URLs are resolved when they exist")
+  @DisplayName("other pathless URIs are resolved when they exist")
   @Test
-  void otherPathlessUrlsAreResolvedWhenTheyExist(
+  void otherPathlessUrisAreResolvedWhenTheyExist(
       @TempDir Path tempDir
   ) throws Exception {
     // Given
@@ -165,14 +166,13 @@ class UrlResourceFetcherTest {
     when(temporarySpace.createTemporarySpace(any(), any()))
         .thenReturn(tempDir);
 
-    var url = URI.create(wireMockBaseUrl).toURL();
-    var digest = Digests.sha1(url.toExternalForm());
+    var uri = URI.create(wireMockBaseUri);
+    var digest = Digests.sha1(uri.toASCIIString());
 
     // When
-    var finalPath = urlResourceFetcher.fetchFileFromUrl(url, ".textfile");
+    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
 
     // Then
-    //noinspection AssertBetweenInconvertibleTypes
     assertThat(finalPath)
         .isPresent()
         .get(InstanceOfAssertFactories.PATH)
@@ -183,19 +183,19 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
-  @DisplayName("other URLs are not resolved when they do not exist")
+  @DisplayName("other URIs are not resolved when they do not exist")
   @Test
-  void otherUrlsAreNotResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
+  void otherUrisAreNotResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
     // Given
     wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
         .willReturn(aResponse().withStatus(404)));
     when(temporarySpace.createTemporarySpace(any(), any()))
         .thenReturn(tempDir);
 
-    var url = URI.create(wireMockBaseUrl + "/foo/bar.txt.bin").toURL();
+    var uri = URI.create(wireMockBaseUri + "/foo/bar.txt.bin");
 
     // When
-    var finalPath = urlResourceFetcher.fetchFileFromUrl(url, ".textfile");
+    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
 
     // Then
     assertThat(finalPath)
@@ -205,20 +205,20 @@ class UrlResourceFetcherTest {
         .withHeader("User-Agent", equalTo(expectedUserAgent())));
   }
 
-  @DisplayName("other URLs raise exceptions if transfer fails")
+  @DisplayName("other URIs raise exceptions if transfer fails")
   @Test
-  void otherUrlsRaiseExceptionsIfTransferFails(@TempDir Path tempDir) throws Exception {
+  void otherUrisRaiseExceptionsIfTransferFails(@TempDir Path tempDir) throws Exception {
     // Given
     wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
         .willReturn(aResponse().withFault(Fault.MALFORMED_RESPONSE_CHUNK)));
     when(temporarySpace.createTemporarySpace(any(), any()))
         .thenReturn(tempDir);
 
-    var url = URI.create(wireMockBaseUrl + "/foo/bar.txt.bin").toURL();
+    var uri = URI.create(wireMockBaseUri + "/foo/bar.txt.bin");
 
     // Then
     assertThatExceptionOfType(ResolutionException.class)
-        .isThrownBy(() -> urlResourceFetcher.fetchFileFromUrl(url, ".textfile"))
+        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".textfile"))
         .withCauseInstanceOf(IOException.class);
 
     wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/foo/bar.txt.bin"))
@@ -230,7 +230,7 @@ class UrlResourceFetcherTest {
         "io.github.ascopes.protobuf-maven-plugin/%s org.apache.maven/%s (Java %s)",
         requireNonNullElse(
             // May not be set if we are running within an IDE.
-            UrlResourceFetcher.class.getPackage().getImplementationVersion(),
+            UriResourceFetcher.class.getPackage().getImplementationVersion(),
             "SNAPSHOT"
         ),
         Maven.class.getPackage().getImplementationVersion(),

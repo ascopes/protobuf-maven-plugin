@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
+import io.github.ascopes.protobufmavenplugin.mojo.plexus.ProtobufMavenPluginConfigurator;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -41,6 +42,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  */
 @Mojo(
     name = "generate",
+    configurator = ProtobufMavenPluginConfigurator.NAME,
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     // We require resolving TEST scope here since the user can control the overall scope
     // we use for dependencies. The TEST scope is documented to cover all other scopes.

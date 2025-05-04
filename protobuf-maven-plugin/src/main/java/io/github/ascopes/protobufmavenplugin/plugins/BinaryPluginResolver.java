@@ -17,7 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
-import io.github.ascopes.protobufmavenplugin.dependencies.UrlResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.dependencies.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
@@ -49,14 +49,14 @@ final class BinaryPluginResolver {
   private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
-  private final UrlResourceFetcher urlResourceFetcher;
+  private final UriResourceFetcher urlResourceFetcher;
 
   @Inject
   BinaryPluginResolver(
       MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
-      UrlResourceFetcher urlResourceFetcher
+      UriResourceFetcher urlResourceFetcher
   ) {
     this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
@@ -77,7 +77,7 @@ final class BinaryPluginResolver {
   }
 
   Collection<? extends ResolvedProtocPlugin> resolveUrlPlugins(
-      Collection<? extends UrlProtocPlugin> plugins
+      Collection<? extends UriProtocPlugin> plugins
   ) throws ResolutionException {
     return resolveAll(plugins, this::resolveUrlPlugin);
   }
@@ -126,12 +126,12 @@ final class BinaryPluginResolver {
   }
 
   private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
-      UrlProtocPlugin plugin
+      UriProtocPlugin plugin
   ) throws ResolutionException {
 
     log.debug("Resolving URL protoc plugin {}", plugin);
 
-    var maybePath = urlResourceFetcher.fetchFileFromUrl(plugin.getUrl(), ".exe");
+    var maybePath = urlResourceFetcher.fetchFileFromUri(plugin.getUrl(), ".exe");
 
     if (maybePath.isEmpty() && plugin.isOptional()) {
       return Optional.empty();
