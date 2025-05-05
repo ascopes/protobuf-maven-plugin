@@ -125,9 +125,9 @@ Any protocols supported by your JRE should be able to be used here, including:
 - `http`
 - `https`
 - `ftp`
-- `jar` - this also works for ZIP files, and can be used to dereference files within the archive,
-  e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip!/plugin.exe`,
-  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
+- `jar` - can be used to dereference files within a JAR or ZIP archive, 
+  e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.jar!/plugin.exe`,
+  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.jar`
   and internally extract `plugin.exe` from that archive.
 
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the

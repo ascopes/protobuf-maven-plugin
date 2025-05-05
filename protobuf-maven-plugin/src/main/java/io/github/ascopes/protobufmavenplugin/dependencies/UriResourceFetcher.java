@@ -25,10 +25,15 @@ import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
+import java.net.spi.URLStreamHandlerProvider;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.ServiceLoader.Provider;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.Maven;
@@ -38,15 +43,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Component that consumes URLs to obtain resources from remote locations.
+ * Component that consumes URIs to obtain resources from remote locations.
  *
  * @author Ashley Scopes
  * @since 0.4.0
  */
-@Description("Fetches and downloads resources from URLs")
+@Description("Fetches and downloads resources from URIs")
 @MojoExecutionScoped
 @Named
-public final class UrlResourceFetcher {
+public final class UriResourceFetcher {
 
   private static final int TIMEOUT = 30_000;
   private static final String USER_AGENT_HEADER = "User-Agent";
@@ -54,19 +59,19 @@ public final class UrlResourceFetcher {
       "io.github.ascopes.protobuf-maven-plugin/%s org.apache.maven/%s (Java %s)",
       requireNonNullElse(
           // May not be set if we are running within an IDE.
-          UrlResourceFetcher.class.getPackage().getImplementationVersion(),
+          UriResourceFetcher.class.getPackage().getImplementationVersion(),
           "SNAPSHOT"
       ),
       Maven.class.getPackage().getImplementationVersion(),
       Runtime.version().toString()
   );
 
-  private static final Logger log = LoggerFactory.getLogger(UrlResourceFetcher.class);
+  private static final Logger log = LoggerFactory.getLogger(UriResourceFetcher.class);
 
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public UrlResourceFetcher(TemporarySpace temporarySpace) {
+  public UriResourceFetcher(TemporarySpace temporarySpace) {
     this.temporarySpace = temporarySpace;
   }
 
@@ -75,7 +80,7 @@ public final class UrlResourceFetcher {
    * local file system in a temporary location if it is not on the
    * root file system.
    *
-   * @param url the URL of the resource to fetch.
+   * @param uri the URI of the resource to fetch.
    * @param extension a hint pointing to the potential file extension to use for the resource.
    *     This may be ignored if the URL points to a resource that is already
    *     on the root file system.
@@ -83,27 +88,28 @@ public final class UrlResourceFetcher {
    *     resource.
    * @throws ResolutionException if resolution fails for any other reason.
    */
-  public Optional<Path> fetchFileFromUrl(URL url, String extension) throws ResolutionException {
-    // This will die if the URL points to a file on the non default file system...
+  public Optional<Path> fetchFileFromUri(URI uri, String extension) throws ResolutionException {
+    // This will die if the URI points to a file on the non default file system...
     // probably don't care enough to fix this bug as users should not ever want to do this I guess.
-    return url.getProtocol().equalsIgnoreCase("file")
-        ? handleFileSystemUrl(url)
-        : handleOtherUrl(url, extension);
+    return uri.getScheme().equalsIgnoreCase("file")
+        ? handleFileSystemUri(uri)
+        : handleOtherUri(uri, extension);
   }
 
-  private Optional<Path> handleFileSystemUrl(URL url) throws ResolutionException {
+  private Optional<Path> handleFileSystemUri(URI uri) throws ResolutionException {
     try {
-      return Optional.of(url.toURI())
+      return Optional.of(uri)
           .map(Path::of)
           .filter(Files::exists);
-
     } catch (Exception ex) {
-      log.debug("Failed to interrogate local file '{}'", url, ex);
-      throw new ResolutionException("Failed to resolve '" + url + "' due to malformed syntax", ex);
+      throw new ResolutionException("Failed to discover file at '" + uri + "': " + ex, ex);
     }
   }
 
-  private Optional<Path> handleOtherUrl(URL url, String extension) throws ResolutionException {
+  private Optional<Path> handleOtherUri(URI uri, String extension) throws ResolutionException {
+    var url = parseUrlWithAnyHandler(uri);
+    // We have to pass a URL in here, since URIs do not parse the !/ fragments at the ends of
+    // strings correctly...
     var targetFile = targetFile(url, extension);
 
     try {
@@ -113,7 +119,7 @@ public final class UrlResourceFetcher {
       conn.setAllowUserInteraction(false);
       conn.setRequestProperty(USER_AGENT_HEADER, USER_AGENT_VALUE);
 
-      log.debug("Connecting to '{}' to copy resources to '{}'", url, targetFile);
+      log.debug("Connecting to '{}' to copy resources to '{}'", uri, targetFile);
       conn.connect();
 
       try (
@@ -121,18 +127,18 @@ public final class UrlResourceFetcher {
           var fileStream = new SizeAwareBufferedOutputStream(Files.newOutputStream(targetFile))
       ) {
         responseStream.transferTo(fileStream);
-        log.info("Downloaded '{}' to '{}' ({} bytes)", url, targetFile, fileStream.size);
+        log.info("Downloaded '{}' to '{}' ({} bytes)", uri, targetFile, fileStream.size);
         return Optional.of(targetFile);
 
       } catch (FileNotFoundException ex) {
-        log.warn("No resource at '{}' appears to exist!", url);
+        log.warn("No resource at '{}' appears to exist!", uri);
         return Optional.empty();
       }
 
     } catch (IOException ex) {
-      log.debug("Failed to download '{}' to '{}'", url, targetFile, ex);
+      log.debug("Failed to download '{}' to '{}'", uri, targetFile, ex);
 
-      throw new ResolutionException("Failed to download '" + url + "' to '" + targetFile + "'", ex);
+      throw new ResolutionException("Failed to download '" + uri + "' to '" + targetFile + "'", ex);
     }
   }
 
@@ -149,6 +155,23 @@ public final class UrlResourceFetcher {
         .resolve(fileName + extension);
   }
 
+  private URL parseUrlWithAnyHandler(URI uri) throws ResolutionException {
+    var customHandler = ServiceLoader
+        .load(URLStreamHandlerProvider.class, getClass().getClassLoader())
+        .stream()
+        .map(Provider::get)
+        .map(provider -> provider.createURLStreamHandler(uri.getScheme()))
+        .findFirst()
+        .orElse(null);
+
+    log.debug("Parsing URI '{}' into URL using custom handler '{}'", uri, customHandler);
+
+    try {
+      return new URL(null, uri.toString(), customHandler);
+    } catch (MalformedURLException ex) {
+      throw new ResolutionException("Syntax for URI '" + uri + "' is invalid", ex);
+    }
+  }
 
   /**
    * Buffers an output stream, and keeps track of how many bytes

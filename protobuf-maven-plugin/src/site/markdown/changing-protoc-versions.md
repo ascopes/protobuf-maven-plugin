@@ -27,7 +27,7 @@ On Linux, MacOS, and other POSIX-like operating systems, this will read the `$PA
 variable and search for a binary named `protoc` case-sensitively. The executable **MUST** be
 executable by the current user (i.e. `chmod +x /path/to/protoc`), otherwise it will be ignored.
 
-On Windows, this will respect the `%PATH%` environment variable (case insensitive). The path will
+On Windows, this will respect the `%PATH%` environment variable (case-insensitive). The path will
 be searched for files where their name matches `protoc` case-insensitively, ignoring the file
 extension. The file extension must match one of the extensions specified in the `%PATHEXT%`
 environment variable. The above example would match `protoc.exe` on Windows, as an example.

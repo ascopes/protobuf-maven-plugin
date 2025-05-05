@@ -29,7 +29,7 @@ import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrato
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,16 +94,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Inject
   MavenProjectHelper mavenProjectHelper;
-
-  /*
-   * User parameters.
-   *
-   * Note that for files, we retain the use of java.io.File despite using java.nio.file.Path
-   * everywhere else. Maven did not support parsing java.nio.file.Path until v3.9.x, and we
-   * support 3.8.x out of the box.
-   *
-   * TODO: simplify this once we drop Maven 3.8 support.
-   */
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
@@ -248,7 +238,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.0.0
    */
   @Parameter
-  @Nullable List<UrlProtocPluginBean> binaryUrlPlugins;
+  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
 
   /**
    * Enable generating C++ sources and headers from the protobuf sources.
@@ -446,7 +436,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  @Nullable List<File> importPaths;
+  @Nullable List<Path> importPaths;
 
   /**
    * Source paths to include in compilation.
@@ -598,10 +588,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean objcEnabled;
 
   /**
-   * Defines the file in which to write the protobin descriptor.
+   * Defines the file in which to write the file descriptor set descriptor..
    *
    * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
-   * defined in descriptor.proto) containing all the input files in
+   * defined by {@code descriptor.proto}) containing all the input files in
    * {@code outputDescriptorFile}.</p>
    *
    * <p>If this is specified, then incremental compilation will always be disabled
@@ -613,7 +603,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable File outputDescriptorFile;
 
   /**
-   * Whether to attach the generated protobin descriptor as a Maven project artifact.
+   * Whether to attach the generated file descriptor set descriptor as a Maven project artifact.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
@@ -624,8 +614,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorAttached;
 
   /**
-   * Defines the Maven artifact type for the protobin descriptor when
-   * attached to the Maven project.
+   * Defines the Maven artifact type for the file descriptor set descriptor when attached to the
+   * Maven project.
    *
    * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
    *
@@ -636,8 +626,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable String outputDescriptorAttachmentType;
 
   /**
-   * Defines the Maven artifact classifier for the protobin descriptor when
-   * attached to the Maven project.
+   * Defines the Maven artifact classifier for the file descriptor set descriptor when attached to
+   * the Maven project.
    *
    * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
    *
@@ -648,7 +638,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable String outputDescriptorAttachmentClassifier;
 
   /**
-   * Enable including imports in generated protobin descriptor files.
+   * Enable including imports in generated file descriptor set descriptor files.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
@@ -659,7 +649,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorIncludeImports;
 
   /**
-   * Enable including source information in generated protobin descriptor
+   * Enable including source information in generated file descriptor set descriptors.
    * files.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
@@ -671,7 +661,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorIncludeSourceInfo;
 
   /**
-   * Enable retaining option details in generated protobin descriptors.
+   * Enable retaining option details in generated file descriptor set descriptors.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
@@ -690,7 +680,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.1.0
    */
   @Parameter
-  @Nullable File outputDirectory;
+  @Nullable Path outputDirectory;
 
   /**
    * Enable generating PHP sources from the protobuf sources.
@@ -886,7 +876,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter
-  @Nullable List<File> sourceDirectories;
+  @Nullable List<Path> sourceDirectories;
 
   /**
    * Specify paths to descriptor files to compile from.
@@ -894,7 +884,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 3.1.0
    */
   @Parameter
-  @Nullable List<File> sourceDescriptorPaths;
+  @Nullable List<Path> sourceDescriptorPaths;
 
   /*
    * Implementation-specific details.
@@ -984,7 +974,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
         .importDependencies(nonNullList(importDependencies))
-        .importPaths(importPaths())
+        .importPaths(determinePaths(importPaths, List::of))
         .includes(nonNullList(includes))
         .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
         .isFailOnInvalidDependencies(failOnInvalidDependencies)
@@ -1008,8 +998,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .protocVersion(protocVersion())
         .sourceDependencies(nonNullList(sourceDependencies))
         .sourceDescriptorDependencies(nonNullList(sourceDescriptorDependencies))
-        .sourceDescriptorPaths(sourceDescriptorPaths())
-        .sourceDirectories(sourceDirectories())
+        .sourceDescriptorPaths(determinePaths(sourceDescriptorPaths, List::of))
+        .sourceDirectories(determinePaths(sourceDirectories, this::defaultSourceDirectories))
         .sourceRootRegistrar(sourceRootRegistrar())
         .build();
 
@@ -1049,22 +1039,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private Path outputDirectory() {
     return Optional.ofNullable(outputDirectory)
-        .map(File::toPath)
         .orElseGet(this::defaultOutputDirectory);
-  }
-
-  private Collection<Path> sourceDirectories() {
-    return parseSourcePaths(sourceDirectories, this::defaultSourceDirectories);
-  }
-
-  private Collection<Path> sourceDescriptorPaths() {
-    return parseSourcePaths(sourceDescriptorPaths, List::of);
-  }
-
-  private Collection<Path> importPaths() {
-    return nonNullList(importPaths).stream()
-        .map(File::toPath)
-        .collect(Collectors.toUnmodifiableList());
   }
 
   private String protocVersion() {
@@ -1076,15 +1051,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : overriddenVersion;
   }
 
-  private static Collection<Path> parseSourcePaths(
-      @Nullable Collection<File> sourcePaths,
+  private static Collection<Path> determinePaths(
+      @Nullable Collection<Path> inputPaths,
       Supplier<Collection<Path>> defaultIfMissing
   ) {
-    var transformed = Optional.ofNullable(sourcePaths)
+    var transformed = Optional.ofNullable(inputPaths)
         .filter(not(Collection::isEmpty))
         .stream()
         .flatMap(Collection::stream)
-        .map(File::toPath)
         .collect(Collectors.toUnmodifiableList());
 
     var finalValue = transformed.isEmpty()

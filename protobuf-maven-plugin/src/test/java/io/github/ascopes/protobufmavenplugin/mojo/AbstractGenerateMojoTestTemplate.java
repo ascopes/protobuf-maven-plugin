@@ -38,9 +38,8 @@ import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrato
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -281,7 +280,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenBinaryUrlPluginsNullExpectEmptyListInRequest(
-      List<UrlProtocPluginBean> plugins
+      List<UriProtocPluginBean> plugins
   ) throws Throwable {
     // Given
     mojo.binaryUrlPlugins = plugins;
@@ -300,7 +299,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   void whenBinaryUrlPluginsProvidedExpectPluginsInRequest() throws Throwable {
     // Given
-    List<UrlProtocPluginBean> plugins = mock();
+    List<UriProtocPluginBean> plugins = mock();
     mojo.binaryUrlPlugins = plugins;
 
     // When
@@ -475,7 +474,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @DisplayName("when importPaths is null, expect an empty list in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
-  void whenImportPathsNullExpectEmptyListInRequest(List<File> importPaths) throws Throwable {
+  void whenImportPathsNullExpectEmptyListInRequest(List<Path> importPaths) throws Throwable {
     // Given
     mojo.importPaths = importPaths;
 
@@ -495,11 +494,11 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       @TempDir Path someTempDir
   ) throws Throwable {
     // Given
-    var path1 = someTempDir.resolve("foo").resolve("bar");
-    var path2 = someTempDir.resolve("do").resolve("ray");
-    var path3 = someTempDir.resolve("aaa").resolve("bbb");
+    var path1 = Files.createDirectories(someTempDir.resolve("foo").resolve("bar"));
+    var path2 = Files.createDirectories(someTempDir.resolve("do").resolve("ray"));
+    var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
 
-    mojo.importPaths = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+    mojo.importPaths = List.of(path1, path2, path3);
 
     // When
     mojo.execute();
@@ -736,7 +735,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
       @TempDir Path expectedOutputDirectory
   ) throws Throwable {
     // Given
-    mojo.outputDirectory = expectedOutputDirectory.toFile();
+    mojo.outputDirectory = expectedOutputDirectory;
 
     // When
     mojo.execute();
@@ -891,7 +890,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDescriptorPathsNullExpectEmptyCollectionInRequest(
-      List<File> sourceDescriptorPaths
+      List<Path> sourceDescriptorPaths
   ) throws Throwable {
     // Given
     mojo.sourceDescriptorPaths = sourceDescriptorPaths;
@@ -916,7 +915,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var path2 = Files.createDirectories(someTempDir.resolve("do").resolve("ray"));
     var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
 
-    mojo.sourceDescriptorPaths = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+    mojo.sourceDescriptorPaths = List.of(path1, path2, path3);
 
     // When
     mojo.execute();
@@ -942,7 +941,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var path3 = Files.createFile(dir2.resolve("file2.binpb"));
     assertThat(path2).doesNotExist();
 
-    mojo.sourceDescriptorPaths = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+    mojo.sourceDescriptorPaths = List.of(path1, path2, path3);
 
     // When
     mojo.execute();
@@ -958,7 +957,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDirectoriesNullExpectDefaultValueInRequest(
-      List<File> sourceDirectories
+      List<Path> sourceDirectories
   ) throws Throwable {
     // Given
     mojo.sourceDirectories = sourceDirectories;
@@ -987,7 +986,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var path2 = Files.createDirectories(someTempDir.resolve("do").resolve("ray"));
     var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
 
-    mojo.sourceDirectories = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+    mojo.sourceDirectories = List.of(path1, path2, path3);
 
     // When
     mojo.execute();
@@ -1010,7 +1009,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var path3 = Files.createDirectories(someTempDir.resolve("aaa").resolve("bbb"));
     assertThat(path2).doesNotExist();
 
-    mojo.sourceDirectories = List.of(path1.toFile(), path2.toFile(), path3.toFile());
+    mojo.sourceDirectories = List.of(path1, path2, path3);
 
     // When
     mojo.execute();

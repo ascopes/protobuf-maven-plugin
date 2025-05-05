@@ -19,7 +19,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDe
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.plugins.UrlProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +56,7 @@ public interface GenerationRequest {
    *
    * @return the collection of plugins.
    */
-  Collection<? extends UrlProtocPlugin> getBinaryUrlPlugins();
+  Collection<? extends UriProtocPlugin> getBinaryUrlPlugins();
 
   /**
    * The preference for how to resolve transitive dependencies by default.
