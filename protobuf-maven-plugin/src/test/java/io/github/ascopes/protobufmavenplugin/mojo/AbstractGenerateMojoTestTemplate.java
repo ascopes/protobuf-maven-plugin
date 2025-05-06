@@ -585,7 +585,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   ) throws Throwable {
     var expectedDescriptorFile = Files.createFile(tempDir.resolve("protobin.desc"));
     // Given
-    mojo.outputDescriptorFile = expectedDescriptorFile.toFile();
+    mojo.outputDescriptorFile = expectedDescriptorFile;
 
     // When
     mojo.execute();

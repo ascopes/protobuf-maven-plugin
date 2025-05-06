@@ -30,7 +30,6 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -600,7 +599,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.9.0
    */
   @Parameter
-  @Nullable File outputDescriptorFile;
+  @Nullable Path outputDescriptorFile;
 
   /**
    * Whether to attach the generated file descriptor set descriptor as a Maven project artifact.
@@ -993,7 +992,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorAttachmentClassifier(outputDescriptorAttachmentClassifier)
         .outputDescriptorAttachmentRegistrar(outputDescriptorAttachmentRegistrar())
         .outputDescriptorAttachmentType(outputDescriptorAttachmentType)
-        .outputDescriptorFile(outputDescriptorFile())
+        .outputDescriptorFile(outputDescriptorFile)
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
         .sourceDependencies(nonNullList(sourceDependencies))
@@ -1029,12 +1028,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     return Optional.ofNullable(dependencyScopes)
         .filter(not(Set::isEmpty))
         .orElseGet(this::defaultDependencyScopes);
-  }
-
-  private @Nullable Path outputDescriptorFile() {
-    return Optional.ofNullable(outputDescriptorFile)
-        .map(File::toPath)
-        .orElse(null);
   }
 
   private Path outputDirectory() {
