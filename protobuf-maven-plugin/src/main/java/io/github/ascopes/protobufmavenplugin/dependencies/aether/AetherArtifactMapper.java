@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 2.4.4
  */
+@Description("Maps between various dependency and artifact types")
 @MojoExecutionScoped
 @Named
 final class AetherArtifactMapper {
