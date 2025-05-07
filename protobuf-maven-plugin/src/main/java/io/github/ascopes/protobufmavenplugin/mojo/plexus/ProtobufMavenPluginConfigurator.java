@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.mojo.plexus;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
+import org.eclipse.sisu.Description;
 
 /**
  * Custom configurator for this Maven plugin which allows us to inject additional converter types to
@@ -26,6 +27,7 @@ import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
  * @author Ashley Scopes
  * @since 3.1.3
  */
+@Description("Registers custom Maven parameter converters for Plexus")
 @Named(ProtobufMavenPluginConfigurator.NAME)
 @Singleton
 public class ProtobufMavenPluginConfigurator extends BasicComponentConfigurator {
