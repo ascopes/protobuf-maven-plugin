@@ -22,6 +22,7 @@ import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.resolution.ResolutionErrorPolicy;
+import org.eclipse.sisu.Description;
 
 /**
  * Custom repository session for the Protobuf Maven Plugin which injects some special components to
@@ -32,6 +33,7 @@ import org.eclipse.aether.resolution.ResolutionErrorPolicy;
  * @author Ashley Scopes
  * @since 2.0.3
  */
+@Description("Injects additional functionality into the default Aether RepositorySession")
 @MojoExecutionScoped
 @Named
 final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepositorySystemSession {
