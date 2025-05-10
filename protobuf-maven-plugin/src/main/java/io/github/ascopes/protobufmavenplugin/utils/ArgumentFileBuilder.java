@@ -41,6 +41,13 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
+  public ArgumentFileBuilder addIfTrue(boolean condition, Supplier<String> content) {
+    if (condition) {
+      add(content.get());
+    }
+    return this;
+  }
+
   public <T> ArgumentFileBuilder apply(Consumer<ArgumentFileBuilder> operator) {
     operator.accept(this);
     return this;
@@ -52,13 +59,6 @@ public final class ArgumentFileBuilder {
   ) {
     for (var item : items) {
       apply(self -> operator.accept(self, item));
-    }
-    return this;
-  }
-
-  public ArgumentFileBuilder addIfTrue(boolean condition, Supplier<String> content) {
-    if (condition) {
-      add(content.get());
     }
     return this;
   }
