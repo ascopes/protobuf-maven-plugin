@@ -57,7 +57,7 @@ class ZipUrlStreamHandlerProviderTest {
 
   @DisplayName("the 'zip' protocol can be used to read files from ZIP archives")
   @Test
-  void zipProtocolCanBeUsedToReadFilesFromZips(@TempDir Path tempDir) throws IOException {
+  void zipProtocolCanBeUsedToReadFilesFromZips(@TempDir Path tempDir) throws Exception {
     // Given
     var zip = createZip(tempDir.resolve("test.zip"), Map.of(
         "foo/bar/baz.txt", "Hello, World!",
@@ -68,6 +68,8 @@ class ZipUrlStreamHandlerProviderTest {
 
     // When
     var conn = uri.toURL().openConnection();
+    conn.setDoOutput(false);
+    conn.setUseCaches(false);
     conn.connect();
     var os = new ByteArrayOutputStream();
     try (var is = conn.getInputStream()) {
@@ -77,6 +79,11 @@ class ZipUrlStreamHandlerProviderTest {
     // Then
     assertThat(os.toString())
         .isEqualTo("Hello, World!");
+
+    // Windows bug, we seem to not close the url connection immediately, and junit crashes
+    // when shutting down as the tempdir will not allow cleanup to proceed while handles
+    // to the file are open. Delay by a couple of seconds to allow this to succeed.
+    Thread.sleep(3_000);
   }
 
   static Path createZip(Path target, Map<String, String> files) throws IOException {
