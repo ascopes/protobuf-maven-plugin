@@ -125,7 +125,11 @@ Any protocols supported by your JRE should be able to be used here, including:
 - `http`
 - `https`
 - `ftp`
-- `jar` - can be used to dereference files within a JAR or ZIP archive, 
+- `zip` - can be used to dereference files within a ZIP archive,
+  e.g. `zip:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip!/plugin.exe`,
+  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
+  and internally extract `plugin.exe` from that archive.
+- `jar` - can be used to dereference files within a JAR archive, 
   e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.jar!/plugin.exe`,
   which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.jar`
   and internally extract `plugin.exe` from that archive.

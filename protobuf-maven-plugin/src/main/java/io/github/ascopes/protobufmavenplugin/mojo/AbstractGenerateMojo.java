@@ -195,8 +195,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
    * </ul>
    *
-   * <p>Additionally, the {@code jar} protocol can be used with any of the above to
-   * enable extracting a file from a JAR or ZIP and using it directly.
+   * <p>Additionally, the {@code zip} or {@code jar} protocol can be used with any of the above to
+   * enable extracting a file from a ZIP or JAR and using it directly.
    *
    * <p>For example:
    * <pre>{@code
@@ -214,7 +214,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    *   <!-- HTTP resource that is a ZIP holding the binary we want. -->
    *   <binaryUrlPlugin>
-   *     <url>jar:https://myorganisation.org/protoc/plugins/myplugin3.zip!/protoc-gen-something.exe</url>
+   *     <url>zip:https://myorganisation.org/protoc/plugins/myplugin3.zip!/protoc-gen-something.exe</url>
    *   </binaryUrlPlugin>
    * </binaryUrlPlugins>
    * }</pre>

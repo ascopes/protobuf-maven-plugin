@@ -30,6 +30,7 @@ import java.net.URL;
 import java.net.spi.URLStreamHandlerProvider;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
@@ -160,6 +161,7 @@ public final class UriResourceFetcher {
         .stream()
         .map(Provider::get)
         .map(provider -> provider.createURLStreamHandler(uri.getScheme()))
+        .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);
 
