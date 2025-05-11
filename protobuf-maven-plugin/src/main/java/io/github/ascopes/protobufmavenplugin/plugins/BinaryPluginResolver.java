@@ -17,9 +17,9 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
-import io.github.ascopes.protobufmavenplugin.dependencies.UriResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
+import io.github.ascopes.protobufmavenplugin.fs.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;

@@ -19,11 +19,11 @@ import static java.util.function.Predicate.not;
 
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
+import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.sources.filter.FileFilter;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
-import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -15,8 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.generation;
 
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.BiConsumer;

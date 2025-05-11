@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;

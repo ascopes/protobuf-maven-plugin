@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static java.util.function.Predicate.not;
 
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
