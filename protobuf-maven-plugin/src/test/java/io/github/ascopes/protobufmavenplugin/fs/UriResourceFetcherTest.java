@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependencies;
+package io.github.ascopes.protobufmavenplugin.fs;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -32,7 +32,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;

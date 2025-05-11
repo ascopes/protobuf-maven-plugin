@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc;
 
+import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.DescriptorFileProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.LanguageProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.PluginProtocTarget;
@@ -22,7 +23,6 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
-import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.nio.charset.StandardCharsets;

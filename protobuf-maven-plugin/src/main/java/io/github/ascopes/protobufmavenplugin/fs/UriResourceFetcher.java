@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependencies;
+package io.github.ascopes.protobufmavenplugin.fs;
 
 import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.utils.TemporarySpace;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;

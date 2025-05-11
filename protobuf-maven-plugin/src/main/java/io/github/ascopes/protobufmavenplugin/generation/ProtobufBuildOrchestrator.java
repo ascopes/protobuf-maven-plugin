@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.generation;
 
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ImmutableProtocInvocation;
@@ -31,7 +32,6 @@ import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputResolver;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.sources.incremental.IncrementalCacheManager;
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.io.IOException;

@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.filter;
 
-import io.github.ascopes.protobufmavenplugin.utils.FileUtils;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
