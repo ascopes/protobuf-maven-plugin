@@ -41,6 +41,8 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
+        <!-- Avoid dependency on javax.annotation-api -->
+        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
   </configuration>
@@ -65,6 +67,8 @@ executable name instead:
     <binaryPathPlugins>
       <binaryPathPlugin>
         <name>protoc-gen-grpc-java</name>
+        <!-- Avoid dependency on javax.annotation-api -->
+        <options>@generated=omit</options>
       </binaryPathPlugin>
     </binaryPathPlugins>
   </configuration>
@@ -104,6 +108,8 @@ specific file system path:
     <binaryUrlPlugins>
       <binaryUrlPlugin>
         <url>file:///opt/protoc/protoc-gen-grpc-java</url>
+        <!-- Avoid dependency on javax.annotation-api -->
+        <options>@generated=omit</options>
       </binaryUrlPlugin>
       <binaryUrlPlugin>
         <url>ftp://company-server.internal/some-other-plugin.exe</url>
@@ -254,6 +260,8 @@ then you can provide the following:
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
+        <!-- Avoid dependency on javax.annotation-api -->
+        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
     <jvmMavenPlugins>

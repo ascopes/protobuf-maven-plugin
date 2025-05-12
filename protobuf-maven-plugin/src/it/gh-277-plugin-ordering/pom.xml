@@ -61,13 +61,6 @@
       <artifactId>reactor-core</artifactId>
       <scope>compile</scope>
     </dependency>
-
-    <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <scope>compile</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -94,6 +87,8 @@
               <groupId>io.grpc</groupId>
               <artifactId>protoc-gen-grpc-java</artifactId>
               <version>${grpc.version}</version>
+              <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
+              <options>@generated=omit</options>
               <order>100</order>
             </binaryMavenPlugin>
           </binaryMavenPlugins>
