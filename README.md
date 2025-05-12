@@ -145,6 +145,7 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
+        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
 
