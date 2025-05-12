@@ -62,12 +62,6 @@
       <artifactId>reactor-core</artifactId>
     </dependency>
 
-    <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -97,7 +91,10 @@
               <groupId>io.grpc</groupId>
               <artifactId>protoc-gen-grpc-java</artifactId>
               <version>${grpc.version}</version>
+              <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
+              <options>@generated=omit</options>
             </binaryMavenPlugin>
+
             <binaryMavenPlugin>
               <groupId>com.salesforce.servicelibs</groupId>
               <artifactId>reactor-grpc</artifactId>

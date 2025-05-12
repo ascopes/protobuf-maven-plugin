@@ -62,13 +62,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <scope>compile</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -96,6 +89,8 @@
           <binaryUrlPlugins>
             <binaryUrlPlugin>
               <url>https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/${grpc.version}/protoc-gen-grpc-java-${grpc.version}-linux-x86_64.exe</url>
+              <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
+              <options>@generated=omit</options>
             </binaryUrlPlugin>
           </binaryUrlPlugins>
         </configuration>
