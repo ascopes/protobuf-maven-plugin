@@ -655,7 +655,14 @@
         <configuration>
           <autoPublish>true</autoPublish>
           <publishingServerId>central</publishingServerId>
-          <waitUntil>published</waitUntil>
+          <!--
+               The central publishing plugin has an eventual consistency bug
+               here where the API may give a 404 for a short time before reporting
+               the publication as in progress. This crashes the plugin and erroneously
+               forces a revert to occur when it is not needed. For now, just hope
+               that the publication succeeds at some point instead of waiting for it.
+          -->
+          <!-- <waitUntil>published</waitUntil> -->
         </configuration>
       </plugin>
     </plugins>
