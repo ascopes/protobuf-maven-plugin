@@ -118,6 +118,27 @@ jobs:
           CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
+      - name: Publish code coverage
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload build logs as artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs
+          path: |-
+            **/build.log
+            **/maven-status/**
+            **/surefire-reports/**.txt
+          compression-level: 9
+          retention-days: 365
+          include-hidden-files: true
+          if-no-files-found: warn
+
       - name: Revert Maven Central release
         if: ${{ failure() && ! inputs.dry-run }}
         run: |-
