@@ -24,12 +24,12 @@ on:
         type: boolean
 
       skip-tests:
-        description: "Skip unit and integration tests"
+        description: "Skip unit and integration tests on Maven steps"
         default: false
         type: boolean
 
       version:
-        description: "Override deployment version"
+        description: "Override the deployment version (leave empty to compute the appropriate value)"
         default: ""
         type: string
 
@@ -71,6 +71,8 @@ jobs:
       contents: write
       id-token: write
 
+    if: ${{ ! inputs.skip-maven-release }}
+
     environment:
       name: Maven Central
       url: https://repo1.maven.org/maven2/io/github/ascopes/protobuf-maven-plugin/
@@ -101,7 +103,6 @@ jobs:
           git config user.email '${{ github.actor }}@users.noreply.github.com'
 
       - name: Create Maven Central release
-        if: ${{ ! inputs.skip-maven-release }}
         run: |-
           ./mvnw -B -e \
               -DdryRun='${{ inputs.dry-run }}' \
@@ -118,7 +119,7 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Revert Maven Central release
-        if: ${{ failure() && ! inputs.skip-maven-release }}
+        if: ${{ failure() && ! inputs.dry-run }}
         run: |-
           ./mvnw -B -e \
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
@@ -135,6 +136,8 @@ jobs:
     permissions:
       id-token: write
       pages: write
+
+    if: ${{ ! inputs.skip-pages }}
 
     environment:
       name: GitHub Pages
@@ -153,19 +156,18 @@ jobs:
           java-version: 24
 
       - name: Generate site
-        if: ${{ ! inputs.skip-pages }}
         run: |-
           ./mvnw -B versions:set -DnewVersion="${{ needs.prepare.outputs.release_version }}"
           ./mvnw -B site -DskipTests -Dinvoker.skip
 
       - name: Upload site to GitHub API
-        if: ${{ ! inputs.skip-pages }}
+        if: ${{ ! inputs.dry-run }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: protobuf-maven-plugin/target/site
 
       - name: Deploy site to GitHub Pages
-        if: ${{ ! inputs.skip-pages && ! inputs.dry-run }}
+        if: ${{ ! inputs.dry-run }}
         uses: actions/deploy-pages@v4
 
   github-release:
@@ -178,13 +180,15 @@ jobs:
       contents: write
       id-token: write
 
+    if: ${{ ! inputs.skip-github-release  }}
+
     environment:
       name: GitHub Releases
       url: https://github.com/${{ github.repository }}/releases
 
     steps:
       - name: Create GitHub release
-        if: ${{ ! inputs.dry-run && ! inputs.skip-github-release  }}
+        if: ${{ ! inputs.dry-run  }}
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ needs.prepare.outputs.release_version }}
