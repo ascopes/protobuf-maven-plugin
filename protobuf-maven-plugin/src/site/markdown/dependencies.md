@@ -187,8 +187,8 @@ unique use cases for it.
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <includeDependencies>
-      <includeDependency>
+    <importDependencies>
+      <importDependency>
         <groupId>org.example</groupId>
         <artifactId>ticketsystem-ticket-board</artifactId>
         <version>...</version>
@@ -201,8 +201,8 @@ unique use cases for it.
             <artifactId>ticketsystem-beta-user-protos</artifactId>
           </exclusion>
         </exclusions>
-      </includeDependency>
-    </includeDependencies>
+      </importDependency>
+    </importDependencies>
   </configuration>
 </plugin>
 ```
