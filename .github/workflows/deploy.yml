@@ -1,4 +1,4 @@
-name: Release New Version
+name: Deploy Artifacts/Documentation
 
 on:
   workflow_dispatch:
