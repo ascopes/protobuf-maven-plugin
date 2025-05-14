@@ -121,7 +121,7 @@ jobs:
       - name: Publish code coverage
         uses: codecov/codecov-action@v4
         continue-on-error: true
-        if: always()
+        if: ${{ always() && ! inputs.dry-run }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
