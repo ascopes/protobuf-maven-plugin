@@ -246,7 +246,7 @@ parent project, allowing you to infer versions from a parent POM across numerous
 team.
 
 This is already valid if you use the `dependencies` block within your pom.xml, but will also apply
-to `importDependencies` blocks as well.
+to `importDependencies` and `sourceDependencies` blocks as well.
 
 ```xml
 <project>
@@ -269,14 +269,17 @@ to `importDependencies` blocks as well.
     <configuration>
       ...
       
-      <includeDependencies>
-        <includeDependency>
+      <importDependencies>
+        <importDependency>
           <groupId>com.google.protobuf</groupId>
           <artifactId>protobuf-java</artifactId>
           <!-- The version here is inferred from <dependencyManagement/>! -->
-        </includeDependency>
-      </includeDependencies>
+        </importDependency>
+      </importDependencies>
     </configuration>
   </plugin>
 </project>
 ```
+
+Note that in the event of duplicate dependencies, the newer dependency version will be
+taken.
