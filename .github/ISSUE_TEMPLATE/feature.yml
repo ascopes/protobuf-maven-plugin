@@ -11,6 +11,15 @@ body:
         So you'd like to request a new feature? That's great! We just need to ask a few
         questions and we can get started.
 
+        Please note that we generally do **not** take requests to provide short-hand
+        integrations with specific `protoc` plugins, due to the sheer number of them that
+        exist.
+        
+        If you find a feature is missing that prevents you from configuring
+        a `protoc` plugin at all, please raise a 
+        [bug](https://github.com/ascopes/protobuf-maven-plugin/issues/new?template=bug.yml)
+        so that we can attempt to address the issue as soon as possible for you.
+
   - type: textarea
     id: brief-description
     attributes:
