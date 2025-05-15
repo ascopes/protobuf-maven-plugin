@@ -219,6 +219,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </binaryUrlPlugins>
    * }</pre>
    *
+   * <p>If you are using v3.1.3 or older, use {@code jar} in place of {@code zip}.
+   *
    * <p>Objects support the following attributes:
    *
    * <ul>
@@ -714,7 +716,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * version specified in the POM. Termux users in particular will find
    * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
    * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
-   *
    *
    * <p>Path resolution on Linux, macOS, and other POSIX-like systems, resolution looks
    * for an executable binary matching the exact name in any directory in the {@code $PATH}
