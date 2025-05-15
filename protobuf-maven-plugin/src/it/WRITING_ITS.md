@@ -95,3 +95,10 @@ individually.
 
 If you wish to enable verbose output from Maven, edit the `invoker-debug.properties` to set
 the `invoker.debug` property to `true`.
+
+## Using `protoc` from the system $PATH
+
+Activate the `-Pinvoker-path-protoc` profile to force all tests to run using `protoc` on the system `$PATH`.
+
+Note that this is incompatible with the debug profile, so you may need to add the debug flags to the properties
+manually.
