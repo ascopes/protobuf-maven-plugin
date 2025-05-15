@@ -7,7 +7,7 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: >-
+      value: |-
         So you'd like to request a new feature? That's great! We just need to ask a few
         questions and we can get started.
 
