@@ -110,7 +110,6 @@
     <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <license-maven-plugin.version>5.0.0</license-maven-plugin.version>
     <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-    <maven-changelog-plugin.version>3.0.0-M1</maven-changelog-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-clean-plugin.version>3.4.1</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
@@ -671,28 +670,6 @@
 
   <reporting>
     <plugins>
-      <plugin>
-        <!-- Generate changelog release notes. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-changelog-plugin</artifactId>
-        <version>${maven-changelog-plugin.version}</version>
-
-        <configuration>
-          <issueIDRegexPattern>(#|[gG][hH]-)[0-9]+</issueIDRegexPattern>
-          <issueLinkUrl>${project.issueManagement.url}/%ISSUE%</issueLinkUrl>
-        </configuration>
-
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>changelog</report>
-              <report>dev-activity</report>
-              <report>file-activity</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    
       <plugin>
         <!-- Generate source documentation listings. -->
         <groupId>org.apache.maven.plugins</groupId>
