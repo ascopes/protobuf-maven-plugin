@@ -92,7 +92,7 @@
     <immutables.version>2.10.1</immutables.version>
     <javax-annotation.version>1.3.2</javax-annotation.version>
     <jspecify.version>1.0.0</jspecify.version>
-    <json.version>20250107</json.version>
+    <json.version>20250517</json.version>
     <jsonassert.version>2.0-rc1</jsonassert.version>
     <junit.version>5.12.2</junit.version>
     <maven-core.version>3.9.9</maven-core.version>
