@@ -48,7 +48,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     // we use for dependencies. The TEST scope is documented to cover all other scopes.
     requiresDependencyCollection = ResolutionScope.TEST,
     requiresDependencyResolution = ResolutionScope.TEST,
-    requiresOnline = true,
+    requiresOnline = false,
     threadSafe = true
 )
 public final class MainGenerateMojo extends AbstractGenerateMojo {
