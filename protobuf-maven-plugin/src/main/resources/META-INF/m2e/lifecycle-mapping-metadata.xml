@@ -16,6 +16,8 @@
 
 -->
 <lifecycleMappingMetadata>
+  <!-- Metadata visible by Eclipse, VSCode, etc, to assist in various automation
+       integrations with this Maven plugin. -->
 	<pluginExecutions>
 		<pluginExecution>
 			<pluginExecutionFilter>
