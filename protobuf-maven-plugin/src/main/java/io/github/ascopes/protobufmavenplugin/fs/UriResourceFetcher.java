@@ -133,6 +133,13 @@ public final class UriResourceFetcher {
 
     try {
       var conn = url.openConnection();
+      // Important! Without this JarURLConnection may leave the underlying connection
+      // open after we close conn.getInputStream(). On Windows this can prevent the deletion
+      // of these files as part of operations like mvn clean, and also in our unit tests.
+      // On Windows, we can evem crash JUnit because of this!
+      // See https://github.com/junit-team/junit5/issues/4567
+      conn.setUseCaches(false);
+
       conn.setConnectTimeout(TIMEOUT);
       conn.setReadTimeout(TIMEOUT);
       conn.setAllowUserInteraction(false);
@@ -151,6 +158,7 @@ public final class UriResourceFetcher {
       return Optional.of(targetFile);
 
     } catch (FileNotFoundException ex) {
+
       // May be raised during the call to .getInputStream(), or the call to .connect(),
       // depending on the implementation.
       log.warn("No resource at '{}' appears to exist!", uri);
