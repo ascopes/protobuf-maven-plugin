@@ -66,6 +66,9 @@ class UriResourceFetcherTest {
   WireMock wireMockClient;
   String wireMockBaseUri;
 
+  @TempDir
+  Path tempDir;
+
   @Mock(strictness = Mock.Strictness.LENIENT)
   MavenSession mavenSession;
 
@@ -104,10 +107,7 @@ class UriResourceFetcherTest {
   @DisplayName("file URIs are resolved when they exist")
   @ValueSource(booleans = {true, false})
   @ParameterizedTest(name = "when MavenSession.isOffline returns {0}")
-  void fileUrisAreResolvedWhenTheyExist(
-      boolean isOffline,
-      @TempDir Path tempDir
-  ) throws Exception {
+  void fileUrisAreResolvedWhenTheyExist(boolean isOffline) throws Exception {
     // Given
     when(mavenSession.isOffline())
         .thenReturn(isOffline);
@@ -134,8 +134,7 @@ class UriResourceFetcherTest {
   @ParameterizedTest(name = "for protocol {0}, when MavenSession.isOffline returns {1}")
   void nestedFileUrisAreResolvedWhenTheyExist(
       String protocol,
-      boolean isOffline,
-      @TempDir Path tempDir
+      boolean isOffline
   ) throws Exception {
     // Given
     when(mavenSession.isOffline())
@@ -175,7 +174,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("file URIs are not resolved when they do not exist")
   @Test
-  void fileUrisAreNotResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
+  void fileUrisAreNotResolvedWhenTheyDoNotExist() throws Exception {
     // Given
     var file = tempDir.resolve("nekomata.nya");
 
@@ -190,10 +189,7 @@ class UriResourceFetcherTest {
   @DisplayName("nested file URIs are not resolved when they do not exist")
   @ValueSource(strings = {"jar", "zip"})
   @ParameterizedTest(name = "for protocol {0}")
-  void nestedFileUrisAreNotResolvedWhenTheyDoNotExist(
-      String protocol,
-      @TempDir Path tempDir
-  ) throws Exception {
+  void nestedFileUrisAreNotResolvedWhenTheyDoNotExist(String protocol) throws Exception {
     // Given
     when(temporarySpace.createTemporarySpace(any(), any()))
         .thenReturn(tempDir);
@@ -239,10 +235,7 @@ class UriResourceFetcherTest {
   @DisplayName("HTTP URIs are resolved when they exist")
   @ValueSource(strings = {"bar.txt.bin", "foo/bar.txt.bin"})
   @ParameterizedTest(name = "for path {0}")
-  void httpUrisAreResolvedWhenTheyExist(
-      String requestedPath,
-      @TempDir Path tempDir
-  ) throws Exception {
+  void httpUrisAreResolvedWhenTheyExist(String requestedPath) throws Exception {
     // Given
     wireMockClient.register(get(urlEqualTo("/" + requestedPath))
         .willReturn(aResponse()
@@ -273,9 +266,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("ZIP nested HTTP URIs are resolved when they exist")
   @Test
-  void zipNestedHttpUrisAreResolvedWhenTheyExist(
-      @TempDir Path tempDir
-  ) throws Exception {
+  void zipNestedHttpUrisAreResolvedWhenTheyExist(@TempDir Path tempDir) throws Exception {
     // Given
     var data = new ByteArrayOutputStream();
     createJar(
@@ -315,9 +306,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("JAR nested HTTP URIs are resolved when they exist")
   @Test
-  void jarNestedHttpUrisAreResolvedWhenTheyExist(
-      @TempDir Path tempDir
-  ) throws Exception {
+  void jarNestedHttpUrisAreResolvedWhenTheyExist() throws Exception {
     // Given
     var data = new ByteArrayOutputStream();
     createJar(
@@ -357,9 +346,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("Pathless HTTP URIs are resolved when they exist")
   @Test
-  void pathlessHttpUrisAreResolvedWhenTheyExist(
-      @TempDir Path tempDir
-  ) throws Exception {
+  void pathlessHttpUrisAreResolvedWhenTheyExist() throws Exception {
     // Given
     wireMockClient.register(get(urlEqualTo("/"))
         .willReturn(aResponse()
@@ -387,7 +374,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("HTTP URIs are not resolved when they do not exist")
   @Test
-  void httpUrisAreNotResolvedWhenTheyDoNotExist(@TempDir Path tempDir) throws Exception {
+  void httpUrisAreNotResolvedWhenTheyDoNotExist() throws Exception {
     // Given
     wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
         .willReturn(aResponse().withStatus(404)));
@@ -408,7 +395,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("HTTP URIs raise exceptions if transfer fails")
   @Test
-  void httpUrisRaiseExceptionsIfTransferFails(@TempDir Path tempDir) throws Exception {
+  void httpUrisRaiseExceptionsIfTransferFails() throws Exception {
     // Given
     wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
         .willReturn(aResponse().withFault(Fault.MALFORMED_RESPONSE_CHUNK)));
