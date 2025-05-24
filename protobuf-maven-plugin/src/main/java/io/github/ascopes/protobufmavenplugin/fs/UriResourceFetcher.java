@@ -15,8 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
-import static java.util.Objects.requireNonNullElse;
-
 import io.github.ascopes.protobufmavenplugin.utils.Digests;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.BufferedInputStream;
@@ -30,13 +28,13 @@ import java.net.URL;
 import java.net.spi.URLStreamHandlerProvider;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.Maven;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
@@ -53,25 +51,27 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class UriResourceFetcher {
 
-  private static final int TIMEOUT = 30_000;
-  private static final String USER_AGENT_HEADER = "User-Agent";
-  private static final String USER_AGENT_VALUE = String.format(
-      "io.github.ascopes.protobuf-maven-plugin/%s org.apache.maven/%s (Java %s)",
-      requireNonNullElse(
-          // May not be set if we are running within an IDE.
-          UriResourceFetcher.class.getPackage().getImplementationVersion(),
-          "SNAPSHOT"
-      ),
-      Maven.class.getPackage().getImplementationVersion(),
-      Runtime.version().toString()
+  // Protocols that we allow in offline mode.
+  private static final List<String> OFFLINE_PROTOCOLS = List.of(
+      "file:",
+      "jar:file:",
+      "zip:file:",
+      "jrt:"
   );
+
+  private static final int TIMEOUT = 30_000;
 
   private static final Logger log = LoggerFactory.getLogger(UriResourceFetcher.class);
 
+  private final MavenSession mavenSession;
   private final TemporarySpace temporarySpace;
 
   @Inject
-  public UriResourceFetcher(TemporarySpace temporarySpace) {
+  public UriResourceFetcher(
+      MavenSession mavenSession,
+      TemporarySpace temporarySpace
+  ) {
+    this.mavenSession = mavenSession;
     this.temporarySpace = temporarySpace;
   }
 
@@ -89,18 +89,37 @@ public final class UriResourceFetcher {
    * @throws ResolutionException if resolution fails for any other reason.
    */
   public Optional<Path> fetchFileFromUri(URI uri, String extension) throws ResolutionException {
+    if (mavenSession.isOffline()) {
+      var isInvalidOfflineProtocol = OFFLINE_PROTOCOLS.stream()
+          .noneMatch(uri.toString()::startsWith);
+
+      if (isInvalidOfflineProtocol) {
+        throw new ResolutionException(
+            "Cannot resolve URI: " + uri
+                + ". Only a limited number of URL protocols are supported in offline mode."
+        );
+      }
+    }
+
     // This will die if the URI points to a file on the non default file system...
     // probably don't care enough to fix this bug as users should not ever want to do this I guess.
-    return uri.getScheme().equalsIgnoreCase("file")
+    return "file".equals(uri.getScheme())
         ? handleFileSystemUri(uri)
         : handleOtherUri(uri, extension);
   }
 
   private Optional<Path> handleFileSystemUri(URI uri) throws ResolutionException {
     try {
-      return Optional.of(uri)
+      var result = Optional.of(uri)
           .map(Path::of)
           .filter(Files::exists);
+
+      result.ifPresentOrElse(
+          path -> log.debug("Resolved '{}' to '{}'", uri, path),
+          () -> log.warn("No resource at '{}' appears to exist!", uri)
+      );
+
+      return result;
     } catch (Exception ex) {
       throw new ResolutionException("Failed to discover file at '" + uri + "': " + ex, ex);
     }
@@ -114,10 +133,16 @@ public final class UriResourceFetcher {
 
     try {
       var conn = url.openConnection();
+      // Important! Without this JarURLConnection may leave the underlying connection
+      // open after we close conn.getInputStream(). On Windows this can prevent the deletion
+      // of these files as part of operations like mvn clean, and also in our unit tests.
+      // On Windows, we can evem crash JUnit because of this!
+      // See https://github.com/junit-team/junit5/issues/4567
+      conn.setUseCaches(false);
+
       conn.setConnectTimeout(TIMEOUT);
       conn.setReadTimeout(TIMEOUT);
       conn.setAllowUserInteraction(false);
-      conn.setRequestProperty(USER_AGENT_HEADER, USER_AGENT_VALUE);
 
       log.debug("Connecting to '{}' to copy resources to '{}'", uri, targetFile);
       conn.connect();
@@ -128,16 +153,20 @@ public final class UriResourceFetcher {
       ) {
         responseStream.transferTo(fileStream);
         log.info("Downloaded '{}' to '{}' ({} bytes)", uri, targetFile, fileStream.size);
-        return Optional.of(targetFile);
-
-      } catch (FileNotFoundException ex) {
-        log.warn("No resource at '{}' appears to exist!", uri);
-        return Optional.empty();
       }
+
+      return Optional.of(targetFile);
+
+    } catch (FileNotFoundException ex) {
+
+      // May be raised during the call to .getInputStream(), or the call to .connect(),
+      // depending on the implementation.
+      log.warn("No resource at '{}' appears to exist!", uri);
+
+      return Optional.empty();
 
     } catch (IOException ex) {
       log.debug("Failed to download '{}' to '{}'", uri, targetFile, ex);
-
       throw new ResolutionException("Failed to download '" + uri + "' to '" + targetFile + "'", ex);
     }
   }
@@ -159,7 +188,7 @@ public final class UriResourceFetcher {
     var customHandler = ServiceLoader
         .load(URLStreamHandlerProvider.class, getClass().getClassLoader())
         .stream()
-        .map(Provider::get)
+        .map(ServiceLoader.Provider::get)
         .map(provider -> provider.createURLStreamHandler(uri.getScheme()))
         .filter(Objects::nonNull)
         .findFirst()
@@ -170,7 +199,7 @@ public final class UriResourceFetcher {
     try {
       return new URL(null, uri.toString(), customHandler);
     } catch (MalformedURLException ex) {
-      throw new ResolutionException("Syntax for URI '" + uri + "' is invalid", ex);
+      throw new ResolutionException("URI '" + uri + "' is invalid: " + ex, ex);
     }
   }
 
