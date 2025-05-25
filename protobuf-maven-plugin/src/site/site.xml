@@ -62,6 +62,7 @@
       <item name="Descriptor Files" href="descriptor-files.html"/>
       <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
       <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
+      <item name="Examples" href="examples.html"/>
       <item name="Faster Builds" href="faster-builds.html"/>
       <item name="Known Issues" href="known-issues.html"/>
     </menu>
