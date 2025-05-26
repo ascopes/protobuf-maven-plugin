@@ -100,7 +100,7 @@
     <maven-plugin-api.version>3.9.9</maven-plugin-api.version>
     <maven-resolver-api.version>2.0.9</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.1</memoryfilesystem.version>
-    <mockito.version>5.17.0</mockito.version>
+    <mockito.version>5.18.0</mockito.version>
     <protobuf.version>4.31.0</protobuf.version>
     <slf4j.version>2.0.17</slf4j.version>
     <wiremock.version>3.13.0</wiremock.version>
