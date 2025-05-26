@@ -30,8 +30,6 @@ import org.immutables.value.Value.Immutable;
 public interface PluginProtocTarget extends ProtocTarget {
   ResolvedProtocPlugin getPlugin();
 
-  Path getOutputPath();
-
   @Derived
   @Override
   default int getOrder() {

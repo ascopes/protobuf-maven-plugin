@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
-import java.nio.file.Path;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +36,6 @@ class PluginProtocTargetTest {
 
     var target = ImmutablePluginProtocTarget.builder()
         .plugin(plugin)
-        .outputPath(Path.of("i", "am", "potato"))
         .build();
 
     // Then

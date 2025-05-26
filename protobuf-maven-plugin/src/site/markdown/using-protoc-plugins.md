@@ -10,6 +10,9 @@ covered by the protoc executable, you can add custom plugins to your build.
 Each plugin is defined as an XML object with various attributes. Many depend on the type of plugin
 you are adding (see the sections below), but all plugins share some common attributes:
 
+- `outputDirectory` - directory to write generated code to. The default is for this to be
+  unspecified, which will result in the output directory specified on the Maven plugin to be used
+  instead.
 - `options` - a string value that can be passed to the plugin as a parameter. Defaults to being
   unspecified.
 - `order` - an integer that controls the plugin execution order relative to other plugins.

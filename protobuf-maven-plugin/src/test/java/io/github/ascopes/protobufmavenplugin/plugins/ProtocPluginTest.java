@@ -25,6 +25,28 @@ import org.junit.jupiter.api.Test;
 @DisplayName("ProtocPlugin tests")
 class ProtocPluginTest {
 
+  @DisplayName("the default value for getOptions is the expected value")
+  @Test
+  void theDefaultValueForGetOptionsIsTheExpectedValue() {
+    // Given
+    var obj = mock(ProtocPlugin.class);
+    when(obj.getOptions()).thenCallRealMethod();
+
+    // Then
+    assertThat(obj.getOptions()).isNull();
+  }
+
+  @DisplayName("the default value for getOutputDirectory is the expected value")
+  @Test
+  void theDefaultValueForGetOutputDirectoryIsTheExpectedValue() {
+    // Given
+    var obj = mock(ProtocPlugin.class);
+    when(obj.getOutputDirectory()).thenCallRealMethod();
+
+    // Then
+    assertThat(obj.getOutputDirectory()).isNull();
+  }
+
   @DisplayName("the default value for isSkip is the expected value")
   @Test
   void theDefaultValueForIsSkipIsTheExpectedValue() {
@@ -34,5 +56,16 @@ class ProtocPluginTest {
 
     // Then
     assertThat(obj.isSkip()).isFalse();
+  }
+
+  @DisplayName("the default value for getOrder is the expected value")
+  @Test
+  void theDefaultValueForGetOrderIsTheExpectedValue() {
+    // Given
+    var obj = mock(ProtocPlugin.class);
+    when(obj.getOrder()).thenCallRealMethod();
+
+    // Then
+    assertThat(obj.getOrder()).isZero();
   }
 }

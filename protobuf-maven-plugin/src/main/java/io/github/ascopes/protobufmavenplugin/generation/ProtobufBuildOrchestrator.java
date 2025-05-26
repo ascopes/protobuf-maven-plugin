@@ -338,7 +338,6 @@ public final class ProtobufBuildOrchestrator {
     resolvedPlugins.stream()
         .map(plugin -> ImmutablePluginProtocTarget.builder()
             .plugin(plugin)
-            .outputPath(request.getOutputDirectory())
             .build())
         .forEach(targets::add);
 
