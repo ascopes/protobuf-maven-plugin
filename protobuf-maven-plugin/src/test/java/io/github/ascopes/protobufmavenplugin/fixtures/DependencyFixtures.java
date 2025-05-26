@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusionBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 import org.mockito.Answers;
@@ -47,7 +47,7 @@ public final class DependencyFixtures {
       @Nullable String classifier,
       @Nullable String type
   ) {
-    return pmpArtifact(
+    return pmpDependency(
         groupId,
         artifactId,
         version,
@@ -57,30 +57,30 @@ public final class DependencyFixtures {
     );
   }
 
-  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact pmpArtifact(
+  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency pmpDependency(
       String groupId,
       String artifactId,
       String version,
       @Nullable String classifier,
       @Nullable String type,
       @Nullable DependencyResolutionDepth dependencyResolutionDepth,
-      MavenExclusionBean... exclusions
+      MavenExclusion... exclusions
   ) {
-    var artifact = mock(
-        io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact.class,
+    var dependency = mock(
+        io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency.class,
         defaultSettings("some protobuf maven plugin artifact")
     );
-    when(artifact.getGroupId()).thenReturn(groupId);
-    when(artifact.getArtifactId()).thenReturn(artifactId);
-    when(artifact.getVersion()).thenReturn(version);
-    when(artifact.getType()).thenReturn(type);
-    when(artifact.getClassifier()).thenReturn(classifier);
-    when(artifact.getDependencyResolutionDepth()).thenReturn(dependencyResolutionDepth);
-    when(artifact.getExclusions()).thenReturn(Set.of(exclusions));
-    return artifact;
+    when(dependency.getGroupId()).thenReturn(groupId);
+    when(dependency.getArtifactId()).thenReturn(artifactId);
+    when(dependency.getVersion()).thenReturn(version);
+    when(dependency.getType()).thenReturn(type);
+    when(dependency.getClassifier()).thenReturn(classifier);
+    when(dependency.getDependencyResolutionDepth()).thenReturn(dependencyResolutionDepth);
+    when(dependency.getExclusions()).thenReturn(Set.of(exclusions));
+    return dependency;
   }
 
-  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusionBean pmpExclusion(
+  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion pmpExclusion(
       String groupId,
       String artifactId,
       @Nullable String classifier,
@@ -89,7 +89,7 @@ public final class DependencyFixtures {
     // Kind of gross that we have to return MavenExclusionBean here but Maven forces our hand
     // due to not being able to cope with interface types.
     var exclusion = mock(
-        io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusionBean.class,
+        io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion.class,
         defaultSettings("some protobuf maven plugin exclusion")
     );
     when(exclusion.getGroupId()).thenReturn(groupId);

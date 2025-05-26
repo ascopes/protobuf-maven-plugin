@@ -15,9 +15,9 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
-import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -121,10 +121,12 @@ final class AetherArtifactMapper {
       io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact,
       io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth defaultDepth
   ) {
-    var effectiveDependencyResolutionDepth = requireNonNullElse(
-        mavenArtifact.getDependencyResolutionDepth(),
-        defaultDepth
-    );
+
+    var effectiveDependencyResolutionDepth = Optional.of(mavenArtifact)
+        .filter(MavenDependency.class::isInstance)
+        .map(MavenDependency.class::cast)
+        .map(MavenDependency::getDependencyResolutionDepth)
+        .orElse(defaultDepth);
 
     var isDirectDepth = io.github.ascopes.protobufmavenplugin.dependencies
         .DependencyResolutionDepth.DIRECT == effectiveDependencyResolutionDepth;

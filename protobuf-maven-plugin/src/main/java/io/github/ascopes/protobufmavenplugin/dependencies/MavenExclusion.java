@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value.Immutable;
 
 /**
  * Marker to exclude a specific transitive dependency.
@@ -26,7 +26,7 @@ import org.immutables.value.Value.Modifiable;
  * @author Ashley Scopes
  * @since 2.12.0
  */
-@Modifiable
+@Immutable
 public interface MavenExclusion {
 
   /**

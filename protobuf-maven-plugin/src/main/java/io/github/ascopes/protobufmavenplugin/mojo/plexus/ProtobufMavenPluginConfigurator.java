@@ -35,6 +35,7 @@ public class ProtobufMavenPluginConfigurator extends BasicComponentConfigurator 
   public static final String NAME = "protobuf-maven-plugin-configurator";
 
   ProtobufMavenPluginConfigurator() {
+    converterLookup.registerConverter(new ImmutablesBuilderConverter());
     converterLookup.registerConverter(new PathConverter());
     converterLookup.registerConverter(new UriConverter());
   }

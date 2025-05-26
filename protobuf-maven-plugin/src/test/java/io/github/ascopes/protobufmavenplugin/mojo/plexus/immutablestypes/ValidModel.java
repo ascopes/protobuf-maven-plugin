@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.mojo.plexus.immutablestypes;
 
-import java.net.URI;
+import java.util.List;
 import org.immutables.value.Value.Immutable;
 
-
-/**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a URI.
- *
- * <p>URI-based plugins can be marked as optional if they should be skipped when the resource
- * is unable to be resolved.
- *
- * @author Ashley Scopes
- * @since 2.0.0
- */
 @Immutable
-public interface UriProtocPlugin extends OptionalProtocPlugin {
+public interface ValidModel {
 
-  // TODO(ascopes): in v4.0.0, rename to "getUri" here, and elsewhere.
-  URI getUrl();
+  boolean isSomeBoolean();
+
+  int getSomeInteger();
+
+  String getSomeString();
+
+  ValidInnerModel getValidInnerModel();
+
+  List<ValidInnerModel> getValidInnerModels();
+
+  // Edge cases
+  // Attribute has one character only.
+  String getA();
 }

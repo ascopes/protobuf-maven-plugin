@@ -20,16 +20,16 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -138,7 +138,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  @Nullable List<MavenProtocPluginBean> binaryMavenPlugins;
+  @Nullable List<MavenProtocPlugin> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -181,7 +181,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.0.0
    */
   @Parameter
-  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
+  @Nullable List<PathProtocPlugin> binaryPathPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
@@ -239,7 +239,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.0.0
    */
   @Parameter
-  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
+  @Nullable List<UriProtocPlugin> binaryUrlPlugins;
 
   /**
    * Enable generating C++ sources and headers from the protobuf sources.
@@ -424,7 +424,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> importDependencies;
+  @Nullable List<MavenDependency> importDependencies;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -554,7 +554,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  @Nullable List<MavenProtocPluginBean> jvmMavenPlugins;
+  @Nullable List<MavenProtocPlugin> jvmMavenPlugins;
 
   /**
    * Enable generating Kotlin API wrapper code around the generated Java code.
@@ -835,7 +835,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> sourceDependencies;
+  @Nullable List<MavenDependency> sourceDependencies;
 
   /**
    * Protobuf Descriptor files to compile.
@@ -866,7 +866,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 3.1.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> sourceDescriptorDependencies;
+  @Nullable List<MavenDependency> sourceDescriptorDependencies;
 
   /**
    * Override the source directories to compile from.
@@ -971,31 +971,31 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .dependencyResolutionDepth(dependencyResolutionDepth)
         .dependencyScopes(dependencyScopes())
+        .embedSourcesInClassOutputs(embedSourcesInClassOutputs)
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
+        .failOnInvalidDependencies(failOnInvalidDependencies)
+        .failOnMissingSources(failOnMissingSources)
+        .failOnMissingTargets(failOnMissingTargets)
+        .fatalWarnings(fatalWarnings)
+        .ignoreProjectDependencies(ignoreProjectDependencies)
         .importDependencies(nonNullList(importDependencies))
         .importPaths(determinePaths(importPaths, List::of))
         .includes(nonNullList(includes))
-        .isEmbedSourcesInClassOutputs(embedSourcesInClassOutputs)
-        .isFailOnInvalidDependencies(failOnInvalidDependencies)
-        .isFailOnMissingSources(failOnMissingSources)
-        .isFailOnMissingTargets(failOnMissingTargets)
-        .isFatalWarnings(fatalWarnings)
-        .isIgnoreProjectDependencies(ignoreProjectDependencies)
-        .isIncrementalCompilationEnabled(incrementalCompilation)
-        .isLiteEnabled(liteOnly)
-        .isOutputDescriptorAttached(outputDescriptorAttached)
-        .isOutputDescriptorIncludeImports(outputDescriptorIncludeImports)
-        .isOutputDescriptorIncludeSourceInfo(outputDescriptorIncludeSourceInfo)
-        .isOutputDescriptorRetainOptions(outputDescriptorRetainOptions)
-        .isRegisterAsCompilationRoot(registerAsCompilationRoot)
+        .incrementalCompilationEnabled(incrementalCompilation)
         .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
+        .liteEnabled(liteOnly)
+        .outputDescriptorAttached(outputDescriptorAttached)
         .outputDescriptorAttachmentClassifier(outputDescriptorAttachmentClassifier)
         .outputDescriptorAttachmentRegistrar(outputDescriptorAttachmentRegistrar())
         .outputDescriptorAttachmentType(outputDescriptorAttachmentType)
         .outputDescriptorFile(outputDescriptorFile)
+        .outputDescriptorIncludeImports(outputDescriptorIncludeImports)
+        .outputDescriptorIncludeSourceInfo(outputDescriptorIncludeSourceInfo)
+        .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
         .protocVersion(protocVersion())
+        .registerAsCompilationRoot(registerAsCompilationRoot)
         .sourceDependencies(nonNullList(sourceDependencies))
         .sourceDescriptorDependencies(nonNullList(sourceDescriptorDependencies))
         .sourceDescriptorPaths(determinePaths(sourceDescriptorPaths, List::of))

@@ -25,6 +25,7 @@
     defaults = @Immutable(copy = false),
     defaultAsDefault = true,
     deferCollectionAllocation = true,
+    get = {"get*", "is*"},
     headerComments = true,
     jacksonIntegration = false,
     // Eventually may be true when Maven upgrades.

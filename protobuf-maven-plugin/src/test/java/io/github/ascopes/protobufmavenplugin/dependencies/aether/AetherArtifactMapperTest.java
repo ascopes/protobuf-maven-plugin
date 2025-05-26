@@ -485,7 +485,7 @@ class AetherArtifactMapperTest {
     return Stream.of(
         argumentSet(
             "when no explicit depth, DIRECT default depth",
-            DependencyFixtures.pmpArtifact(
+            DependencyFixtures.pmpDependency(
                 "org.foo",
                 "bar",
                 "69.420",
@@ -498,7 +498,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "when no explicit depth, TRANSITIVE default depth",
-            DependencyFixtures.pmpArtifact("org.foo",
+            DependencyFixtures.pmpDependency("org.foo",
                 "bar",
                 "69.420",
                 "xxx",
@@ -509,7 +509,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "DIRECT explicit depth, DIRECT default depth",
-            DependencyFixtures.pmpArtifact("org.foo",
+            DependencyFixtures.pmpDependency("org.foo",
                 "bar",
                 "69",
                 "xxx",
@@ -520,7 +520,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "DIRECT explicit depth, TRANSITIVE default depth",
-            DependencyFixtures.pmpArtifact("BAZ",
+            DependencyFixtures.pmpDependency("BAZ",
                 "bar",
                 "69.420",
                 "xxx",
@@ -531,7 +531,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "TRANSITIVE explicit depth, DIRECT default depth",
-            DependencyFixtures.pmpArtifact("org",
+            DependencyFixtures.pmpDependency("org",
                 "bar",
                 "69",
                 null,
@@ -542,7 +542,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "DIRECT explicit depth, TRANSITIVE default depth",
-            DependencyFixtures.pmpArtifact("xxx",
+            DependencyFixtures.pmpDependency("xxx",
                 "bar",
                 "420",
                 null,
@@ -553,7 +553,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "TRANSITIVE explicit depth, exclusions present",
-            DependencyFixtures.pmpArtifact(
+            DependencyFixtures.pmpDependency(
                 "xxx",
                 "bar",
                 "420",
@@ -584,7 +584,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "TRANSITIVE default depth, exclusions present",
-            DependencyFixtures.pmpArtifact(
+            DependencyFixtures.pmpDependency(
                 "xxx",
                 "bar",
                 "420",

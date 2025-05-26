@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.dependencies;
 
-import java.net.URI;
 import org.immutables.value.Value.Immutable;
+import org.jspecify.annotations.Nullable;
 
 
 /**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a URI.
- *
- * <p>URI-based plugins can be marked as optional if they should be skipped when the resource
- * is unable to be resolved.
+ * Interface for a parameter that consumes Maven artifact details.
  *
  * @author Ashley Scopes
- * @since 2.0.0
+ * @since 3.3.0
  */
 @Immutable
-public interface UriProtocPlugin extends OptionalProtocPlugin {
+public interface MavenDependency extends MavenArtifact {
 
-  // TODO(ascopes): in v4.0.0, rename to "getUri" here, and elsewhere.
-  URI getUrl();
+  /**
+   * Get the preferences for the depth of dependency resolution.
+   *
+   * <p>May be {@code null} if the default should be used.
+   *
+   * @return the preference for the depth of dependency resolution.
+   */
+  @Nullable
+  DependencyResolutionDepth getDependencyResolutionDepth();
 }
