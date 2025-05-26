@@ -16,8 +16,12 @@
 
 -->
 <lifecycleMappingMetadata>
-  <!-- Metadata visible by Eclipse, VSCode, etc, to assist in various automation
-       integrations with this Maven plugin. -->
+  <!-- Metadata visible by M2E backends, such as those used in Eclipse and VSCode.
+       Enables making those backends "aware" of the work that is performed by this
+       plugin so that the build state is accurately reflected when changes occur.
+
+       See https://eclipse.dev/m2e/documentation/m2e-making-maven-plugins-compat.html
+       for further documentation on this. -->
 	<pluginExecutions>
 		<pluginExecution>
 			<pluginExecutionFilter>
