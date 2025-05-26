@@ -16,11 +16,11 @@ function usage() {
   echo "    -m | --minor  Bump the minor version."
   echo "    -M | --major  Bump the major version."
   echo ""
-  echo "This script will consune your intent to update the major or minor"
-  echo "version of this project. If the project is not already prepared to"
-  echo "release a new major or minor version, it will update the versions"
-  echo "as needed. Otherwise, it will report that nothing needs changing"
-  echo "and will exit."
+  echo "This script will update the major or minor version of this project."
+  echo ""
+  echo "If the project is not already prepared to release a new major or minor"
+  echo "version, it will update the versions as needed. Otherwise, it will"
+  echo "report that nothing needs any changes, before exiting."
   echo
 }
 
