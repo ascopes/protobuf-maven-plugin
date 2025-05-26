@@ -24,6 +24,8 @@ List<String> expectedGeneratedFiles = [
     "org/example/helloworld/Helloworld",
     "org/example/helloworld/GreetingRequest",
     "org/example/helloworld/GreetingRequestOrBuilder",
+    "org/example/helloworld/GreetingServiceGrpc",
+    "org/example/helloworld/ReactorGreetingServiceGrpc",
 ]
 
 assertThat(generatedSourcesDir).isDirectory()

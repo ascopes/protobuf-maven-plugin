@@ -37,6 +37,10 @@ public interface ProtocPlugin {
     return null;
   }
 
+  default @Nullable Boolean isRegisterAsCompilationRoot() {
+    return null;
+  }
+
   default int getOrder() {
     return 0;
   }

@@ -13,12 +13,16 @@ you are adding (see the sections below), but all plugins share some common attri
 - `outputDirectory` - directory to write generated code to. The default is for this to be
   unspecified, which will result in the output directory specified on the Maven plugin to be used
   instead.
+- `registerAsCompilationRoot` - overrides the project-global setting for registering output
+  code directories as compilation roots for future compiler steps in the Maven build. If 
+  unspecified/null, the project global setting will be used. Otherwise, the explicitly provided
+  value will be used instead.
 - `options` - a string value that can be passed to the plugin as a parameter. Defaults to being
   unspecified.
 - `order` - an integer that controls the plugin execution order relative to other plugins.
   Smaller numbers make plugins run before those with larger numbers. Defaults to `100000`, meaning
   you can place plugins before or after those that do not define an order if you wish.
-- `skip` - a boolean that, when true, skips the execution of the plugin entierly. Defaults to
+- `skip` - a boolean that, when true, skips the execution of the plugin entirely. Defaults to
   `false`.
 
 ## Binary plugins
