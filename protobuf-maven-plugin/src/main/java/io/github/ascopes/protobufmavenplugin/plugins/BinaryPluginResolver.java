@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import static java.util.Objects.requireNonNullElse;
+
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
@@ -64,26 +66,30 @@ final class BinaryPluginResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> plugins
+  Collection<ResolvedProtocPlugin> resolveMavenPlugins(
+      Collection<? extends MavenProtocPlugin> plugins,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
-    return resolveAll(plugins, this::resolveMavenPlugin);
+    return resolveAll(plugins, defaultOutputDirectory, this::resolveMavenPlugin);
   }
 
-  Collection<? extends ResolvedProtocPlugin> resolvePathPlugins(
-      Collection<? extends PathProtocPlugin> plugins
+  Collection<ResolvedProtocPlugin> resolvePathPlugins(
+      Collection<? extends PathProtocPlugin> plugins,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
-    return resolveAll(plugins, this::resolvePathPlugin);
+    return resolveAll(plugins, defaultOutputDirectory, this::resolvePathPlugin);
   }
 
-  Collection<? extends ResolvedProtocPlugin> resolveUrlPlugins(
-      Collection<? extends UriProtocPlugin> plugins
+  Collection<ResolvedProtocPlugin> resolveUrlPlugins(
+      Collection<? extends UriProtocPlugin> plugins,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
-    return resolveAll(plugins, this::resolveUrlPlugin);
+    return resolveAll(plugins, defaultOutputDirectory, this::resolveUrlPlugin);
   }
 
   private Optional<ResolvedProtocPlugin> resolveMavenPlugin(
-      MavenProtocPlugin plugin
+      MavenProtocPlugin plugin,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
     var pluginBuilder = ImmutableMavenProtocPlugin.builder()
         .from(plugin);
@@ -103,11 +109,12 @@ final class BinaryPluginResolver {
 
     var path = artifactPathResolver.resolveArtifact(plugin);
     makeExecutable(path);
-    return Optional.of(createResolvedProtocPlugin(plugin, path));
+    return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
   }
 
   private Optional<ResolvedProtocPlugin> resolvePathPlugin(
-      PathProtocPlugin plugin
+      PathProtocPlugin plugin,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
 
     log.debug("Resolving Path protoc plugin {}", plugin);
@@ -122,13 +129,13 @@ final class BinaryPluginResolver {
         "No plugin named " + plugin.getName() + " was found on the system path"
     ));
 
-    return Optional.of(createResolvedProtocPlugin(plugin, path));
+    return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
   }
 
   private Optional<ResolvedProtocPlugin> resolveUrlPlugin(
-      UriProtocPlugin plugin
+      UriProtocPlugin plugin,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
-
     log.debug("Resolving URL protoc plugin {}", plugin);
 
     var maybePath = urlResourceFetcher.fetchFileFromUri(plugin.getUrl(), ".exe");
@@ -143,21 +150,27 @@ final class BinaryPluginResolver {
 
     makeExecutable(path);
 
-    return Optional.of(createResolvedProtocPlugin(plugin, path));
+    return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
   }
 
-  private ResolvedProtocPlugin createResolvedProtocPlugin(ProtocPlugin plugin, Path path) {
+  private ResolvedProtocPlugin createResolvedProtocPlugin(
+      ProtocPlugin plugin,
+      Path defaultOutputDirectory,
+      Path path
+  ) {
     return ImmutableResolvedProtocPlugin
         .builder()
         .id(Digests.sha1(path.toString()))
-        .path(path)
         .options(plugin.getOptions())
         .order(plugin.getOrder())
+        .outputDirectory(requireNonNullElse(plugin.getOutputDirectory(), defaultOutputDirectory))
+        .path(path)
         .build();
   }
 
   private <P extends ProtocPlugin> Collection<ResolvedProtocPlugin> resolveAll(
       Collection<? extends P> plugins,
+      Path defaultOutputDirectory,
       Resolver<? super P> resolver
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
@@ -167,7 +180,7 @@ final class BinaryPluginResolver {
         continue;
       }
 
-      resolver.resolve(plugin)
+      resolver.resolve(plugin, defaultOutputDirectory)
           .ifPresentOrElse(resolvedPlugins::add, skipUnresolvedPlugin(plugin));
     }
     return resolvedPlugins;
@@ -188,6 +201,9 @@ final class BinaryPluginResolver {
   @FunctionalInterface
   private interface Resolver<P extends ProtocPlugin> {
 
-    Optional<ResolvedProtocPlugin> resolve(P plugin) throws ResolutionException;
+    Optional<ResolvedProtocPlugin> resolve(
+        P plugin,
+        Path defaultOutputDirectory
+    ) throws ResolutionException;
   }
 }

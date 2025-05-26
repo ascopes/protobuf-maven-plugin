@@ -133,6 +133,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
+   *   <li>{@code outputDirectory} - where to write the generated outputs to.
+   *       - if unspecified, then the {@link #outputDirectory} on the Maven
+   *       plugin is used instead - optional.</li>
+   *   <li>{@code registerAsCompilationRoot} - whether to register the output
+   *       directory as a source directory for later compilation steps. If
+   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
+   *       If the {@code outputDirectory} is not overridden, this setting has
+   *       no effect, and the project-wide setting is used. If explicitly
+   *       specified, then the project setting is ignored in favour of this
+   *       value instead.</li>
    * </ul>
    *
    * @since 0.3.0
@@ -169,6 +179,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
+   *   <li>{@code outputDirectory} - where to write the generated outputs to.
+   *       - if unspecified, then the {@link #outputDirectory} on the Maven
+   *       plugin is used instead - optional.</li>
+   *   <li>{@code registerAsCompilationRoot} - whether to register the output
+   *       directory as a source directory for later compilation steps. If
+   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
+   *       If the {@code outputDirectory} is not overridden, this setting has
+   *       no effect, and the project-wide setting is used. If explicitly
+   *       specified, then the project setting is ignored in favour of this
+   *       value instead.</li>
    * </ul>
    *
    * <p>On Linux, macOS, and other POSIX-like systems, resolution looks for an executable
@@ -234,6 +254,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
+   *   <li>{@code outputDirectory} - where to write the generated outputs to.
+   *       - if unspecified, then the {@link #outputDirectory} on the Maven
+   *       plugin is used instead - optional.</li>
+   *   <li>{@code registerAsCompilationRoot} - whether to register the output
+   *       directory as a source directory for later compilation steps. If
+   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
+   *       If the {@code outputDirectory} is not overridden, this setting has
+   *       no effect, and the project-wide setting is used. If explicitly
+   *       specified, then the project setting is ignored in favour of this
+   *       value instead.</li>
    * </ul>
    *
    * @since 2.0.0
@@ -535,6 +565,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
    *       useful if you want to control whether the plugin runs via a
    *       property - optional.</li>
+   *   <li>{@code outputDirectory} - where to write the generated outputs to.
+   *       - if unspecified, then the {@link #outputDirectory} on the Maven
+   *       plugin is used instead - optional.</li>
+   *   <li>{@code registerAsCompilationRoot} - whether to register the output
+   *       directory as a source directory for later compilation steps. If
+   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
+   *       If the {@code outputDirectory} is not overridden, this setting has
+   *       no effect, and the project-wide setting is used. If explicitly
+   *       specified, then the project setting is ignored in favour of this
+   *       value instead.</li>
    *   <li>{@code mainClass} - if the plugin is not an assembled JAR at the time
    *       the {@code protobuf-maven-plugin} is run, then you will need to provide
    *       the fully qualified class name of the plugin entrypoint here. This is

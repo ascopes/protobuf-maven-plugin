@@ -99,40 +99,46 @@ final class JvmPluginResolver {
     this.pathResolver = pathResolver;
   }
 
-  Collection<? extends ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> pluginDescriptors
+  Collection<ResolvedProtocPlugin> resolveMavenPlugins(
+      Collection<? extends MavenProtocPlugin> plugins,
+      Path defaultOutputDirectory
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     var index = 0;
 
-    for (var pluginDescriptor : pluginDescriptors) {
-      if (pluginDescriptor.isSkip()) {
-        log.info("Skipping plugin {}", pluginDescriptor);
+    for (var plugin : plugins) {
+      if (plugin.isSkip()) {
+        log.info("Skipping plugin {}", plugin);
         continue;
       }
 
-      var resolvedPlugin = resolveMavenPlugin(pluginDescriptor, index++);
+      var resolvedPlugin = resolveMavenPlugin(
+          plugin,
+          defaultOutputDirectory,
+          index++
+      );
       resolvedPlugins.add(resolvedPlugin);
     }
     return Collections.unmodifiableList(resolvedPlugins);
   }
 
   private ResolvedProtocPlugin resolveMavenPlugin(
-      MavenProtocPlugin pluginDescriptor,
+      MavenProtocPlugin plugin,
+      Path defaultOutputDirectory,
       int index
   ) throws ResolutionException {
 
     log.debug(
         "Resolving JVM-based Maven protoc plugin {} and generating OS-specific bootstrap scripts",
-        pluginDescriptor
+        plugin
     );
 
-    var id = hashPlugin(pluginDescriptor, index);
-    var argLine = buildArgLine(pluginDescriptor);
+    var id = hashPlugin(plugin, index);
+    var argLine = buildArgLine(plugin);
     var javaPath = hostSystem.getJavaExecutablePath();
     var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
 
-    log.debug("Arguments for JVM plugin {} (id {}) are:\n{}", pluginDescriptor, id, argLine);
+    log.debug("Arguments for JVM plugin {} (id {}) are:\n{}", plugin, id, argLine);
 
     var scriptPath = hostSystem.isProbablyWindows()
         ? writeWindowsScripts(javaPath, scratchDir, argLine)
@@ -141,9 +147,10 @@ final class JvmPluginResolver {
     return ImmutableResolvedProtocPlugin
         .builder()
         .id(id)
+        .options(plugin.getOptions())
+        .order(plugin.getOrder())
+        .outputDirectory(requireNonNullElse(plugin.getOutputDirectory(), defaultOutputDirectory))
         .path(scriptPath)
-        .options(pluginDescriptor.getOptions())
-        .order(pluginDescriptor.getOrder())
         .build();
   }
 

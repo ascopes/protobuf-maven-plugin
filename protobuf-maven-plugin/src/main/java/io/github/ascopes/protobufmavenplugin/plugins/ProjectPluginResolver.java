@@ -61,11 +61,25 @@ public final class ProjectPluginResolver {
   public Collection<ResolvedProtocPlugin> resolveProjectPlugins(
       GenerationRequest request
   ) throws ResolutionException {
+    // XXX: we could run this in parallel
     var plugins = new ArrayList<ResolvedProtocPlugin>();
-    plugins.addAll(binaryPluginResolver.resolveMavenPlugins(request.getBinaryMavenPlugins()));
-    plugins.addAll(binaryPluginResolver.resolvePathPlugins(request.getBinaryPathPlugins()));
-    plugins.addAll(binaryPluginResolver.resolveUrlPlugins(request.getBinaryUrlPlugins()));
-    plugins.addAll(jvmPluginResolver.resolveMavenPlugins(request.getJvmMavenPlugins()));
+    plugins.addAll(binaryPluginResolver.resolveMavenPlugins(
+        request.getBinaryMavenPlugins(),
+        request.getOutputDirectory()
+    ));
+    plugins.addAll(binaryPluginResolver.resolvePathPlugins(
+        request.getBinaryPathPlugins(),
+        request.getOutputDirectory()
+    ));
+    plugins.addAll(binaryPluginResolver.resolveUrlPlugins(
+        request.getBinaryUrlPlugins(),
+        request.getOutputDirectory()
+    ));
+    plugins.addAll(jvmPluginResolver.resolveMavenPlugins(
+        request.getJvmMavenPlugins(),
+        request.getOutputDirectory()
+    ));
+    plugins.trimToSize();
     return Collections.unmodifiableList(plugins);
   }
 }

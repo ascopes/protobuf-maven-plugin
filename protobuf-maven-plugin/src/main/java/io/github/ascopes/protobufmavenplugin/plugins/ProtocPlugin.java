@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import java.nio.file.Path;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -28,7 +29,17 @@ import org.jspecify.annotations.Nullable;
  */
 public interface ProtocPlugin {
 
-  @Nullable String getOptions();
+  default @Nullable String getOptions() {
+    return null;
+  }
+
+  default @Nullable Path getOutputDirectory() {
+    return null;
+  }
+
+  default @Nullable Boolean isRegisterAsCompilationRoot() {
+    return null;
+  }
 
   default int getOrder() {
     return 0;

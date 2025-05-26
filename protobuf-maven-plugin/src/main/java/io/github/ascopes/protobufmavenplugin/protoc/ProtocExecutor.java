@@ -130,7 +130,7 @@ public final class ProtocExecutor {
     var plugin = target.getPlugin();
     builder
         .add("--plugin=protoc-gen-" + plugin.getId() + "=" + plugin.getPath())
-        .add("--" + plugin.getId() + "_out=" + target.getOutputPath());
+        .add("--" + plugin.getId() + "_out=" + plugin.getOutputDirectory());
     plugin.getOptions()
         .map(options -> "--" + plugin.getId() + "_opt=" + options)
         .ifPresent(builder::add);

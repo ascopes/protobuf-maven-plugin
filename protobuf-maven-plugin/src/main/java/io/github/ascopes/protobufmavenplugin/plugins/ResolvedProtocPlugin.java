@@ -29,11 +29,15 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface ResolvedProtocPlugin {
 
-  Path getPath();
-
   String getId();
 
   Optional<String> getOptions();
 
   int getOrder();
+
+  Path getOutputDirectory();
+
+  Optional<Boolean> getRegisterAsCompilationRoot();
+
+  Path getPath();
 }

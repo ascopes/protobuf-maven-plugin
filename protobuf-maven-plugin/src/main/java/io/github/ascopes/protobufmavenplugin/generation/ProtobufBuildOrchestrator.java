@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.generation;
 
+import static java.util.function.Function.identity;
+
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
@@ -38,8 +40,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -120,11 +124,11 @@ public final class ProtobufBuildOrchestrator {
       return handleMissingTargets(request);
     }
 
-    createOutputDirectories(request);
+    createOutputDirectories(request, resolvedPlugins);
 
     // GH-438: We now register the source roots before generating anything. This ensures we still
     // call Javac with the sources even if we incrementally compile with zero changes.
-    registerSourceRoots(request);
+    registerSourceRoots(request, resolvedPlugins);
 
     // Determine the sources we need to regenerate. This will be all the sources usually but
     // if incremental compilation is enabled then we will only output the files that have changed
@@ -203,46 +207,54 @@ public final class ProtobufBuildOrchestrator {
         .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
   }
 
-  private void createOutputDirectories(GenerationRequest request) throws IOException {
-    var directory = request.getOutputDirectory();
-    log.debug("Creating {}", directory);
+  private void createOutputDirectories(
+      GenerationRequest request,
+      Collection<ResolvedProtocPlugin> resolvedProtocPlugins
+  ) throws IOException {
+    var outputDirectories = Stream
+        .of(
+            // Project output directory.
+            Stream.of(request.getOutputDirectory()),
+            // Output descriptor file location, if non-null.
+            Optional.ofNullable(request.getOutputDescriptorFile())
+                .map(p -> p.toAbsolutePath().getParent())
+                .stream(),
+            // Custom output directories for plugins, if overriding the project defaults.
+            resolvedProtocPlugins.stream()
+                .map(ResolvedProtocPlugin::getOutputDirectory)
+                .filter(Objects::nonNull)
+        )
+        .flatMap(identity())
+        .collect(Collectors.toUnmodifiableList());
 
-    // Having .jar on the output directory makes protoc generate a JAR with a
-    // Manifest. This will break our logic because generated sources will be
-    // inaccessible for the compilation phase later. For now, just prevent this
-    // edge case entirely.
-    FileUtils.getFileExtension(directory)
-        .filter(".jar"::equalsIgnoreCase)
-        .ifPresent(ext -> {
-          throw new IllegalArgumentException(
-              "The output directory '" + directory
-                  + "' cannot be a path with a JAR file extension, due to "
-                  + "limitations with how protoc operates on file names."
-          );
-        });
-
-    Files.createDirectories(directory);
-
-    Optional.ofNullable(request.getOutputDescriptorFile())
-        .map(p -> p.toAbsolutePath().getParent())
-        .ifPresent(p -> {
-          try {
-            Files.createDirectories(p);
-          } catch (IOException e) {
-            throw new IllegalStateException(
-                "Failed to create output directory for descriptor file '"
-                    + p + "'", e);
-          }
-        });
+    for (var outputDirectory : outputDirectories) {
+      log.debug("Creating {}", outputDirectory);
+      Files.createDirectories(outputDirectory);
+    }
   }
 
-  private void registerSourceRoots(GenerationRequest request) {
-    if (request.isRegisterAsCompilationRoot()) {
-      request.getSourceRootRegistrar().registerSourceRoot(
-          mavenSession,
-          request.getOutputDirectory()
-      );
-    }
+  private void registerSourceRoots(
+      GenerationRequest request,
+      Collection<ResolvedProtocPlugin> resolvedProtocPlugins
+  ) {
+    var registrar = request.getSourceRootRegistrar();
+    Stream
+        .of(
+            // Project output directory, if we allow registration of compilation roots.
+            Stream.of(request.getOutputDirectory())
+                .filter(dir -> request.isRegisterAsCompilationRoot()),
+
+            // Custom output directories for plugins, if we explicitly allow them to be used as
+            // compilation roots, or if we do not override the behaviour and the project default is
+            // to use them as compilation roots anyway.
+            resolvedProtocPlugins.stream()
+                .filter(plugin -> plugin.getRegisterAsCompilationRoot()
+                    .orElseGet(request::isRegisterAsCompilationRoot))
+                .map(ResolvedProtocPlugin::getOutputDirectory)
+                .filter(Objects::nonNull)
+        )
+        .flatMap(identity())
+        .forEach(outputDirectory -> registrar.registerSourceRoot(mavenSession, outputDirectory));
   }
 
   // TODO: migrate this logic to a compilation strategy.
@@ -338,7 +350,6 @@ public final class ProtobufBuildOrchestrator {
     resolvedPlugins.stream()
         .map(plugin -> ImmutablePluginProtocTarget.builder()
             .plugin(plugin)
-            .outputPath(request.getOutputDirectory())
             .build())
         .forEach(targets::add);
 
