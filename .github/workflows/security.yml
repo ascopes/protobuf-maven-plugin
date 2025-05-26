@@ -24,6 +24,6 @@ jobs:
           java-version: 24
 
       - name: Submit dependency snapshot
-        uses: advanced-security/maven-dependency-submission-action@v4
+        uses: advanced-security/maven-dependency-submission-action@v5
         with:
           maven-args: -B
