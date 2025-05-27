@@ -20,8 +20,8 @@ import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.eclipseDependency;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.mavenArtifact;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.mavenDependency;
+import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.pmpDependency;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.pmpExclusion;
-import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.pmpMavenArtifact;
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static java.util.Objects.requireNonNullElse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -121,7 +120,7 @@ class AetherArtifactMapperTest {
     return Stream.of(
         argumentSet(
             "missing input type, null input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -139,7 +138,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, empty input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -157,7 +156,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, blank input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -175,7 +174,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, null input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -193,7 +192,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, empty input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -211,7 +210,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, blank input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -229,7 +228,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, null input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -247,7 +246,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, empty input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -265,7 +264,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, blank input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -283,7 +282,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, null input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -301,7 +300,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, empty input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -319,7 +318,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, blank input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -337,7 +336,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, known input classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -355,7 +354,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, known classifiers, unknown default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -373,7 +372,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "missing input type, known input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -391,7 +390,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "provided input type, known input classifiers, known default artifact type",
-            pmpMavenArtifact(
+            pmpDependency(
                 "org.example",
                 "test1",
                 "1.2.3",
@@ -410,12 +409,12 @@ class AetherArtifactMapperTest {
     );
   }
 
-  @DisplayName(".mapPmpArtifactToEclipseDependency(MavenArtifact, DependencyResolutionDepth) "
+  @DisplayName(".mapPmpArtifactToEclipseDependency(MavenDependency, DependencyResolutionDepth) "
       + "returns the expected result")
   @MethodSource("mapPmpArtifactToEclipseDependencyTestCases")
   @ParameterizedTest(name = "when {argumentSetName}")
-  void mapPmpArtifactToEclipseDependencyReturnsTheExpectedResult(
-      io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact inputMavenArtifact,
+  void mapPmpArtifactDependencyToEclipseDependencyReturnsTheExpectedResult(
+      io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency inputMavenArtifact,
       io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth defaultDepth,
       boolean expectWildcardExclusion
   ) {
@@ -478,14 +477,14 @@ class AetherArtifactMapperTest {
   static Stream<Arguments> mapPmpArtifactToEclipseDependencyTestCases() {
     // argumentSet(
     //   description,
-    //   input MavenArtifact,
+    //   input MavenDependency,
     //   default DependencyResolutionDepth,
     //   boolean expected wildcard exclusion present
     // )
     return Stream.of(
         argumentSet(
             "when no explicit depth, DIRECT default depth",
-            DependencyFixtures.pmpArtifact(
+            pmpDependency(
                 "org.foo",
                 "bar",
                 "69.420",
@@ -498,7 +497,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "when no explicit depth, TRANSITIVE default depth",
-            DependencyFixtures.pmpArtifact("org.foo",
+            pmpDependency("org.foo",
                 "bar",
                 "69.420",
                 "xxx",
@@ -509,7 +508,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "DIRECT explicit depth, DIRECT default depth",
-            DependencyFixtures.pmpArtifact("org.foo",
+            pmpDependency("org.foo",
                 "bar",
                 "69",
                 "xxx",
@@ -520,7 +519,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "DIRECT explicit depth, TRANSITIVE default depth",
-            DependencyFixtures.pmpArtifact("BAZ",
+            pmpDependency("BAZ",
                 "bar",
                 "69.420",
                 "xxx",
@@ -531,7 +530,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "TRANSITIVE explicit depth, DIRECT default depth",
-            DependencyFixtures.pmpArtifact("org",
+            pmpDependency("org",
                 "bar",
                 "69",
                 null,
@@ -542,7 +541,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "DIRECT explicit depth, TRANSITIVE default depth",
-            DependencyFixtures.pmpArtifact("xxx",
+            pmpDependency("xxx",
                 "bar",
                 "420",
                 null,
@@ -553,7 +552,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "TRANSITIVE explicit depth, exclusions present",
-            DependencyFixtures.pmpArtifact(
+            pmpDependency(
                 "xxx",
                 "bar",
                 "420",
@@ -584,7 +583,7 @@ class AetherArtifactMapperTest {
         ),
         argumentSet(
             "TRANSITIVE default depth, exclusions present",
-            DependencyFixtures.pmpArtifact(
+            pmpDependency(
                 "xxx",
                 "bar",
                 "420",
@@ -614,6 +613,60 @@ class AetherArtifactMapperTest {
             false
         )
     );
+  }
+
+  @DisplayName(".mapPmpArtifactToEclipseDependency(MavenArtifact, DependencyResolutionDepth) "
+      + "returns the expected result")
+  @Test
+  void mapPmpArtifactArtifactToEclipseDependencyReturnsTheExpectedResult() {
+    // Given
+    var inputMavenArtifact = mock(io.github.ascopes.protobufmavenplugin.dependencies
+        .MavenArtifact.class);
+    when(inputMavenArtifact.getGroupId())
+        .thenReturn("foo");
+    when(inputMavenArtifact.getArtifactId())
+        .thenReturn("bar");
+    when(inputMavenArtifact.getVersion())
+        .thenReturn("baz");
+    when(inputMavenArtifact.getClassifier())
+        .thenReturn("eggs");
+    when(inputMavenArtifact.getType())
+        .thenReturn("spam");
+
+    when(artifactTypeRegistry.get(any())).thenReturn(null);
+    var expectedOutputArtifact = eclipseArtifact(
+        inputMavenArtifact.getGroupId(),
+        inputMavenArtifact.getArtifactId(),
+        inputMavenArtifact.getVersion(),
+        inputMavenArtifact.getClassifier(),
+        inputMavenArtifact.getType()
+    );
+
+    // When
+    var actualOutputDependency = aetherArtifactMapper.mapPmpArtifactToEclipseDependency(
+        inputMavenArtifact,
+        DependencyResolutionDepth.TRANSITIVE
+    );
+
+    // Then
+    assertSoftly(softly -> {
+      softly.assertThat(actualOutputDependency.getArtifact().getGroupId())
+          .as("artifact.groupId").isEqualTo(expectedOutputArtifact.getGroupId());
+      softly.assertThat(actualOutputDependency.getArtifact().getArtifactId())
+          .as("artifact.artifactId").isEqualTo(expectedOutputArtifact.getArtifactId());
+      softly.assertThat(actualOutputDependency.getArtifact().getVersion())
+          .as("artifact.version").isEqualTo(expectedOutputArtifact.getVersion());
+      softly.assertThat(actualOutputDependency.getArtifact().getClassifier())
+          .as("artifact.classifier").isEqualTo(expectedOutputArtifact.getClassifier());
+      softly.assertThat(actualOutputDependency.getArtifact().getExtension())
+          .as("artifact.extension").isEqualTo(expectedOutputArtifact.getExtension());
+      softly.assertThat(actualOutputDependency.getScope())
+          .as("scope").isEqualTo("compile");
+      softly.assertThat(actualOutputDependency.getOptional())
+          .as("optional").isFalse();
+      softly.assertThat(actualOutputDependency.getExclusions())
+          .as("exclusions").isEmpty();
+    });
   }
 
   @DisplayName(".mapMavenDependencyToEclipseArtifact(Dependency) returns the expected result")

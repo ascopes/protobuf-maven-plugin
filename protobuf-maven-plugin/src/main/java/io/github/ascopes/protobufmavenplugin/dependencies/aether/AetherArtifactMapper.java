@@ -121,22 +121,17 @@ final class AetherArtifactMapper {
       io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact,
       io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth defaultDepth
   ) {
-    var effectiveDependencyResolutionDepth = requireNonNullElse(
-        mavenArtifact.getDependencyResolutionDepth(),
-        defaultDepth
-    );
+    var effectiveDependencyResolutionDepth = depth(mavenArtifact, defaultDepth);
 
     var isDirectDepth = io.github.ascopes.protobufmavenplugin.dependencies
         .DependencyResolutionDepth.DIRECT == effectiveDependencyResolutionDepth;
 
     var exclusions = isDirectDepth
         ? Set.of(WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION)
-        : mapPmpExclusionsToEclipseExclusions(mavenArtifact.getExclusions());
-
-    var artifact = mapPmpArtifactToEclipseArtifact(mavenArtifact);
+        : mapPmpExclusionsToEclipseExclusions(pmpExclusions(mavenArtifact));
 
     return new org.eclipse.aether.graph.Dependency(
-        artifact,
+        mapPmpArtifactToEclipseArtifact(mavenArtifact),
         DEFAULT_SCOPE,
         false,
         exclusions
@@ -189,5 +184,38 @@ final class AetherArtifactMapper {
             exclusion.getType()
         ))
         .collect(Collectors.toUnmodifiableSet());
+  }
+
+  private io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth depth(
+      io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact,
+      io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth defaultDepth
+  ) {
+    return asPmpMavenDependency(mavenArtifact)
+        .map(io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency
+            ::getDependencyResolutionDepth)
+        .orElse(defaultDepth);
+  }
+
+  private Collection<
+      ? extends io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion
+        > pmpExclusions(
+      io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact
+  ) {
+    return asPmpMavenDependency(mavenArtifact)
+        .map(io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency
+            ::getExclusions)
+        .orElseGet(Set::of);
+  }
+
+  private Optional<
+      io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency
+        > asPmpMavenDependency(
+      io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact mavenArtifact
+  ) {
+    return Optional.of(mavenArtifact)
+        .filter(io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency.class
+            ::isInstance)
+        .map(io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency.class
+            ::cast);
   }
 }

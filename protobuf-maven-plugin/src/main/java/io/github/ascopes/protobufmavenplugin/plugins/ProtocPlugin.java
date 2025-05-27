@@ -29,17 +29,11 @@ import org.jspecify.annotations.Nullable;
  */
 public interface ProtocPlugin {
 
-  default @Nullable String getOptions() {
-    return null;
-  }
+  @Nullable String getOptions();
 
-  default @Nullable Path getOutputDirectory() {
-    return null;
-  }
+  @Nullable Path getOutputDirectory();
 
-  default @Nullable Boolean isRegisterAsCompilationRoot() {
-    return null;
-  }
+  @Nullable Boolean isRegisterAsCompilationRoot();
 
   default int getOrder() {
     return 0;

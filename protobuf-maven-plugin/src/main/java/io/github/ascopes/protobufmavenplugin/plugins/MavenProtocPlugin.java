@@ -15,10 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import java.util.List;
-import org.immutables.value.Value.Derived;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
@@ -39,7 +37,8 @@ public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
   /**
    * Get the version of the {@code protoc} plugin.
    *
-   * <p>This <strong>must</strong> be specified for plugins.
+   * <p>This <strong>must</strong> be specified for plugins. The use
+   * of {@code <dependencyManagement/>} is ignored here.
    *
    * @return the protoc plugin version to use.
    */
@@ -55,20 +54,6 @@ public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
    * @since 2.6.0
    */
   @Nullable List<String> getJvmArgs();
-
-  /**
-   * The dependency resolution depth.
-   *
-   * <p>This cannot be changed for this type of plugin.
-   *
-   * @return {@code null}, always.
-   */
-  @Derived
-  @Override
-  default @Nullable DependencyResolutionDepth getDependencyResolutionDepth() {
-    // We never allow this to be specified for protoc plugins.
-    return null;
-  }
 
   /**
    * Get the arguments to pass to the JVM to configure it.
