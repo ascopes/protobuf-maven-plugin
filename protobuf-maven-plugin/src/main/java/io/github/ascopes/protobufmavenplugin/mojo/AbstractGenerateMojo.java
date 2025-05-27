@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
@@ -454,7 +454,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> importDependencies;
+  @Nullable List<MavenDependencyBean> importDependencies;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -875,7 +875,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> sourceDependencies;
+  @Nullable List<MavenDependencyBean> sourceDependencies;
 
   /**
    * Protobuf Descriptor files to compile.
@@ -906,7 +906,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 3.1.0
    */
   @Parameter
-  @Nullable List<MavenArtifactBean> sourceDescriptorDependencies;
+  @Nullable List<MavenDependencyBean> sourceDescriptorDependencies;
 
   /**
    * Override the source directories to compile from.

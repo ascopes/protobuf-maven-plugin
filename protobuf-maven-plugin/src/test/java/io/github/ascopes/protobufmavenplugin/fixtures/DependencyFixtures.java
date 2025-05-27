@@ -40,14 +40,14 @@ public final class DependencyFixtures {
     // Static-only class.
   }
 
-  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact pmpMavenArtifact(
+  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency pmpDependency(
       String groupId,
       String artifactId,
       String version,
       @Nullable String classifier,
       @Nullable String type
   ) {
-    return pmpArtifact(
+    return pmpDependency(
         groupId,
         artifactId,
         version,
@@ -57,7 +57,7 @@ public final class DependencyFixtures {
     );
   }
 
-  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact pmpArtifact(
+  public static io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency pmpDependency(
       String groupId,
       String artifactId,
       String version,
@@ -67,8 +67,8 @@ public final class DependencyFixtures {
       MavenExclusionBean... exclusions
   ) {
     var artifact = mock(
-        io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact.class,
-        defaultSettings("some protobuf maven plugin artifact")
+        io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency.class,
+        defaultSettings("some protobuf maven plugin dependency")
     );
     when(artifact.getGroupId()).thenReturn(groupId);
     when(artifact.getArtifactId()).thenReturn(artifactId);
