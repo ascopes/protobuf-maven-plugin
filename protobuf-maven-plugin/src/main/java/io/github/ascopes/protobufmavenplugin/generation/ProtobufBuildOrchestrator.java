@@ -341,8 +341,8 @@ public final class ProtobufBuildOrchestrator {
     request.getEnabledLanguages()
         .stream()
         .map(language -> ImmutableLanguageProtocTarget.builder()
-            .isLite(request.isLiteEnabled())
             .language(language)
+            .lite(request.isLiteEnabled())
             .outputPath(request.getOutputDirectory())
             .build())
         .forEach(targets::add);
@@ -355,10 +355,10 @@ public final class ProtobufBuildOrchestrator {
 
     if (request.getOutputDescriptorFile() != null) {
       var descriptorFileTarget = ImmutableDescriptorFileProtocTarget.builder()
-          .isIncludeImports(request.isOutputDescriptorIncludeImports())
-          .isIncludeSourceInfo(request.isOutputDescriptorIncludeSourceInfo())
-          .isRetainOptions(request.isOutputDescriptorRetainOptions())
+          .includeImports(request.isOutputDescriptorIncludeImports())
+          .includeSourceInfo(request.isOutputDescriptorIncludeSourceInfo())
           .outputFile(request.getOutputDescriptorFile())
+          .retainOptions(request.isOutputDescriptorRetainOptions())
           .build();
 
       targets.add(descriptorFileTarget);
@@ -377,9 +377,9 @@ public final class ProtobufBuildOrchestrator {
 
     return ImmutableProtocInvocation.builder()
         .descriptorSourceFiles(filesToCompile.getDescriptorFiles())
+        .fatalWarnings(request.isFatalWarnings())
         .importPaths(importPaths)
         .inputDescriptorFiles(inputDescriptorFiles)
-        .isFatalWarnings(request.isFatalWarnings())
         .protocPath(protocPath)
         .sourcePaths(filesToCompile.getProtoSources())
         .targets(targets)

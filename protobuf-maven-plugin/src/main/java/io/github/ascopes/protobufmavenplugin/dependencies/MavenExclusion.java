@@ -33,7 +33,7 @@ public interface MavenExclusion {
    * Value used by Eclipse Aether internally to imply a match for
    * any value.
    */
-  static String WILDCARD = "*";
+  String WILDCARD = "*";
 
   /**
    * Get the group ID.
