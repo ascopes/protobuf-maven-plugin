@@ -47,37 +47,25 @@ This example shows how to generate JavaScript/TypeScript client code for a gRPC 
       <configuration>
         <protocVersion>${protobuf.version}</protocVersion>
         <javaEnabled>false</javaEnabled>
+
+        <binaryUrlPlugins>
+          <binaryUrlPlugin>
+            <!-- Generate JavaScript protobuf messages -->
+            <url>${protoc.gen.js.url}</url>
+            <options>import_style=commonjs</options>
+            <outputDirectory>${project.basedir}/target/js/protobuf</outputDirectory>
+          </binaryUrlPlugin>
+          <binaryUrlPlugin>
+            <!-- Generate JavaScript gRPC stubs -->
+            <url>${protoc.gen.grpc.web.url}</url>
+            <options>import_style=typescript,mode=grpcwebtext</options>
+            <outputDirectory>${project.basedir}/target/js/grpc</outputDirectory>
+          </binaryUrlPlugin>
+        </binaryUrlPlugins>
       </configuration>
+  
       <executions>
-        <!-- Generate JavaScript protobuf messages -->
         <execution>
-          <id>compile-javascript</id>
-          <configuration>
-            <outputDirectory>${project.basedir}/src/main/web</outputDirectory>
-            <binaryUrlPlugins>
-              <binaryUrlPlugin>
-                <url>${protoc.gen.js.url}</url>
-                <options>import_style=commonjs</options>
-              </binaryUrlPlugin>
-            </binaryUrlPlugins>
-          </configuration>
-          <goals>
-            <goal>generate</goal>
-          </goals>
-        </execution>
-        
-        <!-- Generate gRPC-Web client stubs -->
-        <execution>
-          <id>compile-javascript-web</id>
-          <configuration>
-            <outputDirectory>${project.basedir}/src/main/web</outputDirectory>
-            <binaryUrlPlugins>
-              <binaryUrlPlugin>
-                <url>${protoc.gen.grpc.web.url}</url>
-                <options>import_style=typescript,mode=grpcwebtext</options>
-              </binaryUrlPlugin>
-            </binaryUrlPlugins>
-          </configuration>
           <goals>
             <goal>generate</goal>
           </goals>
@@ -163,10 +151,9 @@ For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>%VERSION%</version>
+
   <configuration>
     <protocVersion>${protobuf.version}</protocVersion>
-    <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
     <jvmMavenPlugins>
       <jvmMavenPlugin>
         <groupId>io.vertx</groupId>
@@ -194,7 +181,6 @@ If you need to generate code to different directories based on the target langua
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>%VERSION%</version>
   
   <executions>
     <!-- Java sources -->
@@ -205,7 +191,7 @@ If you need to generate code to different directories based on the target langua
       </goals>
       <configuration>
         <protocVersion>${protobuf.version}</protocVersion>
-        <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+        <outputDirectory>${project.basedir}/target/java</outputDirectory>
       </configuration>
     </execution>
     
@@ -219,7 +205,7 @@ If you need to generate code to different directories based on the target langua
         <protocVersion>${protobuf.version}</protocVersion>
         <javaEnabled>false</javaEnabled>
         <pythonEnabled>true</pythonEnabled>
-        <outputDirectory>${project.basedir}/src/main/python</outputDirectory>
+        <outputDirectory>${project.basedir}/target/python</outputDirectory>
       </configuration>
     </execution>
   </executions>
