@@ -16,16 +16,17 @@
 package io.github.ascopes.protobufmavenplugin.mojo.plexus;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mockStatic;
 
-import java.nio.file.InvalidPathException;
+import java.io.File;
 import java.nio.file.Path;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
+import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
+import org.codehaus.plexus.component.configurator.expression.DefaultExpressionEvaluator;
+import org.codehaus.plexus.configuration.DefaultPlexusConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -58,35 +59,89 @@ class PathConverterTest {
         .isEqualTo(expectedResult);
   }
 
-  @DisplayName("Paths can be parsed successfully")
+  @DisplayName("Relative paths can be parsed successfully")
   @Test
-  void pathsCanBeParsedSuccessfully() throws ComponentConfigurationException {
+  void relativePathsCanBeParsedSuccessfully(
+      @TempDir Path baseDir
+  ) throws ComponentConfigurationException {
     // Given
-    var path = Path.of("foo", "bar", "baz.txt");
+    var expectedAbsolutePath = baseDir.resolve("foo").resolve("bar").resolve("baz.txt")
+        .toAbsolutePath();
+    var expectedPath = baseDir
+        .relativize(expectedAbsolutePath);
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("path", expectedPath.toString());
+    var evaluator = new SomeDirectoryRelativeExpressionEvaluator(baseDir);
+
+    // When
+    var result = converter.fromConfiguration(
+        converterLookup,
+        configuration,
+        Path.class,
+        null,
+        getClass().getClassLoader(),
+        evaluator
+    );
 
     // Then
-    assertThat(converter.fromString(path.toString()))
-        .isEqualTo(path);
+    assertThat(result).isInstanceOf(Path.class);
+    var resultPath = (Path) result;
+
+    assertThat(resultPath.toAbsolutePath())
+        .hasToString("%s", expectedAbsolutePath);
   }
 
-  @DisplayName("Invalid Paths raise an exception during parsing")
+  @DisplayName("Absolute paths can be parsed successfully")
   @Test
-  void invalidPathsRaiseAnExceptionDuringParsing() {
-    // Mocked because we cannot create reproducible results across Windows and Unix
-    try (var pathStatic = mockStatic(Path.class)) {
-      // Given
-      var expectedCause = new InvalidPathException("that is bad", "bad stuff found", 123);
-      pathStatic.when(() -> Path.of(anyString()))
-          .thenThrow(expectedCause);
+  void absolutePathsCanBeParsedSuccessfully(
+      @TempDir Path baseDir
+  ) throws ComponentConfigurationException {
+    // Given
+    var expectedPath = baseDir.resolve("foo").resolve("bar").resolve("baz.txt")
+        .toAbsolutePath();
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("path", expectedPath.toString());
+    var evaluator = new SomeDirectoryRelativeExpressionEvaluator(baseDir);
 
-      // Then
-      assertThatExceptionOfType(ComponentConfigurationException.class)
-          .isThrownBy(() -> converter.fromString("invalid-path"))
-          .withMessage("Failed to parse path 'invalid-path': "
-              + "java.nio.file.InvalidPathException: bad stuff found at index 123: that is bad")
-          .havingCause()
-          .isSameAs(expectedCause);
+    // When
+    var result = converter.fromConfiguration(
+        converterLookup,
+        configuration,
+        Path.class,
+        null,
+        getClass().getClassLoader(),
+        evaluator
+    );
 
+    // Then
+    assertThat(result).isInstanceOf(Path.class);
+    var resultPath = (Path) result;
+
+    assertThat(resultPath.toAbsolutePath())
+        .hasToString("%s", expectedPath.toAbsolutePath());
+  }
+
+  // Roughly equivalent to what Maven does, for the sake of this test.
+  static final class SomeDirectoryRelativeExpressionEvaluator extends DefaultExpressionEvaluator {
+
+    private final Path baseDir;
+
+    SomeDirectoryRelativeExpressionEvaluator(Path baseDir) {
+      this.baseDir = baseDir.toAbsolutePath();
+    }
+
+    @Override
+    public File alignToBaseDirectory(File file) {
+      if (file.isAbsolute()) {
+        return file;
+      }
+
+      var path = file.toPath();
+      var fullPath = baseDir;
+      for (var part : path) {
+        fullPath = fullPath.resolve(part);
+      }
+      return fullPath.toFile();
     }
   }
 }

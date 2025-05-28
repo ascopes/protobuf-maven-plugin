@@ -73,10 +73,8 @@ class UriConverterTest {
     // Then
     assertThatExceptionOfType(ComponentConfigurationException.class)
         .isThrownBy(() -> converter.fromString("foo\\bar"))
-        // Annoyingly this varies with the JDK and OS in use. Windows reports a different issue
-        // to Linux!
-        .withMessageMatching("Failed to parse URI 'foo\\\\bar': "
-            + "java.net.URISyntaxException: .*")
+        // Ignore the message here, it varies based on the platform the test is running.
+        // Windows produces a different issue since backslashes have a special meaning there.
         .havingCause()
         .isInstanceOf(URISyntaxException.class);
   }
