@@ -30,7 +30,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * point because the URL class is hardcoded to only consider the system classloader. Since Maven
  * uses ClassWorlds to run multiple classloaders for each plugin and component, we will not be
  * loaded as part of that default classloader. By deferring this operation to as late as possible
- * (i.e. in {@link io.github.ascopes.protobufmavenplugin.dependencies.UriResourceFetcher}), we can
+ * (i.e. in {@link io.github.ascopes.protobufmavenplugin.fs.UriResourceFetcher}), we can
  * ensure we provide the desired URL handler directly instead. This allows us to hook custom URL
  * handlers in via {@link java.util.ServiceLoader} dynamically, like we would be able to outside a
  * Maven plugin running in Plexus.
@@ -45,7 +45,7 @@ final class UriConverter extends AbstractBasicConverter {
 
   @Override
   public boolean canConvert(Class<?> type) {
-    return type.equals(URI.class);
+    return URI.class.equals(type);
   }
 
   @Override
@@ -53,7 +53,9 @@ final class UriConverter extends AbstractBasicConverter {
     try {
       return new URI(str);
     } catch (URISyntaxException ex) {
-      throw new ComponentConfigurationException("Failed to parse URI '" + str + "': " + ex, ex);
+      // GH-689: align with the same error format as Sisu provides in Maven 3.9.x for
+      // forwards compatibility.
+      throw new ComponentConfigurationException("Cannot convert '" + str + "' to URI", ex);
     }
   }
 }

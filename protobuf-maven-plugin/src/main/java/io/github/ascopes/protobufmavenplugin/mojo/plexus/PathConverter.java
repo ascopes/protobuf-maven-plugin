@@ -15,10 +15,15 @@
  */
 package io.github.ascopes.protobufmavenplugin.mojo.plexus;
 
-import java.nio.file.InvalidPathException;
+import java.io.File;
 import java.nio.file.Path;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
-import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
+import org.codehaus.plexus.component.configurator.ConfigurationListener;
+import org.codehaus.plexus.component.configurator.converters.basic.FileConverter;
+import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
+import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
+import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -32,19 +37,37 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * @author Ashley Scopes
  * @since 3.1.3
  */
-final class PathConverter extends AbstractBasicConverter {
+final class PathConverter extends FileConverter {
 
   @Override
   public boolean canConvert(Class<?> type) {
-    return type.equals(Path.class);
+    return Path.class.equals(type);
   }
 
   @Override
-  protected Object fromString(String str) throws ComponentConfigurationException {
-    try {
-      return Path.of(str);
-    } catch (InvalidPathException ex) {
-      throw new ComponentConfigurationException("Failed to parse path '" + str + "': " + ex, ex);
-    }
+  public Object fromConfiguration(
+      ConverterLookup lookup,
+      PlexusConfiguration configuration,
+      @Nullable Class<?> type, Class<?> enclosingType,
+      ClassLoader loader,
+      ExpressionEvaluator evaluator,
+      @Nullable ConfigurationListener listener
+  ) throws ComponentConfigurationException {
+    // GH-689: we need to consider paths as relative to the Maven project directory rather
+    // than relative to the current working directory. This is important when running nested
+    // Maven modules that are expected to assume the submodule directory rather than the launch
+    // site directory.
+    //
+    // For now, we do the same thing that Sisu is doing in Maven 3.9.x to retain backwards and
+    // forwards compatibility. This handles any other niche cases we might miss as well.
+    // See https://github.com/eclipse-sisu/sisu-project/blob/e86e5005ff03b57aab8c7eb7f54f41e85914e2dd/org.eclipse.sisu.plexus/src/main/java/org/codehaus/plexus/component/configurator/converters/basic/PathConverter.java#L33
+
+    var result = super.fromConfiguration(
+        lookup, configuration, type, enclosingType, loader, evaluator, listener
+    );
+
+    return result instanceof File
+        ? ((File) result).toPath()
+        : result;
   }
 }

@@ -18,12 +18,18 @@ package io.github.ascopes.protobufmavenplugin.mojo.plexus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import io.github.ascopes.protobufmavenplugin.mojo.plexus.PathConverterTest.SomeDirectoryRelativeExpressionEvaluator;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
+import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
+import org.codehaus.plexus.component.configurator.expression.DefaultExpressionEvaluator;
+import org.codehaus.plexus.configuration.DefaultPlexusConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -61,6 +67,19 @@ class UriConverterTest {
   void urisCanBeParsedSuccessfully() throws ComponentConfigurationException {
     // Given
     var uri = URI.create("https://google.com");
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("uri", uri.toString());
+    var evaluator = new DefaultExpressionEvaluator();
+
+    // When
+    var result = converter.fromConfiguration(
+        converterLookup,
+        configuration,
+        URI.class,
+        null,
+        getClass().getClassLoader(),
+        evaluator
+    );
 
     // Then
     assertThat(converter.fromString(uri.toString()))
@@ -70,14 +89,47 @@ class UriConverterTest {
   @DisplayName("Invalid URIs raise an exception during parsing")
   @Test
   void invalidUrisRaiseAnExceptionDuringParsing() {
+    // Given
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("uri", "foo\\bar");
+    var evaluator = new DefaultExpressionEvaluator();
+
     // Then
     assertThatExceptionOfType(ComponentConfigurationException.class)
-        .isThrownBy(() -> converter.fromString("foo\\bar"))
-        // Annoyingly this varies with the JDK and OS in use. Windows reports a different issue
-        // to Linux!
-        .withMessageMatching("Failed to parse URI 'foo\\\\bar': "
-            + "java.net.URISyntaxException: .*")
+        .isThrownBy(() -> converter.fromConfiguration(
+            converterLookup,
+            configuration,
+            URI.class,
+            null,
+            getClass().getClassLoader(),
+            evaluator,
+            null
+        ))
+        // Ignore the message here, it varies based on the platform the test is running.
+        // Windows produces a different issue since backslashes have a special meaning there.
         .havingCause()
         .isInstanceOf(URISyntaxException.class);
+  }
+
+  @DisplayName("Null values are returned directly")
+  @Test
+  void nullValuesAreReturnedDirectly() throws ComponentConfigurationException {
+    // Given
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("uri", null);
+    var evaluator = new DefaultExpressionEvaluator();
+
+    // When
+    var result = converter.fromConfiguration(
+        converterLookup,
+        configuration,
+        URI.class,
+        null,
+        getClass().getClassLoader(),
+        evaluator
+    );
+
+    // Then
+    assertThat(result).isNull();
   }
 }
