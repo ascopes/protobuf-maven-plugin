@@ -80,7 +80,8 @@ class PathConverterTest {
         Path.class,
         null,
         getClass().getClassLoader(),
-        evaluator
+        evaluator,
+        null
     );
 
     // Then
@@ -110,7 +111,8 @@ class PathConverterTest {
         Path.class,
         null,
         getClass().getClassLoader(),
-        evaluator
+        evaluator,
+        null
     );
 
     // Then
@@ -119,6 +121,31 @@ class PathConverterTest {
 
     assertThat(resultPath.toAbsolutePath())
         .hasToString("%s", expectedPath.toAbsolutePath());
+  }
+
+  @DisplayName("Null values are returned directly")
+  @Test
+  void nullValuesAreReturnedDirectly(
+      @TempDir Path baseDir
+  ) throws ComponentConfigurationException {
+    // Given
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("path", null);
+    var evaluator = new SomeDirectoryRelativeExpressionEvaluator(baseDir);
+
+    // When
+    var result = converter.fromConfiguration(
+        converterLookup,
+        configuration,
+        Path.class,
+        null,
+        getClass().getClassLoader(),
+        evaluator,
+        null
+    );
+
+    // Then
+    assertThat(result).isNull();
   }
 
   // Roughly equivalent to what Maven does, for the sake of this test.
