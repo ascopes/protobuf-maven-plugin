@@ -31,7 +31,7 @@ static final @Field List<String> PROTO_TYPES = [
     "fixed32", "fixed64", "sfixed32", "sfixed64", "bool", "string", "bytes",
 ]
 
-@Field Random rng = new Random()
+static final @Field Random rng = new Random()
 
 int randomInt(int min, int max) {
   return min + rng.nextInt(max - min)
@@ -143,5 +143,8 @@ void generateRandomFiles(int count, ExecutorService executor) {
 }
 
 ExecutorService executor = Executors.newFixedThreadPool(30)
-generateRandomFiles(500, executor)
-executor.shutdown()
+try {
+  generateRandomFiles(500, executor)
+} finally {
+  executor.shutdown()
+}
