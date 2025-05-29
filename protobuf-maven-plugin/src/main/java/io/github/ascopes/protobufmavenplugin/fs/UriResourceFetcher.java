@@ -148,26 +148,29 @@ public final class UriResourceFetcher {
       conn.connect();
 
       try (
-          var responseStream = new BufferedInputStream(conn.getInputStream());
-          var fileStream = new SizeAwareBufferedOutputStream(Files.newOutputStream(targetFile))
+          var responseInputStream = new BufferedInputStream(conn.getInputStream());
+          var fileOutputStream = FileUtils.newBufferedOutputStream(targetFile)
       ) {
-        responseStream.transferTo(fileStream);
-        log.info("Downloaded '{}' to '{}' ({} bytes)", uri, targetFile, fileStream.size);
+        responseInputStream.transferTo(fileOutputStream);
       }
+
+      var fileSize = Files.size(targetFile);
+      log.info("Downloaded '{}' to '{}' ({} bytes)", uri, fileSize);
 
       return Optional.of(targetFile);
 
-    } catch (FileNotFoundException ex) {
-
-      // May be raised during the call to .getInputStream(), or the call to .connect(),
-      // depending on the implementation.
-      log.warn("No resource at '{}' appears to exist!", uri);
-
-      return Optional.empty();
-
     } catch (IOException ex) {
       log.debug("Failed to download '{}' to '{}'", uri, targetFile, ex);
-      throw new ResolutionException("Failed to download '" + uri + "' to '" + targetFile + "'", ex);
+
+      if (ex instanceof FileNotFoundException) {
+        // May be raised during the call to .getInputStream(), or the call to .connect(),
+        // depending on the implementation.
+        log.warn("No resource at '{}' exists", uri);
+        return Optional.empty();
+      } else {
+        throw new ResolutionException(
+            "Failed to download '" + uri + "' to '" + targetFile + "'", ex);
+      }
     }
   }
 
@@ -185,6 +188,11 @@ public final class UriResourceFetcher {
   }
 
   private URL parseUrlWithAnyHandler(URI uri) throws ResolutionException {
+    // We use ServiceLoader directly for this so that we can load handlers from
+    // other non-system classloaders. URL's internals only consider the default
+    // system/boot classloader, which differs to our runtime classloader that
+    // runs on top of ClassWorlds in Maven, meaning we cannot load custom schemes
+    // via normal mechanisms.
     var customHandler = ServiceLoader
         .load(URLStreamHandlerProvider.class, getClass().getClassLoader())
         .stream()
@@ -200,37 +208,6 @@ public final class UriResourceFetcher {
       return new URL(null, uri.toString(), customHandler);
     } catch (MalformedURLException ex) {
       throw new ResolutionException("URI '" + uri + "' is invalid: " + ex, ex);
-    }
-  }
-
-  /**
-   * Buffers an output stream, and keeps track of how many bytes
-   * were written.
-   */
-  private static final class SizeAwareBufferedOutputStream extends OutputStream {
-    private final OutputStream delegate;
-    private long size;
-
-    private SizeAwareBufferedOutputStream(OutputStream delegate) {
-      this.delegate = new BufferedOutputStream(delegate);
-      size = 0;
-    }
-
-    @Override
-    public void close() throws IOException {
-      flush();
-      delegate.close();
-    }
-
-    @Override
-    public void flush() throws IOException {
-      delegate.flush();
-    }
-
-    @Override
-    public void write(int nextByte) throws IOException {
-      ++size;
-      delegate.write(nextByte);
     }
   }
 }

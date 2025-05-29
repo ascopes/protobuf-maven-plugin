@@ -258,9 +258,10 @@ final class JvmPluginResolver {
   ) throws ResolutionException {
     try (
         var zip = FileUtils.openZipAsFileSystem(pluginPath);
-        var manifestStream = Files.newInputStream(zip.getPath("META-INF", "MANIFEST.MF"))
+        var manifestInputStream = FileUtils.newBufferedInputStream(
+            zip.getPath("META-INF", "MANIFEST.MF"))
     ) {
-      return new Manifest(manifestStream)
+      return new Manifest(manifestInputStream)
           .getMainAttributes()
           .getValue("Main-Class");
     } catch (IOException ex) {
