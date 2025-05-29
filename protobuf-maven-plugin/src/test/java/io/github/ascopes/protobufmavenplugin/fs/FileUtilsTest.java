@@ -20,6 +20,10 @@ import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.TestFileSystem;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -251,5 +255,43 @@ class FileUtilsTest {
               newDir2.resolve("ccc.txt")
           );
     }
+  }
+
+  @DisplayName(".newBufferedInputStream(Path, OpenOption... reads a file with a buffer")
+  @Test
+  void newBufferedInputStreamReadsFileWithBuffer(@TempDir Path dir) throws IOException {
+    // Given
+    var file = dir.resolve("file.txt");
+    Files.writeString(file, "Hello, World!");
+
+    // When
+    var os = new ByteArrayOutputStream();
+    try (var is = FileUtils.newBufferedInputStream(file)) {
+      assertThat(is).isInstanceOf(BufferedInputStream.class);
+      is.transferTo(os);
+    }
+
+    // Then
+    assertThat(os).asString().isEqualTo("Hello, World!");
+  }
+
+  @DisplayName(".newBufferedOutputStream(Path, OpenOption... writes a file with a buffer")
+  @Test
+  void newBufferedOutputStreamWritesFileWithBuffer(@TempDir Path dir) throws IOException {
+    // Given
+    var file = dir.resolve("file.txt");
+
+    // When
+    var is = new ByteArrayInputStream("Hello, World!".getBytes());
+    try (var os = FileUtils.newBufferedOutputStream(file)) {
+      assertThat(os).isInstanceOf(BufferedOutputStream.class);
+      is.transferTo(os);
+    }
+
+    // Then
+    assertThat(file)
+        .isRegularFile()
+        .content()
+        .isEqualTo("Hello, World!");
   }
 }

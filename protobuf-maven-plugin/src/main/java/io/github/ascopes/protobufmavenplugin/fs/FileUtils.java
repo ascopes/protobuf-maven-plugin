@@ -15,10 +15,15 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
@@ -145,5 +150,19 @@ public final class FileUtils {
     }
 
     return Collections.unmodifiableList(newPaths);
+  }
+
+  public static InputStream newBufferedInputStream(
+      Path path,
+      OpenOption... options
+  ) throws IOException {
+    return new BufferedInputStream(Files.newInputStream(path, options));
+  }
+
+  public static OutputStream newBufferedOutputStream(
+      Path path,
+      OpenOption... options
+  ) throws IOException {
+    return new BufferedOutputStream(Files.newOutputStream(path, options));
   }
 }

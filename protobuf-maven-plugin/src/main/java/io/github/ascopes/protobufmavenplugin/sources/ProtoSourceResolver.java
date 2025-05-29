@@ -98,7 +98,7 @@ final class ProtoSourceResolver {
       return Optional.empty();
     }
 
-    try (var inputStream = Files.newInputStream(descriptorFilePath)) {
+    try (var inputStream = FileUtils.newBufferedInputStream(descriptorFilePath)) {
       return FileDescriptorSet.parseFrom(inputStream)
           .getFileList()
           .stream()

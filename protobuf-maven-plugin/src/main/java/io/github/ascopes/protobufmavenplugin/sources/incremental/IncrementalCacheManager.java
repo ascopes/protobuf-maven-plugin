@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.sources.DescriptorListing;
 import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
@@ -198,7 +199,7 @@ public final class IncrementalCacheManager {
   private FutureTask<Map.Entry<Path, String>> generateFileDigest(Path file) {
     return concurrentExecutor.submit(() -> {
       log.trace("Generating digest for {}", file);
-      try (var inputStream = Files.newInputStream(file)) {
+      try (var inputStream = FileUtils.newBufferedInputStream(file)) {
         var digest = Digests.sha512ForStream(inputStream);
         return Map.entry(file, digest);
       }
