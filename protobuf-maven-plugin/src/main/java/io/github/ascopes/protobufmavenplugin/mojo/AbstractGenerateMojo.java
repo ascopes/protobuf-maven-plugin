@@ -912,6 +912,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Override the source directories to compile from.
    *
    * <p>Leave unspecified or explicitly null/empty to use the defaults.
+   * 
+   * <p><strong>Note that specifying custom directories will override the default
+   * directories rather than adding to them.</strong>
    *
    * @since 0.0.1
    */

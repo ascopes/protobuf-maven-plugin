@@ -35,7 +35,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * <p>Any project dependencies using the {@code compile}, {@code provided},
  * or {@code system} scopes will be made available to import from protobuf sources.
  *
- * <p>By default, sources will be read from {@code src/main/protobuf},
+ * <p>By default, sources will be read from {@code src/main/protobuf} ({@code src/main/proto},
+ * is also supported to assist in migration off of other unmaintained Maven plugins),
  * and generated sources will be written to {@code target/generated-sources/protobuf}.
  *
  * @author Ashley Scopes
@@ -74,9 +75,14 @@ public final class MainGenerateMojo extends AbstractGenerateMojo {
   Collection<Path> defaultSourceDirectories() {
     var basePath = mavenProject.getBasedir().toPath()
         .resolve("src")
-        .resolve("main")
-        .resolve("protobuf");
-    return List.of(basePath);
+        .resolve("main");
+
+    return List.of(
+        basePath.resolve("protobuf"),
+        // Provided in GH-687 as a transition layer for other plugin users
+        // migrating onto this Maven plugin.
+        basePath.resolve("proto")
+    );
   }
 
   @Override

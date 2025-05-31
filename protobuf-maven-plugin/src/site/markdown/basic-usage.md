@@ -91,6 +91,18 @@ generated protobuf classes.
 
 ---
 
+## Migration
+
+[GH-692](https://github.com/ascopes/protobuf-maven-plugin/issues/692) introduced the
+fallback source directory of `src/main/proto` and `src/test/proto` to be used to
+assist users who are migrating their codebases off of other unmaintained Maven plugins.
+
+It is recommended that users default to making use of `src/main/protobuf` and 
+`src/test/protobuf` instead, as this follows the standard naming convention of other 
+Maven-managed projects which is to use the language name rather than the file extension.
+
+---
+
 ## Goals
 
 By default, this plugin runs the `generate` goal to generate source code designed
