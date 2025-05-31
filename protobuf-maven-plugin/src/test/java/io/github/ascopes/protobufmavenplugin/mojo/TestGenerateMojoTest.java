@@ -39,9 +39,8 @@ class TestGenerateMojoTest extends AbstractGenerateMojoTestTemplate<TestGenerate
   Collection<Path> expectedDefaultSourceDirectories() {
     var basePath = mojo.mavenProject.getBasedir().toPath()
         .resolve("src")
-        .resolve("test")
-        .resolve("protobuf");
-    return List.of(basePath);
+        .resolve("test");
+    return List.of(basePath.resolve("protobuf"), basePath.resolve("proto"));
   }
 
   @Override
