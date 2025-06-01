@@ -400,6 +400,12 @@
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven-gpg-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
           <version>${maven-install-plugin.version}</version>
         </plugin>
@@ -457,7 +463,7 @@
                  by this point. -->
             <arguments>-Dmaven.test.skip -Dinvoker.skip</arguments>
             <goals>deploy</goals>
-            <releaseProfiles>gpg</releaseProfiles>
+            <releaseProfiles>release</releaseProfiles>
             <preparationGoals>clean verify</preparationGoals>
           </configuration>
         </plugin>
@@ -732,9 +738,35 @@
 
   <profiles>
     <profile>
-      <id>gpg</id>
+      <id>release</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          
           <plugin>
             <!-- GPG signing of build artifacts, required by Maven
                 Central. We only enable this via a profile so that
@@ -742,7 +774,6 @@
                 to build. -->
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>${maven-gpg-plugin.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
