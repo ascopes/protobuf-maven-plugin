@@ -32,7 +32,7 @@ import org.jspecify.annotations.Nullable;
  * both formats work in the same way internally.
  *
  * @author Ashley Scopes
- * @since 3.2.p
+ * @since 3.2.0
  */
 public final class ZipUrlStreamHandlerProvider extends URLStreamHandlerProvider {
 
