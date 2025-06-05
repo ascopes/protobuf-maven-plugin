@@ -78,10 +78,10 @@ jobs:
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          #- title: Windows arm64 - jdk21
-          #  os-name: windows-11-arm
-          #  java-version: 21  # This is the earliest-supported version on Windows ARM
-          #  maven-version: "${{ needs.validate.outputs.default_maven_version }}"
+          - title: Windows arm64 - jdk21
+            os-name: windows-11-arm
+            java-version: 21  # This is the earliest-supported version on Windows ARM
+            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: Linux arm64 - jdk11
             os-name: ubuntu-24.04-arm

@@ -54,7 +54,16 @@ public final class PlatformClassifierFactory {
       "amd64", "windows-x86_64",
       "x86", "windows-x86_32",
       "x86_32", "windows-x86_32",
-      "x86_64", "windows-x86_64"
+      "x86_64", "windows-x86_64",
+      // Protoc's developers have no plans to support an ARM release of
+      // protoc. The Prism emulator is included in Windows 10 and Windows
+      // 11 to execute x86 binaries on the ARM instruction set.
+      // Reportedly, Windows 10 only supports 32-bit ARM emulation, whereas
+      // Windows 11 supports both.
+      // At this time, we pin to the 64 bit version since Windows 10 is
+      // near EOL at the time of writing, and more support in protoc
+      // plugins will be available by vendors for 64 bit releases.
+      "aarch64", "windows-x86_64"
   );
 
   private static final Map<String, String> FALLBACK_MAPPING = Map.of();

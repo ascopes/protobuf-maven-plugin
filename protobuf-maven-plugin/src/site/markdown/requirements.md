@@ -54,6 +54,7 @@ architectures and operating systems. These are listed below:
         <ul>
           <li>amd64 (x86_64)</li>
           <li>x86 (x86_32)</li>
+          <li>aarch64</li>
         </ul>
       </td>
       <td>
@@ -77,16 +78,15 @@ Refer to the `protocVersion` parameter documentation on the
 
 ### Windows on ARM
 
-As of right now, no official binaries for `aarch64` Windows systems are provided.
-You may be able to use x86 emulation to get this to work. To do this, refer to
-the Microsoft ARM emulation documentation.
+As of right now, no official binaries for `aarch64` Windows systems are provided,
+and there has been no sign of plans at the time of writing to support this from
+Google.
 
-Pass the `-Dos.arch=x86_64 -Dos.name=Windows` flag to Maven to force the use of the
-amd64 binary for Windows.
+Windows 11 ARM releases support x86 emulation via the Prism emulator.
 
-Alternatively, you can build `protoc` yourself. Refer to the `protobufCompiler` 
-parameter documentation on the [goals page](plugin-info.html) for how you can override
-the binary being used.
+To enable users to build on Windows ARM machines, this plugin will always download the
+x86_64 release of `protoc` and any corresponding plugins, with the assumption that
+emulation will work successfully.
 
 ### BSDs, Linux on unsupported CPUs, MINIX, Solaris, etc
 
