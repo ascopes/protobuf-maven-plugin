@@ -21,7 +21,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.UriResourceFetcher;
-import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.IOException;
@@ -160,7 +160,7 @@ final class BinaryPluginResolver {
   ) {
     return ImmutableResolvedProtocPlugin
         .builder()
-        .id(Digests.sha1(path.toString()))
+        .id(Digest.compute("SHA-1", path.toString()).toString())
         .options(plugin.getOptions())
         .order(plugin.getOrder())
         .outputDirectory(requireNonNullElse(plugin.getOutputDirectory(), defaultOutputDirectory))

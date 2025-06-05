@@ -23,7 +23,7 @@ import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.sources.filter.FileFilter;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
-import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -247,7 +247,8 @@ final class ProtoSourceResolver {
   private String generateUniqueName(Path path) {
     // Use a URI here as the URI will correctly encapsulate archives within archives. Paths may have
     // name collisions between archives using the same relative file paths internally.
-    var digest = Digests.sha1(FileUtils.normalize(path).toUri().toASCIIString());
+    var name = FileUtils.normalize(path).toUri().toASCIIString();
+    var digest = Digest.compute("SHA-1", name);
     return FileUtils.getFileNameWithoutExtension(path) + "-" + digest;
   }
 }

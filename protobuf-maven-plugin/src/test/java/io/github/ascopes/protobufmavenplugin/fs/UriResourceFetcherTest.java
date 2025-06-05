@@ -31,7 +31,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -158,7 +158,7 @@ class UriResourceFetcherTest {
     }
 
     var uri = URI.create(protocol + ":" + archiveFile.toUri() + "!/foo/bar.txt");
-    var digest = Digests.sha1(uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString());
     var expectedFileName = "bar.txt-" + digest + ".log";
 
     // When
@@ -246,7 +246,7 @@ class UriResourceFetcherTest {
         .thenReturn(tempDir);
 
     var uri = URI.create(wireMockBaseUri + "/" + requestedPath);
-    var digest = Digests.sha1(uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString());
     var expectedFileName = requestedPath.contains("/")
         ? requestedPath.substring(requestedPath.lastIndexOf("/") + 1)
         : requestedPath;
@@ -289,7 +289,7 @@ class UriResourceFetcherTest {
     var uri = URI.create("zip:" + wireMockBaseUri
         + "/some/archive.zip!/foo/bar/baz.txt");
 
-    var digest = Digests.sha1(uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString());
 
     // When
     var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
@@ -329,7 +329,7 @@ class UriResourceFetcherTest {
     var uri = URI.create("jar:" + wireMockBaseUri
         + "/some/archive.jar!/foo/bar/baz.txt");
 
-    var digest = Digests.sha1(uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString());
 
     // When
     var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
@@ -357,7 +357,7 @@ class UriResourceFetcherTest {
         .thenReturn(tempDir);
 
     var uri = URI.create(wireMockBaseUri);
-    var digest = Digests.sha1(uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString());
 
     // When
     var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
