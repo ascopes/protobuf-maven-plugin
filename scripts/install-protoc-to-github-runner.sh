@@ -15,16 +15,30 @@ readonly version=4.30.1
 case "$(uname)" in
   Linux)
     readonly os_name=linux
+    case "$(uname -m)" in
+      aarch64)
+        readonly os_arch=aarch_64
+        ;;
+      *)
+        readonly os_arch=x86_64
+        ;;
+    esac
     ;;
   Darwin)
+    # Only support for aarch64 in new macOS versions.
     readonly os_name=osx
+    readonly os_arch=aarch_64
     ;;
   *)
+    # No arm64 version available, we assume Prism on ARM for Windows will
+    # correctly translate this.
     readonly os_name=windows
+    readonly os_arch=x86_64
     ;;
 esac
 
-readonly url=https://repo1.maven.org/maven2/com/google/protobuf/protoc/${version}/protoc-${version}-${os_name}-x86_64.exe
+
+readonly url=https://repo1.maven.org/maven2/com/google/protobuf/protoc/${version}/protoc-${version}-${os_name}-${os_arch}.exe
 # shellcheck disable=SC2155
 readonly target_dir=$(mktemp -d)
 readonly target=${target_dir}/protoc
