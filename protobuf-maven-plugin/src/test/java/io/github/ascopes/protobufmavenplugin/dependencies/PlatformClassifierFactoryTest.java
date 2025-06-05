@@ -95,7 +95,8 @@ class PlatformClassifierFactoryTest {
         arguments(windows().and(arch("amd64")), "windows-x86_64"),
         arguments(windows().and(arch("x86_64")), "windows-x86_64"),
         arguments(windows().and(arch("x86")), "windows-x86_32"),
-        arguments(windows().and(arch("x86_32")), "windows-x86_32")
+        arguments(windows().and(arch("x86_32")), "windows-x86_32"),
+        arguments(windows().and(arch("aarch64")), "windows-x86_64")
     );
   }
 
