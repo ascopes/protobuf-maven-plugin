@@ -59,14 +59,15 @@ public final class Digest {
     return Objects.hash(algorithm, digest);
   }
 
-  public boolean matchesDigestOf(InputStream inputStream) {
-    return compute(algorithm, inputStream).equals(this);
-  }
-
-  public String toUrlSafeBase64String() {
+  @Override
+  public String toString() {
     return Base64.getUrlEncoder()
         .withoutPadding()
         .encodeToString(digest);
+  }
+
+  public boolean matchesDigestOf(InputStream inputStream) {
+    return compute(algorithm, inputStream).equals(this);
   }
 
   public static Digest from(String algorithm, String b64Data) {
