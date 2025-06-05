@@ -88,7 +88,7 @@ jobs:
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux amd64
+          - title: Linux amd64 - jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
@@ -108,12 +108,12 @@ jobs:
             java-version: 24
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: mvn 3.8.8 (oldest supported)
+          - title: Maven 3.8.8 - jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: 3.8.8
 
-          - title: mvn 4.x.x
+          - title: Maven 4 - jdk17
             os-name: ubuntu-24.04
             java-version: 17
             maven-version: 4.0.0-rc-3
