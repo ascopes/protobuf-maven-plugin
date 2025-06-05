@@ -33,7 +33,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 final class DigestConverter extends AbstractBasicConverter {
 
   private static final Pattern PATTERN = Pattern.compile(
-      "^(?P<algorithm>[-a-z0-9]+):(?P<digest>^[-a-z0-9+/]*=*$",
+      "^(?<algorithm>[-a-z0-9]+):(?<digest>^[-a-z0-9+/]*=*$",
       Pattern.CASE_INSENSITIVE
   );
 
