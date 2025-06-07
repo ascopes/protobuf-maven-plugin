@@ -22,7 +22,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
-import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
@@ -158,7 +158,8 @@ final class JvmPluginResolver {
     // GH-421: Ensure duplicate plugin definitions retain a unique name
     // when in the same execution, rather than trampling over eachother's
     // files.
-    return Digests.sha1(plugin.toString()) + "-" + index;
+    return Digest.compute("SHA-1", plugin.toString())
+        + "-" + index;
   }
 
   private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin) throws ResolutionException {
