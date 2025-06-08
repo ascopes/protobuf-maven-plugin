@@ -166,9 +166,6 @@ public final class IncrementalCacheManager {
             .collect(concurrentExecutor.awaiting())
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))))
-        // Schedule all concurrent tasks together by using a terminal operation
-        .collect(Collectors.toUnmodifiableList())
-        .stream()
         .collect(concurrentExecutor.awaiting())
         .iterator();
 
