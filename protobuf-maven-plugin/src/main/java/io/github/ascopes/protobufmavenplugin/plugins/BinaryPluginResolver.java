@@ -24,7 +24,9 @@ import io.github.ascopes.protobufmavenplugin.fs.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,6 +149,19 @@ final class BinaryPluginResolver {
     var path = maybePath.orElseThrow(() -> new ResolutionException(
         "Plugin at " + plugin.getUrl() + " does not exist"
     ));
+
+    if (plugin.getDigest() != null) {
+      log.debug("Verifying digest of {} against {}", plugin.getUrl(), plugin.getDigest());
+
+      try (var is = new BufferedInputStream(Files.newInputStream(path))) {
+        plugin.getDigest().verify(is);
+      } catch (IOException ex) {
+        throw new ResolutionException(
+            "Failed to compute digest of " + plugin.getUrl() + ": " + ex,
+            ex
+        );
+      }
+    }
 
     makeExecutable(path);
 
