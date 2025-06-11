@@ -33,7 +33,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 final class DigestConverter extends AbstractBasicConverter {
 
   private static final Pattern PATTERN = Pattern.compile(
-      "^(?<algorithm>[-a-z0-9]+):(?<digest>^[-a-z0-9+/]*=*)$",
+      "^(?<algorithm>[-a-z0-9]+):(?<digest>[0-9a-f]+)$",
       Pattern.CASE_INSENSITIVE
   );
 
@@ -62,7 +62,8 @@ final class DigestConverter extends AbstractBasicConverter {
       throw new ComponentConfigurationException(
           "Failed to parse digest '" + str + "'. "
               +  "Ensure that the digest is in a format such as "
-              +  "'sha512:1a2b3c4d'"
+              +  "'sha512:1a2b3c4d', where the digest is a hexadecimal-encoded"
+              + "string."
       );
     }
 

@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
@@ -59,9 +58,7 @@ public final class Digest {
 
   @Override
   public String toString() {
-    return Base64.getUrlEncoder()
-        .withoutPadding()
-        .encodeToString(digest);
+    return encodeHex(digest);
   }
 
   public void verify(InputStream inputStream) throws IOException {
@@ -76,11 +73,11 @@ public final class Digest {
     }
   }
 
-  public static Digest from(String algorithm, String b64Data) {
+  public static Digest from(String algorithm, String hex) {
     // Validate the algorithm exists in this JVM, and
     // de-alias it.
     var messageDigest = getMessageDigest(algorithm);
-    var data = Base64.getDecoder().decode(b64Data);
+    var data = decodeHex(hex);
     return new Digest(messageDigest.getAlgorithm(), data);
   }
 
@@ -117,5 +114,27 @@ public final class Digest {
           ex
       );
     }
+  }
+
+  private static byte[] decodeHex(String hex) {
+    if (hex.length() % 2 != 0) {
+      throw new IllegalArgumentException(
+          "Hexadecimal string does not have a multiple of 2 characters"
+      );
+    }
+
+    var decoded = new byte[hex.length() / 2];
+    for (var i = 0; i < decoded.length; ++i) {
+      decoded[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+    }
+    return decoded;
+  }
+
+  private static String encodeHex(byte[] data) {
+    var sb = new StringBuilder();
+    for (var b : data) {
+      sb.append(Integer.toHexString(Byte.toUnsignedInt(b)));
+    }
+    return sb.toString();
   }
 }
