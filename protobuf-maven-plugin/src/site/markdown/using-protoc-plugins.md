@@ -155,6 +155,11 @@ cannot be resolved. This is useful for specific cases where resources may only b
 prevent the application being built locally. If set to optional, then any "not found" response provided by
 the underlying URL protocol will be ignored.
 
+If you wish to verify that the content of a URL's resource matches the expected digest, you can
+provide the `digest` attribute to verify the integrity. This takes the format
+`<digest>md5:6c224d84618c71e2ebb46dd9c4459aa6</digest>`, and supports `md5`, `sha1`, `sha256`,
+`sha512`, and any other JDK-provided message digest types.
+
 This is not recommended outside specific use cases, and care should be taken to ensure the
 legitimacy and security of any URLs being provided prior to adding them.
 
