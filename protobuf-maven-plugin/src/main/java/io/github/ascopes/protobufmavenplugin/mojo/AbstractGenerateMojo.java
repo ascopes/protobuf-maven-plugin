@@ -30,6 +30,7 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -60,6 +61,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private static final String DEFAULT_TRUE = "true";
   private static final String DEFAULT_TRANSITIVE = "TRANSITIVE";
 
+  private static final String PROTOBUF_COMPILER_DIGEST = "protobuf.compiler.digest";
   private static final String PROTOBUF_COMPILER_EXCLUDES = "protobuf.compiler.excludes";
   private static final String PROTOBUF_COMPILER_INCLUDES = "protobuf.compiler.includes";
   private static final String PROTOBUF_COMPILER_INCREMENTAL = "protobuf.compiler.incremental";
@@ -264,6 +266,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       no effect, and the project-wide setting is used. If explicitly
    *       specified, then the project setting is ignored in favour of this
    *       value instead.</li>
+   *   <li>{@code digest} - an optional digest to verify the binary against.
+   *       If specified, this is a string in the format {@code sha512:1a2b3c4d...},
+   *       using any supported message digest provided by your JDK (e.g. {@code md5},
+   *       {@code sha1}, {@code sha256}, {@code sha512}, etc).</li>
    * </ul>
    *
    * @since 2.0.0
@@ -732,6 +738,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean phpEnabled;
 
   /**
+   * Optional digest to verify {@code protoc} against.
+   *
+   * <p>Generally, you will not need to provide this, as the Maven Central
+   * {@code protoc} binaries will already be digest-verified as part of distribution.
+   * You may wish to specify this if you are using a {@code PATH}-based binary, or
+   * using a URL for {@code protoc}.
+   *
+   * <p>This is a string in the format {@code sha512:1a2b3c...}, using any
+   * message digest algorithm supported by your JDK.
+   *
+   * @since 3.5.0
+   */
+  @Parameter(property = PROTOBUF_COMPILER_DIGEST)
+  @Nullable Digest protocDigest;
+
+  /**
    * Specifies where to find {@code protoc} or which version to download.
    *
    * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
@@ -768,7 +790,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(required = true, property = PROTOBUF_COMPILER_VERSION)
+  @Parameter(
+      alias = "protoc",
+      required = true,
+      property = PROTOBUF_COMPILER_VERSION
+  )
   String protocVersion;
 
   /**
@@ -912,7 +938,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Override the source directories to compile from.
    *
    * <p>Leave unspecified or explicitly null/empty to use the defaults.
-   * 
+   *
    * <p><strong>Note that specifying custom directories will override the default
    * directories rather than adding to them.</strong>
    *
@@ -1037,6 +1063,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorIncludeSourceInfo(outputDescriptorIncludeSourceInfo)
         .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
+        .protocDigest(protocDigest)
         .protocVersion(protocVersion())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sourceDependencies(nonNullList(sourceDependencies))

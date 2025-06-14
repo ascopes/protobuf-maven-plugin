@@ -67,7 +67,8 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <protocVersion>https://repo1.maven.org/maven2/com/google/protobuf/protoc/${protobuf.version}/protoc-${protobuf.version}-linux-x86_64.exe</protocVersion>
+          <protoc>https://repo1.maven.org/maven2/com/google/protobuf/protoc/${protobuf.version}/protoc-${protobuf.version}-linux-x86_64.exe</protoc>
+          <protocDigest>md5:6c224d84618c71e2ebb46dd9c4459aa6</protocDigest>
         </configuration>
 
         <executions>

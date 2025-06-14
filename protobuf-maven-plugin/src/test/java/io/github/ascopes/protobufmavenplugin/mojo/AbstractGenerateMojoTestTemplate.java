@@ -39,6 +39,7 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,6 +48,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
@@ -56,6 +58,7 @@ import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
@@ -67,6 +70,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
@@ -208,7 +212,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenBinaryMavenPluginsNullExpectEmptyListInRequest(
-      List<MavenProtocPluginBean> plugins
+      @Nullable List<MavenProtocPluginBean> plugins
   ) throws Throwable {
     // Given
     mojo.binaryMavenPlugins = plugins;
@@ -244,7 +248,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenBinaryPathPluginsNullExpectEmptyListInRequest(
-      List<PathProtocPluginBean> plugins
+      @Nullable List<PathProtocPluginBean> plugins
   ) throws Throwable {
     // Given
     mojo.binaryPathPlugins = plugins;
@@ -280,7 +284,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenBinaryUrlPluginsNullExpectEmptyListInRequest(
-      List<UriProtocPluginBean> plugins
+      @Nullable List<UriProtocPluginBean> plugins
   ) throws Throwable {
     // Given
     mojo.binaryUrlPlugins = plugins;
@@ -335,7 +339,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "for dependencyScopes = \"{0}\"")
   void defaultDependencyScopesAreUsedWhenNoUserProvidedScopesArePresent(
-      Set<String> userProvidedDependencyScopes
+      @Nullable Set<String> userProvidedDependencyScopes
   ) throws Throwable {
     // Given
     mojo.dependencyScopes = userProvidedDependencyScopes;
@@ -439,10 +443,10 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenImportDependenciesNullExpectEmptyListInRequest(
-      List<MavenDependencyBean> plugins
+      @Nullable List<MavenDependencyBean> dependencies
   ) throws Throwable {
     // Given
-    mojo.importDependencies = plugins;
+    mojo.importDependencies = dependencies;
 
     // When
     mojo.execute();
@@ -474,7 +478,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @DisplayName("when importPaths is null, expect an empty list in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
-  void whenImportPathsNullExpectEmptyListInRequest(List<Path> importPaths) throws Throwable {
+  void whenImportPathsNullExpectEmptyListInRequest(
+      @Nullable List<Path> importPaths
+  ) throws Throwable {
     // Given
     mojo.importPaths = importPaths;
 
@@ -530,7 +536,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenJvmMavenPluginsNullExpectEmptyListInRequest(
-      List<MavenProtocPluginBean> plugins
+      @Nullable List<MavenProtocPluginBean> plugins
   ) throws Throwable {
     // Given
     mojo.jvmMavenPlugins = plugins;
@@ -715,9 +721,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   void whenOutputDirectoryNotProvidedExpectDefaultOutputDirectoryToBeUsed() throws Throwable {
     // Given
-    // Final vars to disable checkstyle complaints.
-    final var expectedOutputDirectory = expectedDefaultOutputDirectory();
     mojo.outputDirectory = null;
+    var expectedOutputDirectory = expectedDefaultOutputDirectory();
 
     // When
     mojo.execute();
@@ -745,6 +750,27 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
     assertThat(actualRequest.getOutputDirectory()).isEqualTo(expectedOutputDirectory);
+  }
+
+  @DisplayName("the protocDigest is set in the request")
+  @NullSource
+  @ValueSource(strings = "non-null")
+  @ParameterizedTest(name = "for {0} digest")
+  void protocDigestIsSetInTheRequest(@Nullable String digestValue) throws Throwable {
+    // Given
+    var digest = Optional.ofNullable(digestValue)
+        .map(v -> Digest.compute("SHA-1", v))
+        .orElse(null);
+    mojo.protocDigest = digest;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getProtocDigest()).isSameAs(digest);
   }
 
   @DisplayName("when protocVersion is null, expect an exception to be raised")
@@ -816,7 +842,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDependenciesNullExpectEmptyListInRequest(
-      List<MavenDependencyBean> dependencies
+      @Nullable List<MavenDependencyBean> dependencies
   ) throws Throwable {
     // Given
     mojo.sourceDependencies = dependencies;
@@ -852,7 +878,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDescriptorDependenciesNullExpectEmptyListInRequest(
-      List<MavenDependencyBean> dependencies
+      @Nullable List<MavenDependencyBean> dependencies
   ) throws Throwable {
     // Given
     mojo.sourceDescriptorDependencies = dependencies;
@@ -890,7 +916,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDescriptorPathsNullExpectEmptyCollectionInRequest(
-      List<Path> sourceDescriptorPaths
+      @Nullable List<Path> sourceDescriptorPaths
   ) throws Throwable {
     // Given
     mojo.sourceDescriptorPaths = sourceDescriptorPaths;
@@ -952,12 +978,12 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var actualRequest = captor.getValue();
     assertThat(actualRequest.getSourceDescriptorPaths()).containsExactly(path1, path3);
   }
-  
+
   @DisplayName("when sourceDirectories is null, expect the default path in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDirectoriesNullExpectDefaultValueInRequest(
-      List<Path> sourceDirectories
+      @Nullable List<Path> sourceDirectories
   ) throws Throwable {
     // Given
     mojo.sourceDirectories = sourceDirectories;

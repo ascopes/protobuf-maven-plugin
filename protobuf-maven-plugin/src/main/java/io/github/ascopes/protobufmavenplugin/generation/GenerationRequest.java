@@ -20,6 +20,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -157,6 +158,17 @@ public interface GenerationRequest {
    * @return the artifact classifier, or {@code null}.
    */
   @Nullable String getOutputDescriptorAttachmentClassifier();
+
+  /**
+   * The digest of the {@code protoc} binary to verify, or {@code null} if
+   * no verification should take place.
+   *
+   * <p>This does not affect any verification performed by Aether.
+   *
+   * @return the digest.
+   * @since 3.5.0
+   */
+  @Nullable Digest getProtocDigest();
 
   /**
    * The version of {@code protoc} to use.
