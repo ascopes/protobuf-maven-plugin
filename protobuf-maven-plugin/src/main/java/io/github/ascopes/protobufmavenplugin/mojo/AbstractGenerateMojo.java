@@ -67,6 +67,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private static final String PROTOBUF_COMPILER_INCREMENTAL = "protobuf.compiler.incremental";
   private static final String PROTOBUF_COMPILER_VERSION = "protobuf.compiler.version";
   private static final String PROTOBUF_SKIP = "protobuf.skip";
+  private static final String PROTOC_ALIAS = "protoc";
 
   private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
 
@@ -791,7 +792,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(
-      alias = "protoc",
+      alias = PROTOC_ALIAS,
       required = true,
       property = PROTOBUF_COMPILER_VERSION
   )
