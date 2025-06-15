@@ -248,7 +248,7 @@ final class ProtoSourceResolver {
     // Use a URI here as the URI will correctly encapsulate archives within archives. Paths may have
     // name collisions between archives using the same relative file paths internally.
     var name = FileUtils.normalize(path).toUri().toASCIIString();
-    var digest = Digest.compute("SHA-1", name);
+    var digest = Digest.compute("SHA-1", name).toHexString();
     return FileUtils.getFileNameWithoutExtension(path) + "-" + digest;
   }
 }

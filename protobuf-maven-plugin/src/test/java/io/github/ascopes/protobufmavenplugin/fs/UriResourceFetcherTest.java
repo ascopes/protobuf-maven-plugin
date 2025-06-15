@@ -21,7 +21,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static java.util.Objects.requireNonNullElse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +42,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.maven.Maven;
 import org.apache.maven.execution.MavenSession;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,7 +87,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("invalid URI protocols are not resolved")
   @Test
-  void invalidUriProtocolsAreNotResolved() throws Exception {
+  void invalidUriProtocolsAreNotResolved() {
     // Given
     var uri = URI.create("foobar:file://path/to/it");
 
@@ -158,7 +156,7 @@ class UriResourceFetcherTest {
     }
 
     var uri = URI.create(protocol + ":" + archiveFile.toUri() + "!/foo/bar.txt");
-    var digest = Digest.compute("SHA-1", uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString()).toHexString();
     var expectedFileName = "bar.txt-" + digest + ".log";
 
     // When
@@ -218,7 +216,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("file URIs with bad characters result in an exception being raised")
   @Test
-  void fileUrisWithBadCharactersResultInAnExceptionBeingRaised() throws Exception {
+  void fileUrisWithBadCharactersResultInAnExceptionBeingRaised() {
     // Given
     var uri = URI.create("file://bob@xxxxxx@Xx@X@X.localhost.net/59339785423");
 
@@ -246,7 +244,7 @@ class UriResourceFetcherTest {
         .thenReturn(tempDir);
 
     var uri = URI.create(wireMockBaseUri + "/" + requestedPath);
-    var digest = Digest.compute("SHA-1", uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString()).toHexString();
     var expectedFileName = requestedPath.contains("/")
         ? requestedPath.substring(requestedPath.lastIndexOf("/") + 1)
         : requestedPath;
@@ -289,7 +287,7 @@ class UriResourceFetcherTest {
     var uri = URI.create("zip:" + wireMockBaseUri
         + "/some/archive.zip!/foo/bar/baz.txt");
 
-    var digest = Digest.compute("SHA-1", uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString()).toHexString();
 
     // When
     var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
@@ -329,7 +327,7 @@ class UriResourceFetcherTest {
     var uri = URI.create("jar:" + wireMockBaseUri
         + "/some/archive.jar!/foo/bar/baz.txt");
 
-    var digest = Digest.compute("SHA-1", uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString()).toHexString();
 
     // When
     var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
@@ -357,7 +355,7 @@ class UriResourceFetcherTest {
         .thenReturn(tempDir);
 
     var uri = URI.create(wireMockBaseUri);
-    var digest = Digest.compute("SHA-1", uri.toASCIIString());
+    var digest = Digest.compute("SHA-1", uri.toASCIIString()).toHexString();
 
     // When
     var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile");
@@ -395,7 +393,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("HTTP URIs raise exceptions if transfer fails")
   @Test
-  void httpUrisRaiseExceptionsIfTransferFails() throws Exception {
+  void httpUrisRaiseExceptionsIfTransferFails() {
     // Given
     wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
         .willReturn(aResponse().withFault(Fault.MALFORMED_RESPONSE_CHUNK)));
@@ -414,7 +412,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("HTTP URIs raise exceptions if offline mode is enabled")
   @Test
-  void httpUrisRaiseExceptionsIfOfflineModeIsEnabled() throws Exception {
+  void httpUrisRaiseExceptionsIfOfflineModeIsEnabled() {
     // Given
     when(mavenSession.isOffline())
         .thenReturn(true);
@@ -434,7 +432,7 @@ class UriResourceFetcherTest {
 
   @DisplayName("nested HTTP URIs raise exceptions if offline mode is enabled")
   @Test
-  void nestedHttpUrisRaiseExceptionsIfOfflineModeIsEnabled() throws Exception {
+  void nestedHttpUrisRaiseExceptionsIfOfflineModeIsEnabled() {
     // Given
     when(mavenSession.isOffline())
         .thenReturn(true);
