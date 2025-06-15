@@ -175,7 +175,7 @@ public final class UriResourceFetcher {
   }
 
   private Path targetFile(URL url, String extension) {
-    var digest = Digest.compute("SHA-1", url.toExternalForm()).toString();
+    var digest = Digest.compute("SHA-1", url.toExternalForm()).toHexString();
     var path = url.getPath();
     var lastSlash = path.lastIndexOf('/');
     var fileName = lastSlash < 0

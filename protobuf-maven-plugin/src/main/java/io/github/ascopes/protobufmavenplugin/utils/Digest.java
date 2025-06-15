@@ -58,6 +58,10 @@ public final class Digest {
 
   @Override
   public String toString() {
+    return algorithm + ":" + encodeHex(digest);
+  }
+
+  public String toHexString() {
     return encodeHex(digest);
   }
 

@@ -156,9 +156,9 @@ final class JvmPluginResolver {
 
   private String hashPlugin(MavenProtocPlugin plugin, int index) {
     // GH-421: Ensure duplicate plugin definitions retain a unique name
-    // when in the same execution, rather than trampling over eachother's
+    // when in the same execution, rather than trampling over each-other's
     // files.
-    return Digest.compute("SHA-1", plugin.toString())
+    return Digest.compute("SHA-1", plugin.toString()).toHexString()
         + "-" + index;
   }
 

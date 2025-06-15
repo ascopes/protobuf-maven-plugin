@@ -175,7 +175,7 @@ final class BinaryPluginResolver {
   ) {
     return ImmutableResolvedProtocPlugin
         .builder()
-        .id(Digest.compute("SHA-1", path.toString()).toString())
+        .id(Digest.compute("SHA-1", path.toString()).toHexString())
         .options(plugin.getOptions())
         .order(plugin.getOrder())
         .outputDirectory(requireNonNullElse(plugin.getOutputDirectory(), defaultOutputDirectory))
