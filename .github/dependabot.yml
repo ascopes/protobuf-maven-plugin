@@ -3,6 +3,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
+    open-pull-requests-limit: 999
     schedule:
       interval: weekly
       day: monday
@@ -23,6 +24,7 @@ updates:
       day: monday
       time: "06:00"
       timezone: Europe/London
+    open-pull-requests-limit: 999
     target-branch: main
     assignees:
       - ascopes
