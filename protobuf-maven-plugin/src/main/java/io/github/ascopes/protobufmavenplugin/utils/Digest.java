@@ -48,12 +48,12 @@ public final class Digest {
 
     var that = (Digest) other;
 
-    return algorithm == that.algorithm && Arrays.equals(digest, that.digest);
+    return Objects.equals(algorithm, that.algorithm) && Arrays.equals(digest, that.digest);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(algorithm, digest);
+    return algorithm.hashCode() ^ Arrays.hashCode(digest);
   }
 
   @Override
