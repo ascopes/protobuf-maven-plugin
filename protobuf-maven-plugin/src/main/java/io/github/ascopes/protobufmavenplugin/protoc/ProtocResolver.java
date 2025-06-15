@@ -20,18 +20,22 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResol
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.UriResourceFetcher;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +77,10 @@ public final class ProtocResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Optional<Path> resolve(String version) throws ResolutionException {
+  public Optional<Path> resolve(
+      String version,
+      @Nullable Digest digest
+  ) throws ResolutionException {
     if (version.equalsIgnoreCase("LATEST")) {
       log.warn(
           "You have set the protoc version to 'latest'. This will likely not behave as you "
@@ -91,19 +98,34 @@ public final class ProtocResolver {
         ? resolveFromUri(version)
         : resolveFromMavenRepositories(version);
 
-    if (path.isPresent()) {
-      var resolvedPath = path.get();
+    if (path.isEmpty()) {
+      return Optional.empty();
 
-      try {
-        FileUtils.makeExecutable(resolvedPath);
+    }
+    var resolvedPath = path.get();
 
+
+    if (digest != null) {
+      log.debug("Verifying digest of {} against {}", resolvedPath, digest);
+      try (var is = new BufferedInputStream(Files.newInputStream(resolvedPath))) {
+        digest.verify(is);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to set executable bit on protoc binary at " + resolvedPath
-                + ": " + ex.getMessage(),
+            "Failed to compute digest of " + resolvedPath + ": " + ex,
             ex
         );
       }
+    }
+
+    try {
+      FileUtils.makeExecutable(resolvedPath);
+
+    } catch (IOException ex) {
+      throw new ResolutionException(
+          "Failed to set executable bit on protoc binary at " + resolvedPath
+              + ": " + ex.getMessage(),
+          ex
+      );
     }
 
     return path;
