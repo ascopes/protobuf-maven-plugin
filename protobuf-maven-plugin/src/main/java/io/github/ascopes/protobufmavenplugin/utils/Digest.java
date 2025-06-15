@@ -82,6 +82,14 @@ public final class Digest {
     // de-alias it.
     var messageDigest = getMessageDigest(algorithm);
     var data = decodeHex(hex);
+
+    if (data.length != messageDigest.getDigestLength()) {
+      throw new IllegalArgumentException(
+          "Illegal length " + data.length + " for " + messageDigest.getAlgorithm()
+              + " digest, expected " + messageDigest.getDigestLength() + " instead"
+      );
+    }
+
     return new Digest(messageDigest.getAlgorithm(), data);
   }
 
@@ -93,7 +101,7 @@ public final class Digest {
     try {
       return compute(algorithm, new ByteArrayInputStream(data));
     } catch (IOException ex) {
-      throw new RuntimeException("Unexpected error computing digest", ex);
+      throw new IllegalStateException("Unexpected error computing digest", ex);
     }
   }
 
