@@ -1,4 +1,4 @@
-name: Deploy Artifacts/Documentation
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -135,7 +135,7 @@ jobs:
             **/maven-status/**
             **/surefire-reports/**.txt
           compression-level: 9
-          retention-days: 365
+          retention-days: 90  # max
           include-hidden-files: true
           if-no-files-found: warn
 
