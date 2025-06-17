@@ -12,7 +12,9 @@ set -o nounset
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 echo "Checking protobuf version from pom.xml..."
-version=$(./mvnw help:evaluate -Dexpression=protobuf.version -DforceStdout=true --quiet)
+# Use of sed+tail works around the fact Maven 4.x needs --raw-streams to not output
+# other noise at the start of the line, but Maven 3.8 does not support this at all.
+version=$(./mvnw help:evaluate -Dexpression=protobuf.version -DforceStdout=true --quiet | sed 's/ /\n/g' | tail -1)
 
 echo "Checking OS and CPU..."
 
