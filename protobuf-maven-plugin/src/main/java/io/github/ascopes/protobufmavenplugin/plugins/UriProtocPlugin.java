@@ -15,8 +15,10 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.net.URI;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -31,6 +33,7 @@ import org.immutables.value.Value.Modifiable;
 @Modifiable
 public interface UriProtocPlugin extends OptionalProtocPlugin {
 
-  // TODO(ascopes): in v4.0.0, rename to "getUri" here, and elsewhere.
   URI getUrl();
+
+  @Nullable Digest getDigest();
 }

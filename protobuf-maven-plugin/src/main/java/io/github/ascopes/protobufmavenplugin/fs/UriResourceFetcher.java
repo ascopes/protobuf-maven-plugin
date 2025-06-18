@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -175,7 +175,7 @@ public final class UriResourceFetcher {
   }
 
   private Path targetFile(URL url, String extension) {
-    var digest = Digests.sha1(url.toExternalForm());
+    var digest = Digest.compute("SHA-1", url.toExternalForm()).toHexString();
     var path = url.getPath();
     var lastSlash = path.lastIndexOf('/');
     var fileName = lastSlash < 0
