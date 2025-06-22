@@ -20,9 +20,9 @@ header of this page.
   <version>0.0.1-SNAPSHOT</version>
 
   <properties>
-    <protobuf.version>4.28.0</protobuf.version>
+    <protobuf.version>4.31.1</protobuf.version>
     
-    <maven.compiler.release>22</maven.compiler.release>
+    <maven.compiler.release>24</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -91,7 +91,7 @@ generated protobuf classes.
 
 ---
 
-## Migration
+## Migration from other plugins
 
 [GH-692](https://github.com/ascopes/protobuf-maven-plugin/issues/692) introduced the
 fallback source directory of `src/main/proto` and `src/test/proto` to be used to
