@@ -88,7 +88,8 @@ public final class Digest {
 
   public static Digest from(String algorithm, String hex) {
     // Validate the algorithm exists in this JVM, and
-    // de-alias it.
+    // de-alias it. We could possibly optimise this in the future
+    // to check the length/2 before decoding.
     var messageDigest = getMessageDigest(algorithm);
     var data = decodeHex(hex);
 
@@ -109,7 +110,12 @@ public final class Digest {
   }
 
   public static Digest compute(String algorithm, String text) {
-    return compute(algorithm, text.getBytes(StandardCharsets.UTF_16LE));
+    // Use UTF-16 here so we can handle any valid character represented
+    // by the JVM within a char. It may or may not include a byte-order-mark.
+    // Supporting this reduces the risk of some kinds of encoding errors
+    // when dealing with certain charsets such as those for varioud asian
+    // runes used in languages such as Japanese.
+    return compute(algorithm, text.getBytes(StandardCharsets.UTF_16));
   }
 
   public static Digest compute(String algorithm, byte[] data) {
@@ -145,6 +151,10 @@ public final class Digest {
   }
 
   private static byte[] decodeHex(String hex) {
+    // Hex contains two digits per byte, and we disallow denoting
+    // sign here as it makes little sense. If we have an invalid length
+    // string, then let it raise an IndexOutOfBoundsException to simplify
+    // error handling.
     var decoded = new byte[hex.length() / 2];
     for (var i = 0; i < hex.length(); i += 2) {
       try {
