@@ -56,6 +56,10 @@ final class DigestConverter extends AbstractBasicConverter {
 
   @Override
   protected Object fromString(String str) throws ComponentConfigurationException {
+    // Users may wish to split digests into more than one line
+    // so they can satisfy tools like spotless. Support this by
+    // yanking any whitespace prior to matching the string.
+    str = removeWhitespace(str);
     var matcher = PATTERN.matcher(str);
 
     if (!matcher.matches()) {
@@ -72,7 +76,8 @@ final class DigestConverter extends AbstractBasicConverter {
       algorithm = DIGEST_ALIASES.getOrDefault(algorithm, algorithm)
           .toUpperCase(Locale.ROOT);
 
-      var digest = matcher.group("digest");
+      var digest = matcher.group("digest")
+          .toLowerCase(Locale.ROOT);
 
       return Digest.from(algorithm, digest);
     } catch (Exception ex) {
@@ -81,5 +86,16 @@ final class DigestConverter extends AbstractBasicConverter {
           ex
       );
     }
+  }
+
+  private static String removeWhitespace(String string) {
+    var sb = new StringBuilder();
+    for (var i = 0; i < string.length(); ++i) {
+      var c = string.charAt(i);
+      if (!Character.isWhitespace(c)) {
+        sb.append(c);
+      }
+    }
+    return sb.toString();
   }
 }
