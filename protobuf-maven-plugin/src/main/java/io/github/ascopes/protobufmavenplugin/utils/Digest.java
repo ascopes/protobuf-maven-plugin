@@ -40,6 +40,14 @@ public final class Digest {
     this.digest = digest;
   }
 
+  public String getAlgorithm() {
+    return algorithm;
+  }
+
+  public byte[] getDigest() {
+    return digest;
+  }
+
   @Override
   public boolean equals(@Nullable Object other) {
     if (!(other instanceof Digest)) {
@@ -69,10 +77,11 @@ public final class Digest {
     var actualDigest = compute(algorithm, inputStream);
     if (!actualDigest.equals(this)) {
       throw new IOException(
-          "Actual digest "
+          "Actual digest '"
               + actualDigest.algorithm + ":" + actualDigest
-              + " does not match expected digest "
+              + "' does not match expected digest '"
               + algorithm + ":" + this
+              + "'"
       );
     }
   }
@@ -84,9 +93,15 @@ public final class Digest {
     var data = decodeHex(hex);
 
     if (data.length != messageDigest.getDigestLength()) {
-      throw new IllegalArgumentException(
-          "Illegal length " + data.length + " for " + messageDigest.getAlgorithm()
-              + " digest, expected " + messageDigest.getDigestLength() + " instead"
+      throw new DigestException(
+          "Illegal length "
+              + data.length
+              + " for decoded digest '"
+              + hex
+              + "' with algorithm '"
+              + messageDigest.getAlgorithm()
+              + "', expected "
+              + messageDigest.getDigestLength()
       );
     }
 
@@ -101,7 +116,8 @@ public final class Digest {
     try {
       return compute(algorithm, new ByteArrayInputStream(data));
     } catch (IOException ex) {
-      throw new IllegalStateException("Unexpected error computing digest", ex);
+      // Should be unreachable but we are forced to handle this.
+      throw new DigestException("Unexpected error computing digest", ex);
     }
   }
 
@@ -121,23 +137,29 @@ public final class Digest {
     try {
       return MessageDigest.getInstance(algorithm);
     } catch (NoSuchAlgorithmException ex) {
-      throw new IllegalArgumentException(
-          "No digest named " + algorithm + " is supported on this system",
+      throw new DigestException(
+          "Digest '" + algorithm + "' is not supported by this JVM",
           ex
       );
     }
   }
 
   private static byte[] decodeHex(String hex) {
-    if (hex.length() % 2 != 0) {
-      throw new IllegalArgumentException(
-          "Hexadecimal string does not have a multiple of 2 characters"
-      );
-    }
-
     var decoded = new byte[hex.length() / 2];
-    for (var i = 0; i < decoded.length; ++i) {
-      decoded[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+    for (var i = 0; i < hex.length(); i += 2) {
+      try {
+        var hexByte = hex.substring(i, i + 2);
+        decoded[i / 2] = (byte) Integer.parseUnsignedInt(hexByte, 16);
+      } catch (NumberFormatException | IndexOutOfBoundsException ex) {
+        throw new DigestException(
+            "Invalid hex byte at position "
+                + (i + 1)
+                + " in hexadecimal string '"
+                + hex
+                + "'",
+            ex
+        );
+      }
     }
     return decoded;
   }
