@@ -35,7 +35,8 @@ public final class Digest {
   private final String algorithm;
   private final byte[] digest;
 
-  private Digest(String algorithm, byte[] digest) {
+  // Visible for testing only.
+  Digest(String algorithm, byte[] digest) {
     this.algorithm = algorithm;
     this.digest = digest;
   }
