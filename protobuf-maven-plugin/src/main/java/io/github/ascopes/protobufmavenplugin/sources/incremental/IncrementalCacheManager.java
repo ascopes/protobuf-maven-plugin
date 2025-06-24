@@ -22,7 +22,7 @@ import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
-import io.github.ascopes.protobufmavenplugin.utils.Digests;
+import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -197,7 +197,7 @@ public final class IncrementalCacheManager {
     return concurrentExecutor.submit(() -> {
       log.trace("Generating digest for {}", file);
       try (var inputStream = FileUtils.newBufferedInputStream(file)) {
-        var digest = Digests.sha512ForStream(inputStream);
+        var digest = Digest.compute("SHA-512", inputStream).toHexString();
         return Map.entry(file, digest);
       }
     });
