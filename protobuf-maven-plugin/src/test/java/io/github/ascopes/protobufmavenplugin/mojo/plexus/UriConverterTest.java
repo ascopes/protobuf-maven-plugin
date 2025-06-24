@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin.mojo.plexus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import io.github.ascopes.protobufmavenplugin.mojo.plexus.PathConverterTest.SomeDirectoryRelativeExpressionEvaluator;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
