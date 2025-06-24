@@ -17,9 +17,12 @@ package io.github.ascopes.protobufmavenplugin.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.io.ByteArrayInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Stream;
@@ -49,37 +52,37 @@ class DigestTest {
   }
 
   static Stream<Arguments> equalsTestCases() {
-    var sameDigest = new Digest("foo", new byte[]{1, 2, 3, 4});
+    var sameDigest = new Digest("foo", bytes(1, 2, 3, 4));
 
     return Stream.of(
         argumentSet(
             "not equal to null",
-            new Digest("foo", new byte[]{1, 2, 3, 4}),
+            new Digest("foo", bytes(1, 2, 3, 4)),
             null,
             false
         ),
         argumentSet(
             "not equal to different types of object",
-            new Digest("foo", new byte[]{1, 2, 3, 4}),
+            new Digest("foo", bytes(1, 2, 3, 4)),
             "some string",
             false
         ),
         argumentSet(
             "not equal if algorithms differ",
-            new Digest("foo", new byte[]{1, 2, 3, 4}),
-            new Digest("bar", new byte[]{1, 2, 3, 4}),
+            new Digest("foo", bytes(1, 2, 3, 4)),
+            new Digest("bar", bytes(1, 2, 3, 4)),
             false
         ),
         argumentSet(
             "not equal if buffers differ",
-            new Digest("foo", new byte[]{1, 2, 3, 4}),
-            new Digest("foo", new byte[]{5, 4, 3, 2}),
+            new Digest("foo", bytes(1, 2, 3, 4)),
+            new Digest("foo", bytes(5, 4, 3, 2)),
             false
         ),
         argumentSet(
             "equal if algorithms and buffers match",
-            new Digest("foo", new byte[]{1, 2, 3, 4}),
-            new Digest("foo", new byte[]{1, 2, 3, 4}),
+            new Digest("foo", bytes(1, 2, 3, 4)),
+            new Digest("foo", bytes(1, 2, 3, 4)),
             true
         ),
         argumentSet(
@@ -89,6 +92,81 @@ class DigestTest {
             true
         )
     );
+  }
+
+  @DisplayName(".hashCode() returns a unique value")
+  @Test
+  void hashCodeReturnsUniqueValue() {
+    // Given
+    var foo = new Digest("aaa", bytes(1, 2, 3));
+    var bar = new Digest("bbb", bytes(1, 2, 3));
+    var baz = new Digest("aaa", bytes(5, 4, 3));
+
+    // Then
+    assertSoftly(softly -> {
+      softly.assertThat(foo).hasSameHashCodeAs(foo);
+      softly.assertThat(bar).hasSameHashCodeAs(bar);
+      softly.assertThat(baz).hasSameHashCodeAs(baz);
+      softly.assertThat(foo).doesNotHaveSameHashCodeAs(bar);
+      softly.assertThat(foo).doesNotHaveSameHashCodeAs(baz);
+      softly.assertThat(bar).doesNotHaveSameHashCodeAs(baz);
+    });
+  }
+
+  @DisplayName(".toString() returns the expexted value")
+  @Test
+  void toStringReturnsTheExpectedValue() {
+    // Given
+    var digest = new Digest("SHA-940", bytes(0xDE, 0xAD, 0xBE, 0xEF, 0x69, 0x42));
+
+    // Then
+    assertThat(digest).hasToString("SHA-940:deadbeef6942");
+  }
+
+  @DisplayName(".toHexString() returns the expexted value")
+  @Test
+  void toHexStringReturnsTheExpectedValue() {
+    // Given
+    var digest = new Digest("SHA-940", bytes(0xDE, 0xAD, 0xBE, 0xEF, 0x69, 0x42));
+
+    // Then
+    assertThat(digest.toHexString()).isEqualTo("deadbeef6942");
+  }
+
+  @DisplayName(".verify(InputStream) succeeds if the digest matches the content")
+  @Test
+  void verifySucceedsIfTheDigestMatchesTheContent() throws Throwable {
+    // Given
+    var stream = new ByteArrayInputStream("hello, world".getBytes());
+    var digest = Digest.from(
+        "SHA-256",
+        "09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b"
+    );
+
+    // Then
+    assertThatNoException()
+        .isThrownBy(() -> digest.verify(stream));
+  }
+
+  @DisplayName(".verify(InputStream) raises if the digest does not match the content")
+  @Test
+  void verifyRaisesIfTheDigestDoesNotMatchTheContent() throws Throwable {
+    // Given
+    var stream = new ByteArrayInputStream("goodbye, world".getBytes());
+    var digest = Digest.from(
+        "SHA-256",
+        "09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b"
+    );
+
+    // Then
+    assertThatExceptionOfType(DigestException.class)
+        .isThrownBy(() -> digest.verify(stream))
+        .withMessage(
+            "Actual digest"
+                + " 'SHA-256:41d8dfe07cfa2111d75a6b318c4e35e2f6bab9daf0d5b0748acb162bb99fa4'"
+                + " does not match expected digest"
+                + " 'SHA-256:9ca7e4eaa6e8ae9c7d261167129184883644d7dfba7cbfbc4c8a2e836d5b'"
+        );
   }
 
   @DisplayName(".from(String, String) builds the expected digest object")
@@ -193,7 +271,86 @@ class DigestTest {
         .withNoCause();
   }
 
+  @DisplayName(".compute(String, String) computes the digest for the string")
+  @Test
+  void computeStringStringComputesTheDigestForTheString() {
+    // Given
+    var expectedDigest = new Digest(
+        "MD5",
+        bytes(
+            0x43, 0xdf, 0x48, 0x0e, 0x18, 0xe4, 0x6f, 0xd8, 0x6c, 0x1b, 0xb8, 0x35,
+            0x23, 0xe3, 0xfe, 0x8f
+        )
+    );
+
+    // When
+    var actualDigest = Digest.compute("MD5", "you are already dead");
+
+    // Then
+    assertThat(actualDigest).isEqualTo(expectedDigest);
+  }
+
+  @DisplayName(".compute(String, byte[]) computes the digest for the bytes")
+  @Test
+  void computeStringBytesComputesTheDigestForTheBytes() {
+    // Given
+    var expectedDigest = new Digest(
+        "MD5",
+        bytes(
+            0x43, 0xdf, 0x48, 0x0e, 0x18, 0xe4, 0x6f, 0xd8, 0x6c, 0x1b, 0xb8, 0x35,
+            0x23, 0xe3, 0xfe, 0x8f
+        )
+    );
+
+    // When
+    var actualDigest = Digest.compute(
+        "MD5",
+        bytes(
+            'y', 'o', 'u', ' ', 'a', 'r', 'e', ' ', 'a', 'l', 'r', 'e', 'a', 'd', 'y',
+            ' ', 'd', 'e', 'a', 'd'
+        )
+    );
+
+    // Then
+    assertThat(actualDigest).isEqualTo(expectedDigest);
+  }
+
+
+  @DisplayName(".compute(String, InputStream) computes the digest for the stream")
+  @Test
+  void computeStringInputStreamComputesTheDigestForTheStream() throws Throwable {
+    // Given
+    var expectedDigest = new Digest(
+        "MD5",
+        bytes(
+            0x43, 0xdf, 0x48, 0x0e, 0x18, 0xe4, 0x6f, 0xd8, 0x6c, 0x1b, 0xb8, 0x35,
+            0x23, 0xe3, 0xfe, 0x8f
+        )
+    );
+
+    // When
+    var actualDigest = Digest.compute(
+        "MD5",
+        new ByteArrayInputStream(bytes(
+            'y', 'o', 'u', ' ', 'a', 'r', 'e', ' ', 'a', 'l', 'r', 'e', 'a', 'd', 'y',
+            ' ', 'd', 'e', 'a', 'd'
+        ))
+    );
+
+    // Then
+    assertThat(actualDigest).isEqualTo(expectedDigest);
+  }
+
+
   static byte[] getDigestOf(String algorithm, String data) throws Throwable {
     return MessageDigest.getInstance(algorithm).digest(data.getBytes());
+  }
+
+  static byte[] bytes(int... ints) {
+    var bytes = new byte[ints.length];
+    for (var i = 0; i < ints.length; ++i) {
+      bytes[i] = (byte) ints[i];
+    }
+    return bytes;
   }
 }
