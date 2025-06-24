@@ -77,11 +77,11 @@ public final class Digest {
   public void verify(InputStream inputStream) throws IOException {
     var actualDigest = compute(algorithm, inputStream);
     if (!actualDigest.equals(this)) {
-      throw new IOException(
+      throw new DigestException(
           "Actual digest '"
-              + actualDigest.algorithm + ":" + actualDigest
+              + actualDigest
               + "' does not match expected digest '"
-              + algorithm + ":" + this
+              + this
               + "'"
       );
     }
@@ -111,20 +111,14 @@ public final class Digest {
   }
 
   public static Digest compute(String algorithm, String text) {
-    // Use UTF-16 here so we can handle any valid character represented
-    // by the JVM within a char. It may or may not include a byte-order-mark.
-    // Supporting this reduces the risk of some kinds of encoding errors
-    // when dealing with certain charsets such as those for varioud asian
-    // runes used in languages such as Japanese.
-    return compute(algorithm, text.getBytes(StandardCharsets.UTF_16));
+    return compute(algorithm, text.getBytes(StandardCharsets.UTF_8));
   }
 
   public static Digest compute(String algorithm, byte[] data) {
     try {
       return compute(algorithm, new ByteArrayInputStream(data));
     } catch (IOException ex) {
-      // Should be unreachable but we are forced to handle this.
-      throw new DigestException("Unexpected error computing digest", ex);
+      throw new IllegalStateException("unreachable", ex);
     }
   }
 
