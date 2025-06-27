@@ -22,10 +22,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,5 +168,50 @@ public final class FileUtils {
       OpenOption... options
   ) throws IOException {
     return new BufferedOutputStream(Files.newOutputStream(path, options));
+  }
+
+  public static void deleteTree(Path path) throws IOException {
+    if (!Files.exists(path)) {
+      return;
+    }
+
+    Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult visitFile(
+          Path file,
+          BasicFileAttributes attrs
+      ) throws IOException {
+        Files.delete(file);
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult preVisitDirectory(
+          Path directory,
+          BasicFileAttributes attrs
+      ) throws IOException {
+        // We do not want to recurse if the directory is actually just a link,
+        // as this might be exploited to allow the plugin to damage files outside
+        // the intended location by making a strategicly positioned link.
+
+        // XXX: we do not check for hard links. If we need to do that
+        // for security purposes, we'll have to check for the unix:nlink
+        // attribute being present on Unix, or some other attribute for Windows
+        // which I have yet to find the documentation for. For now, we'll just
+        // habdle symbolic links for basic security.
+        return Files.isSymbolicLink(directory)
+            ? FileVisitResult.SKIP_SUBTREE
+            : FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult postVisitDirectory(
+          Path directory,
+          @Nullable IOException ex
+      ) throws IOException {
+        Files.delete(directory);
+        return FileVisitResult.CONTINUE;
+      }
+    });
   }
 }
