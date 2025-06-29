@@ -108,6 +108,7 @@ public final class ProtobufBuildOrchestrator {
       return handleMissingInputs(request);
     }
 
+    final var incrementalCompilation = shouldIncrementallyCompile(request);
     final var protocPath = discoverProtocPath(request);
     final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
@@ -124,7 +125,7 @@ public final class ProtobufBuildOrchestrator {
       return handleMissingTargets(request);
     }
 
-    createOutputDirectories(request, resolvedPlugins);
+    createOutputDirectories(request, resolvedPlugins, incrementalCompilation);
 
     // GH-438: We now register the source roots before generating anything. This ensures we still
     // call Javac with the sources even if we incrementally compile with zero changes.
@@ -133,7 +134,7 @@ public final class ProtobufBuildOrchestrator {
     // Determine the sources we need to regenerate. This will be all the sources usually but
     // if incremental compilation is enabled then we will only output the files that have changed
     // unless we deem a full rebuild necessary.
-    var compilableFiles = computeFilesToCompile(request, projectInputs);
+    var compilableFiles = computeFilesToCompile(request, projectInputs, incrementalCompilation);
     if (compilableFiles.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
       // incremental compilation and nothing changed since the last build.
@@ -209,7 +210,8 @@ public final class ProtobufBuildOrchestrator {
 
   private void createOutputDirectories(
       GenerationRequest request,
-      Collection<ResolvedProtocPlugin> resolvedProtocPlugins
+      Collection<ResolvedProtocPlugin> resolvedProtocPlugins,
+      boolean incrementalCompilation
   ) throws IOException {
     var outputDirectories = Stream
         .of(
@@ -226,6 +228,13 @@ public final class ProtobufBuildOrchestrator {
         )
         .flatMap(identity())
         .collect(Collectors.toUnmodifiableList());
+
+    if (!incrementalCompilation && request.isCleanOutputDirectories()) {
+      for (var outputDirectory : outputDirectories) {
+        log.info("Deleting outputs from previous build in \"{}\"", outputDirectory);
+        FileUtils.deleteTree(outputDirectory);
+      }
+    }
 
     for (var outputDirectory : outputDirectories) {
       log.debug("Creating {}", outputDirectory);
@@ -260,7 +269,8 @@ public final class ProtobufBuildOrchestrator {
   // TODO: migrate this logic to a compilation strategy.
   private FilesToCompile computeFilesToCompile(
       GenerationRequest request,
-      ProjectInputListing projectInputs
+      ProjectInputListing projectInputs,
+      boolean incrementalCompilation
   ) throws IOException {
     var totalSourceFileCount = projectInputs.getCompilableProtoSources().stream()
         .mapToInt(sourcePath -> sourcePath.getSourceFiles().size())
@@ -269,7 +279,7 @@ public final class ProtobufBuildOrchestrator {
         .mapToInt(sourcePath -> sourcePath.getSourceFiles().size())
         .sum();
 
-    var filesToCompile = shouldIncrementallyCompile(request)
+    var filesToCompile = incrementalCompilation
         ? incrementalCacheManager.determineSourcesToCompile(projectInputs)
         : FilesToCompile.allOf(projectInputs);
 

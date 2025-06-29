@@ -130,7 +130,6 @@ class FileUtilsTest {
     // Given
     try (var tempFs = TestFileSystem.linux()) {
       var file = tempFs.givenFileExists("foo", "bar", "baz");
-
       assumeThat(Files.isExecutable(file)).isFalse();
 
       // When
@@ -293,5 +292,63 @@ class FileUtilsTest {
         .isRegularFile()
         .content()
         .isEqualTo("Hello, World!");
+  }
+
+  @DisplayName(".deleteTree(Path) deletes all files recursively in a file tree")
+  @Test
+  void deleteTreeDeletesAllFilesRecursivelyInFileTree(@TempDir Path tmpDir) throws IOException {
+    // Given
+    var siblingFile = Files.createFile(tmpDir.resolve("siblingFile"));
+    var symlinkedFile = Files.createFile(tmpDir.resolve("symlinkedFile"));
+    var symlinkedDir = Files.createDirectory(tmpDir.resolve("symlinkedDir"));
+    var nestedSymlinkedFile = Files.createFile(symlinkedDir.resolve("nestedSymlinkedFile"));
+
+    var allFilesAndDirectoriesToKeep = List.of(
+        tmpDir,
+        siblingFile,
+        symlinkedFile,
+        symlinkedDir,
+        nestedSymlinkedFile
+    );
+
+    var baseDir = Files.createDirectories(tmpDir.resolve("basedir"));
+    var dir1 = Files.createDirectory(baseDir.resolve("dir1"));
+    var dir1a = Files.createDirectory(dir1.resolve("dir1a"));
+    var dir1b = Files.createDirectory(dir1.resolve("dir1b"));
+    var dir2 = Files.createDirectory(baseDir.resolve("dir2"));
+    var dir3 = Files.createDirectory(baseDir.resolve("dir3"));
+    var file1a = Files.createFile(dir1.resolve("file1a"));
+    var file1b = Files.createFile(dir1.resolve("file1b"));
+    var file1c = Files.createFile(dir1.resolve("file1c"));
+    var file1aa = Files.createFile(dir1a.resolve("file1aa"));
+    var file1ba = Files.createFile(dir1b.resolve("file1ba"));
+    var file2a = Files.createFile(dir2.resolve("file2a"));
+    var link3a = Files.createSymbolicLink(dir3.resolve("link3a"), symlinkedFile);
+    var link3b = Files.createSymbolicLink(dir3.resolve("link3b"), symlinkedDir);
+
+    var allFilesAndDirectoriesToDelete = List.of(
+        baseDir,
+        dir1,
+        dir1b,
+        dir2,
+        dir3,
+        file1a,
+        file1b,
+        file1c,
+        file1aa,
+        file1ba,
+        file2a,
+        link3a,
+        link3b
+    );
+
+    // When
+    FileUtils.deleteTree(baseDir);
+
+    // Then
+    assertThat(allFilesAndDirectoriesToDelete)
+        .allSatisfy(file -> assertThat(file).doesNotExist());
+    assertThat(allFilesAndDirectoriesToKeep)
+        .allSatisfy(file -> assertThat(file).exists());
   }
 }

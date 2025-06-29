@@ -22,10 +22,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -35,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,5 +169,33 @@ public final class FileUtils {
       OpenOption... options
   ) throws IOException {
     return new BufferedOutputStream(Files.newOutputStream(path, options));
+  }
+
+  public static void deleteTree(Path path) throws IOException {
+    // Compared to checking if (!Files.exists(path)) first, this reduces the
+    // risk of other file-system based race conditions.
+    try {
+      Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult visitFile(
+            Path file,
+            BasicFileAttributes attrs
+        ) throws IOException {
+          Files.deleteIfExists(file);
+          return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(
+            Path directory,
+            @Nullable IOException ex
+        ) throws IOException {
+          Files.deleteIfExists(directory);
+          return FileVisitResult.CONTINUE;
+        }
+      });
+    } catch (NoSuchFileException ex) {
+      log.trace("Not deleting \"{}\", it does not exist", path, ex);
+    }
   }
 }
