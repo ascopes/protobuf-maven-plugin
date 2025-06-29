@@ -171,17 +171,13 @@ public final class FileUtils {
   }
 
   public static void deleteTree(Path path) throws IOException {
-    if (!Files.exists(path)) {
-      return;
-    }
-
     Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
       @Override
       public FileVisitResult visitFile(
           Path file,
           BasicFileAttributes attrs
       ) throws IOException {
-        Files.delete(file);
+        Files.deleteIfExists(file);
         return FileVisitResult.CONTINUE;
       }
 
@@ -209,7 +205,7 @@ public final class FileUtils {
           Path directory,
           @Nullable IOException ex
       ) throws IOException {
-        Files.delete(directory);
+        Files.deleteIfExists(directory);
         return FileVisitResult.CONTINUE;
       }
     });
