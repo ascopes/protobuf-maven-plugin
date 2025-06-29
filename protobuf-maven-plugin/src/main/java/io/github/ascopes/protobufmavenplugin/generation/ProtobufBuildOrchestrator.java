@@ -229,7 +229,7 @@ public final class ProtobufBuildOrchestrator {
         .flatMap(identity())
         .collect(Collectors.toUnmodifiableList());
 
-    if (!incrementalCompilation) {
+    if (!incrementalCompilation && request.isCleanOutputDirectories()) {
       for (var outputDirectory : outputDirectories) {
         log.info("Deleting outputs from previous build in \"{}\"", outputDirectory);
         FileUtils.deleteTree(outputDirectory);

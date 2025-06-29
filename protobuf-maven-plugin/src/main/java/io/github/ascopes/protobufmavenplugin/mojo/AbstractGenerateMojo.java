@@ -279,6 +279,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
 
   /**
+   * If {@code true}, all output directories will be cleared before {@code protoc}
+   * is invoked.
+   *
+   * <p>Note that this is ignored if {@code incrementalCompilation} is enabled.
+   *
+   * @since 3.6.0
+   */
+  @Parameter(defaultValue = DEFAULT_FALSE)
+  boolean cleanOutputDirectories;
+
+  /**
    * Enable generating C++ sources and headers from the protobuf sources.
    *
    * @since 1.1.0
@@ -1042,6 +1053,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
+        .cleanOutputDirectories(cleanOutputDirectories)
         .dependencyResolutionDepth(dependencyResolutionDepth)
         .dependencyScopes(dependencyScopes())
         .embedSourcesInClassOutputs(embedSourcesInClassOutputs)

@@ -233,6 +233,15 @@ public interface GenerationRequest {
   OutputDescriptorAttachmentRegistrar getOutputDescriptorAttachmentRegistrar();
 
   /**
+   * Whether to delete all output directories at the start of the build.
+   *
+   * <p>Ignored if using incremental compilation.
+   *
+   * @return the boolean preference.
+   */
+  boolean isCleanOutputDirectories();
+
+  /**
    * Whether to include input {@code proto} sources in the output class
    * directory.
    *
