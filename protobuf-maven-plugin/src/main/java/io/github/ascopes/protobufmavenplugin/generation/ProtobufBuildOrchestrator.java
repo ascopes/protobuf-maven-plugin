@@ -231,7 +231,7 @@ public final class ProtobufBuildOrchestrator {
 
     if (!incrementalCompilation) {
       for (var outputDirectory : outputDirectories) {
-        log.debug("Removing {}", outputDirectory);
+        log.info("Deleting outputs from previous build in \"{}\"", outputDirectory);
         FileUtils.deleteTree(outputDirectory);
       }
     }
