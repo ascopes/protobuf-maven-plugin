@@ -518,6 +518,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * dependencies between builds, making a best-effort attempt to only rebuild files when
    * changes have been made since the last build.
    *
+   * <p>Note that when disabled, any output directories and their contents will be deleted prior
+   * to invoking protoc to ensure clean builds.
+   *
    * @since 2.7.0
    */
   @Parameter(defaultValue = DEFAULT_TRUE, property = PROTOBUF_COMPILER_INCREMENTAL)
