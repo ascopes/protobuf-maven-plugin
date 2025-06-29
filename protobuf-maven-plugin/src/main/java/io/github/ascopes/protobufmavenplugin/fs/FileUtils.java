@@ -171,43 +171,49 @@ public final class FileUtils {
   }
 
   public static void deleteTree(Path path) throws IOException {
-    Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-      @Override
-      public FileVisitResult visitFile(
-          Path file,
-          BasicFileAttributes attrs
-      ) throws IOException {
-        Files.deleteIfExists(file);
-        return FileVisitResult.CONTINUE;
-      }
+    // Compared to checking if (!Files.exists(path)) first, this reduces the
+    // risk of other file-system based race conditions.
+    try {
+      Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult visitFile(
+            Path file,
+            BasicFileAttributes attrs
+        ) throws IOException {
+          Files.deleteIfExists(file);
+          return FileVisitResult.CONTINUE;
+        }
 
-      @Override
-      public FileVisitResult preVisitDirectory(
-          Path directory,
-          BasicFileAttributes attrs
-      ) throws IOException {
-        // We do not want to recurse if the directory is actually just a link,
-        // as this might be exploited to allow the plugin to damage files outside
-        // the intended location by making a strategicly positioned link.
+        @Override
+        public FileVisitResult preVisitDirectory(
+            Path directory,
+            BasicFileAttributes attrs
+        ) throws IOException {
+          // We do not want to recurse if the directory is actually just a link,
+          // as this might be exploited to allow the plugin to damage files outside
+          // the intended location by making a strategicly positioned link.
 
-        // XXX: we do not check for hard links. If we need to do that
-        // for security purposes, we'll have to check for the unix:nlink
-        // attribute being present on Unix, or some other attribute for Windows
-        // which I have yet to find the documentation for. For now, we'll just
-        // habdle symbolic links for basic security.
-        return Files.isSymbolicLink(directory)
-            ? FileVisitResult.SKIP_SUBTREE
-            : FileVisitResult.CONTINUE;
-      }
+          // XXX: we do not check for hard links. If we need to do that
+          // for security purposes, we'll have to check for the unix:nlink
+          // attribute being present on Unix, or some other attribute for Windows
+          // which I have yet to find the documentation for. For now, we'll just
+          // handle symbolic links for basic security.
+          return Files.isSymbolicLink(directory)
+              ? FileVisitResult.SKIP_SUBTREE
+              : FileVisitResult.CONTINUE;
+        }
 
-      @Override
-      public FileVisitResult postVisitDirectory(
-          Path directory,
-          @Nullable IOException ex
-      ) throws IOException {
-        Files.deleteIfExists(directory);
-        return FileVisitResult.CONTINUE;
-      }
-    });
+        @Override
+        public FileVisitResult postVisitDirectory(
+            Path directory,
+            @Nullable IOException ex
+        ) throws IOException {
+          Files.deleteIfExists(directory);
+          return FileVisitResult.CONTINUE;
+        }
+      });
+    } catch (NoSuchFileException ex) {
+      log.trace("Not deleting \"{}\", it does not exist", path, ex);
+    }
   }
 }
