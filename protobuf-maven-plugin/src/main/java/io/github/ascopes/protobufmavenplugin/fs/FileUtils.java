@@ -186,25 +186,6 @@ public final class FileUtils {
         }
 
         @Override
-        public FileVisitResult preVisitDirectory(
-            Path directory,
-            BasicFileAttributes attrs
-        ) throws IOException {
-          // We do not want to recurse if the directory is actually just a link,
-          // as this might be exploited to allow the plugin to damage files outside
-          // the intended location by making a strategicly positioned link.
-
-          // XXX: we do not check for hard links. If we need to do that
-          // for security purposes, we'll have to check for the unix:nlink
-          // attribute being present on Unix, or some other attribute for Windows
-          // which I have yet to find the documentation for. For now, we'll just
-          // handle symbolic links for basic security.
-          return Files.isSymbolicLink(directory)
-              ? FileVisitResult.SKIP_SUBTREE
-              : FileVisitResult.CONTINUE;
-        }
-
-        @Override
         public FileVisitResult postVisitDirectory(
             Path directory,
             @Nullable IOException ex
