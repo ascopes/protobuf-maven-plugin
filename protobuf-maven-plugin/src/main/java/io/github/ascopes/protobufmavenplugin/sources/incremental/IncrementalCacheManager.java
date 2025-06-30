@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.incremental;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.sources.DescriptorListing;
@@ -22,7 +23,6 @@ import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
 import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;

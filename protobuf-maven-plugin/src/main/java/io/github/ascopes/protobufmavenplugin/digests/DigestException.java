@@ -13,27 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
-
-import io.github.ascopes.protobufmavenplugin.digests.Digest;
-import java.net.URI;
-import org.immutables.value.Value.Modifiable;
-import org.jspecify.annotations.Nullable;
+package io.github.ascopes.protobufmavenplugin.digests;
 
 
 /**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a URI.
- *
- * <p>URI-based plugins can be marked as optional if they should be skipped when the resource
- * is unable to be resolved.
+ * Exception raised if digest operations fail.
  *
  * @author Ashley Scopes
- * @since 2.0.0
+ * @since 3.5.0
  */
-@Modifiable
-public interface UriProtocPlugin extends OptionalProtocPlugin {
+public final class DigestException extends RuntimeException {
+  public DigestException(String message) {
+    super(message);
+  }
 
-  URI getUrl();
-
-  @Nullable Digest getDigest();
+  public DigestException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

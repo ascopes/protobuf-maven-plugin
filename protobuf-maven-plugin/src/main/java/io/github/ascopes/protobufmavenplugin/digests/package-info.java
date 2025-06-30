@@ -13,21 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.utils;
-
-
 /**
- * Exception raised if digest operations fail.
- *
- * @author Ashley Scopes
- * @since 3.5.0
+ * Hashing operations and support.
  */
-public final class DigestException extends RuntimeException {
-  public DigestException(String message) {
-    super(message);
-  }
-
-  public DigestException(String message, Throwable cause) {
-    super(message, cause);
-  }
-}
+package io.github.ascopes.protobufmavenplugin.digests;

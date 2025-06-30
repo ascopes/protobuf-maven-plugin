@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.mojo.plexus;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;

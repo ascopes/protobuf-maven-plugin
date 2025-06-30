@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
-import io.github.ascopes.protobufmavenplugin.utils.DigestException;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.digests.DigestException;
 import java.util.stream.Stream;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
