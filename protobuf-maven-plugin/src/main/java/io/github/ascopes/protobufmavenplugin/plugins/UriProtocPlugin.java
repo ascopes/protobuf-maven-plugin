@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.net.URI;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;

@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.digests;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
@@ -30,7 +29,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * @author Ashley Scopes
  * @since 3.5.0
  */
-final class DigestConverter extends AbstractBasicConverter {
+public final class DigestPlexusConverter extends AbstractBasicConverter {
 
   private static final Pattern PATTERN = Pattern.compile(
       "^(?<algorithm>[-a-z0-9]+):(?<digest>[0-9a-f]+)$",

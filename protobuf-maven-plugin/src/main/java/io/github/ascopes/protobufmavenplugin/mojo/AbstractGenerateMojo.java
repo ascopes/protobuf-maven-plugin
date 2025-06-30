@@ -21,6 +21,7 @@ import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
@@ -30,7 +31,6 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;

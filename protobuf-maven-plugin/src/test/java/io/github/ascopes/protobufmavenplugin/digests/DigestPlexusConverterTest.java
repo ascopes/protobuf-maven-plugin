@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.digests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
-import io.github.ascopes.protobufmavenplugin.utils.DigestException;
 import java.util.stream.Stream;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
@@ -35,28 +33,28 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 
-@DisplayName("DigestConverter test")
-class DigestConverterTest {
+@DisplayName("DigestPlexusConverter tests")
+class DigestPlexusConverterTest {
 
-  DigestConverter converter;
+  DigestPlexusConverter converter;
 
   @BeforeEach
   void setUp() {
-    converter = new DigestConverter();
+    converter = new DigestPlexusConverter();
   }
 
   @DisplayName("only the expected types are convertible")
   @CsvSource({
-      "io.github.ascopes.protobufmavenplugin.utils.Digest,  true",
-      "                                      java.net.URI, false",
-      "                                java.nio.file.Path, false",
-      "                                  java.lang.Object, false",
-      "                                 java.lang.Integer, false",
-      "                                   java.lang.Class, false",
-      "                                  java.lang.String, false",
-      "                           java.lang.StringBuilder, false",
-      "                                      java.io.File, false",
-      "                                      java.net.URL, false",
+      "io.github.ascopes.protobufmavenplugin.digests.Digest,  true",
+      "                                        java.net.URI, false",
+      "                                  java.nio.file.Path, false",
+      "                                    java.lang.Object, false",
+      "                                   java.lang.Integer, false",
+      "                                     java.lang.Class, false",
+      "                                    java.lang.String, false",
+      "                             java.lang.StringBuilder, false",
+      "                                        java.io.File, false",
+      "                                        java.net.URL, false",
   })
   @ParameterizedTest(name = "for {0}, expect {1}")
   void onlyTheExpectedTypesAreConvertible(Class<?> type, boolean expectedResult) {

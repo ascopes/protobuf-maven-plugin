@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.fs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,14 +30,14 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-@DisplayName("PathConverter test")
-class PathConverterTest {
+@DisplayName("PathPlexusConverter tests")
+class PathPlexusConverterTest {
 
-  PathConverter converter;
+  PathPlexusConverter converter;
 
   @BeforeEach
   void setUp() {
-    converter = new PathConverter();
+    converter = new PathPlexusConverter();
   }
 
   @DisplayName("only the expected types are convertible")

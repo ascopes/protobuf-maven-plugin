@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Overrides for how MOJOs are configured within Plexus and Sisu.
+ * Hashing operations and support.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.digests;

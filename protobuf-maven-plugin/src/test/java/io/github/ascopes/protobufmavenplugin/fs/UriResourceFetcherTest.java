@@ -30,7 +30,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

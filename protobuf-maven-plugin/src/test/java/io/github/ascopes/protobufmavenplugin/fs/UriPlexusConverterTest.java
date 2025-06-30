@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.fs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -32,14 +32,14 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-@DisplayName("UriConverter test")
-class UriConverterTest {
+@DisplayName("UriPlexusConverter tests")
+class UriPlexusConverterTest {
 
-  UriConverter converter;
+  UriPlexusConverter converter;
 
   @BeforeEach
   void setUp() {
-    converter = new UriConverter();
+    converter = new UriPlexusConverter();
   }
 
   @DisplayName("only the expected types are convertible")

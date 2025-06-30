@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

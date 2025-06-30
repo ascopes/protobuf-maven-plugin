@@ -17,10 +17,10 @@ package io.github.ascopes.protobufmavenplugin.generation;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;

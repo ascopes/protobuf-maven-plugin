@@ -30,6 +30,7 @@ import static org.mockito.Mockito.withSettings;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
@@ -39,7 +40,6 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.utils.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
