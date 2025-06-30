@@ -94,7 +94,7 @@ final class AetherResolver {
    * @throws ResolutionException if resolution failed.
    */
   Artifact resolveRequiredArtifact(Artifact artifact) throws ResolutionException {
-    log.info("Attempting to resolve artifact {}", artifact);
+    log.info("Attempting to resolve artifact \"{}\"", artifact);
 
     var request = new ArtifactRequest();
     request.setArtifact(artifact);
@@ -115,7 +115,7 @@ final class AetherResolver {
     // else goes wrong, then we can panic about it.
     if (result.isMissing()) {
       throw mapExceptions(
-          "Failed to resolve artifact " + artifact,
+          "Failed to resolve artifact \"" + artifact + "\"",
           result.getExceptions()
       );
     }
@@ -126,8 +126,7 @@ final class AetherResolver {
     // for me here.
     return requireNonNull(
         result.getArtifact(),
-        () -> "No resolution exceptions raised, but no artifact was returned "
-            + "by Aether while resolving " + artifact
+        () -> "No result was returned by Aether while resolving artifact \"" + artifact + "\""
     );
   }
 
@@ -180,7 +179,7 @@ final class AetherResolver {
     for (var artifactResult : dependencyResult.getArtifactResults()) {
       var artifact = artifactResult.getArtifact();
       if (artifact != null) {
-        log.debug("Resolution of {} returned artifact {}", dependencies, artifact);
+        log.debug("Resolution of dependencies returned artifact \"{}\"", artifact);
         artifacts.add(artifact);
       }
 

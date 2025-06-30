@@ -61,7 +61,7 @@ public final class ProtocExecutor {
     var argumentFile = writeArgumentFile(argumentFileBuilder);
 
     log.info("Invoking protoc (enable debug logs for more details)");
-    log.debug("Protoc binary is located at {}", invocation.getProtocPath());
+    log.debug("Protoc binary is located at \"{}\"", invocation.getProtocPath());
     log.debug("Protoc argument file:\n{}", argumentFileBuilder);
 
     var procBuilder = new ProcessBuilder(invocation.getProtocPath().toString(), "@" + argumentFile);
@@ -159,7 +159,7 @@ public final class ProtocExecutor {
 
   private Path writeArgumentFile(ArgumentFileBuilder argumentFileBuilder) throws IOException {
     var file = temporarySpace.createTemporarySpace("protoc").resolve("args.txt");
-    log.debug("Writing to protoc argument file at {}", file);
+    log.debug("Writing to protoc argument file at \"{}\"", file);
 
     var writer = new TeeWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8));
     try (writer) {

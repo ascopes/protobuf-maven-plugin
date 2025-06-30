@@ -97,7 +97,7 @@ public final class ProtobufBuildOrchestrator {
       GenerationRequest request
   ) throws ResolutionException, IOException {
 
-    log.debug("The provided protobuf GenerationRequest is: {}", request);
+    log.debug("Processing generation request {}", request);
 
     // GH-600: Short circuit and avoid expensive dependency resolution if
     // we can exit early.
@@ -237,7 +237,7 @@ public final class ProtobufBuildOrchestrator {
     }
 
     for (var outputDirectory : outputDirectories) {
-      log.debug("Creating {}", outputDirectory);
+      log.debug("Creating output directory \"{}\"", outputDirectory);
       Files.createDirectories(outputDirectory);
     }
   }
@@ -306,20 +306,20 @@ public final class ProtobufBuildOrchestrator {
   // TODO: migrate this logic to a compilation strategy
   private boolean shouldIncrementallyCompile(GenerationRequest request) {
     if (!request.isIncrementalCompilationEnabled()) {
-      log.debug("Incremental compilation is disabled");
+      log.debug("Incremental compilation was disabled by the user");
       return false;
     }
+
+    log.debug("Incremental compilation was enabled by the user");
 
     if (request.getOutputDescriptorFile() != null) {
       // Protoc does not selectively update an existing descriptor with differentiated
       // changes. Using incremental compilation will result in behaviour that is
       // inconsistent, so do not allow it here.
-      log.info("Incremental compilation is disabled since proto descriptor generation "
-          + "has been requested.");
+      log.warn("Incremental compilation will be disabled since descriptors will be generated");
       return false;
     }
 
-    log.debug("Will use incremental compilation");
     return true;
   }
 
@@ -332,7 +332,7 @@ public final class ProtobufBuildOrchestrator {
         registrar.embedListing(mavenSession, listing);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to embed " + listing.getSourceRoot() + " into the class outputs directory",
+            "Failed to embed \"" + listing.getSourceRoot() + "\" into the class outputs directory",
             ex
         );
       }

@@ -75,7 +75,11 @@ public final class IncrementalCacheManager {
     var previousCache = getPreviousIncrementalCachePath();
     var nextCache = getNextIncrementalCachePath();
     if (Files.exists(nextCache)) {
-      log.debug("Overwriting incremental build cache at {} with {}", previousCache, nextCache);
+      log.debug(
+          "Overwriting incremental build cache at \"{}\" with \"{}\"",
+          previousCache,
+          nextCache
+      );
       Files.move(nextCache, previousCache, StandardCopyOption.REPLACE_EXISTING);
     } else {
       log.debug("No new incremental cache was created, so nothing will be updated...");
@@ -134,12 +138,12 @@ public final class IncrementalCacheManager {
   }
 
   private Optional<IncrementalCache> readIncrementalCache(Path path) throws IOException {
-    log.debug("Reading incremental cache in from {}", path);
+    log.debug("Reading incremental cache in from \"{}\"", path);
 
     try (var reader = Files.newBufferedReader(path)) {
       return Optional.of(serializedIncrementalCacheSerializer.deserialize(reader));
     } catch (NoSuchFileException ex) {
-      log.debug("No file found at {}", path);
+      log.debug("No file found at \"{}\"", path);
       return Optional.empty();
     }
   }
@@ -148,7 +152,7 @@ public final class IncrementalCacheManager {
       Path path,
       IncrementalCache cache
   ) throws IOException {
-    log.debug("Writing incremental cache out to {}", path);
+    log.debug("Writing incremental cache out to \"{}\"", path);
 
     try (var writer = Files.newBufferedWriter(path)) {
       serializedIncrementalCacheSerializer.serialize(cache, writer);
@@ -195,7 +199,7 @@ public final class IncrementalCacheManager {
 
   private FutureTask<Map.Entry<Path, String>> generateFileDigest(Path file) {
     return concurrentExecutor.submit(() -> {
-      log.trace("Generating digest for {}", file);
+      log.trace("Generating digest for \"{}\"", file);
       try (var inputStream = FileUtils.newBufferedInputStream(file)) {
         var digest = Digest.compute("SHA-512", inputStream).toHexString();
         return Map.entry(file, digest);

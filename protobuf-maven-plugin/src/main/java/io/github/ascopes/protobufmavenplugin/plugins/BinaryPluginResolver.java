@@ -108,7 +108,6 @@ final class BinaryPluginResolver {
     plugin = pluginBuilder.build();
 
     log.debug("Resolving Maven protoc plugin {}", plugin);
-
     var path = artifactPathResolver.resolveArtifact(plugin);
     makeExecutable(path);
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
@@ -120,7 +119,6 @@ final class BinaryPluginResolver {
   ) throws ResolutionException {
 
     log.debug("Resolving Path protoc plugin {}", plugin);
-
     var maybePath = systemPathResolver.resolve(plugin.getName());
 
     if (maybePath.isEmpty() && plugin.isOptional()) {
@@ -128,7 +126,7 @@ final class BinaryPluginResolver {
     }
 
     var path = maybePath.orElseThrow(() -> new ResolutionException(
-        "No plugin named " + plugin.getName() + " was found on the system path"
+        "No plugin named \"" + plugin.getName() + "\" was found on the system path"
     ));
 
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
@@ -151,13 +149,13 @@ final class BinaryPluginResolver {
     ));
 
     if (plugin.getDigest() != null) {
-      log.debug("Verifying digest of {} against {}", plugin.getUrl(), plugin.getDigest());
+      log.debug("Verifying digest of \"{}\" against \"{}\"", plugin.getUrl(), plugin.getDigest());
 
       try (var is = new BufferedInputStream(Files.newInputStream(path))) {
         plugin.getDigest().verify(is);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to compute digest of " + plugin.getUrl() + ": " + ex,
+            "Failed to compute digest of \"" + plugin.getUrl() + "\": " + ex,
             ex
         );
       }

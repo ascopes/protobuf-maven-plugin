@@ -66,12 +66,12 @@ public final class SourceRootRegistrar {
   }
 
   public void registerSourceRoot(MavenSession session, Path path) {
-    log.info("Registering {} as a {} source root", path, this);
+    log.info("Registering \"{}\" as a {} source root for compiler plugins", path, this);
     sourceRootRegistrar.accept(session.getCurrentProject(), path.toString());
   }
 
   public void embedListing(MavenSession session, SourceListing listing) throws IOException {
-    log.info("Embedding sources from {} in {} class outputs", listing.getSourceRoot(), this);
+    log.info("Embedding sources from \"{}\" in {} class outputs", listing.getSourceRoot(), this);
     var targetDirectory = classOutputDirectoryGetter.andThen(Path::of)
         .apply(session.getCurrentProject().getBuild());
 

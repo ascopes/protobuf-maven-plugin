@@ -25,11 +25,11 @@ public final class StringUtils {
     // Static-only class.
   }
 
-  public static String pluralize(int quantity, String singular) {
+  public static String pluralize(long quantity, String singular) {
     return pluralize(quantity, singular, singular + "s");
   }
 
-  public static String pluralize(int quantity, String singular, String plural) {
+  public static String pluralize(long quantity, String singular, String plural) {
     return quantity == 1
         ? quantity + " " + singular
         : quantity + " " + plural;

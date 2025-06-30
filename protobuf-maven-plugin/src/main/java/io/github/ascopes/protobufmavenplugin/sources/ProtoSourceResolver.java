@@ -94,7 +94,10 @@ final class ProtoSourceResolver {
       FileFilter filter
   ) throws IOException {
     if (!Files.exists(descriptorFilePath)) {
-      log.debug("Skipping descriptor lookup in path {} as it does not exist", descriptorFilePath);
+      log.debug(
+          "Skipping descriptor lookup in path \"{}\" as it does not exist",
+          descriptorFilePath
+      );
       return Optional.empty();
     }
 
@@ -104,7 +107,7 @@ final class ProtoSourceResolver {
           .stream()
           .map(FileDescriptorProto::getName)
           .peek(protoFile -> log.trace(
-              "Found virtual proto file {} in descriptor {}",
+              "Found virtual proto file \"{}\" in descriptor \"{}\"",
               protoFile,
               descriptorFilePath
           ))
@@ -151,7 +154,7 @@ final class ProtoSourceResolver {
       FileFilter filter
   ) throws IOException {
     if (!Files.exists(rootPath)) {
-      log.debug("Skipping source lookup in path {} as it does not exist", rootPath);
+      log.debug("Skipping source lookup in path \"{}\" as it does not exist", rootPath);
       return Optional.empty();
     }
 
@@ -177,11 +180,11 @@ final class ProtoSourceResolver {
     }
 
     if (fileExtension.filter(POM_FILE_EXTENSIONS::contains).isPresent()) {
-      log.debug("Ignoring invalid dependency on potential POM at {}", rootPath);
+      log.debug("Ignoring invalid dependency on POM artifact at \"{}\"", rootPath);
       return Optional.empty();
     }
 
-    log.warn("Ignoring unknown archive type at {}", rootPath);
+    log.warn("Ignoring unknown archive type at \"{}\"", rootPath);
     return Optional.empty();
   }
 

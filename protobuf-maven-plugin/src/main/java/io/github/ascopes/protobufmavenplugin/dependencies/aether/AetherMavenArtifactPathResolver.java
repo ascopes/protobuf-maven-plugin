@@ -76,7 +76,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
    */
   @Override
   public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
-    log.debug("Resolving artifact: {}", artifact);
+    log.debug("Resolving artifact \"{}\"", artifact);
     var unresolvedArtifact = aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(artifact);
     var resolvedArtifact = aetherResolver.resolveRequiredArtifact(unresolvedArtifact);
     return aetherArtifactMapper.mapEclipseArtifactToPath(resolvedArtifact);
@@ -111,7 +111,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     var unresolvedDependencies = new ArrayList<Dependency>();
 
     artifacts.stream()
-        .peek(artifact -> log.debug("Resolving artifact as dependency: {}", artifact))
+        .peek(artifact -> log.debug("Resolving artifact \"{}\" as dependency", artifact))
         .map(artifact -> aetherArtifactMapper.mapPmpArtifactToEclipseDependency(artifact, depth))
         .map(aetherDependencyManagement::fillManagedAttributes)
         .forEach(unresolvedDependencies::add);
@@ -131,7 +131,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       var projectArtifacts = mavenSession.getCurrentProject().getArtifacts()
           .stream()
           .filter(artifact -> dependencyScopes.contains(artifact.getScope()))
-          .peek(artifact -> log.trace("Including project artifact: {}", artifact))
+          .peek(artifact -> log.trace("Including project artifact \"{}\"", artifact))
           .map(aetherArtifactMapper::mapMavenArtifactToEclipseArtifact);
 
       resolvedArtifacts = Stream.concat(projectArtifacts, resolvedArtifacts);

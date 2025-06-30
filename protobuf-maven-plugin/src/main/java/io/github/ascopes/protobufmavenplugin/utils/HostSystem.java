@@ -203,7 +203,7 @@ public final class HostSystem {
               // GH-557: Do not crash if the user has garbage contents in their $PATH.
               // Warn and drop instead.
               log.warn(
-                  "Ignoring path {} in $PATH environment variable because - {}: {}. "
+                  "Ignoring path \"{}\" in $PATH environment variable because - {}: {}. "
                       + "Please check your system settings!",
                   trimmedPath,
                   ex.getClass().getName(),

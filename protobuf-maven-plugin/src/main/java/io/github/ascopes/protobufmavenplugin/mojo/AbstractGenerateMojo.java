@@ -1098,7 +1098,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       // to Maven.
       log.error("Generation failed due to an unexpected error - {}", ex.getMessage(), ex);
       throw new MojoFailureException(
-          "Generation failed due to an unexpected error - " + ex.getMessage(),
+          "Generation failed due to an unexpected error - " + ex,
           ex
       );
     }
@@ -1148,7 +1148,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     return finalValue.stream()
         .filter(path -> {
           if (Files.notExists(path)) {
-            log.info("Ignoring provided path {} as it does not appear to actually exist", path);
+            log.info("Ignoring non-existent path \"{}\"", path);
             return false;
           }
           return true;
