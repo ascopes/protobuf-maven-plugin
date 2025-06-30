@@ -316,6 +316,26 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.getBinaryUrlPlugins()).isSameAs(plugins);
   }
 
+  @DisplayName("cleanOutputDirectories is set on the request")
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest(name = "when {0}")
+  void cleanOutputDirectoriesIsSetOnTheRequest(
+      boolean cleanOutputDirectories
+  ) throws Throwable {
+    // Given
+    mojo.cleanOutputDirectories = cleanOutputDirectories;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.isCleanOutputDirectories())
+        .isEqualTo(cleanOutputDirectories);
+  }
+
   @DisplayName("the dependencyResolutionDepth is set to the specified value")
   @EnumSource(DependencyResolutionDepth.class)
   @ParameterizedTest(name = "for {0}")
