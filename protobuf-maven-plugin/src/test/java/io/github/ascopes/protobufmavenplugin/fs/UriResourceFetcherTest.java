@@ -95,7 +95,7 @@ class UriResourceFetcherTest {
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".blob"))
         .withMessage(
-            "URI '%s' is invalid: java.net.MalformedURLException: "
+            "URI \"%s\" is invalid: java.net.MalformedURLException: "
                 + "unknown protocol: foobar",
             uri
         )
@@ -225,7 +225,7 @@ class UriResourceFetcherTest {
         .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, "boop"))
         // This varies between Linux and Windows....
         .withMessageMatching("Failed to discover file at "
-            + "'file://bob@xxxxxx@Xx@X@X\\.localhost\\.net/59339785423': "
+            + "\"file://bob@xxxxxx@Xx@X@X\\.localhost\\.net/59339785423\": "
             + "java.lang.IllegalArgumentException: .*")
         .withCauseInstanceOf(IllegalArgumentException.class);
   }
@@ -422,7 +422,7 @@ class UriResourceFetcherTest {
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".textfile"))
         .withMessage(
-            "Cannot resolve URI: %s. Only a limited number of URL protocols "
+            "Cannot resolve URI \"%s\". Only a limited number of URL protocols "
                 + "are supported in offline mode.",
             uri
         );
@@ -442,7 +442,7 @@ class UriResourceFetcherTest {
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".textfile"))
         .withMessage(
-            "Cannot resolve URI: %s. Only a limited number of URL protocols "
+            "Cannot resolve URI \"%s\". Only a limited number of URL protocols "
                 + "are supported in offline mode.",
             uri
         );

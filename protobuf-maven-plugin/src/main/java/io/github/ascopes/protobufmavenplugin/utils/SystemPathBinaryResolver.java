@@ -49,7 +49,7 @@ public final class SystemPathBinaryResolver {
   }
 
   public Optional<Path> resolve(String name) throws ResolutionException {
-    log.debug("Looking for executable matching name '{}' on PATH", name);
+    log.debug("Looking for executable matching name \"{}\" on PATH", name);
     var predicate = hostSystem.isProbablyWindows()
         ? isWindowsMatch(name)
         : isPosixMatch(name);
@@ -60,19 +60,22 @@ public final class SystemPathBinaryResolver {
           var result = files.filter(predicate).findFirst();
 
           if (result.isPresent()) {
-            log.debug("Result for lookup of '{}' on PATH was {}", name, result.get());
+            log.debug("Result for lookup of \"{}\" on PATH was \"{}\"", name, result.get());
             return result;
           }
 
         } catch (AccessDeniedException ex) {
-          log.debug("Ignoring directory '{}' as access is denied", dir, ex);
+          log.debug("Ignoring directory \"{}\" as access is denied", dir, ex);
         }
       }
     } catch (Exception ex) {
-      throw new ResolutionException("An exception occurred while scanning the system PATH", ex);
+      throw new ResolutionException(
+          "An exception occurred while scanning the system PATH: " + ex,
+          ex
+      );
     }
 
-    log.debug("No match found for '{}' on PATH", name);
+    log.debug("No match found for \"{}\" on PATH", name);
     return Optional.empty();
   }
 
@@ -84,14 +87,6 @@ public final class SystemPathBinaryResolver {
           .getFileExtension(path)
           .filter(hostSystem.getSystemPathExtensions()::contains)
           .isPresent();
-
-      log.trace(
-          "Path '{}' matches name = {}, matches executable extension = {}",
-          path,
-          matchesName,
-          matchesExtension
-      );
-
       return matchesName && matchesExtension;
     };
   }
@@ -100,14 +95,6 @@ public final class SystemPathBinaryResolver {
     return path -> {
       var matchesName = path.getFileName().toString().equals(name);
       var matchesExecutableFlag = Files.isExecutable(path);
-
-      log.trace(
-          "Path '{}' matches name = {}, matches executable flag = {}",
-          path,
-          matchesName,
-          matchesExecutableFlag
-      );
-
       return matchesName && matchesExecutableFlag;
     };
   }

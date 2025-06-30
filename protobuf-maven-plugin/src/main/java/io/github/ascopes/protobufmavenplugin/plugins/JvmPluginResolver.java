@@ -138,7 +138,7 @@ final class JvmPluginResolver {
     var javaPath = hostSystem.getJavaExecutablePath();
     var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
 
-    log.debug("Arguments for JVM plugin {} (id {}) are:\n{}", plugin, id, argLine);
+    log.debug("Arguments for JVM plugin {} (id \"{}\") are:\n{}", plugin, id, argLine);
 
     var scriptPath = hostSystem.isProbablyWindows()
         ? writeWindowsScripts(javaPath, scratchDir, argLine)
@@ -239,18 +239,18 @@ final class JvmPluginResolver {
             pluginPath
         );
       } else {
-        log.debug("Determined main class to be {} from manifest for {}", mainClass, pluginPath);
+        log.debug("Determined main class to be \"{}\" from manifest for {}", mainClass, pluginPath);
         return mainClass;
       }
     }
 
     throw new IllegalArgumentException(
-        "No main class was described for "
+        "No main class was described for \""
             + pluginPath
-            + ", please provide an explicit "
-            + "'mainClass' attribute when configuring the "
+            + "\", please provide an explicit "
+            + "'mainClass' attribute when configuring the \""
             + plugin.getArtifactId()
-            + " JVM plugin"
+            + "\" JVM plugin"
     );
   }
 
@@ -267,9 +267,9 @@ final class JvmPluginResolver {
           .getValue("Main-Class");
     } catch (IOException ex) {
       throw new ResolutionException(
-          "Failed to determine the main class in the MANIFEST.MF for JAR corresponding to "
+          "Failed to determine the main class in the MANIFEST.MF for JAR corresponding to \""
               + pluginPath
-              + ": an unexpected IO error occurred",
+              + "\":" + ex,
           ex
       );
     }
@@ -300,7 +300,6 @@ final class JvmPluginResolver {
         .flatMap(Optional::stream)
         .map(Path::of)
         .map(FileUtils::normalize)
-        .peek(modulePath -> log.trace("Looks like {} is a JPMS module!", modulePath))
         // Sort as the order of output is arbitrary, and this ensures reproducible builds.
         .sorted(Comparator.comparing(Path::toString))
         .collect(Collectors.toUnmodifiableList());
@@ -316,7 +315,7 @@ final class JvmPluginResolver {
       }
 
       log.warn(
-          "Dropping illegal JVM argument '{}' for Maven plugin '{}'",
+          "Dropping illegal JVM argument \"{}\" for Maven plugin \"{}\"",
           arg,
           plugin.getArtifactId()
       );

@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.fs;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
+import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -95,8 +96,9 @@ public final class UriResourceFetcher {
 
       if (isInvalidOfflineProtocol) {
         throw new ResolutionException(
-            "Cannot resolve URI: " + uri
-                + ". Only a limited number of URL protocols are supported in offline mode."
+            "Cannot resolve URI \""
+                + uri
+                + "\". Only a limited number of URL protocols are supported in offline mode."
         );
       }
     }
@@ -115,13 +117,13 @@ public final class UriResourceFetcher {
           .filter(Files::exists);
 
       result.ifPresentOrElse(
-          path -> log.debug("Resolved '{}' to '{}'", uri, path),
-          () -> log.warn("No resource at '{}' appears to exist!", uri)
+          path -> log.debug("Resolved \"{}\" to \"{}\"", uri, path),
+          () -> log.warn("No resource was found at \"{}\" ", uri)
       );
 
       return result;
     } catch (Exception ex) {
-      throw new ResolutionException("Failed to discover file at '" + uri + "': " + ex, ex);
+      throw new ResolutionException("Failed to discover file at \"" + uri + "\": " + ex, ex);
     }
   }
 
@@ -144,7 +146,7 @@ public final class UriResourceFetcher {
       conn.setReadTimeout(TIMEOUT);
       conn.setAllowUserInteraction(false);
 
-      log.debug("Connecting to '{}' to copy resources to '{}'", uri, targetFile);
+      log.debug("Connecting to \"{}\", will transfer contents to \"{}\"", uri, targetFile);
       conn.connect();
 
       try (
@@ -155,21 +157,22 @@ public final class UriResourceFetcher {
       }
 
       var fileSize = Files.size(targetFile);
-      log.info("Downloaded '{}' to '{}' ({} bytes)", uri, fileSize);
+      log.info("Transferred \"{}\" to \"{}\" ({})", uri, StringUtils.pluralize(fileSize, "byte"));
 
       return Optional.of(targetFile);
 
     } catch (IOException ex) {
-      log.debug("Failed to download '{}' to '{}'", uri, targetFile, ex);
+      log.debug("Failed to transfer \"{}\" to \"{}\"", uri, targetFile, ex);
 
       if (ex instanceof FileNotFoundException) {
         // May be raised during the call to .getInputStream(), or the call to .connect(),
         // depending on the implementation.
-        log.warn("No resource at '{}' exists", uri);
+        log.warn("No resource at \"{}\" exists", uri);
         return Optional.empty();
       } else {
         throw new ResolutionException(
-            "Failed to download '" + uri + "' to '" + targetFile + "'", ex);
+            "Failed to transfer \"" + uri + "\" to \"" + targetFile + "\"", ex
+        );
       }
     }
   }
@@ -193,7 +196,7 @@ public final class UriResourceFetcher {
     // system/boot classloader, which differs to our runtime classloader that
     // runs on top of ClassWorlds in Maven, meaning we cannot load custom schemes
     // via normal mechanisms.
-    var customHandler = ServiceLoader
+    var handler = ServiceLoader
         .load(URLStreamHandlerProvider.class, getClass().getClassLoader())
         .stream()
         .map(ServiceLoader.Provider::get)
@@ -202,12 +205,12 @@ public final class UriResourceFetcher {
         .findFirst()
         .orElse(null);
 
-    log.debug("Parsing URI '{}' into URL using custom handler '{}'", uri, customHandler);
+    log.debug("Parsing URI \"{}\" into URL using handler \"{}\"", uri, handler);
 
     try {
-      return new URL(null, uri.toString(), customHandler);
+      return new URL(null, uri.toString(), handler);
     } catch (MalformedURLException ex) {
-      throw new ResolutionException("URI '" + uri + "' is invalid: " + ex, ex);
+      throw new ResolutionException("URI \"" + uri + "\" is invalid: " + ex, ex);
     }
   }
 }

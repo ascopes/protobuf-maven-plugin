@@ -104,14 +104,13 @@ public final class ProtocResolver {
     }
     var resolvedPath = path.get();
 
-
     if (digest != null) {
-      log.debug("Verifying digest of {} against {}", resolvedPath, digest);
+      log.debug("Verifying digest of \"{}\" against \"{}\"", resolvedPath, digest);
       try (var is = new BufferedInputStream(Files.newInputStream(resolvedPath))) {
         digest.verify(is);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to compute digest of " + resolvedPath + ": " + ex,
+            "Failed to compute digest of \"" + resolvedPath + "\": " + ex,
             ex
         );
       }
@@ -122,8 +121,8 @@ public final class ProtocResolver {
 
     } catch (IOException ex) {
       throw new ResolutionException(
-          "Failed to set executable bit on protoc binary at " + resolvedPath
-              + ": " + ex.getMessage(),
+          "Failed to set executable bit on protoc binary at \"" + resolvedPath
+              + "\": " + ex,
           ex
       );
     }
@@ -136,7 +135,7 @@ public final class ProtocResolver {
       var uri = new URI(uriString);
       return urlResourceFetcher.fetchFileFromUri(uri, ".exe");
     } catch (URISyntaxException ex) {
-      throw new ResolutionException("Failed to parse URI '" + uriString + "'", ex);
+      throw new ResolutionException("Failed to parse URI \"" + uriString + "\"", ex);
     }
   }
 

@@ -460,7 +460,8 @@ class SystemPathBinaryResolverTest {
     // When
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> underTest.resolve("protoc"))
-        .withMessage("An exception occurred while scanning the system PATH")
+        .withMessage("An exception occurred while scanning the system PATH: "
+            + "java.nio.file.ClosedFileSystemException")
         .havingCause()
         .isNotNull();
   }

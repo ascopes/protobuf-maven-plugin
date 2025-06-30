@@ -60,7 +60,7 @@ public final class OutputDescriptorAttachmentRegistrar {
         .orElse(defaultArtifactClassifier);
 
     log.info(
-        "Registering {} as an attached artifact with type: {}, classifier: {}",
+        "Attaching \"{}\" to build outputs with type \"{}\" and classifier \"{}\"",
         artifactPath,
         resolvedArtifactType,
         resolvedArtifactClassifier
