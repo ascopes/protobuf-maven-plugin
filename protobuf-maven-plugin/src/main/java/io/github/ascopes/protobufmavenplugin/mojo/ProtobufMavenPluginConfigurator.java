@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.mojo;
 
+import io.github.ascopes.protobufmavenplugin.digests.DigestPlexusConverter;
+import io.github.ascopes.protobufmavenplugin.fs.PathPlexusConverter;
+import io.github.ascopes.protobufmavenplugin.fs.UriPlexusConverter;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
@@ -35,8 +38,8 @@ public class ProtobufMavenPluginConfigurator extends BasicComponentConfigurator 
   public static final String NAME = "protobuf-maven-plugin-configurator";
 
   ProtobufMavenPluginConfigurator() {
-    converterLookup.registerConverter(new DigestConverter());
-    converterLookup.registerConverter(new PathConverter());
-    converterLookup.registerConverter(new UriConverter());
+    converterLookup.registerConverter(new DigestPlexusConverter());
+    converterLookup.registerConverter(new PathPlexusConverter());
+    converterLookup.registerConverter(new UriPlexusConverter());
   }
 }

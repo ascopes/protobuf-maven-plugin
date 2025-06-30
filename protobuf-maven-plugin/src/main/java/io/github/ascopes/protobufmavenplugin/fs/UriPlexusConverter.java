@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.mojo.plexus;
+package io.github.ascopes.protobufmavenplugin.fs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,7 +22,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 
 
 /**
- * Converter for URIs.
+ * Plexus/Sisu parameter converter for URIs.
  *
  * <p>We provide this to avoid using the URL and File APIs in the Mojo interface. URLs do an
  * immediate lookup for the URL scheme's appropriate URLStreamHandlerProvider upon construction, and
@@ -41,7 +41,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * @author Ashley Scopes
  * @since 3.1.3
  */
-final class UriConverter extends AbstractBasicConverter {
+public final class UriPlexusConverter extends AbstractBasicConverter {
 
   @Override
   public boolean canConvert(Class<?> type) {
