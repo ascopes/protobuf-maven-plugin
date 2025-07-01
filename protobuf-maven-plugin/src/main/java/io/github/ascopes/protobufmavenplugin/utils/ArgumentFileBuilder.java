@@ -117,4 +117,13 @@ public final class ArgumentFileBuilder {
     }
     return sb.toString().trim();
   }
+
+  public String[] getCommand(String executablePath) {
+    var command = new String[arguments.size() + 1];
+    command[0] = executablePath;
+    for (int i = 0; i < arguments.size(); i++) {
+      command[i + 1] = arguments.get(i);
+    }
+    return command;
+  }
 }

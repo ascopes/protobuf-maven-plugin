@@ -64,7 +64,9 @@ public final class ProtocExecutor {
     log.debug("Protoc binary is located at \"{}\"", invocation.getProtocPath());
     log.debug("Protoc argument file:\n{}", argumentFileBuilder);
 
-    var procBuilder = new ProcessBuilder(invocation.getProtocPath().toString(), "@" + argumentFile);
+    var procBuilder = new ProcessBuilder(
+        argumentFileBuilder.getCommand(invocation.getProtocPath().toString())
+    );
     procBuilder.environment().putAll(System.getenv());
 
     try {
