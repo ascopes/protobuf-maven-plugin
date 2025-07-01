@@ -116,7 +116,7 @@ jobs:
           - title: Linux amd64, mvn 4, jdk17
             os-name: ubuntu-24.04
             java-version: 17
-            maven-version: 4.0.0-rc-3
+            maven-version: 4.0.0-rc-4
 
     steps:
       - name: Checkout repository
