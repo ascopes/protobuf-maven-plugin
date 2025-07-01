@@ -64,8 +64,8 @@ public final class DigestPlexusConverter extends AbstractBasicConverter {
     if (!matcher.matches()) {
       throw new ComponentConfigurationException(
           "Failed to parse digest '" + str + "'. "
-              +  "Ensure that the digest is in a format such as "
-              +  "'sha512:1a2b3c4d', where the digest is a hexadecimal-encoded "
+              + "Ensure that the digest is in a format such as "
+              + "'sha512:1a2b3c4d', where the digest is a hexadecimal-encoded "
               + "string."
       );
     }
