@@ -219,8 +219,10 @@
 
       <dependency>
         <groupId>org.immutables</groupId>
-        <artifactId>value</artifactId>
+        <artifactId>bom</artifactId>
         <version>${immutables.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
       </dependency>
 
       <dependency>
