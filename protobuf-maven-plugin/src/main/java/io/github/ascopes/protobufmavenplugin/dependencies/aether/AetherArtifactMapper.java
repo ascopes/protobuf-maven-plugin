@@ -89,8 +89,8 @@ final class AetherArtifactMapper {
         .orElseGet(() -> new FallbackEclipseArtifactType(extension));
 
     log.debug(
-        "Resolved extension \"{}\" to Aether artifact type (classifier: \"{}\", type: \"{}\""
-            + "id: \"{}\", \"{}\")",
+        "Resolved extension \"{}\" to Aether artifact type (classifier: \"{}\", type: \"{}\", "
+            + "id: \"{}\", properties={})",
         mavenArtifact.getType(),
         artifactType.getClassifier(),
         artifactType.getExtension(),
