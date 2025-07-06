@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 import io.github.ascopes.protobufmavenplugin.digests.DigestPlexusConverter;
 import io.github.ascopes.protobufmavenplugin.fs.PathPlexusConverter;
 import io.github.ascopes.protobufmavenplugin.urls.UriPlexusConverter;
+import io.github.ascopes.protobufmavenplugin.utils.ImmutablesDataPlexusConverter;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
@@ -41,5 +42,6 @@ public class ProtobufMavenPluginConfigurator extends BasicComponentConfigurator 
     converterLookup.registerConverter(new DigestPlexusConverter());
     converterLookup.registerConverter(new PathPlexusConverter());
     converterLookup.registerConverter(new UriPlexusConverter());
+    converterLookup.registerConverter(new ImmutablesDataPlexusConverter());
   }
 }
