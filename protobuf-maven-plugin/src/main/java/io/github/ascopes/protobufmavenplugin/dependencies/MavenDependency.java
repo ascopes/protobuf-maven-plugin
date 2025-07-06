@@ -16,8 +16,8 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import java.util.Set;
+import org.immutables.data.Data;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
 
@@ -27,11 +27,11 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 3.3.1
  */
+@Data
 @Immutable
-@Modifiable
 public interface MavenDependency extends MavenArtifact {
 
   @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
 
-  Set<MavenExclusionBean> getExclusions();
+  Set<MavenExclusion> getExclusions();
 }
