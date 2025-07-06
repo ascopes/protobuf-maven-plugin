@@ -17,8 +17,8 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import java.util.List;
+import org.immutables.data.Data;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -30,8 +30,8 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
+@Data
 @Immutable
-@Modifiable
 public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
 
   /**
