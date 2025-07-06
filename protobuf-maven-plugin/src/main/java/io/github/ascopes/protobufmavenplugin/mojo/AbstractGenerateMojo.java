@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
@@ -28,9 +28,9 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -160,7 +160,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  @Nullable List<MavenProtocPluginBean> binaryMavenPlugins;
+  @Nullable List<MavenProtocPlugin> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -213,7 +213,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 2.0.0
    */
   @Parameter
-  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
+  @Nullable List<PathProtocPlugin> binaryPathPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
@@ -267,13 +267,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code digest} - an optional digest to verify the binary against.
    *       If specified, this is a string in the format {@code sha512:1a2b3c4d...},
    *       using any supported message digest provided by your JDK (e.g. {@code md5},
-   *       {@code sha1}, {@code sha256}, {@code sha512}, etc).</li>
+   *       {@code sha1}, {@code sha256}, {@code sha512}, etc.).</li>
    * </ul>
    *
    * @since 2.0.0
    */
   @Parameter
-  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
+  @Nullable List<UriProtocPlugin> binaryUrlPlugins;
 
   /**
    * If {@code true}, all output directories will be cleared before {@code protoc}
@@ -487,7 +487,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> importDependencies;
+  @Nullable List<MavenDependency> importDependencies;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -638,7 +638,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.3.0
    */
   @Parameter
-  @Nullable List<MavenProtocPluginBean> jvmMavenPlugins;
+  @Nullable List<MavenProtocPlugin> jvmMavenPlugins;
 
   /**
    * Enable generating Kotlin API wrapper code around the generated Java code.
@@ -955,7 +955,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> sourceDependencies;
+  @Nullable List<MavenDependency> sourceDependencies;
 
   /**
    * Protobuf Descriptor files to compile.
@@ -989,7 +989,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 3.1.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> sourceDescriptorDependencies;
+  @Nullable List<MavenDependency> sourceDescriptorDependencies;
 
   /**
    * Override the source directories to compile from.
