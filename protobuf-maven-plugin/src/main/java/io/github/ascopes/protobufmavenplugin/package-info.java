@@ -26,8 +26,6 @@
     jacksonIntegration = false,
     jdkOnly = true,
     jdk9Collections = true,
-    nullableAnnotation = "org.jspecify.annotations.Nullable",
-    passAnnotations = Nullable.class,
     optionalAcceptNullable = true,
     typeModifiable = "*Bean",
     validationMethod = ValidationMethod.MANDATORY_ONLY
@@ -38,4 +36,3 @@ import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
 import org.immutables.value.Value.Style.ValidationMethod;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
