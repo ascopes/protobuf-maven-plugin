@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.protoc.distributions;
+package io.github.ascopes.protobufmavenplugin.plexus.testdata;
 
-import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import java.net.URI;
-import org.immutables.value.Value.Immutable;
+import org.immutables.datatype.Data;
+import org.immutables.value.Value;
 
-/**
- * Model base for a {@code protoc} distribution that is located at a URI.
- *
- * @author Ashley Scopes
- * @since 5.1.0
- */
-@Immutable
-@KindHint("url")
-public abstract non-sealed class UriProtocDistribution implements ProtocDistribution {
+@Data
+@Value.Immutable
+public interface ValidInnerModel {
 
-  /**
-   * Get the URI.
-   *
-   * @return the URI.
-   */
-  public abstract URI getUrl();
+  String getFoo();
+
+  int getBar();
 }

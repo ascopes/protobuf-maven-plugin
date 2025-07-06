@@ -19,8 +19,6 @@
  */
 @NullMarked
 @Style(
-    beanFriendlyModifiables = true,
-    create = "new",
     defaults = @Immutable(copy = false),
     defaultAsDefault = true,
     get = {"get*", "is*"},

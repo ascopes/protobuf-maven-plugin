@@ -191,21 +191,22 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
   private Optional<? extends Class<?>> findRequestedImplementation(Class<?> type, String kind) {
     return listKindedImplementations(type)
         .filter(kindPair -> kindPair.kind().equals(kind))
-        .map(KindHint::implementation)
+        .map(KindPair::implementation)
         .findFirst();
   }
 
   private String nameValidKinds(Class<?> type) {
     return listKindedImplementations(type)
-        .map(KindHint::kind)
+        .map(KindPair::kind)
         .sorted()
         .map(s -> "\"" + s + "\"")
         .collect(Collectors.joining(", "));
   }
 
-  private Stream<KindHint> listKindedImplementations(Class<?> type) {
+  private Stream<KindPair> listKindedImplementations(Class<?> type) {
     var thisKindHint = AnnotationProxy.findAnnotation(KindHint.class, type)
-        .stream();
+        .stream()
+        .map(annotation -> new KindPair(annotation.value(), type));
 
     var kindedSubtypes = Optional.ofNullable(type.getPermittedSubclasses())
         .stream()
@@ -225,4 +226,6 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
             + nameValidKinds(type) + "."
     );
   }
+
+  private record KindPair(String kind, Class<?> implementation) {}
 }
