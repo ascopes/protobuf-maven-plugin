@@ -13,23 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.plexus.testdata;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
-import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import org.immutables.value.Value.Immutable;
-
-/**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
- * repository and corresponds to a native executable.
- *
- * @author Ashley Scopes
- * @since 4.1.0
- */
-@Immutable
-@KindHint("binary-maven")
-public abstract non-sealed class BinaryMavenProtocPlugin
-    extends MavenArtifact
-    implements ProtocPlugin {
-
+public final class SomeBrokenModel {
 }
