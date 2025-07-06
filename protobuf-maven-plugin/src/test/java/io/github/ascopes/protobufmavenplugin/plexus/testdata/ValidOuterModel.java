@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Ashley Scopes
+ * Copyright (C) 2023 - 2025, Ashley Scopes.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependencies;
+package io.github.ascopes.protobufmavenplugin.plexus.testdata;
 
 import java.util.Set;
 import org.immutables.datatype.Data;
-import org.immutables.value.Value.Immutable;
-import org.jspecify.annotations.Nullable;
+import org.immutables.value.Value;
 
-
-/**
- * Representation of a Maven dependency.
- *
- * @author Ashley Scopes
- * @since 3.3.1
- */
 @Data
-@Immutable
-public abstract class MavenDependency extends MavenArtifact {
+@Value.Immutable
+public interface ValidOuterModel {
 
-  public abstract @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
+  String getFoo();
 
-  public abstract Set<MavenExclusion> getExclusions();
+  int getBar();
 
-  // Must be overridden to keep immutables happy.
-  @Override
-  public String toString() {
-    return super.toString();
-  }
+  Set<ValidInnerModel> getValidInnerModels();
 }

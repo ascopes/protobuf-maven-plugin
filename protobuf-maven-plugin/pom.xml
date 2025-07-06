@@ -84,6 +84,12 @@
 
     <dependency>
       <groupId>org.immutables</groupId>
+      <artifactId>datatype</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.immutables</groupId>
       <artifactId>value</artifactId>
       <!-- Annotation processor only -->
       <scope>provided</scope>
