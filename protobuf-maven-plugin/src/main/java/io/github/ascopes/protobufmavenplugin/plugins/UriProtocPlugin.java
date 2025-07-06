@@ -18,7 +18,8 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.net.URI;
 import java.util.Optional;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.datatype.Data;
+import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
 
@@ -31,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
-@Modifiable
+@Data
+@Immutable
 public abstract class UriProtocPlugin implements OptionalProtocPlugin {
 
   public abstract URI getUrl();

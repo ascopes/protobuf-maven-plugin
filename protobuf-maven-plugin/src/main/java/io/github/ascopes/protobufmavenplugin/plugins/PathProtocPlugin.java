@@ -15,7 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import org.immutables.value.Value.Modifiable;
+import org.immutables.datatype.Data;
+import org.immutables.value.Value.Immutable;
 
 
 /**
@@ -28,7 +29,8 @@ import org.immutables.value.Value.Modifiable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
-@Modifiable
+@Data
+@Immutable
 public abstract class PathProtocPlugin implements OptionalProtocPlugin {
 
   public abstract String getName();
