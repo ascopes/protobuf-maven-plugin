@@ -119,18 +119,18 @@ String randomFileName(int index) {
   return fileName.append("_${index}.proto").toString()
 }
 
-@SuppressWarnings('GroovyAssignabilityCheck')
+@SuppressWarnings("GroovyAssignabilityCheck")
 CompletableFuture<Void> generateRandomFile(int index, Path baseDir, ExecutorService executor) {
-  CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+  CompletableFuture<Void> completableFuture = new CompletableFuture<>()
   executor.submit {
     try {
       Path path = baseDir.resolve(randomFileName(index))
       try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
         addRandomProtoFile(index, writer)
       }
-      completableFuture.complete(null);
+      completableFuture.complete(null)
     } catch (Exception ex) {
-      completableFuture.completeExceptionally(ex);
+      completableFuture.completeExceptionally(ex)
     }
   }
   return completableFuture
