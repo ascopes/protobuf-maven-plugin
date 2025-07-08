@@ -19,6 +19,7 @@ import groovy.transform.Field
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -119,27 +120,31 @@ String randomFileName(int index) {
 }
 
 @SuppressWarnings('GroovyAssignabilityCheck')
-Future<Void> generateRandomFile(int index, Path baseDir, ExecutorService executor) {
+CompletableFuture<Void> generateRandomFile(int index, Path baseDir, ExecutorService executor) {
+  CompletableFuture<Void> completableFuture = new CompletableFuture<>();
   executor.submit {
-    Path path = baseDir.resolve(randomFileName(index))
-    try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-      addRandomProtoFile(index, writer)
+    try {
+      Path path = baseDir.resolve(randomFileName(index))
+      try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+        addRandomProtoFile(index, writer)
+      }
+      completableFuture.complete(null);
+    } catch (Exception ex) {
+      completableFuture.completeExceptionally(ex);
     }
-    return null
   }
+  return completableFuture
 }
 
 void generateRandomFiles(int count, ExecutorService executor) {
   println("Generating ${count} random proto files files for this test...")
   Path baseDir = basedir.toPath().resolve("src").resolve("main").resolve("protobuf")
   Files.createDirectories(baseDir)
-  List<Future<Void>> futures = []
+  CompletableFuture[] futures = new CompletableFuture[count]
   for (int i = 0; i < count; ++i) {
-    futures.add(generateRandomFile(i, baseDir, executor))
+    futures[i] = generateRandomFile(i, baseDir, executor)
   }
-  for (Future<Void> future : futures) {
-    future.get()
-  }
+  CompletableFuture.allOf(futures).join()
 }
 
 ExecutorService executor = Executors.newFixedThreadPool(30)
