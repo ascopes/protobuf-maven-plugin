@@ -68,14 +68,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - title: macOS arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: macOS arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
             os-name: macos-15
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Windows amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: Windows amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
             os-name: windows-2025
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: Windows arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
@@ -83,14 +83,9 @@ jobs:
             java-version: 21  # This is the earliest-supported version on Windows ARM
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: Linux arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
             os-name: ubuntu-24.04-arm
-            java-version: 11
-            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
-
-          - title: Linux amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
-            os-name: ubuntu-24.04
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: Linux amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
@@ -113,10 +108,10 @@ jobs:
             java-version: 11
             maven-version: 3.8.8
 
-          - title: Linux amd64, mvn 4, jdk17
+          - title: Linux amd64, mvn 3.9.10, jdk11
             os-name: ubuntu-24.04
-            java-version: 17
-            maven-version: 4.0.0-rc-4
+            java-version: 11
+            maven-version: 3.9.10
 
     steps:
       - name: Checkout repository
@@ -159,6 +154,7 @@ jobs:
             **/build.log
             **/maven-status/**
             **/surefire-reports/**.txt
+            **/invoker-reports/**.txt
           compression-level: 9
           retention-days: 7
           include-hidden-files: true
