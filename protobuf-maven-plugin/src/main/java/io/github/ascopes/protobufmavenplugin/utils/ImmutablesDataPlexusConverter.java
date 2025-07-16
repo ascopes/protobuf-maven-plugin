@@ -24,9 +24,10 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
-import org.immutables.data.Datatype;
-import org.immutables.data.Datatype.Builder;
-import org.immutables.data.Datatype.Feature;
+import org.immutables.datatype.Datatype;
+import org.immutables.datatype.Datatype.Builder;
+import org.immutables.datatype.Datatype.Feature;
+import org.immutables.datatype.Types;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -34,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * on the interface it was derived from.
  *
  * <p>Note that all objects must be annotated with both {@link org.immutables.value.Value}
- * <strong>and</strong> {@link org.immutables.data.Data}, otherwise deserialization will fail at
+ * <strong>and</strong> {@link org.immutables.datatype.Data}, otherwise deserialization will fail at
  * runtime.
  *
  * @author Ashley Scopes
@@ -74,7 +75,7 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
     for (var child : configuration.getChildren()) {
       try {
         var feature = (Feature<Object, Object>) datatype.feature(child.getName());
-        var valueType = feature.type().getRawType();
+        var valueType = Types.toRawType(feature.type());
         var converter = lookup.lookupConverterForType(valueType);
         var value = converter.fromConfiguration(
             lookup,

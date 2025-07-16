@@ -77,12 +77,7 @@
 
     <dependency>
       <groupId>org.immutables</groupId>
-      <artifactId>data</artifactId>
-      <!-- Depends on the following PRs being merged:
-          - https://github.com/immutables/immutables/pull/1556 - include data in BOM
-          - https://github.com/immutables/immutables/pull/1558 - fix compilation issues with @Nullable
-          -->
-      <version>2.11.1-SNAPSHOT</version>
+      <artifactId>datatype</artifactId>
       <!-- Annotations and runtime classes. -->
       <scope>compile</scope>
     </dependency>
@@ -90,12 +85,6 @@
     <dependency>
       <groupId>org.immutables</groupId>
       <artifactId>value</artifactId>
-      <!-- Depends on the following PRs being merged:
-          - https://github.com/immutables/immutables/pull/1556 - include data in BOM
-          - https://github.com/immutables/immutables/pull/1558 - fix compilation issues with @Nullable
-          TODO: revert once fixed.
-          -->
-      <version>2.11.1-SNAPSHOT</version>
       <!-- Annotation processor only -->
       <scope>provided</scope>
     </dependency>
