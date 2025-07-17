@@ -15,11 +15,15 @@
  */
 package io.github.ascopes.protobufmavenplugin.digests;
 
+import java.security.Security;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
 
@@ -36,17 +40,25 @@ public final class DigestPlexusConverter extends AbstractBasicConverter {
       Pattern.CASE_INSENSITIVE
   );
 
-  private static final Map<String, String> DIGEST_ALIASES;
-
-  static {
-    var digestAliases = new TreeMap<String, String>(String::compareToIgnoreCase);
-    digestAliases.put("sha1", "SHA-1");
-    digestAliases.put("sha224", "SHA-224");
-    digestAliases.put("sha256", "SHA-256");
-    digestAliases.put("sha384", "SHA-384");
-    digestAliases.put("sha512", "SHA-512");
-    DIGEST_ALIASES = Collections.unmodifiableMap(digestAliases);
-  }
+  // This is a special sorted map that maps all MessageDogest algorithms back to
+  // themselves. At a glance, this might seem totally pointless, but we provide a
+  // key comparator that compares all keys ignoring case and without any hyphen
+  // separator characters if present. This enables us to programmatically support
+  // all aliases for all available digest algorithms dynamically without hardcoding
+  // anything. Effectively this enables us to map things like "sha256" back to
+  // "SHA-256" internally.
+  private static final Map<String, String> DIGEST_ALIASES = Security.getAlgorithms("MessageDigest")
+      .stream()
+      .collect(Collectors.collectingAndThen(
+          Collectors.toMap(
+              Function.identity(),
+              Function.identity(),
+              (existingAlgorithm, newAlgorithm) -> newAlgorithm,
+              () -> new TreeMap<>(Comparator.comparing(alias -> alias.replace("-", "")
+                  .toLowerCase(Locale.ROOT)))
+          ),
+          Collections::unmodifiableMap
+      ));
 
   @Override
   public boolean canConvert(Class<?> type) {
@@ -72,13 +84,10 @@ public final class DigestPlexusConverter extends AbstractBasicConverter {
 
     try {
       var algorithm = matcher.group("algorithm");
-      algorithm = DIGEST_ALIASES.getOrDefault(algorithm, algorithm)
-          .toUpperCase(Locale.ROOT);
-
-      var digest = matcher.group("digest")
-          .toLowerCase(Locale.ROOT);
-
+      algorithm = DIGEST_ALIASES.getOrDefault(algorithm, algorithm);
+      var digest = matcher.group("digest");
       return Digest.from(algorithm, digest);
+
     } catch (Exception ex) {
       throw new ComponentConfigurationException(
           "Failed to parse digest '" + str + "': " + ex,
