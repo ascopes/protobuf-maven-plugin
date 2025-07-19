@@ -223,7 +223,7 @@ class DigestPlexusConverterTest {
         ))
         .withMessage(
             "Failed to parse digest 'sha-69420:1a2b3c4d5e': "
-                + "%s: Digest 'SHA-69420' is not supported by this JVM",
+                + "%s: Digest 'sha-69420' is not supported by this JVM",
             DigestException.class.getName()
         )
         .withCauseInstanceOf(DigestException.class);
