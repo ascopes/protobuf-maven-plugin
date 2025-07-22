@@ -153,18 +153,11 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - prepare
-      # Needed to ensure we do not make a tag before Maven does,
-      # otherwise this will cause the Maven job to fall over and revert
-      # everything.
-      - maven-central-release
     permissions:
       id-token: write
       pages: write
 
-    # Specifically require !cancelled() so we can still run this step
-    # if we skip the Maven pipeline we depend on. Otherwise this will not
-    # run if the dependency job does not run either.
-    if: ${{ ! cancelled() && ! inputs.skip-pages }}
+    if: ${{ ! inputs.skip-pages }}
 
     environment:
       name: GitHub Pages
@@ -197,13 +190,27 @@ jobs:
         if: ${{ ! inputs.dry-run }}
         uses: actions/deploy-pages@v4
 
+      # If the deployment failed due to an internal error (e.g. an outage on GitHub),
+      # then we may get stuck in a state where we are unable to rerun this step. This
+      # happens because we create duplicate artifact uploads and the upload artifact
+      # action mishandles duplicates. The easiest way around this is to just purge the
+      # artifact if we failed so that any rerun can succeed.
+      - name: Remove GitHub Pages artifacts
+        uses: geekyeggo/delete-artifact@v5
+        if: ${{ failure() && ! inputs.dry-run }}
+        with:
+          name: github-pages
+          failOnError: false
+
   github-release:
     name: GitHub Release
     runs-on: ubuntu-latest
     needs:
       - prepare
+      # Needed to ensure we do not make a tag before Maven does,
+      # otherwise this will cause the Maven job to fall over and revert
+      # everything.
       - maven-central-release
-      - github-pages
 
     permissions:
       contents: write
