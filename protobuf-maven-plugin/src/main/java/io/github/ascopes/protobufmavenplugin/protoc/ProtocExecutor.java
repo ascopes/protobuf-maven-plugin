@@ -65,7 +65,9 @@ public final class ProtocExecutor {
     log.debug("Protoc argument file:\n{}", argumentFileBuilder);
 
     var procBuilder = new ProcessBuilder(invocation.getProtocPath().toString(), "@" + argumentFile);
-    procBuilder.environment().putAll(System.getenv());
+    var env = procBuilder.environment();
+    env.putAll(System.getenv());
+    env.putAll(invocation.getEnvironmentVariables());
 
     try {
       return runProcess(procBuilder);

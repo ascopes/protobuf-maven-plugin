@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Spliterators.AbstractSpliterator;
@@ -394,6 +395,38 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.getDependencyScopes())
         .containsExactlyInAnyOrderElementsOf(combination);
   }
+
+  @DisplayName("the environmentVariables are set to the specified value")
+  @Test
+  void environmentVariablesAreSetToTheSpecifiedValue() throws Throwable {
+    mojo.environmentVariables = Map.of("foo", "bar", "baz", "bork");
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getEnvironmentVariables())
+        .isEqualTo(Map.of("foo", "bar", "baz", "bork"));
+  }
+
+  @DisplayName("the environmentVariables are set to an empty map if unspecified")
+  @Test
+  void environmentVariablesAreSetToAnEmptyMapIfUnspecified() throws Throwable {
+    mojo.environmentVariables = null;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getEnvironmentVariables()).isEmpty();
+  }
+
 
   @DisplayName("failOnInvalidDependencies is set to the specified value")
   @ValueSource(booleans = {true, false})

@@ -24,6 +24,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
@@ -88,6 +89,11 @@ public interface GenerationRequest {
    * @return the collection of glob patterns.
    */
   List<String> getExcludes();
+
+  /**
+   * Additional environment variables to set when calling {@code protoc}.
+   */
+  Map<String, String> getEnvironmentVariables();
 
   /**
    * Additional user-defined Maven dependencies to include in the {@code protoc}

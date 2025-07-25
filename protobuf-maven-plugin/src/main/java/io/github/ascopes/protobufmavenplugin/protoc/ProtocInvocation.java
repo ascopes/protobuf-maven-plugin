@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import org.immutables.value.Value.Immutable;
 
@@ -36,6 +37,9 @@ public interface ProtocInvocation {
 
   // Fail if we get warnings, rather than continuing.
   boolean isFatalWarnings();
+
+  // Environment variables to explicitly set.
+  Map<String, String> getEnvironmentVariables();
 
   // Paths to proto source files on the root file system to compile.
   List<Path> getImportPaths();
