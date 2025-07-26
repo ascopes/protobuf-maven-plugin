@@ -26,4 +26,4 @@ Please raise an issue with the details and reproduction if appropriate.
 
 If the issue is with `protoc` or another dependency, then any issues need
 to be raised with the associated projects. This project is not affiliated
-with any of the projects it depends upon.
+with any of the projects it depends upon, unless explicitly stated via relevant license documentation.
