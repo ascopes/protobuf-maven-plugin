@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -340,6 +341,24 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean embedSourcesInClassOutputs;
+
+  /**
+   * Additional environment variables to pass to the {@code protoc} subprocess.
+   *
+   * <p>This can be used to override some internal behaviours within {@code protoc} or any
+   * associated {@code protoc} plugins during execution.
+   *
+   * <p>By default, any environment variables made visible to Maven will be passed to
+   * {@code protoc}. Any environment variables specified here will be appended to the default
+   * environment variables, overwriting any that have duplicate names.
+   *
+   * <p>Note that this will not allow overriding aspects like the system path, as those are
+   * resolved statically prior to any invocation.
+   *
+   * @since 3.7.0
+   */
+  @Parameter
+  @Nullable Map<String, String> environmentVariables;
 
   /**
    * Source paths to exclude from compilation.
@@ -1057,6 +1076,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .dependencyResolutionDepth(dependencyResolutionDepth)
         .dependencyScopes(dependencyScopes())
         .embedSourcesInClassOutputs(embedSourcesInClassOutputs)
+        .environmentVariables(nonNullMap(environmentVariables))
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
         .failOnInvalidDependencies(failOnInvalidDependencies)
@@ -1158,5 +1178,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private static <T> List<T> nonNullList(@Nullable List<T> list) {
     return requireNonNullElseGet(list, List::of);
+  }
+
+  private static <K, V> Map<K, V>  nonNullMap(@Nullable Map<K, V> map) {
+    return requireNonNullElseGet(map, Map::of);
   }
 }
