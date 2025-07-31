@@ -1,0 +1,34 @@
+name: Build Devcontainer
+on:
+  pull_request:
+    paths:
+      - .devcontainer/**
+      - .github/workflows/devcontainer.yml
+
+  workflow_call: {}
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    name: Build Devcontainer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Devcontainer
+        run: |-
+          set -o errexit
+          set -o nounset
+          set -o xtrace
+
+          # Verify docker is up first.
+          docker run --rm hello-world
+
+          # Verify the devcontainer builds correctly.
+          npm install -g @devcontainers/cli
+          devcontainer build \
+              --workspace-folder . \
+              --push false \
+              --image-name ghcr.io/ascopes/protobuf-maven-plugin/devcontainer:latest

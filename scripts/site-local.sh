@@ -5,8 +5,9 @@
 ### Author: Ashley Scopes
 ###
 set -o errexit
+set -o nounset
 set -o pipefail
-[[ -n ${DEBUG+undef} ]] && set -o xtrace
+[[ -v DEBUG ]] && set -o xtrace
 
 readonly host=127.0.0.1
 readonly port=9000

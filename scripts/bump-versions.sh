@@ -6,7 +6,7 @@
 ###
 set -o errexit
 set -o nounset
-[[ -n ${DEBUG+undef} ]] && set -o xtrace
+[[ -v DEBUG ]] && set -o xtrace
 
 function usage() {
   echo "USAGE: ${BASH_SOURCE[0]} [ -h | -m | -M ]"

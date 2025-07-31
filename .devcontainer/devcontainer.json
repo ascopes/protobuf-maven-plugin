@@ -1,9 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/java:dev-21",
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers-contrib/features/protoc:1": {
-      "version": "latest"
-    }
+  "build": {
+    "dockerfile": "Dockerfile"
   }
 }

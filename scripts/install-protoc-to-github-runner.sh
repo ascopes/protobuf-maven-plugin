@@ -8,7 +8,7 @@
 ###
 set -o errexit
 set -o nounset
-[[ -n ${DEBUG+defined} ]] && set -o xtrace
+[[ -v DEBUG ]] && set -o xtrace
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 echo "Checking protobuf version from pom.xml..."
@@ -51,7 +51,6 @@ readonly target_dir=$(mktemp -d)
 readonly target=${target_dir}/protoc
 echo "${target_dir}" >> "${GITHUB_PATH}"
 export PATH="${PATH}:${target_dir}"
-
 
 echo "Downloading protoc ${version} for OS ${os_name} and CPU ${os_arch}"
 echo "Installing ${url} to ${target}"
