@@ -33,7 +33,14 @@ case "$(uname)" in
   Darwin)
     # Only support for aarch64 in new macOS versions.
     readonly os_name=osx
-    readonly os_arch=aarch_64
+    case "$(uname -m)" in
+      aarch64)
+        readonly os_arch=aarch_64
+        ;;
+      *)
+        readonly os_arch=x86_64
+        ;;
+    esac
     ;;
   *)
     # No arm64 version available, we assume Prism on ARM for Windows will
