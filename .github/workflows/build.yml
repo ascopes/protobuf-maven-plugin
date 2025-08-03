@@ -68,6 +68,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - title: macOS amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+            os-name: macos-13
+            java-version: 11
+            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
+            pre-script: "brew install bash"
+            
           - title: macOS arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: macos-15
             java-version: 11
