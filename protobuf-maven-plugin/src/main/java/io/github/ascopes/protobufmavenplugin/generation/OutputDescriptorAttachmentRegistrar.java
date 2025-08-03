@@ -15,8 +15,9 @@
  */
 package io.github.ascopes.protobufmavenplugin.generation;
 
+import static java.util.Objects.requireNonNullElse;
+
 import java.nio.file.Path;
-import java.util.Optional;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProjectHelper;
 import org.jspecify.annotations.Nullable;
@@ -34,43 +35,38 @@ public final class OutputDescriptorAttachmentRegistrar {
       .getLogger(OutputDescriptorAttachmentRegistrar.class);
 
   private final MavenProjectHelper mavenProjectHelper;
-  private final String defaultArtifactType;
-  private final @Nullable String defaultArtifactClassifier;
+  private final String defaultType;
+  private final @Nullable String defaultClassifier;
 
   public OutputDescriptorAttachmentRegistrar(
       MavenProjectHelper mavenProjectHelper,
-      String defaultArtifactType,
-      @Nullable String defaultArtifactClassifier
+      String defaultType,
+      @Nullable String defaultClassifier
   ) {
     this.mavenProjectHelper = mavenProjectHelper;
-    this.defaultArtifactType = defaultArtifactType;
-    this.defaultArtifactClassifier = defaultArtifactClassifier;
+    this.defaultType = defaultType;
+    this.defaultClassifier = defaultClassifier;
   }
 
   public void registerAttachedArtifact(
       MavenSession session,
-      Path artifactPath,
-      @Nullable String artifactType,
-      @Nullable String artifactClassifier
+      Path path,
+      @Nullable String type,
+      @Nullable String classifier
   ) {
 
-    var resolvedArtifactType = Optional.ofNullable(artifactType)
-        .orElse(defaultArtifactType);
-    var resolvedArtifactClassifier = Optional.ofNullable(artifactClassifier)
-        .orElse(defaultArtifactClassifier);
+    var type = requireNonNullElse(type, defaultType);
+    var classifier = requireNonNullElse(classifier, defaultClassifier);
+    var project = session.getCurrentProject();
+    var file = path.toFile();
 
     log.info(
         "Attaching \"{}\" to build outputs with type \"{}\" and classifier \"{}\"",
-        artifactPath,
-        resolvedArtifactType,
-        resolvedArtifactClassifier
+        path,
+        type,
+        classifier
     );
 
-    mavenProjectHelper.attachArtifact(
-        session.getCurrentProject(),
-        resolvedArtifactType,
-        resolvedArtifactClassifier,
-        artifactPath.toFile()
-    );
+    mavenProjectHelper.attachArtifact(project, type, classifier, file);
   }
 }
