@@ -36,7 +36,7 @@
     <grpc.version>1.73.0</grpc.version>
     <kotlin.version>2.2.0</kotlin.version>
     <proto-google-common-protos.version>2.59.2</proto-google-common-protos.version>
-    <scala.version>3.7.1</scala.version>
+    <scala.version>3.7.2</scala.version>
     <scalapb.version>0.11.17</scalapb.version>
     <scala-maven-plugin.version>4.9.5</scala-maven-plugin.version>
     <reactor-core.version>3.7.8</reactor-core.version>
