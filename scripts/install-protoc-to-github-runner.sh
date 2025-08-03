@@ -57,7 +57,7 @@ echo "Installing ${url} to ${target}"
 curl --fail "${url}" -o "${target}"
 
 echo "Marking ${target} as executable (if possible)"
-chmod ugo+rwx -v "${target}" || :
+chmod -v 777 "${target}" || :
 
 if [[ $(command -v protoc) = "${target}" ]]; then
   echo "Installation successful"
