@@ -5,8 +5,9 @@
 ### Author: Ashley Scopes
 ###
 set -o errexit
+set -o nounset
 set -o pipefail
-[[ -n ${DEBUG+undef} ]] && set -o xtrace
+[[ -v DEBUG ]] && set -o xtrace
 
 readonly host=127.0.0.1
 readonly port=9000
@@ -14,13 +15,13 @@ readonly port=9000
 cd "$(git rev-parse --show-toplevel)/protobuf-maven-plugin/target/site"
 python3 -m http.server -b "${host}" "${port}" &
 readonly pid=$!
-trap 'kill -SIGTERM $pid' EXIT INT TERM
+trap 'kill -SIGTERM "$pid" &> /dev/null; trap - EXIT INT TERM' EXIT INT TERM
 
 until curl --connect-timeout 1 --fail --silent -I "http://${host}:${port}" | head -n 1; do
-  sleep 0.5
+  sleep 1
 done
 
-if command -v termux-open-url 2>/dev/null; then
+if command -v termux-open-url &> /dev/null; then
   termux-open-url "http://${host}:${port}"
 else
   python3 -m webbrowser -t "http://${host}:${port}"
