@@ -55,8 +55,8 @@ public final class OutputDescriptorAttachmentRegistrar {
       @Nullable String classifier
   ) {
 
-    var type = requireNonNullElse(type, defaultType);
-    var classifier = requireNonNullElse(classifier, defaultClassifier);
+    type = requireNonNullElse(type, defaultType);
+    classifier = requireNonNullElse(classifier, defaultClassifier);
     var project = session.getCurrentProject();
     var file = path.toFile();
 
