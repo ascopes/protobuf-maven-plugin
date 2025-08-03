@@ -68,67 +68,67 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - title: macOS amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: macOS x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: macos-13
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: "brew install bash"
             
-          - title: macOS arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: macOS aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: macos-15
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: "brew install bash"
 
-          - title: Windows amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: Windows x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: windows-2025
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Windows arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
+          - title: Windows aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
             os-name: windows-11-arm
             java-version: 21  # This is the earliest-supported version on Windows ARM
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Linux arm64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: Linux aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: ubuntu-24.04-arm
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Linux amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Linux amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
+          - title: Linux x86_64 mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
             os-name: ubuntu-24.04
             java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Linux amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
+          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
             os-name: ubuntu-24.04
             java-version: 21
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Linux amd64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk24
+          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk24
             os-name: ubuntu-24.04
             java-version: 24
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
             pre-script: ":"
 
-          - title: Linux amd64, mvn 3.8.8, jdk11
+          - title: Linux x86_64, mvn 3.8.8, jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: 3.8.8
             pre-script: ":"
 
-          - title: Linux amd64, mvn 4, jdk17
+          - title: Linux x86_64, mvn 4, jdk17
             os-name: ubuntu-24.04
             java-version: 17
             maven-version: 4.0.0-rc-4
