@@ -21,12 +21,17 @@ For generating gRPC stubs for Java, you can use the official gRPC Java plugin:
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-        <!-- Avoid dependency on javax.annotation-api -->
-        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
   </configuration>
 </plugin>
+```
+
+Note that for gRPC versions prior to 1.74.0, you should also pass the following options
+to avoid dependencies on `javax.annotation-api`.
+
+```xml
+<options>@generated=omit</options>
 ```
 
 ## JavaScript and gRPC-Web

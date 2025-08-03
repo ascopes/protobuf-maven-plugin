@@ -48,14 +48,19 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-        <!-- Avoid dependency on javax.annotation-api -->
-        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
   </configuration>
 
   ...
 </plugin>
+```
+
+Note that for gRPC versions prior to 1.74.0, you should also pass the following options
+to avoid dependencies on `javax.annotation-api`.
+
+```xml
+<options>@generated=omit</options>
 ```
 
 ### Binary plugins from the system path
@@ -74,14 +79,19 @@ executable name instead:
     <binaryPathPlugins>
       <binaryPathPlugin>
         <name>protoc-gen-grpc-java</name>
-        <!-- Avoid dependency on javax.annotation-api -->
-        <options>@generated=omit</options>
       </binaryPathPlugin>
     </binaryPathPlugins>
   </configuration>
 
   ...
 </plugin>
+```
+
+Note that for gRPC versions prior to 1.74.0, you should also pass the following options
+to avoid dependencies on `javax.annotation-api`.
+
+```xml
+<options>@generated=omit</options>
 ```
 
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
@@ -115,8 +125,6 @@ specific file system path:
     <binaryUrlPlugins>
       <binaryUrlPlugin>
         <url>file:///opt/protoc/protoc-gen-grpc-java</url>
-        <!-- Avoid dependency on javax.annotation-api -->
-        <options>@generated=omit</options>
       </binaryUrlPlugin>
       <binaryUrlPlugin>
         <url>ftp://company-server.internal/some-other-plugin.exe</url>
@@ -274,8 +282,6 @@ then you can provide the following:
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-        <!-- Avoid dependency on javax.annotation-api -->
-        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
     <jvmMavenPlugins>

@@ -87,8 +87,6 @@
               <groupId>io.grpc</groupId>
               <artifactId>protoc-gen-grpc-java</artifactId>
               <version>${grpc.version}</version>
-              <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
-              <options>@generated=omit</options>
               <order>100</order>
             </binaryMavenPlugin>
           </binaryMavenPlugins>

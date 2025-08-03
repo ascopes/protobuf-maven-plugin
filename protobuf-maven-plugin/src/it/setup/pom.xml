@@ -33,7 +33,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <grpc.version>1.73.0</grpc.version>
+    <grpc.version>1.74.0</grpc.version>
     <kotlin.version>2.2.0</kotlin.version>
     <proto-google-common-protos.version>2.59.2</proto-google-common-protos.version>
     <scala.version>3.7.2</scala.version>
