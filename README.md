@@ -1,13 +1,27 @@
-![Java 11+](https://img.shields.io/badge/Java-11+-red?logo=openjdk&logoColor=white)
-![Maven 3.8](https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven)
-![GitHub License](https://img.shields.io/github/license/ascopes/protobuf-maven-plugin)
-[![Build Status](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main)](https://codecov.io/gh/ascopes/protobuf-maven-plugin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.ascopes%22%20AND%20a:%22protobuf-maven-plugin%22)
-[![Documentation](https://img.shields.io/badge/documentation-latest-purple?logo=apache-maven)](https://ascopes.github.io/protobuf-maven-plugin)
-![GitHub Release Date](https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin)
+<p align="center">
+  <img alt="Java 11+" src="https://img.shields.io/badge/Java-11+-red?logo=openjdk&logoColor=white">
+  <img alt="Maven 3.8" src="https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven">
+  <img alt="GitHub License" src="https://img.shields.io/github/license/ascopes/protobuf-maven-plugin">
+  <a href="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml">
+    <img alt="Build Status" src="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main">
+  </a>
+  <a href="https://codecov.io/gh/ascopes/protobuf-maven-plugin">
+    <img alt="Coverage" src="https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main">
+  </a>
+  <a href="https://search.maven.org/search?q=g:%22io.github.ascopes%22%20AND%20a:%22protobuf-maven-plugin%22">
+    <img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin.svg?label=Maven%20Central">
+  </a>
+  <a href="https://ascopes.github.io/protobuf-maven-plugin">
+    <img alt="Documentation" src="https://img.shields.io/badge/documentation-latest-purple?logo=apache-maven">
+  </a>
+  <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin">
+  <br>
+  <br>
+  <img alt="logo" src="protobuf-maven-plugin/src/site/resources/images/banner.jpg">
+  <br>
+  <hr>
+</p>
 
-![logo](protobuf-maven-plugin/src/site/resources/images/banner.jpg)
 
 # protobuf-maven-plugin
 
