@@ -6,7 +6,7 @@
 ###
 set -o errexit
 set -o nounset
-[[ -n ${DEBUG+undef} ]] && set -o xtrace
+[[ -v DEBUG ]] && set -o xtrace
 
 function usage() {
   echo "USAGE: ${BASH_SOURCE[0]} [ -h | -m | -M ]"
@@ -27,8 +27,15 @@ function usage() {
 function get_current_version_tuple() {
   echo "Fetching current version..." >&2
   local raw_version
-  raw_version=$(./mvnw help:evaluate -q -DforceStdout=true -Dexpression=project.version 2>/dev/null)
-  if ! [[ "${raw_version}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-SNAPSHOT$ ]]; then
+  # Use of sed and tail here works around the fact Maven 4 outputs content with a prefix by
+  # default. There are flags to control this but these flags do not exist in Maven 3.8, so
+  # this is the only cross-compatible solution.
+  raw_version=$(
+      ./mvnw help:evaluate -q -DforceStdout=true -Dexpression=project.version 2>/dev/null \
+      | sed 's/ /\n/g' \
+      | tail -n1
+  )
+  if [[ ! ${raw_version} =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)-SNAPSHOT$ ]]; then
     echo "Illegal version <${raw_version}>. Must be in the format X.Y.Z-SNAPSHOT." >&2
     echo "Please fix this manually." >&2
     return 2
@@ -54,7 +61,7 @@ function bump_minor_version() {
   version_tuple=$(get_current_version_tuple)
   local version
   readarray -t version <<< "${version_tuple}"
-  if [[ "${version[2]}" -eq 0 ]]; then
+  if ((version[2] == 0)); then
     echo "Already prepared to release a new minor version. Nothing to change." >&2
     return 0
   fi
@@ -69,7 +76,7 @@ function bump_major_version() {
   version_tuple=$(get_current_version_tuple)
   local version
   readarray -t version <<< "${version_tuple}"
-  if [[ "${version[1]}" -eq 0 ]]; then
+  if (( version[1] == 0 )); then
     echo "Already prepared to release a new major version. Nothing to change." >&2
     return 0
   fi
@@ -86,5 +93,5 @@ case "${1:-}" in
   "" | -h | --help) usage ;;
   -m | --minor)     bump_minor_version ;;
   -M | --major)     bump_major_version ;;
-  *)                echo "ERROR: Unknown argument ${1}."; usage; exit 1 ;;
+  *)                echo "ERROR: Unknown argument ${1}." >&2; usage; exit 1 ;;
 esac
