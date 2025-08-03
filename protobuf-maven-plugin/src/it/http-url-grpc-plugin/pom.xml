@@ -90,7 +90,8 @@
             <binaryUrlPlugin>
               <url>https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/${grpc.version}/protoc-gen-grpc-java-${grpc.version}-linux-x86_64.exe</url>
               <digest>sha256:a9f9a7987be4a37c69a85e5e8885394356fd2f1a47f843c6461da4fc99f407b3</digest>
-              <!-- See https://github.com/grpc/grpc-java/issues/9179 -->
+              <!-- Needed until we use gRPC 1.74.0 or newer, as this avoids the dependency on
+                   javax.annotation-api. -->
               <options>@generated=omit</options>
             </binaryUrlPlugin>
           </binaryUrlPlugins>
