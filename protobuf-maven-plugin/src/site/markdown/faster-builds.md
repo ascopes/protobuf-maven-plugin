@@ -53,7 +53,8 @@ for very large projects.
 </plugin>
 ```
 
-Note that you may see new warnings, as ECJ tends to be much more vocal by default than javac.
+Note that you may see new warnings, as ECJ tends to be much more vocal by default than `javac`.
+Please raise any issues you find with Google on their Protobuf repository as needed.
 
 ## Move proto files into a separate module
 
