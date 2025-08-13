@@ -386,6 +386,7 @@ public final class ProtobufBuildOrchestrator {
         .collect(Collectors.toUnmodifiableList());
 
     return ImmutableProtocInvocation.builder()
+        .arguments(request.getArguments())
         .descriptorSourceFiles(filesToCompile.getDescriptorFiles())
         .environmentVariables(request.getEnvironmentVariables())
         .fatalWarnings(request.isFatalWarnings())

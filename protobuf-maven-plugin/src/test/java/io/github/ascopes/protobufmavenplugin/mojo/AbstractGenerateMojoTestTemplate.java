@@ -209,6 +209,42 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         .withCause(exceptionCause);
   }
 
+  @DisplayName("when arguments is null, expect an empty list in the request")
+  @NullAndEmptySource
+  @ParameterizedTest(name = "when {0}")
+  void whenArgumentsNullExpectEmptyListInRequest(
+      @Nullable List<String> arguments
+  ) throws Throwable {
+    // Given
+    mojo.arguments = arguments;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getArguments()).isEmpty();
+  }
+
+  @DisplayName("when arguments are provided, expect the arguments in the request")
+  @Test
+  void whenArgumentsProvidedExpectArgumentsInRequest() throws Throwable {
+    // Given
+    List<String> arguments = List.of("foo", "bar");
+    mojo.arguments = arguments;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getArguments()).isEqualTo(arguments);
+  }
+
   @DisplayName("when binaryMavenPlugins is null, expect an empty list in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")

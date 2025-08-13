@@ -99,6 +99,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   MavenProjectHelper mavenProjectHelper;
 
   /**
+   * Additional arguments to pass to {@code protoc}.
+   *
+   * <p>Note that generally, you should not need to use this. It is useful, however, if your
+   * use-case is not covered by other configuration parameters in this goal.
+   *
+   * <p>Configuring arguments that are covered by other parameters in this goal is undefined
+   * behaviour and should be avoided.
+   *
+   * @since 3.8.0
+   */
+  @Parameter
+  @Nullable List<String> arguments;
+
+  /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
    *
    * <p>Plugin artifacts must be a <strong>native executable</strong>. By default, the OS and CPU
@@ -1069,6 +1083,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .build();
 
     var request = ImmutableGenerationRequest.builder()
+        .arguments(nonNullList(arguments))
         .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
         .binaryPathPlugins(nonNullList(binaryPathPlugins))
         .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
@@ -1180,7 +1195,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     return requireNonNullElseGet(list, List::of);
   }
 
-  private static <K, V> Map<K, V>  nonNullMap(@Nullable Map<K, V> map) {
+  private static <K, V> Map<K, V> nonNullMap(@Nullable Map<K, V> map) {
     return requireNonNullElseGet(map, Map::of);
   }
 }

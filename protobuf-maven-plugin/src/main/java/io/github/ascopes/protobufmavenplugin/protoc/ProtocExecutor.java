@@ -82,6 +82,7 @@ public final class ProtocExecutor {
 
   private ArgumentFileBuilder createArgumentFileBuilder(ProtocInvocation invocation) {
     return new ArgumentFileBuilder()
+        .applyForEach(invocation.getArguments(), ArgumentFileBuilder::add)
         .addIfTrue(invocation.isFatalWarnings(), () -> "--fatal_warnings")
         .applyForEach(invocation.getTargets(), this::applyProtocTargetArguments)
         .addIfTrue(

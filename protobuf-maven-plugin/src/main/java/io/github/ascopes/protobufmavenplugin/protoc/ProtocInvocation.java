@@ -38,6 +38,9 @@ public interface ProtocInvocation {
   // Fail if we get warnings, rather than continuing.
   boolean isFatalWarnings();
 
+  // Additional arguments to pass to protoc.
+  List<String> getArguments();
+
   // Environment variables to explicitly set.
   Map<String, String> getEnvironmentVariables();
 
