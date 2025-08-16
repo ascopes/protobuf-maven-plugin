@@ -38,6 +38,13 @@ import org.jspecify.annotations.Nullable;
 public interface GenerationRequest {
 
   /**
+   * Additional arguments to pass to {@code protoc}.
+   *
+   * @return the arguments list.
+   */
+  List<String> getArguments();
+
+  /**
    * Binary {@code protoc} plugins that should be resolved from Maven
    * repositories.
    *
