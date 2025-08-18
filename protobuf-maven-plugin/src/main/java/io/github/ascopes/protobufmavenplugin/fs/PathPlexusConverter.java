@@ -48,7 +48,8 @@ public final class PathPlexusConverter extends FileConverter {
   public Object fromConfiguration(
       ConverterLookup lookup,
       PlexusConfiguration configuration,
-      @Nullable Class<?> type, Class<?> enclosingType,
+      Class<?> type, 
+      @Nullable Class<?> enclosingType,
       ClassLoader loader,
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
