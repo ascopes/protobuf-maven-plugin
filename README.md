@@ -25,8 +25,8 @@
 
 # protobuf-maven-plugin
 
-A scratch-built, modern Maven plugin for seamless protoc integration. Provides support for native
-and JVM-based protoc plugins, as well as automatic dependency resolution and incremental code
+A scratch-built, modern Maven plugin for seamless `protoc` integration. Provides support for native
+and JVM-based `protoc` plugins, as well as automatic dependency resolution and incremental code
 generation.
 
 > [!NOTE]
@@ -159,13 +159,13 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-        <options>@generated=omit</options>
       </binaryMavenPlugin>
     </binaryMavenPlugins>
 
     <!-- JVM plugins are distributed as JARs rather than native system
          executables. The protobuf-maven-plugin will automatically bootstrap
-         them for you. -->
+         them for you, without the need for additional
+         tooling for your platform. It should "just work". -->
     <jvmMavenPlugins>
       <jvmMavenPlugin>
         <groupId>com.salesforce.servicelibs</groupId>
