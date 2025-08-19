@@ -60,7 +60,7 @@ jobs:
   build:
     name: Tests - ${{ matrix.title }}
     runs-on: ${{ matrix.os-name }}
-    timeout-minutes: 30
+    timeout-minutes: 60  # oh MacOS, why are you so slow?
     needs:
       - validate
 
