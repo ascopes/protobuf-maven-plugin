@@ -58,17 +58,17 @@ public final class IncrementalCacheManager {
 
   private final ConcurrentExecutor concurrentExecutor;
   private final TemporarySpace temporarySpace;
-  private final IncrementalCacheSerializer serializedIncrementalCacheSerializer;
+  private final IncrementalCacheSerializer incrementalCacheSerializer;
 
   @Inject
   IncrementalCacheManager(
       ConcurrentExecutor concurrentExecutor,
       TemporarySpace temporarySpace,
-      IncrementalCacheSerializer serializedIncrementalCacheSerializer
+      IncrementalCacheSerializer incrementalCacheSerializer
   ) {
     this.concurrentExecutor = concurrentExecutor;
     this.temporarySpace = temporarySpace;
-    this.serializedIncrementalCacheSerializer = serializedIncrementalCacheSerializer;
+    this.incrementalCacheSerializer = incrementalCacheSerializer;
   }
 
   public void updateIncrementalCache() throws IOException {
@@ -141,7 +141,7 @@ public final class IncrementalCacheManager {
     log.debug("Reading incremental cache in from \"{}\"", path);
 
     try (var reader = Files.newBufferedReader(path)) {
-      return Optional.of(serializedIncrementalCacheSerializer.deserialize(reader));
+      return Optional.of(incrementalCacheSerializer.deserialize(reader));
     } catch (NoSuchFileException ex) {
       log.debug("No file found at \"{}\"", path);
       return Optional.empty();
@@ -155,7 +155,7 @@ public final class IncrementalCacheManager {
     log.debug("Writing incremental cache out to \"{}\"", path);
 
     try (var writer = Files.newBufferedWriter(path)) {
-      serializedIncrementalCacheSerializer.serialize(cache, writer);
+      incrementalCacheSerializer.serialize(cache, writer);
     }
   }
 
