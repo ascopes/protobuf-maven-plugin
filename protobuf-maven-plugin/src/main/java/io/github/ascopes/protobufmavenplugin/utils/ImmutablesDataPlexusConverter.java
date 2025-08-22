@@ -49,8 +49,16 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
 
   @Override
   public boolean canConvert(Class<?> cls) {
+    // Ignore anything from the standard library or that has a primitive value associated with it.
+    if (cls.isPrimitive() || cls.getClassLoader() == null) {
+      return false;
+    }
+
+    // XXX: is this slow? If it is slow, do I care?
+    // Might need to eventually investigate this, as it reeks of slow code to me, but I doubt it
+    // makes enough of a difference to actually matter.
     try {
-      datatypeFor(cls.getClassLoader(), cls);
+      datatypeFor(cls);
       return true;
     } catch (NoSuchElementException ex) {
       return false;
@@ -64,11 +72,11 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
       PlexusConfiguration configuration,
       Class<?> type,
       @Nullable Class<?> enclosingType,
-      ClassLoader loader,
+      @Nullable ClassLoader loader,
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
-    var datatype = datatypeFor(loader, type);
+    var datatype = datatypeFor(type);
 
     var builder = (Builder<Object>) datatype.builder();
     for (var child : configuration.getChildren()) {
@@ -97,16 +105,14 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
     return builder.build();
   }
 
-  private <T> Datatype<T> datatypeFor(
-      ClassLoader classLoader,
-      Class<T> cls
-  ) {
+  private <T> Datatype<T> datatypeFor(Class<T> cls) {
     @SuppressWarnings("unchecked")
     var datatype = (Datatype<T>) knownDatatypes.computeIfAbsent(cls, ignored -> {
+      var loader = cls.getClassLoader();
       var outerClsName = cls.getPackageName() + ".Datatypes_" + cls.getSimpleName();
 
       try {
-        var outerCls = classLoader.loadClass(outerClsName);
+        var outerCls = loader.loadClass(outerClsName);
         return (Datatype<?>) outerCls.getMethod("_" + cls.getSimpleName()).invoke(null);
       } catch (ClassNotFoundException ex) {
         var newEx = new NoSuchElementException("No datatype converter " + outerClsName);
