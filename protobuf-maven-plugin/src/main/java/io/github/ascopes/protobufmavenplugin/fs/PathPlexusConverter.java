@@ -50,7 +50,7 @@ public final class PathPlexusConverter extends FileConverter {
       PlexusConfiguration configuration,
       Class<?> type, 
       @Nullable Class<?> enclosingType,
-      ClassLoader loader,
+      @Nullable ClassLoader loader,
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
