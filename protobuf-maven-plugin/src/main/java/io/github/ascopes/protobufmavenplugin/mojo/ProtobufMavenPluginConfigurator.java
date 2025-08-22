@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 import io.github.ascopes.protobufmavenplugin.digests.DigestPlexusConverter;
 import io.github.ascopes.protobufmavenplugin.fs.PathPlexusConverter;
 import io.github.ascopes.protobufmavenplugin.fs.UriPlexusConverter;
-import io.github.ascopes.protobufmavenplugin.utils.ImmutablesDataPlexusConverter;
+import io.github.ascopes.protobufmavenplugin.immutables.ImmutablesDataPlexusConverter;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
