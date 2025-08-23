@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Initialize Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           cache: maven
           distribution: temurin
@@ -139,7 +139,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Initialize Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           cache: maven
           java-version: ${{ matrix.java-version }}
@@ -194,7 +194,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Initialize Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           cache: maven
           distribution: temurin
