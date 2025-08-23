@@ -45,3 +45,6 @@ updates:
       - dependency-name: 'org.apache.maven.plugin-tools:maven-plugin-annotations'
         versions:
           - '>=4.0.0'
+    groups:
+      # Group all changes to a single PR.
+      dependencies: {}
