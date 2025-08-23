@@ -30,3 +30,18 @@ updates:
       - ascopes
     labels:
       - dependencies
+    ignore:
+      # Maven versions should be kept in lockstep with the version
+      # of Maven that is in use.
+      - dependency-name: 'org.apache.maven.resolver:maven-resolver-api'
+        versions:
+          - '>=2.0.0'
+      - dependency-name: 'org.apache.maven:maven-core'
+        versions:
+          - '>=4.0.0'
+      - dependency-name: 'org.apache.maven:maven-plugin-api'
+        versions:
+          - '>=4.0.0'
+      - dependency-name: 'org.apache.maven.plugin-tools:maven-plugin-annotations'
+        versions:
+          - '>=4.0.0'
