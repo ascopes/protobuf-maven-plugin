@@ -76,9 +76,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     // Nothing to do here.
   }
 
-  //////////////////////////////////////////
+  // //////////////////////////////////// //
   // Dependencies to inject via Sisu CDI. //
-  //////////////////////////////////////////
+  // //////////////////////////////////// //
 
   /**
    * The source code generator.
@@ -1014,10 +1014,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter
   @Nullable List<Path> sourceDescriptorPaths;
 
-  ///////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////// //
   // Implementation-specific details that depend on the goal extending //
   // this class.                                                       //
-  ///////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////// //
 
   /**
    * Provides the default source directory to read protobuf sources from.
@@ -1064,9 +1064,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   abstract SourceRootRegistrar sourceRootRegistrar();
 
-  //////////////////////////////////
+  // //////////////////////////// //
   // Entrypoint and common logic. //
-  //////////////////////////////////
+  // //////////////////////////// //
 
   /**
    * Execute the plugin and generate sources.
