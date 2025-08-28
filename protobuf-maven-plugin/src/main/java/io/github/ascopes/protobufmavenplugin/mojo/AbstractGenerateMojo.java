@@ -1181,7 +1181,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : overriddenVersion;
   }
 
-  private static Collection<Path> determinePaths(
+  private Collection<Path> determinePaths(
       @Nullable Collection<Path> inputPaths,
       Supplier<Collection<Path>> defaultIfMissing
   ) {
