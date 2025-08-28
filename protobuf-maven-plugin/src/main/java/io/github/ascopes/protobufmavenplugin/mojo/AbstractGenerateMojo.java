@@ -687,11 +687,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
    * defined by {@code descriptor.proto}) containing all the input files in
-   * {@code outputDescriptorFile}.</p>
+   * {@code outputDescriptorFile}.
    *
    * <p>If this is specified, then incremental compilation will always be disabled
    * to prevent issues with inconsistent build results.
    *
+   * @see #outputDescriptorAttached
    * @since 2.9.0
    */
   @Parameter
@@ -712,8 +713,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Defines the Maven artifact type for the file descriptor set descriptor when attached to the
    * Maven project.
    *
-   * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
+   * <p>This is ignored if {@code outputDescriptorAttached} is false, or if
+   * {@code outputDescriptorFile} is not provided.
    *
+   * @see #outputDescriptorAttached
    * @see #outputDescriptorFile
    * @since 2.11.0
    */
