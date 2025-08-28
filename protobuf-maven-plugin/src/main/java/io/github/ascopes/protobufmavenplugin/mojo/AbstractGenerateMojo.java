@@ -76,9 +76,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     // Nothing to do here.
   }
 
-  /*
-   * Dependencies to inject.
-   */
+  //////////////////////////////////////////
+  // Dependencies to inject via Sisu CDI. //
+  //////////////////////////////////////////
 
   /**
    * The source code generator.
@@ -97,6 +97,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Inject
   MavenProjectHelper mavenProjectHelper;
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Parameters to inject.                                                      //
+  //                                                                            //
+  // Please keep these in lexicographical order (i.e. ASCII-based ordering).    //
+  //                                                                            //
+  // Any new parameters must include tests in AbstractGenerateMojoTestTemplate. //
+  ////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Additional arguments to pass to {@code protoc}.
@@ -1006,9 +1014,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter
   @Nullable List<Path> sourceDescriptorPaths;
 
-  /*
-   * Implementation-specific details.
-   */
+  ///////////////////////////////////////////////////////////////////////
+  // Implementation-specific details that depend on the goal extending //
+  // this class.                                                       //
+  ///////////////////////////////////////////////////////////////////////
 
   /**
    * Provides the default source directory to read protobuf sources from.
@@ -1055,9 +1064,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   abstract SourceRootRegistrar sourceRootRegistrar();
 
-  /*
-   * Core implementation.
-   */
+  //////////////////////////////////
+  // Entrypoint and common logic. //
+  //////////////////////////////////
 
   /**
    * Execute the plugin and generate sources.
@@ -1068,7 +1077,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
-      log.info("Execution of this plugin has been skipped in the configuration");
+      log.info(
+          "Execution of this plugin has been skipped explicitly in the "
+              + "plugin configuration"
+      );
       return;
     }
 
@@ -1146,7 +1158,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       throw new MojoExecutionException("Generation failed - " + result);
     }
 
-    log.info("{}", result);
+    log.info("Generation succeeded - {}", result);
   }
 
   private Set<String> dependencyScopes() {
@@ -1183,15 +1195,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         ? defaultIfMissing.get()
         : transformed;
 
+    // Purposely filter out the defaults that are missing as well
+    // so we can effectively fail early if no valid sources were
+    // actually provided in the project (e.g. invalid project
+    // configuration).
     return finalValue.stream()
-        .filter(path -> {
-          if (Files.notExists(path)) {
-            log.info("Ignoring non-existent path \"{}\"", path);
-            return false;
-          }
-          return true;
-        })
+        .filter(this::pathExists)
         .collect(Collectors.toUnmodifiableList());
+  }
+
+  private boolean pathExists(Path path) {
+    if (Files.notExists(path)) {
+      log.info("Ignoring non-existent path \"{}\"", path);
+      return false;
+    }
+    log.trace("Including existing path \"{}\"", path);
+    return true;
   }
 
   private static <T> List<T> nonNullList(@Nullable List<T> list) {
