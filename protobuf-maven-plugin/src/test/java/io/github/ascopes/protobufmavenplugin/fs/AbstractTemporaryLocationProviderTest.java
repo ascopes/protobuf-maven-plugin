@@ -17,20 +17,14 @@ package io.github.ascopes.protobufmavenplugin.fs;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecution;
-import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,53 +32,41 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
 import org.mockito.quality.Strictness;
 
-@DisplayName("TemporarySpace tests")
-class TemporarySpaceTest {
+@DisplayName("AbstractTemporaryLocationProvider tests")
+class AbstractTemporaryLocationProviderTest {
 
-  @TempDir Path tempDir;
-  String goal;
+  @TempDir
+  Path tempDir;
+  MojoExecution mojoExecution;
   String executionId;
-  TemporarySpace temporarySpace;
+  String goal;
+  SomeTemporaryLocationProvider provider;
 
   @BeforeEach
   void setUp() {
-    var mavenProject = mock(MavenProject.class, withSettings()
-        .strictness(Strictness.LENIENT)
-        .defaultAnswer(Answers.RETURNS_SMART_NULLS));
-
-    var mavenBuild = mock(Build.class, withSettings()
-        .strictness(Strictness.LENIENT)
-        .defaultAnswer(Answers.RETURNS_SMART_NULLS));
-
-    when(mavenProject.getBuild())
-        .thenReturn(mavenBuild);
-
-    when(mavenBuild.getDirectory())
-        .thenReturn(tempDir.toAbsolutePath().toString());
-
     goal = "goal-" + someBasicString();
     executionId = "executionId-" + someBasicString();
 
-    var execution = mock(MojoExecution.class, withSettings()
+    mojoExecution = mock(MojoExecution.class, withSettings()
         .strictness(Strictness.LENIENT)
         .defaultAnswer(Answers.RETURNS_SMART_NULLS));
 
-    when(execution.getExecutionId())
+    when(mojoExecution.getExecutionId())
         .thenReturn(executionId);
-    when(execution.getGoal())
+    when(mojoExecution.getGoal())
         .thenReturn(goal);
 
-    temporarySpace = new TemporarySpace(mavenProject, execution);
+    provider = new SomeTemporaryLocationProvider();
   }
 
-  @DisplayName("temporary spaces are created in the expected place")
+  @DisplayName("temporary locations are created in the expected place")
   @Test
-  void temporarySpacesAreCreatedInTheExpectedPlace() {
+  void temporaryLocationsAreCreatedInTheExpectedPlace() throws IOException {
     // Given
     var id = someBasicString();
 
     // When
-    var actualPath = temporarySpace.createTemporarySpace("foo", "bar", "baz", id);
+    var actualPath = provider.resolveAndCreateDirectory(tempDir, "foo", "bar", "baz", id);
 
     // Then
     assertThat(actualPath)
@@ -115,7 +97,7 @@ class TemporarySpaceTest {
     Files.createDirectories(existingPath);
 
     // When
-    var actualPath = temporarySpace.createTemporarySpace("foo", "bar", "baz", id);
+    var actualPath = provider.resolveAndCreateDirectory(tempDir, "foo", "bar", "baz", id);
 
     // Then
     assertThat(actualPath)
@@ -123,22 +105,10 @@ class TemporarySpaceTest {
         .isDirectory();
   }
 
-  @DisplayName("directory creation failures are propagated")
-  @Test
-  void directoryCreationFailuresArePropagated() {
-    try (var filesMock = mockStatic(Files.class)) {
-      // Given
-      var expectedCause = new IOException("boom");
-      filesMock.when(() -> Files.createDirectories(any()))
-          .thenThrow(expectedCause);
+  private final class SomeTemporaryLocationProvider extends AbstractTemporaryLocationProvider {
 
-      var id = someBasicString();
-
-      // Then
-      assertThatExceptionOfType(UncheckedIOException.class)
-          .isThrownBy(() -> temporarySpace.createTemporarySpace("foo", id))
-          .withMessage("Failed to create temporary location!")
-          .withCause(expectedCause);
+    SomeTemporaryLocationProvider() {
+      super(mojoExecution);
     }
   }
 }

@@ -201,6 +201,16 @@ public interface GenerationRequest {
   String getProtocVersion();
 
   /**
+   * Sanctioned path to place executables in.
+   *
+   * <p>Used for corporate environments with overly locked-down policies on where native
+   * executables can be placed.
+   *
+   * @return the sanctioned path, or {@code null} if no movement of resources is desired.
+   */
+  @Nullable Path getSanctionedExecutablePath();
+
+  /**
    * Additional user-defined Maven dependencies to include in the {@code protoc}
    * import path, and to compile.
    *

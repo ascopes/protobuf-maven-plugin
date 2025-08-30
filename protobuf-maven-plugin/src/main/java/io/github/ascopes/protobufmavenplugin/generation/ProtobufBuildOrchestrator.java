@@ -393,6 +393,7 @@ public final class ProtobufBuildOrchestrator {
         .importPaths(importPaths)
         .inputDescriptorFiles(inputDescriptorFiles)
         .protocPath(protocPath)
+        .sanctionedExecutablePath(request.getSanctionedExecutablePath())
         .sourcePaths(filesToCompile.getProtoSources())
         .targets(targets)
         .build();

@@ -20,6 +20,7 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.DescriptorFileProtoc
 import io.github.ascopes.protobufmavenplugin.protoc.targets.LanguageProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.PluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
+import io.github.ascopes.protobufmavenplugin.protoc.targets.SanctionedExecutableTransformer;
 import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
@@ -49,14 +50,28 @@ public final class ProtocExecutor {
   private static final Logger log = LoggerFactory.getLogger(ProtocExecutor.class);
   private final HostSystem hostSystem;
   private final TemporarySpace temporarySpace;
+  private final SanctionedExecutableTransformer sanctionedExecutablePathTransformer;
 
   @Inject
-  public ProtocExecutor(HostSystem hostSystem, TemporarySpace temporarySpace) {
+  public ProtocExecutor(
+      HostSystem hostSystem,
+      TemporarySpace temporarySpace,
+      SanctionedExecutableTransformer sanctionedExecutablePathTransformer
+  ) {
     this.hostSystem = hostSystem;
     this.temporarySpace = temporarySpace;
+    this.sanctionedExecutablePathTransformer = sanctionedExecutablePathTransformer;
   }
 
   public boolean invoke(ProtocInvocation invocation) throws IOException {
+    // In locked down corporate environments, ensure executables are placed in an allowed location
+    // such that we can invoke them successfully.
+    //
+    // We do this here as usually our sources will be all over the place. Some might be on
+    // the system path, some might be in target/ in the temporary space, some may be in the
+    // local Maven repository.
+    invocation = sanctionedExecutablePathTransformer.transform(invocation);
+
     var argumentFileBuilder = createArgumentFileBuilder(invocation);
     var argumentFile = writeArgumentFile(argumentFileBuilder);
 
