@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.protoc.targets;
+package org.example.helloworld;
 
-import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
-import org.immutables.value.Value.Derived;
-import org.immutables.value.Value.Immutable;
+import reactor.core.publisher.Mono;
 
-/**
- * Base model for a {@code protoc} target that calls a binary plugin.
- *
- * @author Ashley Scopes
- * @since 3.1.0
- */
-@Immutable
-public interface PluginProtocTarget extends ProtocTarget {
-  ResolvedProtocPlugin getPlugin();
-
-  @Derived
+public class ReactorGreetingServiceImpl extends ReactorGreetingServiceGrpc.GreetingServiceImplBase {
   @Override
-  default int getOrder() {
-    return getPlugin().getOrder();
+  public Mono<GreetingResponse> greet(Mono<GreetingRequest> request) {
+    return request.map(body -> GreetingResponse.newBuilder()
+            .setText("Hello, " + body.getName() + "!")
+            .build());
   }
 }
