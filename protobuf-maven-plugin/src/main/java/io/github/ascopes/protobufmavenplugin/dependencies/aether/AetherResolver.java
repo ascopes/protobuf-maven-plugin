@@ -224,7 +224,7 @@ final class AetherResolver {
       // We purposely log the warning class and message twice, since exception tracebacks are
       // hidden unless Maven was invoked with --errors.
       //noinspection LoggingPlaceholderCountMatchesArgumentCount
-      log.warn(
+      log.debug(
           "Dependency resolution warning was reported - {}: {}",
           exception.getClass().getName(),
           exception.getMessage(),
