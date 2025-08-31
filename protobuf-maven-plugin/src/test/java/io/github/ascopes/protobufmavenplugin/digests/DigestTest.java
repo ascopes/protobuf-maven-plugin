@@ -117,20 +117,20 @@ class DigestTest {
   @Test
   void toStringReturnsTheExpectedValue() {
     // Given
-    var digest = new Digest("SHA-940", bytes(0xDE, 0xAD, 0xBE, 0xEF, 0x69, 0x42));
+    var digest = new Digest("SHA-940", bytes(0xDE, 0xAD, 0xBE, 0xEF, 0x69, 0x42, 0x0, 0x1, 0x2));
 
     // Then
-    assertThat(digest).hasToString("SHA-940:deadbeef6942");
+    assertThat(digest).hasToString("SHA-940:deadbeef6942000102");
   }
 
   @DisplayName(".toHexString() returns the expexted value")
   @Test
   void toHexStringReturnsTheExpectedValue() {
     // Given
-    var digest = new Digest("SHA-940", bytes(0xDE, 0xAD, 0xBE, 0xEF, 0x69, 0x42));
+    var digest = new Digest("SHA-940", bytes(0xDE, 0xAD, 0xBE, 0xEF, 0x69, 0x42, 0x0, 0x1, 0x2));
 
     // Then
-    assertThat(digest.toHexString()).isEqualTo("deadbeef6942");
+    assertThat(digest.toHexString()).isEqualTo("deadbeef6942000102");
   }
 
   @DisplayName(".verify(InputStream) succeeds if the digest matches the content")
@@ -163,9 +163,9 @@ class DigestTest {
         .isThrownBy(() -> digest.verify(stream))
         .withMessage(
             "Actual digest"
-                + " 'SHA-256:41d8dfe07cfa2111d75a6b318c4e35e2f6bab9daf0d5b0748acb162bb99fa4'"
+                + " 'SHA-256:41d8dfe07cfa2111d75a6b318c4e35e2f6bab9daf0d5b0748acb162bb909fa04'"
                 + " does not match expected digest"
-                + " 'SHA-256:9ca7e4eaa6e8ae9c7d261167129184883644d7dfba7cbfbc4c8a2e836d5b'"
+                + " 'SHA-256:09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b'"
         );
   }
 
