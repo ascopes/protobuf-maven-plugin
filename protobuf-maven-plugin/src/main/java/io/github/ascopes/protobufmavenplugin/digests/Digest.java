@@ -172,7 +172,14 @@ public final class Digest {
   private static String encodeHex(byte[] data) {
     var sb = new StringBuilder();
     for (var b : data) {
-      sb.append(Integer.toHexString(Byte.toUnsignedInt(b)));
+      // If the hex digit is less than 10 (base10) in value, it will not
+      // have a leading 0, so will be only one digit long and thus produce
+      // broken results.
+      var hexDigit = Integer.toHexString(Byte.toUnsignedInt(b));
+      if (hexDigit.length() == 1) {
+        sb.append('0');
+      }
+      sb.append(hexDigit);
     }
     return sb.toString();
   }
