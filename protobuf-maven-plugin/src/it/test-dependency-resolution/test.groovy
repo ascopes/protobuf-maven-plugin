@@ -34,12 +34,17 @@ Path mainProjectTargetDir = resolve(baseDirectory, "main-project", "target")
 // `test-dependency' output expectations //
 ///////////////////////////////////////////
 
+Path testDependencyGenerateDefaultArchivesDir = testDependencyTargetDir
+    .resolve("protobuf-maven-plugin")
+    // SHA-256 of "\0".join("generate", "default", "archives")
+    .resolve("0a499ddd05c090f574ae588c7326a72fa6b7799765ebd89a7a9450830353312b")
+
 assertThat(testDependencyTargetDir).isDirectory()
 assertThat(resolve(testDependencyTargetDir, "classes", "org", "example", "test", "TestSuite.class"))
     .isRegularFile()
 assertThat(resolve(testDependencyTargetDir, "classes", "org", "example", "test", "test.proto"))
     .isRegularFile()
-assertThat(Files.list(resolve(testDependencyTargetDir, "protobuf-maven-plugin", "generate", "default", "archives")))
+assertThat(Files.list(testDependencyGenerateDefaultArchivesDir))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
@@ -48,17 +53,22 @@ assertThat(Files.list(resolve(testDependencyTargetDir, "protobuf-maven-plugin", 
 // `test-project' output expectations //
 ////////////////////////////////////////
 
+Path testProjectGenerateTestDefaultArchivesDir = testProjectTargetDir
+    .resolve("protobuf-maven-plugin")
+    // SHA-256 of "\0".join("generate-test", "default", "archives")
+    .resolve("0adb9f47535fa69ba04c54f2533a170de99e89478c2513bb0dcc0b6ea5ba3ee5")
+
 assertThat(testProjectTargetDir).isDirectory()
 assertThat(resolve(testProjectTargetDir, "test-classes", "org", "example", "compiler", "Compiler.class"))
     .isRegularFile()
 assertThat(resolve(testProjectTargetDir, "test-classes", "org", "example", "compiler", "compiler.proto"))
     .isRegularFile()
-assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "generate-test", "default", "archives")))
+assertThat(Files.list(testProjectGenerateTestDefaultArchivesDir))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
 // We should include test sources in the test goal execution.
-assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "generate-test", "default", "archives")))
+assertThat(Files.list(testProjectGenerateTestDefaultArchivesDir))
     .withFailMessage { "Expected test-dependency-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("test-dependency-") }
     .hasSize(1)
@@ -67,17 +77,23 @@ assertThat(Files.list(resolve(testProjectTargetDir, "protobuf-maven-plugin", "ge
 // `main-project' output expectations //
 ////////////////////////////////////////
 
+Path mainProjectGenerateDefaultArchivesDir = mainProjectTargetDir
+    .resolve("protobuf-maven-plugin")
+    // SHA-256 of "\0".join("generate", "default", "archives")
+    .resolve("0a499ddd05c090f574ae588c7326a72fa6b7799765ebd89a7a9450830353312b")
+
+
 assertThat(mainProjectTargetDir).isDirectory()
 assertThat(resolve(mainProjectTargetDir,"classes", "org", "example", "compiler", "Compiler.class"))
     .isRegularFile()
 assertThat(resolve(mainProjectTargetDir,"classes", "org", "example", "compiler", "compiler.proto"))
     .isRegularFile()
-assertThat(Files.list(resolve(mainProjectTargetDir, "protobuf-maven-plugin", "generate", "default", "archives")))
+assertThat(Files.list(mainProjectGenerateDefaultArchivesDir))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }
     .hasSize(1)
 // We should exclude test sources in the main goal execution.
-assertThat(Files.list(resolve(mainProjectTargetDir, "protobuf-maven-plugin", "generate", "default", "archives")))
+assertThat(Files.list(mainProjectGenerateDefaultArchivesDir))
     .withFailMessage { "Expected test-dependency-* directory to not be present" }
     .filteredOn { it.getFileName().toString().startsWith("test-dependency-") }
     .isEmpty()

@@ -52,9 +52,8 @@ assertThat(transitiveRuntimeDependenciesRuntimeProto)
 // Compile dependencies are included in the archives directory.
 Path transitiveRuntimeDependenciesArchivesDir = transitiveRuntimeDependencyTargetDir
     .resolve("protobuf-maven-plugin")
-    .resolve("generate")
-    .resolve("default")
-    .resolve("archives")
+    // SHA-256 of "\0".join("generate", "default", "archives")
+    .resolve("0a499ddd05c090f574ae588c7326a72fa6b7799765ebd89a7a9450830353312b")
 
 assertThat(Files.list(transitiveRuntimeDependenciesArchivesDir))
     .withFailMessage { "Expected protobuf-java-* directory to be present" }
@@ -87,9 +86,8 @@ assertThat(projectTargetCompilerProto)
 // Compile dependencies are included in the archives directory.
 Path projectTargetDirArchives = projectTargetDir
     .resolve("protobuf-maven-plugin")
-    .resolve("generate")
-    .resolve("default")
-    .resolve("archives")
+    // SHA-256 of "\0".join("generate", "default", "archives")
+    .resolve("0a499ddd05c090f574ae588c7326a72fa6b7799765ebd89a7a9450830353312b")
 
 assertThat(Files.list(projectTargetDirArchives))
     .filteredOn { it.getFileName().toString().startsWith("protobuf-java-") }

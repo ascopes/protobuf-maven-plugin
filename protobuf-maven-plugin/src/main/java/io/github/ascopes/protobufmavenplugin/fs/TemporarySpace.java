@@ -15,11 +15,15 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -63,18 +67,30 @@ public final class TemporarySpace {
         "unknown-execution-id"
     );
 
+    // Use a digest of the components to make bits from, rather than subdirectories.
+    // This avoids https://bugs.openjdk.org/browse/JDK-8315405 and
+    // https://bugs.openjdk.org/browse/JDK-8315405 on Windows, which effectively limit the
+    // fully qualified path of a Windows executable passed to ProcessBuilder to 260
+    // characters in length... something we easily hit during integration testing, amongst
+    // other things.
+    //
+    // Eventually if OpenJDK fix this, we should revert this change to keep the code easier
+    // to debug for bug reports. For now, it gets us out of a mess though.
+    var subDirectoryBits = Stream
+        .concat(Stream.of(goal, executionId), Stream.of(bits))
+        .toArray(String[]::new);
+    var subDirectoryName = Digest.compute("SHA-256", String.join("\0", subDirectoryBits))
+        .toHexString();
+
     var dir = Path.of(mavenProject.getBuild().getDirectory())
         .resolve(FRAG)
-        // GH-421: Include the execution ID and goal to keep file paths unique
-        // between invocations in multiple goals.
-        .resolve(goal)
-        .resolve(executionId);
+        .resolve(subDirectoryName);
 
-    for (var bit : bits) {
-      dir = dir.resolve(bit);
-    }
-
-    log.trace("Creating temporary directory at '{}' if it does not already exist...", dir);
+    log.trace(
+        "Creating temporary directory at '{}' for fragment <{}> if it does not already exist...",
+        dir,
+        String.join(", ", subDirectoryBits)
+    );
 
     // This should be concurrent-safe as it will not break if the directory already exists unless
     // the directory is instead a regular file.

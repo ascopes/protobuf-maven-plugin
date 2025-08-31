@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -87,15 +88,14 @@ class TemporarySpaceTest {
     var actualPath = temporarySpace.createTemporarySpace("foo", "bar", "baz", id);
 
     // Then
+    var expectedDigestComponent = String.join("\0", goal, executionId, "foo", "bar", "baz", id);
+    var expectedDigestDir = Digest.compute("SHA-256", expectedDigestComponent)
+            .toHexString();
+
     assertThat(actualPath)
         .isEqualTo(tempDir
             .resolve("protobuf-maven-plugin")
-            .resolve(goal)
-            .resolve(executionId)
-            .resolve("foo")
-            .resolve("bar")
-            .resolve("baz")
-            .resolve(id))
+            .resolve(expectedDigestDir))
         .isDirectory();
   }
 
@@ -104,14 +104,12 @@ class TemporarySpaceTest {
   void nothingHappensIfTheTemporaryDirectoryAlreadyExists() throws IOException {
     // Given
     var id = someBasicString();
+    var expectedDigestComponent = String.join("\0", goal, executionId, "foo", "bar", "baz", id);
+    var expectedDigestDir = Digest.compute("SHA-256", expectedDigestComponent)
+        .toHexString();
     var existingPath = tempDir
         .resolve("protobuf-maven-plugin")
-        .resolve(goal)
-        .resolve(executionId)
-        .resolve("foo")
-        .resolve("bar")
-        .resolve("baz")
-        .resolve(id);
+        .resolve(expectedDigestDir);
     Files.createDirectories(existingPath);
 
     // When

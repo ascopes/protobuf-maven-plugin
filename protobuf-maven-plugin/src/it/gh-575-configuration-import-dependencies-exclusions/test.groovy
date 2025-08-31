@@ -33,9 +33,8 @@ Path dependencyDirectory = baseDirectory
     .resolve("channels")
     .resolve("target")
     .resolve("protobuf-maven-plugin")
-    .resolve("generate")
-    .resolve("default")
-    .resolve("archives")
+    // SHA-256 of "\0".join("generate", "default", "archives")
+    .resolve("0a499ddd05c090f574ae588c7326a72fa6b7799765ebd89a7a9450830353312b")
 
 assertThat(dependencyDirectory).isDirectory()
 

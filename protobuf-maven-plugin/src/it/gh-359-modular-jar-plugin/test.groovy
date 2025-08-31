@@ -32,10 +32,16 @@ Path expectedGeneratedFile = baseProjectDir.resolve("some-project")
 Path expectedScriptsDirectory = baseProjectDir.resolve("some-project")
     .resolve("target")
     .resolve("protobuf-maven-plugin")
-    .resolve("generate")
-    .resolve("default")
-    .resolve("plugins")
-    .resolve("jvm")
+    // SHA-256 of "\0".join(
+    //    "generate",
+    //    "default",
+    //    "plugins",
+    //    "jvm",
+    //    "08ce24621df7fd2139fd50dc82690c2638b232a98-0"
+    // )
+    // Where 08ce24621df7fd2139fd50dc82690c2638b232a98 is the SHA-1 digest of the
+    // protoc-plugin-frontend plugin and 0 is the plugin index.
+    .resolve("4b74c1002112236045d985915202761b573d141b1d4d1e152d194b39fc0db86f")
 
 // Verify compilation succeeded but that no JAR was created for the plugin itself.
 assertThat(protocPluginFrontendTargetDir).isDirectory()
@@ -52,10 +58,7 @@ assertThat(expectedGeneratedFile)
     .hasContent("org/example/helloworld.proto")
 
 // Verify we invoked the JVM with a module path.
-assertThat(Files.list(expectedScriptsDirectory))
-    .singleElement(InstanceOfAssertFactories.PATH)
-    .isDirectory()
-    .extracting({ dir -> dir.resolve("args.txt") }, InstanceOfAssertFactories.PATH)
+assertThat(expectedScriptsDirectory.resolve("args.txt"))
     .isRegularFile()
     .content()
     .contains("--module-path")
