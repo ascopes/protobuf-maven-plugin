@@ -904,6 +904,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * or via a property such that any executables are first moved to a directory within this
    * location. This is designed to be able to be used within a Maven profile if desired.
    *
+   * <p>When specified, any executables will be copied to this directory prior to invoking them.
+   * These executables will be located in a nested sub-directory to allow this setting to be
+   * shared across plugin invocations whilst retaining build reproducibility.
+   *
    * @since 3.9.0
    */
   @Parameter(property = "protobuf.sanctioned-executable-path")
