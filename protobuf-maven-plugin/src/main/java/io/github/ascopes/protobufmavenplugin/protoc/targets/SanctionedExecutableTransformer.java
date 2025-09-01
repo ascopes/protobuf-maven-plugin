@@ -80,19 +80,19 @@ public final class SanctionedExecutableTransformer extends AbstractTemporaryLoca
       return protocInvocation;
     }
 
-    sanctionedPath = sanctionedPath
-        .resolve(mavenProject.getGroupId())
-        .resolve(mavenProject.getArtifactId());
-    sanctionedPath = resolveAndCreateDirectory(sanctionedPath);
-
-    Files.createDirectories(sanctionedPath);
-
     log.warn(
         "A user-specified sanctioned execution location of \"{}\" was provided. All executables "
             + "managed by this plugin invocation will be moved to that location. Your "
             + "mileage may vary, and it will be up to you to manage cleaning up this path.",
         sanctionedPath
     );
+
+    sanctionedPath = sanctionedPath
+        .resolve(mavenProject.getGroupId())
+        .resolve(mavenProject.getArtifactId());
+    sanctionedPath = resolveAndCreateDirectory(sanctionedPath);
+
+    Files.createDirectories(sanctionedPath);
 
     return ImmutableProtocInvocation.builder()
         .from(protocInvocation)
