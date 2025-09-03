@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.protoc.targets;
+import java.nio.file.Files
+import java.nio.file.Path
 
-import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
-import org.immutables.value.Value.Derived;
-import org.immutables.value.Value.Immutable;
+Path tempDir = Path.of(System.getProperty("java.io.tmpdir"))
 
-/**
- * Base model for a {@code protoc} target that calls a binary plugin.
- *
- * @author Ashley Scopes
- * @since 3.1.0
- */
-@Immutable
-public interface PluginProtocTarget extends ProtocTarget {
-  ResolvedProtocPlugin getPlugin();
+// We use /tmp for this to work around Windows problems
+// with https://github.com/ascopes/protobuf-maven-plugin/pull/786
+Files.createDirectories(tempDir.resolve("pmp-gh-782-sanctioned-executable-paths"))
 
-  @Derived
-  @Override
-  default int getOrder() {
-    return getPlugin().getOrder();
-  }
-}
+return true

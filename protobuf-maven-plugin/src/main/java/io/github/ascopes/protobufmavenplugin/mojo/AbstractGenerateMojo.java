@@ -62,13 +62,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private static final String DEFAULT_TRUE = "true";
   private static final String DEFAULT_TRANSITIVE = "TRANSITIVE";
 
-  private static final String PROTOBUF_COMPILER_DIGEST = "protobuf.compiler.digest";
-  private static final String PROTOBUF_COMPILER_EXCLUDES = "protobuf.compiler.excludes";
-  private static final String PROTOBUF_COMPILER_INCLUDES = "protobuf.compiler.includes";
-  private static final String PROTOBUF_COMPILER_INCREMENTAL = "protobuf.compiler.incremental";
-  private static final String PROTOBUF_COMPILER_VERSION = "protobuf.compiler.version";
-  private static final String PROTOBUF_SKIP = "protobuf.skip";
-  private static final String PROTOC_ALIAS = "protoc";
+  private static final String COMPILER_VERSION_PROPERTY = "protobuf.compiler.version";
 
   private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
 
@@ -406,7 +400,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.2.0
    */
-  @Parameter(property = PROTOBUF_COMPILER_EXCLUDES)
+  @Parameter(property = "protobuf.compiler.excludes")
   @Nullable List<String> excludes;
 
   /**
@@ -552,7 +546,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.2.0
    */
-  @Parameter(property = PROTOBUF_COMPILER_INCLUDES)
+  @Parameter(property = "protobuf.compiler.includes")
   @Nullable List<String> includes;
 
   /**
@@ -567,7 +561,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.7.0
    */
-  @Parameter(defaultValue = DEFAULT_TRUE, property = PROTOBUF_COMPILER_INCREMENTAL)
+  @Parameter(defaultValue = DEFAULT_TRUE, property = "protobuf.compiler.incremental")
   boolean incrementalCompilation;
 
   /**
@@ -801,7 +795,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 3.5.0
    */
-  @Parameter(property = PROTOBUF_COMPILER_DIGEST)
+  @Parameter(property = "protobuf.compiler.digest")
   @Nullable Digest protocDigest;
 
   /**
@@ -842,9 +836,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 0.0.1
    */
   @Parameter(
-      alias = PROTOC_ALIAS,
+      alias = "protoc",
       required = true,
-      property = PROTOBUF_COMPILER_VERSION
+      property = COMPILER_VERSION_PROPERTY
   )
   String protocVersion;
 
@@ -900,11 +894,31 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean rustEnabled;
 
   /**
+   * Specify a corporate-sanctioned path to run native executables from.
+   *
+   * <p>Most users <strong>SHOULD NOT</strong> specify this.
+   *
+   * <p>If you operate in an overly locked-down corporate environment that disallows running
+   * shell/batch scripts or native executables outside sanctioned locations on your local
+   * file system, you can specify the path here either via this configuration parameter
+   * or via a property such that any executables are first moved to a directory within this
+   * location. This is designed to be able to be used within a Maven profile if desired.
+   *
+   * <p>When specified, any executables will be copied to this directory prior to invoking them.
+   * These executables will be located in a nested sub-directory to allow this setting to be
+   * shared across plugin invocations whilst retaining build reproducibility.
+   *
+   * @since 3.9.0
+   */
+  @Parameter(property = "protobuf.sanctioned-executable-path")
+  @Nullable Path sanctionedExecutablePath;
+
+  /**
    * Whether to skip the plugin execution entirely.
    *
    * @since 2.0.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE, property = PROTOBUF_SKIP)
+  @Parameter(defaultValue = DEFAULT_FALSE, property = "protobuf.skip")
   boolean skip;
 
   /**
@@ -1120,6 +1134,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .protocDigest(protocDigest)
         .protocVersion(protocVersion())
         .registerAsCompilationRoot(registerAsCompilationRoot)
+        .sanctionedExecutablePath(sanctionedExecutablePath)
         .sourceDependencies(nonNullList(sourceDependencies))
         .sourceDescriptorDependencies(nonNullList(sourceDescriptorDependencies))
         .sourceDescriptorPaths(determinePaths(sourceDescriptorPaths, List::of))
@@ -1163,7 +1178,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private String protocVersion() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
-    var overriddenVersion = System.getProperty(PROTOBUF_COMPILER_VERSION);
+    var overriddenVersion = System.getProperty(COMPILER_VERSION_PROPERTY);
     return overriddenVersion == null
         ? requireNonNull(protocVersion, "protocVersion has not been set")
         : overriddenVersion;

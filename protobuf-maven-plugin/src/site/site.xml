@@ -56,22 +56,25 @@
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
       <item name="Requirements" href="requirements.html"/>
-      <item name="Basic Usage" href="basic-usage.html"/>
-      <item name="Additional Language Support" href="additional-language-support.html"/>
-      <item name="Dependencies" href="dependencies.html"/>
-      <item name="Descriptor Files" href="descriptor-files.html"/>
-      <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
-      <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
-      <item name="Examples" href="examples.html"/>
-      <item name="Faster Builds" href="faster-builds.html"/>
       <item name="Known Issues" href="known-issues.html"/>
     </menu>
-    <menu name="Deployments">
-      <item name="Releases" href="https://github.com/ascopes/protobuf-maven-plugin/releases"/>
+    <menu name="Guides">
+      <item name="Basic Usage" href="basic-usage.html"/>
+      <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
+      <item name="Corporate Environments" href="corporate-environents.html"/>
+      <item name="Dependencies" href="dependencies.html"/>
+      <item name="Descriptor Files" href="descriptor-files.html"/>
+      <item name="Examples" href="examples.html"/>
+      <item name="Faster Builds" href="faster-builds.html"/>
+      <item name="Other Language Support" href="other-language-support.html"/>
+      <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
+    </menu>
+    <menu name="Releases">
+      <item name="GitHub" href="https://github.com/ascopes/protobuf-maven-plugin/releases"/>
       <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
     </menu>
     <menu name="Development">
-      <item name="Issue Tracker" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
+      <item name="Issues and Bugs" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
       <item name="Discussions" href="https://github.com/ascopes/protobuf-maven-plugin/discussions"/>
       <item name="Source Code" href="https://github.com/ascopes/protobuf-maven-plugin"/>
       <item name="Code Test Coverage" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>

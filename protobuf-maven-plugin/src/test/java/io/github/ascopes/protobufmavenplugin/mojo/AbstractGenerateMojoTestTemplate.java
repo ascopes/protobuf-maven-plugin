@@ -927,6 +927,43 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.isRegisterAsCompilationRoot()).isEqualTo(value);
   }
 
+  @DisplayName("when ssnctionedExecutablePath is provided, expect it to be set on the request")
+  @Test
+  void whenSanctionedExecutablePathIsProvidedExpectItToBeSetOnTheRequest(
+      @TempDir Path tempDir
+  ) throws Throwable {
+    var expectedSanctionedExecutablePath = Files.createDirectories(tempDir.resolve("some-path"));
+    // Given
+    mojo.sanctionedExecutablePath = expectedSanctionedExecutablePath;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSanctionedExecutablePath())
+        .isEqualTo(expectedSanctionedExecutablePath);
+  }
+
+  @DisplayName("when sanctionedExecutablePath is not provided, expect no path to be used")
+  @Test
+  void whenSanctionedExecutablePathNotProvidedExpectNoFileToBeUsed() throws Throwable {
+    // Given
+    mojo.sanctionedExecutablePath = null;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getSanctionedExecutablePath())
+        .isNull();
+  }
+
   @DisplayName("when sourceDependencies is null, expect an empty list in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
