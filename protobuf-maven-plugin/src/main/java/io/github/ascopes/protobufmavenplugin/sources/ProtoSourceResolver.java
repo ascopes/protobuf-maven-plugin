@@ -54,8 +54,8 @@ import org.slf4j.LoggerFactory;
 @Named
 final class ProtoSourceResolver {
 
-  private static final Set<String> POM_FILE_EXTENSIONS = Set.of(".pom", ".xml");
-  private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".jar", ".zip");
+  private static final Set<String> XML_FILE_EXTENSIONS = Set.of(".pom", ".xml");
+  private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".ear", ".jar", ".war", ".zip");
 
   private static final Logger log = LoggerFactory.getLogger(ProtoSourceResolver.class);
 
@@ -179,12 +179,12 @@ final class ProtoSourceResolver {
       return resolveSourcesWithinArchive(rootPath, filter);
     }
 
-    if (fileExtension.filter(POM_FILE_EXTENSIONS::contains).isPresent()) {
-      log.debug("Ignoring invalid dependency on POM artifact at \"{}\"", rootPath);
+    if (fileExtension.filter(XML_FILE_EXTENSIONS::contains).isPresent()) {
+      log.debug("Ignoring invalid dependency on XML artifact at \"{}\"", rootPath);
       return Optional.empty();
     }
 
-    log.warn("Ignoring unknown archive type at \"{}\"", rootPath);
+    log.warn("Ignoring unknown artifact type at \"{}\"", rootPath);
     return Optional.empty();
   }
 
