@@ -188,13 +188,15 @@
               <failIfNoProjects>true</failIfNoProjects>
               <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
               <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
-              <!-- Set to 1 for now to avoid flaky builds on GitHub. -->
-              <parallelThreads>1</parallelThreads>
+              <parallelThreads>2C</parallelThreads>
               <postBuildHookScript>test</postBuildHookScript>
               <properties>
-                <!-- Acquire locks where-ever we run Maven to avoid parallel tests trampling across eachother. -->
+                <!-- Acquire locks whereever we run Maven to avoid parallel tests trampling across eachother. -->
                 <aether.syncContext.named.factory>file-lock</aether.syncContext.named.factory>
                 <aether.syncContext.named.nameMapper>file-gav</aether.syncContext.named.nameMapper>
+                <!-- Avoid https://bugs.openjdk.org/browse/JDK-8252883 on Windows -->
+                <aether.named.file-lock.attempts>10</aether.named.file-lock.attempts>
+                <aether.named.file-lock.sleepMillis>500</aether.named.file-lock.sleepMillis>
               </properties>
               <setupIncludes>
                 <setupInclude>setup</setupInclude>
