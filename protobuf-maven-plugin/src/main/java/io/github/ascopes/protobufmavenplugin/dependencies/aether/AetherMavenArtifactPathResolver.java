@@ -18,7 +18,12 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
+import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,52 +58,45 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
   private final AetherArtifactMapper aetherArtifactMapper;
   private final AetherDependencyManagement aetherDependencyManagement;
   private final AetherResolver aetherResolver;
+  private final TemporarySpace temporarySpace;
 
   @Inject
   AetherMavenArtifactPathResolver(
       MavenSession mavenSession,
       AetherArtifactMapper aetherArtifactMapper,
       AetherDependencyManagement aetherDependencyManagement,
-      AetherResolver aetherResolver
+      AetherResolver aetherResolver,
+      TemporarySpace temporarySpace
   ) {
     this.mavenSession = mavenSession;
     this.aetherArtifactMapper = aetherArtifactMapper;
     this.aetherDependencyManagement = aetherDependencyManagement;
     this.aetherResolver = aetherResolver;
+    this.temporarySpace = temporarySpace;
   }
 
-  /**
-   * Resolve an artifact and return the path to the artifact on the root file system.
-   *
-   * @param artifact the artifact to resolve.
-   * @return the path to the artifact.
-   * @throws ResolutionException if resolution failed.
-   */
   @Override
-  public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
+  public Path resolveExecutable(MavenArtifact artifact) throws ResolutionException {
     log.debug("Resolving artifact \"{}\"", artifact);
     var unresolvedArtifact = aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(artifact);
     var resolvedArtifact = aetherResolver.resolveRequiredArtifact(unresolvedArtifact);
-    return aetherArtifactMapper.mapEclipseArtifactToPath(resolvedArtifact);
-  }
+    var originalPath = aetherArtifactMapper.mapEclipseArtifactToPath(resolvedArtifact);
 
-  /**
-   * Resolve a collection of artifacts and return the paths to those artifacts and their
-   * dependencies on the root file system
-   *
-   * @param artifacts                 the artifacts to resolve.
-   * @param depth                     the default preference for how to resolve transitive
-   *                                  dependencies.
-   * @param dependencyScopes          the scopes of dependencies to resolve -- anything not in this
-   *                                  set is ignored.
-   * @param includeProjectArtifacts   whether to also pull the project dependencies in the current
-   *                                  MavenProject and include those in the result as well.
-   * @param failOnInvalidDependencies if true, invalid or unresolvable dependencies result in an
-   *                                  exception being raised. If false, a best effort attempt to
-   *                                  ignore the dependencies is made.
-   * @return the paths to the artifacts, in the order they were provided.
-   * @throws ResolutionException if resolution failed.
-   */
+    // GH-792: make a copy and set that as executable rather than changing what is in the
+    // repository, as this is racy between concurrent builds and deemed to be unsafe.
+    var finalPath = temporarySpace.createTemporarySpace("artifacts")
+        .resolve(Digest.compute("SHA-1", artifact.toString()).toHexString() + ".exe");
+
+    try {
+      log.debug("Copying \"{}\" to \"{}\" and making executable", originalPath, finalPath);
+      Files.copy(originalPath, finalPath);
+      FileUtils.makeExecutable(finalPath);
+    } catch (IOException ex) {
+      throw new ResolutionException("Failed to process downloaded artifact " + artifact, ex);
+    }
+
+    return finalPath;
+  }
 
   @Override
   public List<Path> resolveDependencies(

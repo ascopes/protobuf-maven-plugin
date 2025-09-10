@@ -116,24 +116,13 @@ public final class ProtocResolver {
       }
     }
 
-    try {
-      FileUtils.makeExecutable(resolvedPath);
-
-    } catch (IOException ex) {
-      throw new ResolutionException(
-          "Failed to set executable bit on protoc binary at \"" + resolvedPath
-              + "\": " + ex,
-          ex
-      );
-    }
-
     return path;
   }
 
   private Optional<Path> resolveFromUri(String uriString) throws ResolutionException {
     try {
       var uri = new URI(uriString);
-      return urlResourceFetcher.fetchFileFromUri(uri, ".exe");
+      return urlResourceFetcher.fetchFileFromUri(uri, ".exe", true);
     } catch (URISyntaxException ex) {
       throw new ResolutionException("Failed to parse URI \"" + uriString + "\"", ex);
     }
@@ -161,6 +150,6 @@ public final class ProtocResolver {
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
-    return Optional.of(artifactPathResolver.resolveArtifact(artifact));
+    return Optional.of(artifactPathResolver.resolveExecutable(artifact));
   }
 }
