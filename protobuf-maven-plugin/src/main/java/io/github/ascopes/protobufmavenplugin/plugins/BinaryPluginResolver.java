@@ -108,8 +108,7 @@ final class BinaryPluginResolver {
     plugin = pluginBuilder.build();
 
     log.debug("Resolving Maven protoc plugin {}", plugin);
-    var path = artifactPathResolver.resolveArtifact(plugin);
-    makeExecutable(path);
+    var path = artifactPathResolver.resolveExecutable(plugin);
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
   }
 
@@ -138,7 +137,7 @@ final class BinaryPluginResolver {
   ) throws ResolutionException {
     log.debug("Resolving URL protoc plugin {}", plugin);
 
-    var maybePath = urlResourceFetcher.fetchFileFromUri(plugin.getUrl(), ".exe");
+    var maybePath = urlResourceFetcher.fetchFileFromUri(plugin.getUrl(), ".exe", true);
 
     if (maybePath.isEmpty() && plugin.isOptional()) {
       return Optional.empty();
@@ -160,8 +159,6 @@ final class BinaryPluginResolver {
         );
       }
     }
-
-    makeExecutable(path);
 
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
   }
