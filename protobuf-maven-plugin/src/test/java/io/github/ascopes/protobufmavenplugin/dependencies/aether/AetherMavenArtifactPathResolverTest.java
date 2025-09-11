@@ -75,9 +75,9 @@ class AetherMavenArtifactPathResolverTest {
   @InjectMocks
   AetherMavenArtifactPathResolver resolver;
 
-  @DisplayName(".resolveArtifact(...) resolves the artifact")
+  @DisplayName(".resolveExecutable(...) resolves the artifact")
   @Test
-  void resolveArtifactResolvesTheArtifact() throws ResolutionException {
+  void resolveExecutableResolvesTheArtifact() throws ResolutionException {
     // Given
     var inputArtifact = mock(MavenArtifact.class);
     var unresolvedArtifact = mock(Artifact.class);
@@ -92,7 +92,7 @@ class AetherMavenArtifactPathResolverTest {
         .thenReturn(path);
 
     // When
-    var resolvedPath = resolver.resolveArtifact(inputArtifact);
+    var resolvedPath = resolver.resolveExecutable(inputArtifact);
 
     // Then
     assertThat(resolvedPath).isSameAs(path);
