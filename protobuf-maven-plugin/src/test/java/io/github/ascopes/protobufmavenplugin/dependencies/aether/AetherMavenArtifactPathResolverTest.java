@@ -103,6 +103,7 @@ class AetherMavenArtifactPathResolverTest {
   @Test
   void resolveExecutableResolvesTheArtifact() throws ResolutionException, IOException {
     // Given
+    var artifactId = "someArtifactId-" + someBasicString();
     var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
     var unresolvedArtifact = mock(Artifact.class);
     var resolvedArtifact = mock(Artifact.class);
@@ -111,6 +112,8 @@ class AetherMavenArtifactPathResolverTest {
         "Some expected binary content here " + someBasicString()
     );
 
+    when(inputArtifact.getArtifactId())
+        .thenReturn(artifactId);
     when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
         .thenReturn(unresolvedArtifact);
     when(aetherResolver.resolveRequiredArtifact(any()))
@@ -118,8 +121,11 @@ class AetherMavenArtifactPathResolverTest {
     when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
         .thenReturn(originalPath);
 
-    var expectedFileName = Digest.compute("SHA-1", inputArtifact.toString())
-        .toHexString() + ".exe";
+    var expectedFileName = artifactId
+        + "-"
+        + Digest.compute("SHA-1", inputArtifact.toString())
+        .toHexString()
+        + ".exe";
 
     // When
     var resolvedPath = resolver.resolveExecutable(inputArtifact);
@@ -141,6 +147,7 @@ class AetherMavenArtifactPathResolverTest {
   void resolveExecutableResolvesTheArtifactWhenAlreadyPresent()
       throws ResolutionException, IOException {
     // Given
+    var artifactId = "someArtifactId-" + someBasicString();
     var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
     var unresolvedArtifact = mock(Artifact.class);
     var resolvedArtifact = mock(Artifact.class);
@@ -149,6 +156,8 @@ class AetherMavenArtifactPathResolverTest {
         "Some expected binary content here " + someBasicString()
     );
 
+    when(inputArtifact.getArtifactId())
+        .thenReturn(artifactId);
     when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
         .thenReturn(unresolvedArtifact);
     when(aetherResolver.resolveRequiredArtifact(any()))
@@ -156,8 +165,11 @@ class AetherMavenArtifactPathResolverTest {
     when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
         .thenReturn(originalPath);
 
-    var expectedFileName = Digest.compute("SHA-1", inputArtifact.toString())
-        .toHexString() + ".exe";
+    var expectedFileName = artifactId
+        + "-"
+        + Digest.compute("SHA-1", inputArtifact.toString())
+        .toHexString()
+        + ".exe";
 
     // Given some file is already in the location... we don't expect this to fail.
     Files.writeString(temporarySpacePath.resolve(expectedFileName), "some garbage I don't want");
