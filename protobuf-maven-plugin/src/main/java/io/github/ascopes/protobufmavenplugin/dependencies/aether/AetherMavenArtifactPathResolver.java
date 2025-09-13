@@ -85,8 +85,9 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
 
     // GH-792: make a copy and set that as executable rather than changing what is in the
     // repository, as this is racy between concurrent builds and deemed to be unsafe.
+    var digestPart = Digest.compute("SHA-1", artifact.toString()).toHexString();
     var finalPath = temporarySpace.createTemporarySpace("artifacts")
-        .resolve(Digest.compute("SHA-1", artifact.toString()).toHexString() + ".exe");
+        .resolve(artifact.getArtifactId() + "-" + digestPart + ".exe");
 
     try {
       log.debug("Copying \"{}\" to \"{}\" and making executable", originalPath, finalPath);
