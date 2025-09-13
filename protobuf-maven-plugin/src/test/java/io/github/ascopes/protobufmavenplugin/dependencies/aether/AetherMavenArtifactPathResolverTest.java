@@ -136,6 +136,47 @@ class AetherMavenArtifactPathResolverTest {
     verifyNoMoreInteractions(aetherArtifactMapper, aetherResolver);
   }
 
+  @DisplayName(".resolveExecutable(...) resolves the artifact if already present")
+  @Test
+  void resolveExecutableResolvesTheArtifactWhenAlreadyPresent()
+      throws ResolutionException, IOException {
+    // Given
+    var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
+    var unresolvedArtifact = mock(Artifact.class);
+    var resolvedArtifact = mock(Artifact.class);
+    var originalPath = Files.writeString(
+        tempDir.resolve("some-artifact.exe"),
+        "Some expected binary content here " + someBasicString()
+    );
+
+    when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
+        .thenReturn(unresolvedArtifact);
+    when(aetherResolver.resolveRequiredArtifact(any()))
+        .thenReturn(resolvedArtifact);
+    when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
+        .thenReturn(originalPath);
+
+    var expectedFileName = Digest.compute("SHA-1", inputArtifact.toString())
+        .toHexString() + ".exe";
+
+    // Given some file is already in the location... we don't expect this to fail.
+    Files.writeString(temporarySpacePath.resolve(expectedFileName), "some garbage I don't want");
+
+    // When
+    var resolvedPath = resolver.resolveExecutable(inputArtifact);
+
+    // Then
+    assertThat(resolvedPath)
+        .isEqualTo(temporarySpacePath.resolve(expectedFileName))
+        .hasSameBinaryContentAs(originalPath)
+        .isExecutable();
+
+    verify(aetherArtifactMapper).mapPmpArtifactToEclipseArtifact(inputArtifact);
+    verify(aetherResolver).resolveRequiredArtifact(unresolvedArtifact);
+    verify(aetherArtifactMapper).mapEclipseArtifactToPath(resolvedArtifact);
+    verifyNoMoreInteractions(aetherArtifactMapper, aetherResolver);
+  }
+
   @DisplayName("resolveDependencies(...) without project artifacts resolves the dependencies")
   @MethodSource("resolveDependenciesParams")
   @ParameterizedTest(name = "{argumentSetName}")
