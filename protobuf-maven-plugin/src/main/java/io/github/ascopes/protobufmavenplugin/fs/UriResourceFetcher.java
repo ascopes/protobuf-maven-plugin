@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.fs;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.io.BufferedInputStream;
@@ -89,7 +90,11 @@ public final class UriResourceFetcher {
    *     resource.
    * @throws ResolutionException if resolution fails for any other reason.
    */
-  public Optional<Path> fetchFileFromUri(URI uri, String extension) throws ResolutionException {
+  public Optional<Path> fetchFileFromUri(
+      URI uri,
+      String extension,
+      boolean setExecutable
+  ) throws ResolutionException {
     if (mavenSession.isOffline()) {
       var isInvalidOfflineProtocol = OFFLINE_PROTOCOLS.stream()
           .noneMatch(uri.toString()::startsWith);
@@ -103,31 +108,18 @@ public final class UriResourceFetcher {
       }
     }
 
-    // This will die if the URI points to a file on the non default file system...
-    // probably don't care enough to fix this bug as users should not ever want to do this I guess.
-    return "file".equals(uri.getScheme())
-        ? handleFileSystemUri(uri)
-        : handleOtherUri(uri, extension);
+    // Prior to GH-782, we handled local files differently, returning the original path to avoid
+    // a copy on each invocation. This has been simplified to be treated in the same way as any
+    // other URI so we can correctly enforce executable bits on the file if required without
+    // modifying files outside the current build.
+    return fetchFileFromUriOnline(uri, extension, setExecutable);
   }
 
-  private Optional<Path> handleFileSystemUri(URI uri) throws ResolutionException {
-    try {
-      var result = Optional.of(uri)
-          .map(Path::of)
-          .filter(Files::exists);
-
-      result.ifPresentOrElse(
-          path -> log.debug("Resolved \"{}\" to \"{}\"", uri, path),
-          () -> log.warn("No resource was found at \"{}\" ", uri)
-      );
-
-      return result;
-    } catch (Exception ex) {
-      throw new ResolutionException("Failed to discover file at \"" + uri + "\": " + ex, ex);
-    }
-  }
-
-  private Optional<Path> handleOtherUri(URI uri, String extension) throws ResolutionException {
+  private Optional<Path> fetchFileFromUriOnline(
+      URI uri,
+      String extension,
+      boolean setExecutable
+  ) throws ResolutionException {
     var url = parseUrlWithAnyHandler(uri);
     // We have to pass a URL in here, since URIs do not parse the !/ fragments at the ends of
     // strings correctly...
@@ -158,6 +150,10 @@ public final class UriResourceFetcher {
 
       var fileSize = Files.size(targetFile);
       log.info("Transferred \"{}\" to \"{}\" ({})", uri, StringUtils.pluralize(fileSize, "byte"));
+
+      if (setExecutable) {
+        FileUtils.makeExecutable(targetFile);
+      }
 
       return Optional.of(targetFile);
 
