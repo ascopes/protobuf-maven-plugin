@@ -47,6 +47,8 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -133,6 +135,10 @@ class UriResourceFetcherTest {
         .isEqualTo(Files.readString(file));
   }
 
+  @DisabledOnOs(
+      disabledReason = "Windows does not support POSIX permission bits",
+      value = OS.WINDOWS
+  )
   @DisplayName("the executable bit is set on files when requested")
   @ValueSource(booleans = {true, false})
   @ParameterizedTest(name = "when setExecutable = {0}")
