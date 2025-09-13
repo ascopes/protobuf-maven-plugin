@@ -25,6 +25,7 @@ import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -89,7 +90,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
 
     try {
       log.debug("Copying \"{}\" to \"{}\" and making executable", originalPath, finalPath);
-      Files.copy(originalPath, finalPath);
+      Files.copy(originalPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
       FileUtils.makeExecutable(finalPath);
     } catch (IOException ex) {
       throw new ResolutionException("Failed to process downloaded artifact " + artifact, ex);
