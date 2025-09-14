@@ -149,7 +149,12 @@ public final class UriResourceFetcher {
       }
 
       var fileSize = Files.size(targetFile);
-      log.info("Transferred \"{}\" to \"{}\" ({})", uri, StringUtils.pluralize(fileSize, "byte"));
+      log.info(
+          "Transferred \"{}\" to \"{}\" ({})", 
+          uri, 
+          targetFile, 
+          StringUtils.pluralize(fileSize, "byte")
+      );
 
       if (setExecutable) {
         FileUtils.makeExecutable(targetFile);
