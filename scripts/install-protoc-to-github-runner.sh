@@ -18,10 +18,14 @@ version=$(./mvnw help:evaluate -Dexpression=protobuf.version -DforceStdout=true 
 
 echo "Checking OS and CPU..."
 
-case "$(uname)" in
-  Linux)
+lower() {
+  tr '[:upper:]' '[:lower:]'
+}
+
+case "$(uname | lower)" in
+  linux*)
     readonly os_name=linux
-    case "$(uname -m)" in
+    case "$(uname -m | lower)" in
       aarch64)
         readonly os_arch=aarch_64
         ;;
@@ -30,10 +34,10 @@ case "$(uname)" in
         ;;
     esac
     ;;
-  Darwin)
+  darwin*)
     # Only support for aarch64 in new macOS versions.
     readonly os_name=osx
-    case "$(uname -m)" in
+    case "$(uname -m | lower)" in
       aarch64)
         readonly os_arch=aarch_64
         ;;
@@ -42,11 +46,15 @@ case "$(uname)" in
         ;;
     esac
     ;;
-  *)
+  windows*|mingw*)
     # No arm64 version available, we assume Prism on ARM for Windows will
     # correctly translate this.
     readonly os_name=windows
     readonly os_arch=x86_64
+    ;;
+  *)
+    echo "ERROR: unknown platform '$(uname)' ($(uname -a))" >&2
+    exit 2
     ;;
 esac
 

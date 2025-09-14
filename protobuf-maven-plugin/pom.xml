@@ -173,6 +173,32 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
 
+        <configuration>
+          <addTestClassPath>true</addTestClassPath>
+          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+          <failIfNoProjects>true</failIfNoProjects>
+          <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
+          <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
+          <parallelThreads>2C</parallelThreads>
+          <postBuildHookScript>test</postBuildHookScript>
+          <properties>
+            <!-- Acquire locks whereever we run Maven to avoid parallel tests trampling across eachother. -->
+            <aether.syncContext.named.factory>file-lock</aether.syncContext.named.factory>
+            <aether.syncContext.named.nameMapper>file-gav</aether.syncContext.named.nameMapper>
+            <!-- Avoid https://bugs.openjdk.org/browse/JDK-8252883 on Windows -->
+            <aether.named.file-lock.attempts>10</aether.named.file-lock.attempts>
+            <aether.named.file-lock.sleepMillis>500</aether.named.file-lock.sleepMillis>
+          </properties>
+          <setupIncludes>
+            <setupInclude>setup</setupInclude>
+          </setupIncludes>
+          <settingsFile>${project.basedir}/src/it/settings.xml</settingsFile>
+          <showErrors>true</showErrors>
+          <streamLogs>false</streamLogs>
+          <streamLogsOnFailures>true</streamLogsOnFailures>
+          <writeJunitReport>true</writeJunitReport>
+        </configuration>
+
         <executions>
           <execution>
             <id>integration-test</id>
@@ -181,32 +207,6 @@
               <goal>install</goal>
               <goal>run</goal>
             </goals>
-
-            <configuration>
-              <addTestClassPath>true</addTestClassPath>
-              <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-              <failIfNoProjects>true</failIfNoProjects>
-              <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
-              <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
-              <parallelThreads>2C</parallelThreads>
-              <postBuildHookScript>test</postBuildHookScript>
-              <properties>
-                <!-- Acquire locks whereever we run Maven to avoid parallel tests trampling across eachother. -->
-                <aether.syncContext.named.factory>file-lock</aether.syncContext.named.factory>
-                <aether.syncContext.named.nameMapper>file-gav</aether.syncContext.named.nameMapper>
-                <!-- Avoid https://bugs.openjdk.org/browse/JDK-8252883 on Windows -->
-                <aether.named.file-lock.attempts>10</aether.named.file-lock.attempts>
-                <aether.named.file-lock.sleepMillis>500</aether.named.file-lock.sleepMillis>
-              </properties>
-              <setupIncludes>
-                <setupInclude>setup</setupInclude>
-              </setupIncludes>
-              <settingsFile>${project.basedir}/src/it/settings.xml</settingsFile>
-              <showErrors>true</showErrors>
-              <streamLogs>false</streamLogs>
-              <streamLogsOnFailures>true</streamLogsOnFailures>
-              <writeJunitReport>true</writeJunitReport>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -325,13 +325,61 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-invoker-plugin</artifactId>
-              <version>${maven-invoker-plugin.version}</version>
               <configuration>
                 <invokerPropertiesFile>invoker-path-protoc.properties</invokerPropertiesFile>
               </configuration>
             </plugin>
           </plugins>
         </pluginManagement>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- Attempt to use a shorter path name for tests on Windows so that we do not get
+           failures from hitting path length limits. -->
+      <id>invoker-windows-workaround</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+
+      <properties>
+        <invoker-project-path-override>${java.io.tmpdir}/pmp-it</invoker-project-path-override>
+      </properties>
+      
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>clean-windows-invoker-path</id>
+                <phase>clean</phase>
+                <goals>
+                  <goal>clean</goal>
+                </goals>
+                <configuration>
+                  <filesets>
+                    <fileset>
+                      <directory>${invoker-project-path-override}</directory>
+                      <useDefaultExcludes>false</useDefaultExcludes>
+                    </fileset>
+                  </filesets>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-invoker-plugin</artifactId>
+            <configuration>
+              <cloneProjectsTo>${invoker-project-path-override}</cloneProjectsTo>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>

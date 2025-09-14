@@ -101,6 +101,19 @@
   </dependencyManagement>
 
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+
+        <configuration>
+          <!-- Avoid invoker confusing checkstyle about config locations -->
+          <configLocation>@project.basedir@/../.mvn/checkstyle/checkstyle.xml</configLocation>
+          <suppressionsLocation>@project.basedir@/../.mvn/checkstyle/suppressions.xml</suppressionsLocation>    
+        </configuration>
+      </plugin>
+    </plugins>
+  
     <pluginManagement>
       <plugins>
         <plugin>
