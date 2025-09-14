@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.fs;
+package io.github.ascopes.protobufmavenplugin.urls;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,7 +30,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * point because the URL class is hardcoded to only consider the system classloader. Since Maven
  * uses ClassWorlds to run multiple classloaders for each plugin and component, we will not be
  * loaded as part of that default classloader. By deferring this operation to as late as possible
- * (i.e. in {@link io.github.ascopes.protobufmavenplugin.fs.UriResourceFetcher}), we can
+ * (i.e. in {@link UriResourceFetcher}), we can
  * ensure we provide the desired URL handler directly instead. This allows us to hook custom URL
  * handlers in via {@link java.util.ServiceLoader} dynamically, like we would be able to outside a
  * Maven plugin running in Plexus.
