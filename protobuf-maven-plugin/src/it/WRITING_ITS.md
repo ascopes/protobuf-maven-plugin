@@ -9,6 +9,11 @@ to capture code coverage.
 All test POMs inherit the `setup/pom.xml` project which acts as the base for defining common 
 versions across all projects. This keeps various concerns simple when updating dependencies.
 
+Note that Windows has very strict file name length limits, and the invoker configuration can result
+in paths that breach this limit, causing builds to spuriously fail. To avoid this, on Windows,
+we run all invoker tests within the user's temporary directory. Be mindful of this when naming
+the test cases.
+
 ## Invocation
 
 To run all integration tests, run:

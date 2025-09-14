@@ -36,11 +36,13 @@ public interface MavenArtifactPathResolver {
   /**
    * Resolve a single Maven artifact directly, and do not resolve any transitive dependencies.
    *
+   * <p>The executable bit will be set on the resulting path.
+   *
    * @param artifact the artifact to resolve.
    * @return the path to the resolved artifact.
    * @throws ResolutionException if resolution fails in the backend.
    */
-  Path resolveArtifact(MavenArtifact artifact) throws ResolutionException;
+  Path resolveExecutable(MavenArtifact artifact) throws ResolutionException;
 
   /**
    * Resolve all given dependencies based on their resolution depth semantics.

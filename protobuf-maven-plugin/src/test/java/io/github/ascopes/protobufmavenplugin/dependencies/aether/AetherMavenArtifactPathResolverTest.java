@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.oneOf;
+import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
@@ -30,7 +31,11 @@ import static org.mockito.Mockito.when;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,20 +50,28 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.graph.Dependency;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 @DisplayName("AetherMavenArtifactPathResolver tests")
 @ExtendWith(MockitoExtension.class)
 class AetherMavenArtifactPathResolverTest {
+
+  @TempDir
+  Path tempDir;
+
+  Path temporarySpacePath;
 
   @Mock
   MavenSession mavenSession;
@@ -72,30 +85,104 @@ class AetherMavenArtifactPathResolverTest {
   @Mock
   AetherResolver aetherResolver;
 
+  @Mock(strictness = Strictness.LENIENT)
+  TemporarySpace temporarySpace;
+
   @InjectMocks
   AetherMavenArtifactPathResolver resolver;
 
-  @DisplayName(".resolveArtifact(...) resolves the artifact")
+  @BeforeEach
+  void setUp() throws IOException {
+    temporarySpacePath = Files.createDirectories(tempDir.resolve("temporary-space"));
+
+    when(temporarySpace.createTemporarySpace(any(String[].class)))
+        .thenReturn(temporarySpacePath);
+  }
+
+  @DisplayName(".resolveExecutable(...) resolves the artifact")
   @Test
-  void resolveArtifactResolvesTheArtifact() throws ResolutionException {
+  void resolveExecutableResolvesTheArtifact() throws ResolutionException, IOException {
     // Given
-    var inputArtifact = mock(MavenArtifact.class);
+    var artifactId = "someArtifactId-" + someBasicString();
+    var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
     var unresolvedArtifact = mock(Artifact.class);
     var resolvedArtifact = mock(Artifact.class);
-    var path = mock(Path.class);
+    var originalPath = Files.writeString(
+        tempDir.resolve("some-artifact.exe"),
+        "Some expected binary content here " + someBasicString()
+    );
 
+    when(inputArtifact.getArtifactId())
+        .thenReturn(artifactId);
     when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
         .thenReturn(unresolvedArtifact);
     when(aetherResolver.resolveRequiredArtifact(any()))
         .thenReturn(resolvedArtifact);
     when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
-        .thenReturn(path);
+        .thenReturn(originalPath);
+
+    var expectedFileName = artifactId
+        + "-"
+        + Digest.compute("SHA-1", inputArtifact.toString())
+        .toHexString()
+        + ".exe";
 
     // When
-    var resolvedPath = resolver.resolveArtifact(inputArtifact);
+    var resolvedPath = resolver.resolveExecutable(inputArtifact);
 
     // Then
-    assertThat(resolvedPath).isSameAs(path);
+    assertThat(resolvedPath)
+        .isEqualTo(temporarySpacePath.resolve(expectedFileName))
+        .hasSameBinaryContentAs(originalPath)
+        .isExecutable();
+
+    verify(aetherArtifactMapper).mapPmpArtifactToEclipseArtifact(inputArtifact);
+    verify(aetherResolver).resolveRequiredArtifact(unresolvedArtifact);
+    verify(aetherArtifactMapper).mapEclipseArtifactToPath(resolvedArtifact);
+    verifyNoMoreInteractions(aetherArtifactMapper, aetherResolver);
+  }
+
+  @DisplayName(".resolveExecutable(...) resolves the artifact if already present")
+  @Test
+  void resolveExecutableResolvesTheArtifactWhenAlreadyPresent()
+      throws ResolutionException, IOException {
+    // Given
+    var artifactId = "someArtifactId-" + someBasicString();
+    var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
+    var unresolvedArtifact = mock(Artifact.class);
+    var resolvedArtifact = mock(Artifact.class);
+    var originalPath = Files.writeString(
+        tempDir.resolve("some-artifact.exe"),
+        "Some expected binary content here " + someBasicString()
+    );
+
+    when(inputArtifact.getArtifactId())
+        .thenReturn(artifactId);
+    when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
+        .thenReturn(unresolvedArtifact);
+    when(aetherResolver.resolveRequiredArtifact(any()))
+        .thenReturn(resolvedArtifact);
+    when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
+        .thenReturn(originalPath);
+
+    var expectedFileName = artifactId
+        + "-"
+        + Digest.compute("SHA-1", inputArtifact.toString())
+        .toHexString()
+        + ".exe";
+
+    // Given some file is already in the location... we don't expect this to fail.
+    Files.writeString(temporarySpacePath.resolve(expectedFileName), "some garbage I don't want");
+
+    // When
+    var resolvedPath = resolver.resolveExecutable(inputArtifact);
+
+    // Then
+    assertThat(resolvedPath)
+        .isEqualTo(temporarySpacePath.resolve(expectedFileName))
+        .hasSameBinaryContentAs(originalPath)
+        .isExecutable();
+
     verify(aetherArtifactMapper).mapPmpArtifactToEclipseArtifact(inputArtifact);
     verify(aetherResolver).resolveRequiredArtifact(unresolvedArtifact);
     verify(aetherArtifactMapper).mapEclipseArtifactToPath(resolvedArtifact);
