@@ -19,13 +19,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.List;
-import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  */
 abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHandlerFactory {
 
-  private final Set<String> protocols;
+  private final List<String> protocols;
   private final boolean archive;
   private final UrlFactory urlFactory;
   private final DecoratingUrlStreamHandlerImpl streamHandler;
@@ -52,7 +52,7 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
       throw new IllegalStateException("At least one protocol is required");
     }
 
-    this.protocols = Set.copyOf(List.of(protocols));
+    this.protocols = List.of(protocols);
     this.archive = archive;
     this.urlFactory = urlFactory;
     streamHandler = new DecoratingUrlStreamHandlerImpl();
@@ -60,10 +60,9 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
 
   @Override
   public final @Nullable URLStreamHandler createURLStreamHandler(String protocol) {
-    if (protocols.contains(protocol)) {
-      return streamHandler;
-    }
-    return null;
+    return protocols.contains(protocol)
+        ? streamHandler
+        : null;
   }
 
   protected abstract InputStream decorateInputStream(
@@ -71,6 +70,9 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
       @Nullable String file
   ) throws IOException;
 
+  /**
+   * Stream handler. Parses URLs and yields a URL connection.
+   */
   private final class DecoratingUrlStreamHandlerImpl extends URLStreamHandler {
 
     @Override
@@ -101,6 +103,10 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
     }
   }
 
+  /**
+   * Decorative URL connection that wraps another URL connection, applying
+   * additional transformitive logic.
+   */
   private final class DecoratingUrlConnection extends URLConnection {
 
     private final @Nullable String file;
@@ -117,24 +123,51 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
 
     @Override
     public void connect() throws IOException {
-      if (innerUrlConnection == null) {
-        innerUrlConnection = innerUrl.openConnection();
-        innerUrlConnection.connect();
-        connected = true;
+      if (connected) {
+        return;
       }
+
+      innerUrlConnection = innerUrl.openConnection();
+
+      // Copy any settings across prior to connecting.
+      innerUrlConnection.setAllowUserInteraction(getAllowUserInteraction());
+      innerUrlConnection.setConnectTimeout(getConnectTimeout());
+      innerUrlConnection.setDoInput(getDoInput());
+      innerUrlConnection.setDoOutput(getDoOutput());
+      innerUrlConnection.setIfModifiedSince(getIfModifiedSince());
+      innerUrlConnection.setReadTimeout(getReadTimeout());
+      innerUrlConnection.setUseCaches(getUseCaches());
+      getRequestProperties().forEach((key, values) ->
+          values.forEach(value -> innerUrlConnection.addRequestProperty(key, value)));
+
+      // Handshake.
+      innerUrlConnection.connect();
+      connected = true;
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
-      var innerUrlConnection = requireNonNull(this.innerUrlConnection);
+      var innerUrlConnection = requireNonNull(this.innerUrlConnection, "not connected");
 
       try {
         return decorateInputStream(innerUrlConnection.getInputStream(), file);
       } catch (IOException ex) {
-        // Clean up, we're in a bad state and cannot continue.
+        // Clean up, we're in a bad state and cannot continue, and we do not
+        // want to abandon any resources.
         innerUrlConnection.getInputStream().close();
-        throw ex;
+        throw new IOException(
+            "Failed to wrap input stream with protocol "
+                + protocols.iterator().next()
+                + ": "
+                + ex,
+            ex
+        );
       }
+    }
+
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+      return requireNonNull(this.innerUrlConnection, "not connected").getOutputStream();
     }
   }
 
