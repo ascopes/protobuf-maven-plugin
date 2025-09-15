@@ -35,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * data.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 3.10.0
  */
 final class ArchiveUrlStreamHandlerFactory
     extends AbstractDecoratingUrlStreamHandlerFactory {

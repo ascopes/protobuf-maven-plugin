@@ -24,7 +24,7 @@ import java.io.InputStream;
  *
  * @param <I> the returned input stream type.
  * @author Ashley Scopes
- * @since TBC
+ * @since 3.10.0
  */
 @FunctionalInterface
 interface InputStreamDecorator<I extends InputStream> {

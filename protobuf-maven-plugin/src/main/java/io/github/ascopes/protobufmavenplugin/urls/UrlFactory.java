@@ -41,7 +41,7 @@ import org.apache.maven.execution.scope.MojoExecutionScoped;
  * <p>Any implementations are expected to be injected via CDI.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 3.10.0
  */
 @MojoExecutionScoped
 @Named
