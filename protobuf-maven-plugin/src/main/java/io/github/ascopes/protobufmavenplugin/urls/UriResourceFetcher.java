@@ -175,7 +175,6 @@ public final class UriResourceFetcher {
     // On Windows, we can evem crash JUnit because of this!
     // See https://github.com/junit-team/junit5/issues/4567
     conn.setUseCaches(false);
-
     conn.setConnectTimeout(TIMEOUT);
     conn.setReadTimeout(TIMEOUT);
     conn.setAllowUserInteraction(false);

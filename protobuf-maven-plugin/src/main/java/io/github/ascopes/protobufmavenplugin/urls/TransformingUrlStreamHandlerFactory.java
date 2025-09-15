@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * {@link java.net.URLConnection}s, effectively transforming the data format.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 3.10.0
  */
 final class TransformingUrlStreamHandlerFactory
     extends AbstractDecoratingUrlStreamHandlerFactory {

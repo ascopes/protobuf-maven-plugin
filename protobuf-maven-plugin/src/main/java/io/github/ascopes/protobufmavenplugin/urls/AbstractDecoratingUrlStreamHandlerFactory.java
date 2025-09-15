@@ -34,7 +34,7 @@ import org.jspecify.annotations.Nullable;
  * {@link InputStream}.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 3.10.0
  */
 abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHandlerFactory {
 
@@ -59,8 +59,7 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
   }
 
   @Override
-  @Nullable
-  public final URLStreamHandler createURLStreamHandler(String protocol) {
+  public final @Nullable URLStreamHandler createURLStreamHandler(String protocol) {
     if (protocols.contains(protocol)) {
       return streamHandler;
     }
