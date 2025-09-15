@@ -68,6 +68,7 @@
       <item name="Known Issues" href="known-issues.html"/>
       <item name="Other Language Support" href="other-language-support.html"/>
       <item name="Requirements" href="requirements.html"/>
+      <item name="URL Support" href="url-support.html"/>
       <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
     </menu>
     <menu name="Releases">
