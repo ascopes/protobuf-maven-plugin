@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 /**
- * URL provider implementations and URL fetching facilities.
+ * URL provider implementations and URL fetching facilities
+ *
+ * <p>An unfortunate side effect of how ClassWorlds and the URL handler
+ * implementations work is that we have to handle custom provider implementations
+ * in a bespoke factory pattern. This is due to the fact URL's SPI only respects
+ * the default classloader, and we are actively operating in a shared environment
+ * that is pre-configured at runtime.
+ *
+ * <p>As a result, much of this machinary could be mistaken for reinventing the
+ * wheel, but this is totally intentional by design to avoid edge cases or
+ * mutating the Maven enviromment outside the bounds of this specific plugin.
  */
 package io.github.ascopes.protobufmavenplugin.urls;
+
