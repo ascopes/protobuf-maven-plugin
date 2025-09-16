@@ -11,15 +11,27 @@ set -o nounset
 min_indent=
 lines=()
 while IFS=$'\n' read -r line; do
-  line=$(expand -t2 <<< "${line}")
-  [[ "${line}" =~ ^( *).*$ ]]
-  indent=${#BASH_REMATCH[1]}
-  if [[ -z "${min_indent}" ]] || ((indent < min_indent)); then
-    min_indent=${indent}
+  # Tabs become two spaces. I have no time for tab indentation.
+  line=$(expand -it2 <<< "${line}")
+
+  # Sniff indents at the start of lines.
+  [[ "${line}" =~ ^( *)(.*)$ ]]
+
+  # Don't bother sniffing whitespace indents on blank lines or
+  # empty lines as it produces unintentional results.
+  if [[ -n ${BASH_REMATCH[2]} ]]; then
+   indent=${#BASH_REMATCH[1]}
+   # Find the next smallest indent if this line has a smaller indent
+   # than previous lines.
+   if [[ -z "${min_indent}" ]] || ((indent < min_indent)); then
+      min_indent=${indent}
+    fi
   fi
+
   lines+=("${line}")
 done
 
+# Slice the minimum indent off each line.
 for line in "${lines[@]}"; do
   echo "${line:${min_indent}:${#line}}"
 done
