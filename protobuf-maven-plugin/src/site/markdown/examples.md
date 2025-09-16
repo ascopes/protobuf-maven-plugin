@@ -40,6 +40,155 @@ to avoid dependencies on `javax.annotation-api`.
 <options>@generated=omit</options>
 ```
 
+## gRPC and Reactor
+
+Salesforce maintains a library to allow you to generate gRPC service stubs that use reactive
+streams via the Reactor framework.
+
+To configure protobuf-maven-plugin to use this `protoc` plugin, use the following configuration:
+
+```xml
+
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+
+  <configuration>
+    <protocVersion>${protobuf.version}</protocVersion>
+
+    <binaryMavenPlugins>
+      <binaryMavenPlugin>
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-java</artifactId>
+        <version>${grpc.version}</version>
+      </binaryMavenPlugin>
+    </binaryMavenPlugins>
+
+    <jvmMavenPlugins>
+      <jvmMavenPlugin>
+        <groupId>com.salesforce.servicelibs</groupId>
+        <artifactId>reactor-grpc</artifactId>
+        <version>${reactor-grpc.version}</version>
+      </jvmMavenPlugin>
+    </jvmMavenPlugins>
+  </configuration>
+</plugin>
+```
+
+## gRPC and Vert.x
+
+For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+
+  <configuration>
+    <protocVersion>${protobuf.version}</protocVersion>
+    <jvmMavenPlugins>
+      <jvmMavenPlugin>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-grpc-protoc-plugin2</artifactId>
+        <version>${vertx.version}</version>
+        <mainClass>io.vertx.grpc.plugin.VertxGrpcGenerator</mainClass>
+        <jvmArgs>
+          <jvmArg>--grpc-client</jvmArg>
+          <jvmArg>--grpc-service</jvmArg>
+          <jvmArg>--service-prefix=Vertx</jvmArg>
+        </jvmArgs>
+      </jvmMavenPlugin>
+    </jvmMavenPlugins>
+  </configuration>
+</plugin>
+```
+
+For more information, see the [Vert.x gRPC plugin documentation](https://vertx.io/docs/vertx-grpc/java/#vertx-grpc-protoc-plugin).
+
+## Scala
+
+Scala support for Protobuf and gRPC can be enabled using the ScalaPB Protoc plugin.
+
+This is distributed as an OS-dependent binary within a ZIP archive on their GitHub releases.
+
+A suitable Maven plugin for providing Scala compilation is also required.
+
+```xml
+<plugins>
+  <plugin>
+    <groupId>io.github.ascopes</groupId>
+    <artifactId>protobuf-maven-plugin</artifactId>
+
+    <configuration>
+      <javaEnabled>false</javaEnabled>
+
+      <binaryUrlPlugins>
+        <binaryUrlPlugin>
+          <url>zip:https://github.com/scalapb/ScalaPB/releases/download/v${scalapb.version}/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
+          <options>flat_package,grpc,scala3_sources</options>
+        </binaryUrlPlugin>
+      </binaryUrlPlugins>
+    </configuration>
+
+    <executions>
+      <execution>
+        <goals>
+          <goal>generate</goal>
+        </goals>
+      </execution>
+    </executions>
+  </plugin>
+
+
+  <plugin>
+    <groupId>net.alchim31.maven</groupId>
+    <artifactId>scala-maven-plugin</artifactId>
+
+    <configuration>
+      <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
+    </configuration>
+  </plugin>
+</plugins>
+```
+
+An example service handler may look like the following:
+
+`src/main/protobuf/helloworld.proto`:
+```protobuf
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.example.helloworld";
+
+package org.example.helloworld;
+
+message GreetingRequest {
+  string name = 1;
+}
+
+message GreetingResponse {
+  string text = 1;
+}
+
+service GreetingService {
+  rpc Greet(GreetingRequest) returns (GreetingResponse);
+}
+```
+
+`src/main/scala/org/example/helloworld/HelloWorld.scala`:
+```scala
+package org.example.helloworld
+
+import scala.concurrent.Future
+
+class GreetingServiceImpl extends GreetingServiceGrpc.GreetingService:
+  override def greet(request: GreetingRequest) =
+    val response = GreetingResponse(text = "Hello, " + request.name + "!")
+    Future.successful(response)
+end GreetingServiceImpl
+```
+
+
 ## JavaScript and gRPC-Web
 
 While JavaScript generation is not natively supported by this plugin (as it's not part of core protoc), you can easily integrate JavaScript and gRPC-Web code generation using binary URL plugins.
@@ -154,36 +303,6 @@ The `protoc-gen-grpc-web` plugin supports:
 
 For more information, see the [gRPC-Web plugin documentation](https://github.com/grpc/grpc-web).
 
-## gRPC and Vert.x
-
-For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
-
-```xml
-<plugin>
-  <groupId>io.github.ascopes</groupId>
-  <artifactId>protobuf-maven-plugin</artifactId>
-
-  <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
-    <jvmMavenPlugins>
-      <jvmMavenPlugin>
-        <groupId>io.vertx</groupId>
-        <artifactId>vertx-grpc-protoc-plugin2</artifactId>
-        <version>${vertx.version}</version>
-        <mainClass>io.vertx.grpc.plugin.VertxGrpcGenerator</mainClass>
-        <jvmArgs>
-          <jvmArg>--grpc-client</jvmArg>
-          <jvmArg>--grpc-service</jvmArg>
-          <jvmArg>--service-prefix=Vertx</jvmArg>
-        </jvmArgs>
-      </jvmMavenPlugin>
-    </jvmMavenPlugins>
-  </configuration>
-</plugin>
-```
-
-For more information, see the [Vert.x gRPC plugin documentation](https://vertx.io/docs/vertx-grpc/java/#vertx-grpc-protoc-plugin).
-
 ## Multiple Output Directories
 
 If you need to generate code to different directories based on the target language:
@@ -213,95 +332,12 @@ If you need to generate code to different directories based on the target langua
         <goal>generate</goal>
       </goals>
       <configuration>
-        <protocVersion>${protobuf.version}</protocVersion>
         <javaEnabled>false</javaEnabled>
-        <pythonEnabled>true</pythonEnabled>
         <outputDirectory>${project.basedir}/target/python</outputDirectory>
+        <protocVersion>${protobuf.version}</protocVersion>
+        <pythonEnabled>true</pythonEnabled>
       </configuration>
     </execution>
   </executions>
 </plugin>
-```
-
-## Scala
-
-Scala support for Protobuf and gRPC can be enabled using the ScalaPB Protoc plugin.
-
-This is distributed as an OS-dependent binary within a ZIP archive on their GitHub releases.
-
-A suitable Maven plugin for providing Scala compilation is also required.
-
-```xml
-<plugins>
-  <plugin>
-    <groupId>io.github.ascopes</groupId>
-    <artifactId>protobuf-maven-plugin</artifactId>
-
-    <configuration>
-      <javaEnabled>false</javaEnabled>
-
-      <binaryUrlPlugins>
-        <binaryUrlPlugin>
-          <url>zip:https://github.com/scalapb/ScalaPB/releases/download/v${scalapb.version}/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
-          <options>flat_package,grpc,scala3_sources</options>
-        </binaryUrlPlugin>
-      </binaryUrlPlugins>
-    </configuration>
-
-    <executions>
-      <execution>
-        <goals>
-          <goal>generate</goal>
-        </goals>
-      </execution>
-    </executions>
-  </plugin>
-
-
-  <plugin>
-    <groupId>net.alchim31.maven</groupId>
-    <artifactId>scala-maven-plugin</artifactId>
-
-    <configuration>
-      <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
-    </configuration>
-  </plugin>
-</plugins>
-```
-
-An example service handler may look like the following:
-
-`src/main/protobuf/helloworld.proto`:
-```protobuf
-syntax = "proto3";
-
-option java_multiple_files = true;
-option java_package = "org.example.helloworld";
-
-package org.example.helloworld;
-
-message GreetingRequest {
-  string name = 1;
-}
-
-message GreetingResponse {
-  string text = 1;
-}
-
-service GreetingService {
-  rpc Greet(GreetingRequest) returns (GreetingResponse);
-}
-```
-
-`src/main/scala/org/example/helloworld/HelloWorld.scala`:
-```scala
-package org.example.helloworld
-
-import scala.concurrent.Future
-
-class GreetingServiceImpl extends GreetingServiceGrpc.GreetingService:
-  override def greet(request: GreetingRequest) =
-    val response = GreetingResponse(text = "Hello, " + request.name + "!")
-    Future.successful(response)
-end GreetingServiceImpl
 ```
