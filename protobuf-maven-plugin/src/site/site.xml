@@ -35,6 +35,7 @@
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/java.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/plaintext.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/protobuf.min.js"></script>
+        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/scala.min.js"></script>
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/xml.min.js"></script>
 
         <!-- Highlight.js copy code button -->
