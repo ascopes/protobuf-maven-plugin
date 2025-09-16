@@ -31,3 +31,6 @@ are a great place to start, since they are full working Maven projects.
 If you wish to contribute additional test cases to show integration with custom plugins or more
 complicated use cases, then this is always welcome.
 
+## Stars
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ascopes/protobuf-maven-plugin&type=Timeline)](https://www.star-history.com/#ascopes/protobuf-maven-plugin&Timeline)
