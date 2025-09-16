@@ -4,7 +4,13 @@
 
 Examples of how to use the protobuf-maven-plugin for different use cases and integrations.
 
-## gRPC Java
+Note that any third party libraries, `protoc` plugins, or Maven plugins are not associated with
+the protobuf-maven-plugin project. If you spot any bugs or have any queries, please contact the
+authors of that tooling. Likewise, these examples are best effort only. While effort has been made
+to ensure they work, updates in third party components may result in issues. If you spot such
+an issue, please raise a GitHub Issue or Pull Request to adjust these examples as appropriate!
+
+## gRPC with Java
 
 For generating gRPC stubs for Java, you can use the official gRPC Java plugin:
 
@@ -148,7 +154,7 @@ The `protoc-gen-grpc-web` plugin supports:
 
 For more information, see the [gRPC-Web plugin documentation](https://github.com/grpc/grpc-web).
 
-## Vert.x Integration
+## gRPC and Vert.x
 
 For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
 
@@ -215,4 +221,87 @@ If you need to generate code to different directories based on the target langua
     </execution>
   </executions>
 </plugin>
+```
+
+## Scala
+
+Scala support for Protobuf and gRPC can be enabled using the ScalaPB Protoc plugin.
+
+This is distributed as an OS-dependent binary within a ZIP archive on their GitHub releases.
+
+A suitable Maven plugin for providing Scala compilation is also required.
+
+```xml
+<plugins>
+  <plugin>
+    <groupId>io.github.ascopes</groupId>
+    <artifactId>protobuf-maven-plugin</artifactId>
+
+    <configuration>
+      <javaEnabled>false</javaEnabled>
+
+      <binaryUrlPlugins>
+        <binaryUrlPlugin>
+          <url>zip:https://github.com/scalapb/ScalaPB/releases/download/v${scalapb.version}/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
+          <options>flat_package,grpc,scala3_sources</options>
+        </binaryUrlPlugin>
+      </binaryUrlPlugins>
+    </configuration>
+
+    <executions>
+      <execution>
+        <goals>
+          <goal>generate</goal>
+        </goals>
+      </execution>
+    </executions>
+  </plugin>
+
+
+  <plugin>
+    <groupId>net.alchim31.maven</groupId>
+    <artifactId>scala-maven-plugin</artifactId>
+
+    <configuration>
+      <failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
+    </configuration>
+  </plugin>
+</plugins>
+```
+
+An example service handler may look like the following:
+
+`src/main/protobuf/helloworld.proto`:
+```protobuf
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.example.helloworld";
+
+package org.example.helloworld;
+
+message GreetingRequest {
+  string name = 1;
+}
+
+message GreetingResponse {
+  string text = 1;
+}
+
+service GreetingService {
+  rpc Greet(GreetingRequest) returns (GreetingResponse);
+}
+```
+
+`src/main/scala/org/example/helloworld/HelloWorld.scala`:
+```scala
+package org.example.helloworld
+
+import scala.concurrent.Future
+
+class GreetingServiceImpl extends GreetingServiceGrpc.GreetingService:
+  override def greet(request: GreetingRequest) =
+    val response = GreetingResponse(text = "Hello, " + request.name + "!")
+    Future.successful(response)
+end GreetingServiceImpl
 ```
