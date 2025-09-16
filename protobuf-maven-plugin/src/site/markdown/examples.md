@@ -18,7 +18,6 @@ For generating gRPC stubs for Java, you can use the official gRPC Java plugin:
 <plugin>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
-  <version>%VERSION%</version>
 
   <configuration>
     <protocVersion>${protobuf.version}</protocVersion>
@@ -203,7 +202,7 @@ This example shows how to generate JavaScript/TypeScript client code for a gRPC 
     <plugin>
       <groupId>io.github.ascopes</groupId>
       <artifactId>protobuf-maven-plugin</artifactId>
-      <version>%VERSION%</version>
+
       <configuration>
         <protocVersion>${protobuf.version}</protocVersion>
         <javaEnabled>false</javaEnabled>
