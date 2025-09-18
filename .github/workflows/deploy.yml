@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: zulu
-          java-version: 24
+          java-version: 25
 
       - name: Compute release version
         id: determine_version_to_release
@@ -87,7 +87,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 24
+          java-version: 25
           server-id: central
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_TOKEN
@@ -173,7 +173,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 24
+          java-version: 25
 
       - name: Generate site
         run: |-
