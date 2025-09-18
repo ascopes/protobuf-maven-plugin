@@ -113,12 +113,14 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
     private final URL innerUrl;
 
     private @Nullable URLConnection innerUrlConnection;
+    private @Nullable InputStream decoratedInputStream;
 
     DecoratingUrlConnection(URL url, URL innerUrl, @Nullable String file) {
       super(url);
       this.innerUrl = innerUrl;
       this.file = file;
       innerUrlConnection = null;
+      decoratedInputStream = null;
     }
 
     @Override
@@ -147,22 +149,26 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
 
     @Override
     public InputStream getInputStream() throws IOException {
-      var innerUrlConnection = requireNonNull(this.innerUrlConnection, "not connected");
+      if (decoratedInputStream == null) {
+        var innerUrlConnection = requireNonNull(this.innerUrlConnection, "not connected");
 
-      try {
-        return decorateInputStream(innerUrlConnection.getInputStream(), file);
-      } catch (IOException ex) {
-        // Clean up, we're in a bad state and cannot continue, and we do not
-        // want to abandon any resources.
-        innerUrlConnection.getInputStream().close();
-        throw new IOException(
-            "Failed to wrap input stream with protocol "
-                + protocols.iterator().next()
-                + ": "
-                + ex,
-            ex
-        );
+        try {
+          decoratedInputStream = decorateInputStream(innerUrlConnection.getInputStream(), file);
+        } catch (IOException ex) {
+          // Clean up, we're in a bad state and cannot continue, and we do not
+          // want to abandon any resources.
+          innerUrlConnection.getInputStream().close();
+          throw new IOException(
+              "Failed to wrap input stream with protocol "
+                  + protocols.iterator().next()
+                  + ": "
+                  + ex,
+              ex
+          );
+        }
       }
+
+      return decoratedInputStream;
     }
 
     @Override
