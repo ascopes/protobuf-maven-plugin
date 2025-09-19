@@ -20,10 +20,10 @@ jobs:
         uses: actions/setup-java@v5
         with:
           cache: maven
-          distribution: temurin
-          java-version: zulu
+          distribution: zulu
+          java-version: 25
 
       - name: Submit dependency snapshot
         uses: advanced-security/maven-dependency-submission-action@v5
         with:
-          maven-args: -B
+          maven-args: -B -e
