@@ -177,4 +177,4 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
 
 ## Stars
 
-[![Star History Chart](https://api.star-history.com/svg?repos=ascopes/protobuf-maven-plugin&type=Timeline)](https://www.star-history.com/#ascopes/protobuf-maven-plugin&Timeline)
+[![Star History Chart](https://api.star-history.com/svg?repos=ascopes/protobuf-maven-plugin&type=Timeline&theme=dark)](https://www.star-history.com/#ascopes/protobuf-maven-plugin&Timeline)
