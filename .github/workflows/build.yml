@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           cache: maven
-          distribution: temurin
+          distribution: zulu
           java-version: 25
 
       - name: Validate shell scripts
@@ -132,7 +132,7 @@ jobs:
         with:
           cache: maven
           java-version: ${{ matrix.java-version }}
-          distribution: 'temurin'
+          distribution: zulu
 
       - name: Configure runner
         shell: bash
@@ -182,7 +182,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           cache: maven
-          distribution: temurin
+          distribution: zulu
           java-version: 25
 
       - name: Build site

@@ -87,7 +87,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 25
+          java-version: zulu
           server-id: central
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_TOKEN
@@ -172,7 +172,7 @@ jobs:
       - name: Initialize Java
         uses: actions/setup-java@v5
         with:
-          distribution: temurin
+          distribution: zulu
           java-version: 25
 
       - name: Generate site

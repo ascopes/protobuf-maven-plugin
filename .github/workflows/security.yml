@@ -21,7 +21,7 @@ jobs:
         with:
           cache: maven
           distribution: temurin
-          java-version: 25
+          java-version: zulu
 
       - name: Submit dependency snapshot
         uses: advanced-security/maven-dependency-submission-action@v5
