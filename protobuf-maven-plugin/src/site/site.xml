@@ -56,8 +56,6 @@
     <menu name="Documentation">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
-      <item name="Requirements" href="requirements.html"/>
-      <item name="Known Issues" href="known-issues.html"/>
     </menu>
     <menu name="Guides">
       <item name="Basic Usage" href="basic-usage.html"/>
@@ -67,7 +65,9 @@
       <item name="Descriptor Files" href="descriptor-files.html"/>
       <item name="Examples" href="examples.html"/>
       <item name="Faster Builds" href="faster-builds.html"/>
+      <item name="Known Issues" href="known-issues.html"/>
       <item name="Other Language Support" href="other-language-support.html"/>
+      <item name="Requirements" href="requirements.html"/>
       <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
     </menu>
     <menu name="Releases">
@@ -75,6 +75,8 @@
       <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
     </menu>
     <menu name="Development">
+      <item name="Contributing Guide" href="gh-contributing.html"/>
+      <item name="Security Policy" href="gh-security.html"/>
       <item name="Issues and Bugs" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
       <item name="Discussions" href="https://github.com/ascopes/protobuf-maven-plugin/discussions"/>
       <item name="Source Code" href="https://github.com/ascopes/protobuf-maven-plugin"/>
