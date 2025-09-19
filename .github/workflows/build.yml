@@ -28,8 +28,8 @@ jobs:
         uses: actions/setup-java@v5
         with:
           cache: maven
-          distribution: temurin
-          java-version: 24
+          distribution: zulu
+          java-version: 25
 
       - name: Validate shell scripts
         uses: ludeeus/action-shellcheck@master
@@ -108,9 +108,9 @@ jobs:
             java-version: 21
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk24
+          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk25
             os-name: ubuntu-24.04
-            java-version: 24
+            java-version: 25
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: Linux x86_64, mvn 3.8.8, jdk11
@@ -132,7 +132,7 @@ jobs:
         with:
           cache: maven
           java-version: ${{ matrix.java-version }}
-          distribution: 'temurin'
+          distribution: zulu
 
       - name: Configure runner
         shell: bash
@@ -182,8 +182,8 @@ jobs:
         uses: actions/setup-java@v5
         with:
           cache: maven
-          distribution: temurin
-          java-version: 24
+          distribution: zulu
+          java-version: 25
 
       - name: Build site
         shell: bash
