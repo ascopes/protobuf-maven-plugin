@@ -18,7 +18,6 @@ Make sure you provide full details of what you are trying to do and why. Include
 what you expect to happen, versus what actually happens. Run `mvn` or `mvnw` in your project
 with the `--errors` flag to get full exception stacktraces.
 
-> [!IMPORTANT]
 > If possible and appropriate, try to show `protoc` being called directly and producing the output you
 > expect.
 
@@ -87,7 +86,6 @@ This project uses semantic versioning!
 If you need to add a new user-facing feature (i.e. something that is accessible via the interface used in
 a `pom.xml` when using this plugin), you should bump the minor version of this plugin.
 
-> [!NOTE]
 > If you are making a breaking API change, you need to bump the major version.
 
 I'll advise about this during PR reviews as needed, but you can use the `scripts/bump-versions.sh` script
