@@ -20,6 +20,9 @@ that security updates in terms of Apache Maven are out of scope for this project
 unless they are explicitly included with `compile` scope, and are able to be
 updated without sacrificing Maven 3 support.
 
+Note that some dependencies must be kept in lockstep with Apache Maven. In the event that this
+is a problem, please reach out via an issue.
+
 ## Reporting a Vulnerability
 
 Please raise an issue with the details and reproduction if appropriate.
