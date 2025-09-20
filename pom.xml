@@ -143,10 +143,14 @@
           itself at runtime which now are raised as of Java 22.
     -->
     <argLine>
+      -XX:+CrashOnOutOfMemoryError
+      -XX:+TieredCompilation
+      -XX:TieredStopAtLevel=1
       -Xshare:off
-      -Dnet.bytebuddy.experimental=true
-      -Dorg.slf4j.simpleLogger.log.io.github.ascopes=TRACE
+      -Dorg.slf4j.simpleLogger.log.io.github.ascopes=DEBUG
       -XX:+EnableDynamicAgentLoading
+      -Xms64m
+      -Xmx512m
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -200,7 +204,7 @@
       <dependency>
         <!--
             This is a bit of a hack: we do not technically depend
-            on this in any project but we reference it in our
+            on this in any project, but we reference it in our
             site.xml that is consumed by Maven Site Plugin. Usually
             we'd declare the version in there directly, but by doing
             it here with a property, we cal allow dependabot to
