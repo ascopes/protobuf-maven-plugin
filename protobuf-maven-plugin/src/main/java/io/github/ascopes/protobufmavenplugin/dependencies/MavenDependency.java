@@ -31,19 +31,7 @@ import org.jspecify.annotations.Nullable;
 @Modifiable
 public interface MavenDependency extends MavenArtifact {
 
-  /**
-   * Get the preferences for the depth of dependency resolution.
-   *
-   * <p>May be {@code null} if the default should be used.
-   *
-   * @return the preference for the depth of dependency resolution.
-   */
   @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
 
-  /**
-   * Get a set of dependency exclusions to apply when resolving dependencies.
-   *
-   * @return the exclusions, which by default is empty if unspecified.
-   */
   Set<MavenExclusionBean> getExclusions();
 }

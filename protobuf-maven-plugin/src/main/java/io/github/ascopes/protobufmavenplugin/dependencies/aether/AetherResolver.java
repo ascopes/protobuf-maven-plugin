@@ -86,13 +86,6 @@ final class AetherResolver {
     remoteRepositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
   }
 
-  /**
-   * Resolve the Eclipse Aether artifact, or throw an exception if it cannot be resolved.
-   *
-   * @param artifact the artifact to resolve.
-   * @return the artifact with any additional resolved metadata attached.
-   * @throws ResolutionException if resolution failed.
-   */
   Artifact resolveRequiredArtifact(Artifact artifact) throws ResolutionException {
     log.info("Attempting to resolve artifact \"{}\"", artifact);
 
@@ -130,19 +123,6 @@ final class AetherResolver {
     );
   }
 
-  /**
-   * Resolve a collection of dependencies transitively and return the corresponding artifacts.
-   *
-   * @param dependencies            the dependencies to resolve.
-   * @param allowedDependencyScopes scopes of dependencies to include. Anything not in this set will
-   *                                be ignored.
-   * @param failOnResolutionErrors  if resolution fails and this is true, an exception will be
-   *                                raised. If this is false, then any invalid/unresolvable
-   *                                dependencies will be skipped instead.
-   * @return the resolved artifacts.
-   * @throws ResolutionException if resolution fails and is unrecoverable or if
-   *                             {@code failOnResolutionErrors} is true.
-   */
   Collection<Artifact> resolveDependencies(
       List<Dependency> dependencies,
       Set<String> allowedDependencyScopes,

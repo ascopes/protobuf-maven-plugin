@@ -34,45 +34,12 @@ import org.jspecify.annotations.Nullable;
 @Modifiable
 public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
 
-  /**
-   * Get the version of the {@code protoc} plugin.
-   *
-   * <p>This <strong>must</strong> be specified for plugins. The use
-   * of {@code <dependencyManagement/>} is ignored here.
-   *
-   * @return the protoc plugin version to use.
-   */
   @Override
   @NonNull String getVersion();
 
-  /**
-   * Get the command line arguments to pass to the JVM.
-   *
-   * <p>This defaults to an empty list.
-   *
-   * @return the list of command line arguments to pass to the JVM.
-   * @since 2.6.0
-   */
   @Nullable List<String> getJvmArgs();
 
-  /**
-   * Get the arguments to pass to the JVM to configure it.
-   *
-   * <p>Users can use this to control concerns such as heap memory controls,
-   * GC and JIT settings, and specifying additional JVM options.
-   *
-   * @return the list of command line arguments to pass to the JVM.
-   * @since 2.6.0
-   */
   @Nullable List<String> getJvmConfigArgs();
 
-  /**
-   * The main class entrypoint to use if the plugin is not an assembled JAR.
-   *
-   * <p>Ignored in all other cases.
-   *
-   * @return the main class name.
-   * @since 2.5.0
-   */
   @Nullable String getMainClass();
 }

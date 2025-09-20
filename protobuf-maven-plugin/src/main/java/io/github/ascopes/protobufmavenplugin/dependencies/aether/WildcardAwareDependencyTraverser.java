@@ -45,12 +45,6 @@ final class WildcardAwareDependencyTraverser implements DependencyTraverser {
     return delegate;
   }
 
-  /**
-   * Traverse the dependency.
-   *
-   * @param dependency the dependency to traverse.
-   * @return true if the dependency was traversed, or false if it was not.
-   */
   @Override
   public boolean traverseDependency(Dependency dependency) {
     // If we internally have the special wildcard exclusion we define, then assume it is a
@@ -59,12 +53,6 @@ final class WildcardAwareDependencyTraverser implements DependencyTraverser {
         && delegate.traverseDependency(dependency);
   }
 
-  /**
-   * Derive a new child dependency traverser.
-   *
-   * @param context the dependency collection context.
-   * @return the new dependency traverser.
-   */
   @Override
   public WildcardAwareDependencyTraverser deriveChildTraverser(
       DependencyCollectionContext context

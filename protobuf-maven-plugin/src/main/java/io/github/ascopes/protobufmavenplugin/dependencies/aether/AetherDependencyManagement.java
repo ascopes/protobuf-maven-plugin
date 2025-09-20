@@ -68,14 +68,6 @@ final class AetherDependencyManagement {
         .collect(deduplicateArtifacts());
   }
 
-  /**
-   * Take a dependency and, if possible, fill in any missing attributes from the corresponding
-   * project dependency management.
-   *
-   * @param dependency the dependency to inspect.
-   * @return a new dependency with missing fields populated if possible and appropriate, or the
-   *     input dependency if nothing changed.
-   */
   Dependency fillManagedAttributes(Dependency dependency) {
     var artifact = dependency.getArtifact();
 
@@ -100,23 +92,7 @@ final class AetherDependencyManagement {
     );
   }
 
-  /**
-   * Generate a collector that produces a map of unique artifacts, mapping from a unique key to the
-   * artifact itself.
-   *
-   * <p>This enables de-duplicating artifavts covered by dependency management semantics.
-   *
-   * <p>In the case that duplicate dependencies are found with differing versions,
-   * then the newest dependency will be chosen.
-   *
-   * <p>Other than removing duplicate dependencies, the returned order should
-   * match that in the returned map (i.e. the returned map is ordered).
-   *
-   * <p>The returned map is unmodifiable.
-   *
-   * @return the collector.
-   */
-  public static Collector<Artifact, ?, Map<String, Artifact>> deduplicateArtifacts() {
+  static Collector<Artifact, ?, Map<String, Artifact>> deduplicateArtifacts() {
     return Collectors.collectingAndThen(
         Collectors.toMap(
             AetherDependencyManagement::getDependencyManagementKey,

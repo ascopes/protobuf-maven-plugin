@@ -27,7 +27,7 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface DescriptorFileProtocTarget extends ProtocTarget {
   Path getOutputFile();
-  
+
   boolean isIncludeImports();
 
   boolean isIncludeSourceInfo();

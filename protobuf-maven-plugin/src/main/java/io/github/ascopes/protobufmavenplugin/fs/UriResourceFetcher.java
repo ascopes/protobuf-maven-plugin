@@ -150,9 +150,9 @@ public final class UriResourceFetcher {
 
       var fileSize = Files.size(targetFile);
       log.info(
-          "Transferred \"{}\" to \"{}\" ({})", 
-          uri, 
-          targetFile, 
+          "Transferred \"{}\" to \"{}\" ({})",
+          uri,
+          targetFile,
           StringUtils.pluralize(fileSize, "byte")
       );
 

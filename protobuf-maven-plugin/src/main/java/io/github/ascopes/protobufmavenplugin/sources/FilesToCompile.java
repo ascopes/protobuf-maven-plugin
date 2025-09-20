@@ -40,12 +40,6 @@ public interface FilesToCompile {
     return getProtoSources().isEmpty() && getDescriptorFiles().isEmpty();
   }
 
-  /**
-   * Produce a {@link FilesToCompile} containing all the proto sources and
-   * descriptor files from the given {@link ProjectInputListing}.
-   *
-   * @return the files to compile.
-   */
   static FilesToCompile allOf(ProjectInputListing listing) {
     return ImmutableFilesToCompile.builder()
         .descriptorFiles(DescriptorListing.flatten(listing.getCompilableDescriptorFiles()))
@@ -53,11 +47,6 @@ public interface FilesToCompile {
         .build();
   }
 
-  /**
-   * Produce a {@link FilesToCompile} that is totally empty.
-   *
-   * @return the files to compile.
-   */
   static FilesToCompile empty() {
     return ImmutableFilesToCompile.builder()
         .descriptorFiles(List.of())

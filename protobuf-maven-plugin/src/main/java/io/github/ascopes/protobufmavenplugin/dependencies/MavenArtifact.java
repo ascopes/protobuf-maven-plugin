@@ -30,44 +30,13 @@ import org.jspecify.annotations.Nullable;
  */
 public interface MavenArtifact {
 
-  /**
-   * Get the group ID.
-   *
-   * @return the group ID.
-   */
   String getGroupId();
 
-  /**
-   * Get the artifact ID.
-   *
-   * @return the artifact ID.
-   */
   String getArtifactId();
 
-  /**
-   * Get the artifact version.
-   *
-   * <p>May be {@code null} if we expect to discover the version from dependency management.
-   *
-   * @return the version.
-   */
   @Nullable String getVersion();
 
-  /**
-   * Get the artifact type.
-   *
-   * <p>May be {@code null} if the default should be used.
-   *
-   * @return the artifact type.
-   */
   @Nullable String getType();
 
-  /**
-   * Get the artifact classifier.
-   *
-   * <p>May be {@code null} if no classifier is set.
-   *
-   * @return the artifact classifier.
-   */
   @Nullable String getClassifier();
 }

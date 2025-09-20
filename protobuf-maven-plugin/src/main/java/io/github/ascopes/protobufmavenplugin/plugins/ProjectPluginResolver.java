@@ -48,16 +48,6 @@ public final class ProjectPluginResolver {
     this.jvmPluginResolver = jvmPluginResolver;
   }
 
-  /**
-   * Resolve all {@code protoc} plugins.
-   *
-   * <p>Note that duplicates are allowed, but the return order is arbitrary.
-   * The expectation is that these will be logically ordered elsewhere.
-   *
-   * @param request the generation request.
-   * @return the collection of plugins.
-   * @throws ResolutionException if resolution fails.
-   */
   public Collection<ResolvedProtocPlugin> resolveProjectPlugins(
       GenerationRequest request
   ) throws ResolutionException {

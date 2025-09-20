@@ -43,3 +43,4 @@ public interface ProtocPlugin {
     return false;
   }
 }
+

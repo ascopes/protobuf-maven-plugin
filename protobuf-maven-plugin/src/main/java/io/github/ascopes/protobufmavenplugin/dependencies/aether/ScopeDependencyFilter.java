@@ -35,22 +35,10 @@ final class ScopeDependencyFilter implements DependencyFilter {
 
   private final Set<String> includedScopes;
 
-  /**
-   * Initialise this filter.
-   *
-   * @param includedScopes the scopes to allow.
-   */
   ScopeDependencyFilter(Set<String> includedScopes) {
     this.includedScopes = includedScopes;
   }
 
-  /**
-   * Determine whether to accept the dependency.
-   *
-   * @param node    the dependency node.
-   * @param parents the parent dependency nodes.
-   * @return true if accepted, or false if ignored.
-   */
   @Override
   public boolean accept(DependencyNode node, List<DependencyNode> parents) {
     var dependency = node.getDependency();

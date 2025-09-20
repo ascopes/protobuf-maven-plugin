@@ -74,9 +74,6 @@ public final class ConcurrentExecutor {
     executorService = Executors.newWorkStealingPool(concurrency);
   }
 
-  /**
-   * Destroy the internal thread pool.
-   */
   @PreDestroy
   @SuppressWarnings("unused")
   public void destroy() {
@@ -91,14 +88,6 @@ public final class ConcurrentExecutor {
     return futureTask;
   }
 
-  /**
-   * Return a reactive collector of all the results of a stream of scheduled tasks.
-   *
-   * @param <R> the task return type.
-   * @return the collector.
-   * @throws MultipleFailuresException if any of the results raised exceptions. All results are
-   *                                   collected prior to this being raised.
-   */
   public <R> Collector<FutureTask<R>, ?, List<R>> awaiting() {
     return Collectors.collectingAndThen(Collectors.toUnmodifiableList(), this::await);
   }

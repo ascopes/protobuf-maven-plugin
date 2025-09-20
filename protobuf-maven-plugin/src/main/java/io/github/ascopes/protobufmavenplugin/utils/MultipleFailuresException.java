@@ -30,13 +30,6 @@ final class MultipleFailuresException extends RuntimeException {
     super(message, cause);
   }
 
-  /**
-   * Initialise this exception.
-   *
-   * @param exceptions the exceptions that were thrown. Must have at least one item.
-   * @return the wrapper exception.
-   * @throws NoSuchElementException if an empty list was provided.
-   */
   static MultipleFailuresException create(List<? extends Throwable> exceptions) {
     var causeIterator = exceptions.iterator();
     var cause = causeIterator.next();

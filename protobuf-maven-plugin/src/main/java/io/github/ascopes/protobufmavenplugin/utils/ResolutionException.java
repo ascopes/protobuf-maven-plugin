@@ -24,23 +24,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ResolutionException extends Exception {
 
-  /**
-   * Initialise this exception with a message and no cause.
-   *
-   * @param message the exception message.
-   */
   public ResolutionException(String message) {
     // Do not pass null to this(String, Throwable), as it initialises the exception
     // cause such that it can no longer be overridden.
     super(message);
   }
 
-  /**
-   * Initialise this exception with a message and an optional cause.
-   *
-   * @param message the exception message.
-   * @param cause   the exception cause, or {@code null}.
-   */
   public ResolutionException(String message, @Nullable Throwable cause) {
     super(message, cause);
   }

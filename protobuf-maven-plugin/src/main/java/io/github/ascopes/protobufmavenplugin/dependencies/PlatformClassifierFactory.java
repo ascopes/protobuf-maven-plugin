@@ -75,14 +75,6 @@ public final class PlatformClassifierFactory {
     this.hostSystem = hostSystem;
   }
 
-  /**
-   * Determine the platform-specific classifier for the given
-   * binary name.
-   *
-   * @param binaryName the name of the binary to resolve the classifier for.
-   * @return the classifier value.
-   * @throws ResolutionException if the classifier cannot be resolved for this platform.
-   */
   public String getClassifier(String binaryName) throws ResolutionException {
     Map<String, String> osMapping;
 

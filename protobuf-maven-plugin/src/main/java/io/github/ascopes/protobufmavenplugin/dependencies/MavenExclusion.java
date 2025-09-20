@@ -35,36 +35,14 @@ public interface MavenExclusion {
    */
   String WILDCARD = "*";
 
-  /**
-   * Get the group ID.
-   *
-   * @return the group ID.
-   */
   String getGroupId();
 
-  /**
-   * Get the artifact ID.
-   *
-   * @return the artifact ID.
-   */
   String getArtifactId();
 
-  /**
-   * Get the artifact classifier.
-   *
-   * @return the classifier, or {@code *} by default which implies
-   *     a match for any classifier.
-   */
   default String getClassifier() {
     return WILDCARD;
   }
 
-  /**
-   * Get the artifact type.
-   *
-   * @return the type, or {@code *} by default which implies a match
-   *     for any type.
-   */
   default String getType() {
     return WILDCARD;
   }
