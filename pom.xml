@@ -138,7 +138,7 @@
 
     <!--
         - Force bytebuddy experimental support for some exotic platforms.
-        - Enable trace logs for our code for diagnostics.
+        - Enable debug logs for our code for diagnostics.
         - Enable the loading of dynamic agents to remove warnings about ByteBuddy loading
           itself at runtime which now are raised as of Java 22.
     -->
@@ -147,6 +147,7 @@
       -XX:+TieredCompilation
       -XX:TieredStopAtLevel=1
       -Xshare:off
+      -Dnet.bytebuddy.experimental=true
       -Dorg.slf4j.simpleLogger.log.io.github.ascopes=DEBUG
       -XX:+EnableDynamicAgentLoading
       -Xms64m
