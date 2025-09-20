@@ -179,7 +179,9 @@
           <failIfNoProjects>true</failIfNoProjects>
           <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
           <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
-          <parallelThreads>2C</parallelThreads>
+          <!--<parallelThreads>2C</parallelThreads>-->
+          <!-- Parallel disabled due to spurious Aether issues -->
+          <parallelThreads>1</parallelThreads>
           <postBuildHookScript>test</postBuildHookScript>
           <properties>
             <!-- Acquire locks whereever we run Maven to avoid parallel tests trampling across eachother. -->
