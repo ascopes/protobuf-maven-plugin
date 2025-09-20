@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.maven.Maven;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
@@ -51,6 +52,18 @@ public final class UriResourceFetcher {
 
   // Protocols that we allow in offline mode.
   private static final Pattern OFFLINE_PROTOCOLS = Pattern.compile("^([A-Za-z0-9-]+:)*file:.*");
+
+  // Fetch our version from our JAR when it is available. For unit tests, etc., this will usually
+  // be null.
+  private static final String USER_AGENT = String.format(
+      "protobuf-maven-plugin/%s (io.github.ascopes) Apache-Maven/%s Java/%s (%s, %s, %s)",
+      UriResourceFetcher.class.getPackage().getImplementationVersion(),
+      Maven.class.getPackage().getImplementationVersion(),
+      System.getProperty("java.version"),
+      System.getProperty("java.vm.name"),
+      System.getProperty("java.vm.version"),
+      System.getProperty("java.vm.vendor")
+  );
 
   private static final int TIMEOUT = 30_000;
 
@@ -161,23 +174,27 @@ public final class UriResourceFetcher {
         return Optional.empty();
       } else {
         throw new ResolutionException(
-            "Failed to transfer \"" + uri + "\" to \"" + targetFile + "\"", ex
+            "Failed to transfer \"" + uri + "\" to \"" + targetFile + "\": " + ex,
+            ex
         );
       }
     }
   }
 
   private static URLConnection openConnection(URL url) throws IOException {
+    // Important! Without disabling caches, JarURLConnection may leave the underlying connection
+    // open after we close conn.getInputStream(). On Windows this can prevent the deletion of these
+    // files as part of operations like mvn clean, and also in our unit tests. On Windows, we can
+    // even crash JUnit because of this!
+    // See https://github.com/junit-team/junit5/issues/4567.
     var conn = url.openConnection();
-    // Important! Without this JarURLConnection may leave the underlying connection
-    // open after we close conn.getInputStream(). On Windows this can prevent the deletion
-    // of these files as part of operations like mvn clean, and also in our unit tests.
-    // On Windows, we can evem crash JUnit because of this!
-    // See https://github.com/junit-team/junit5/issues/4567
-    conn.setUseCaches(false);
-    conn.setConnectTimeout(TIMEOUT);
-    conn.setReadTimeout(TIMEOUT);
+    conn.addRequestProperty("User-Agent", USER_AGENT);
     conn.setAllowUserInteraction(false);
+    conn.setConnectTimeout(TIMEOUT);
+    conn.setDoInput(true);
+    conn.setDoOutput(false);
+    conn.setReadTimeout(TIMEOUT);
+    conn.setUseCaches(false);
     return conn;
   }
 
