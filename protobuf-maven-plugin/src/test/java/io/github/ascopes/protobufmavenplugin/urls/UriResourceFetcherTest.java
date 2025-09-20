@@ -185,14 +185,6 @@ class UriResourceFetcherTest {
     when(urlFactory.create(any()))
         .thenReturn(url);
 
-    Path expectedFile = temporarySpaceDir
-        .resolve(
-            uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
-                + "-"
-                + Digest.compute("SHA-1", url.toExternalForm()).toHexString()
-                + ".ext"
-        );
-
     // When
     uriResourceFetcher.fetchFileFromUri(uri, ".ext", false);
 
@@ -299,12 +291,12 @@ class UriResourceFetcherTest {
         .thenReturn(url);
 
     var cause = new IOException("bang");
-    var badInputStream = mock(InputStream.class);
-    when(badInputStream.transferTo(any()))
-        .thenThrow(cause);
-
-    when(url.openConnection().getInputStream())
+    var badInputStream = new BadInputStream(cause);
+    var conn = mock(URLConnection.class);
+    when(conn.getInputStream())
         .thenReturn(badInputStream);
+    when(url.openConnection())
+        .thenReturn(conn);
 
     Path expectedFile = temporarySpaceDir
         .resolve(
@@ -351,12 +343,12 @@ class UriResourceFetcherTest {
         .thenReturn(url);
 
     var cause = new FileNotFoundException("bang");
-    var badInputStream = mock(InputStream.class);
-    when(badInputStream.transferTo(any()))
-        .thenThrow(cause);
-
-    when(url.openConnection().getInputStream())
+    var badInputStream = new BadInputStream(cause);
+    var conn = mock(URLConnection.class);
+    when(conn.getInputStream())
         .thenReturn(badInputStream);
+    when(url.openConnection())
+        .thenReturn(conn);
 
     // When
     var result = uriResourceFetcher.fetchFileFromUri(uri, ".foo", false);
@@ -413,5 +405,21 @@ class UriResourceFetcherTest {
     lenient().when(url.getProtocol())
         .thenReturn(uri.getScheme());
     return url;
+  }
+
+  // Overridden as mocking an InputStream and wrapping it in a BufferedInputStream seems to
+  // result in an infinite loop, memory leaks, and heap exhaustion on Zulu JDKs!
+  static class BadInputStream extends InputStream {
+
+    private final IOException ex;
+
+    BadInputStream(IOException ex) {
+      this.ex = ex;
+    }
+
+    @Override
+    public int read() throws IOException {
+      throw ex;
+    }
   }
 }
