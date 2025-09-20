@@ -161,7 +161,9 @@ jobs:
           path: |-
             **/build.log
             **/maven-status/**
-            **/surefire-reports/**.txt
+            **/*-reports/**.txt
+            **/*-reports/**.xml
+            **/*.dumpstream
           compression-level: 9
           retention-days: 7
           include-hidden-files: true
