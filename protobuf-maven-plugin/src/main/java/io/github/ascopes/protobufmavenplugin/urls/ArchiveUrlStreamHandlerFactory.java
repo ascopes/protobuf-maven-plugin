@@ -25,6 +25,8 @@ import java.io.InputStream;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Standard type for wrapping variants of an Apache Commons Compress archivers into
@@ -39,6 +41,8 @@ import org.jspecify.annotations.Nullable;
  */
 final class ArchiveUrlStreamHandlerFactory
     extends AbstractDecoratingUrlStreamHandlerFactory {
+
+  private static final Logger log = LoggerFactory.getLogger(ArchiveUrlStreamHandlerFactory.class);
 
   private final InputStreamDecorator<ArchiveInputStream<?>> decorator;
 
@@ -57,15 +61,27 @@ final class ArchiveUrlStreamHandlerFactory
       @Nullable String file
   ) throws IOException {
     requireNonNull(file);
+    file = normalizeEntryName(file);
 
     try (
         inputStream;
         var archiveInputStream = decorator.decorate(inputStream)
     ) {
       ArchiveEntry entry;
+      String name;
 
       while ((entry = archiveInputStream.getNextEntry()) != null) {
-        if (file.equals(entry.getName())) {
+        name = normalizeEntryName(entry.getName());
+
+        log.debug(
+            "Discovered entry '{}' (original name was '{}') in {} (wrapping {})",
+            name,
+            entry.getName(),
+            archiveInputStream,
+            inputStream
+        );
+
+        if (file.equals(name)) {
           break;
         }
       }
@@ -79,8 +95,16 @@ final class ArchiveUrlStreamHandlerFactory
 
       // Transfer the file contents out so we can close the actual stream.
       var baos = new ByteArrayOutputStream();
+      log.debug("Loading '{}' into new buffer", file);
       archiveInputStream.transferTo(baos);
       return new ByteArrayInputStream(baos.toByteArray());
     }
+  }
+
+  private static String normalizeEntryName(String name) {
+    if (name.startsWith("./")) {
+      name = name.substring(2);
+    }
+    return name;
   }
 }

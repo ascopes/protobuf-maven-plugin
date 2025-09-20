@@ -173,7 +173,7 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-      return requireNonNull(this.innerUrlConnection, "not connected").getOutputStream();
+      return requireNonNull(innerUrlConnection, "not connected").getOutputStream();
     }
   }
 

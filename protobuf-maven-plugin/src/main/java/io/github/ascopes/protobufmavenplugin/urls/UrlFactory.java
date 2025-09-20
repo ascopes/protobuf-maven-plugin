@@ -15,11 +15,12 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
@@ -30,6 +31,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Workaround for loading URLs with custom protocols defined in this ClassWorlds realm.
@@ -47,19 +49,16 @@ import org.apache.maven.execution.scope.MojoExecutionScoped;
 @Named
 public final class UrlFactory {
 
-  private final List<URLStreamHandlerFactory> urlStreamHandlerFactories;
-
-  UrlFactory() {
-    urlStreamHandlerFactories = new ArrayList<>();
-  }
+  // late-initialised to avoid circular dependency problems.
+  private @Nullable List<URLStreamHandlerFactory> urlStreamHandlerFactories;
 
   @PostConstruct
   void init() {
-    urlStreamHandlerFactories.addAll(List.of(
+    urlStreamHandlerFactories = List.of(
         new TransformingUrlStreamHandlerFactory(
             this,
             BZip2CompressorInputStream::new,
-            "bz", "bzip2"
+            "bz", "bz2", "bzip", "bzip2"
         ),
         new TransformingUrlStreamHandlerFactory(
             this,
@@ -81,18 +80,21 @@ public final class UrlFactory {
             TarArchiveInputStream::new,
             "tar"
         )
-    ));
+    );
   }
 
   public URL create(URI uri) throws IOException {
     var protocol = uri.getScheme();
-    var handler = urlStreamHandlerFactories.stream()
+    var handler = requireNonNull(urlStreamHandlerFactories)
+        .stream()
         .map(factory -> factory.createURLStreamHandler(protocol))
         .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);
 
     // If the handler is null, the regular JDK providers will be used as normal.
+    // In that case, we do not support further recursion, but that is probably
+    // fine.
     return new URL(null, uri.toString(), handler);
   }
 }

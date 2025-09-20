@@ -15,451 +15,411 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static java.util.Objects.requireNonNullElse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.PATH;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.matches;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.http.Fault;
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.stream.Stream;
 import org.apache.maven.execution.MavenSession;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@Disabled("TODO: rewrite these tests using the new URL resolution mechanism")
 @DisplayName("UriResourceFetcher tests")
 @ExtendWith(MockitoExtension.class)
-@WireMockTest
 class UriResourceFetcherTest {
 
-  WireMock wireMockClient;
-  String wireMockBaseUri;
-
-  @TempDir
-  Path tempDir;
-
-  @Mock(strictness = Mock.Strictness.LENIENT)
-  MavenSession mavenSession;
+  Path temporarySpaceDir;
 
   @Mock
+  MavenSession session;
+
+  @Mock(strictness = Strictness.LENIENT)
   TemporarySpace temporarySpace;
+
+  @Mock
+  UrlFactory urlFactory;
 
   @InjectMocks
   UriResourceFetcher uriResourceFetcher;
 
   @BeforeEach
-  void setUp(WireMockRuntimeInfo wireMockInfo) {
-    wireMockClient = wireMockInfo.getWireMock();
-    wireMockBaseUri = wireMockInfo.getHttpBaseUrl();
+  void setUp(@TempDir Path tempDir) throws IOException {
+    temporarySpaceDir = tempDir.resolve("temporary-space");
+    Files.createDirectories(temporarySpaceDir);
 
-    when(mavenSession.isOffline())
-        .thenReturn(false);
+    when(temporarySpace.createTemporarySpace(any(String[].class)))
+        .thenReturn(temporarySpaceDir);
   }
 
-  @DisplayName("invalid URI protocols are not resolved")
-  @Test
-  void invalidUriProtocolsAreNotResolved() {
-    // Given
-    var uri = URI.create("foobar:file://path/to/it");
-
-    // Then
-    assertThatExceptionOfType(ResolutionException.class)
-        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".blob", false))
-        .withMessage(
-            "URI \"%s\" is invalid: java.net.MalformedURLException: "
-                + "unknown protocol: foobar",
-            uri
-        )
-        .withCauseInstanceOf(MalformedURLException.class);
-  }
-
-  @DisplayName("file URIs are resolved when they exist")
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest(name = "when MavenSession.isOffline returns {0}")
-  void fileUrisAreResolvedWhenTheyExist(boolean isOffline) throws Exception {
-    // Given
-    when(mavenSession.isOffline())
-        .thenReturn(isOffline);
-
-    var expectedOutputDir = tempDir.resolve("outputs");
-    Files.createDirectories(expectedOutputDir);
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(expectedOutputDir);
-
-    var file = Files.writeString(tempDir.resolve("nekomata.nya"), "blahblah");
-    var uri = file.toUri();
-    var digest = Digest.compute("SHA-1", uri.toURL().toExternalForm()).toHexString();
-    var expectedFileName = "nekomata.nya-" + digest + ".thiren";
-
-    // When
-    var result = uriResourceFetcher.fetchFileFromUri(uri, ".thiren", false);
-
-    // Then
-    assertThat(result)
-        .isPresent()
-        .get(InstanceOfAssertFactories.PATH)
-        .isNotEqualTo(file)
-        .isEqualTo(expectedOutputDir.resolve(expectedFileName))
-        .content()
-        .isEqualTo(Files.readString(file));
-  }
-
-  @DisabledOnOs(
-      disabledReason = "Windows does not support POSIX permission bits",
-      value = OS.WINDOWS
-  )
-  @DisplayName("the executable bit is set on files when requested")
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest(name = "when setExecutable = {0}")
-  void theExecutableBitIsSetOnFilesWhenRequested(boolean setExecutable) throws Exception {
-    // Given
-    var file = Files.createFile(tempDir.resolve("nekomata.nya"));
-
-    var expectedOutputDir = tempDir.resolve("outputs");
-    Files.createDirectories(expectedOutputDir);
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(expectedOutputDir);
-
-    // When
-    var result = uriResourceFetcher.fetchFileFromUri(file.toUri(), ".thiren", setExecutable);
-
-    // Then
-    var resultFile = result.orElseThrow();
-    assertThat(resultFile)
-        .exists();
-    assertThat(Files.isExecutable(resultFile))
-        .withFailMessage("expected %s to %sbe executable", resultFile, setExecutable ? "" : "not ")
-        .isEqualTo(setExecutable);
-  }
-
-  @DisplayName("nested file URIs are resolved when they exist")
-  @CsvSource({
-      "jar,  true",
-      "zip,  true",
-      "jar, false",
-      "zip, false"
-  })
-  @ParameterizedTest(name = "for protocol {0}, when MavenSession.isOffline returns {1}")
-  void nestedFileUrisAreResolvedWhenTheyExist(
-      String protocol,
-      boolean isOffline
+  @DisplayName("Local file protocols can be resolved if offline mode is enabled")
+  @MethodSource("fileUris")
+  @ParameterizedTest(name = "for URI {0}")
+  void localFileProtocolsCanBeResolvedIfOfflineModeIsEnabled(
+      URI uri,
+      @TempDir Path tempDir
   ) throws Exception {
     // Given
-    when(mavenSession.isOffline())
-        .thenReturn(isOffline);
+    when(session.isOffline())
+        .thenReturn(true);
 
-    var expectedOutputDir = tempDir.resolve("outputs");
-    Files.createDirectories(expectedOutputDir);
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(expectedOutputDir);
+    var dir = Files.createDirectories(tempDir.resolve("foo"));
+    var file = Files.writeString(dir.resolve("bar.txt"), "blah blah");
 
-    var archiveFile = tempDir.resolve("inputs").resolve("archive." + protocol);
-    Files.createDirectories(archiveFile.getParent());
-    try (var outputStream = Files.newOutputStream(archiveFile)) {
-      createJar(
-          outputStream,
-          Map.entry("some/file.txt", "some content here"),
-          Map.entry("some/other/file.txt", "some more content here"),
-          Map.entry("foo/bar.txt", "Hello, World!"),
-          Map.entry("yet/another/file.bin", "blah blah blah")
-      );
-    }
-
-    var uri = URI.create(protocol + ":" + archiveFile.toUri() + "!/foo/bar.txt");
-    var digest = Digest.compute("SHA-1", uri.toURL().toExternalForm()).toHexString();
-    var expectedFileName = "bar.txt-" + digest + ".log";
+    when(urlFactory.create(any()))
+        .thenReturn(file.toUri().toURL());
 
     // When
-    var result = uriResourceFetcher.fetchFileFromUri(uri, ".log", false);
+    var result = uriResourceFetcher.fetchFileFromUri(uri, "foo", true);
 
     // Then
     assertThat(result)
-        .isPresent()
-        .get(InstanceOfAssertFactories.PATH)
-        .isEqualTo(expectedOutputDir.resolve(expectedFileName))
-        .hasContent("Hello, World!");
+        .get(PATH)
+        .hasSameBinaryContentAs(file);
+
+    verify(urlFactory).create(uri);
+    verifyNoMoreInteractions(urlFactory);
   }
 
-  @DisplayName("file URIs are not resolved when they do not exist")
+  @DisplayName("Remote protocols cannot be resolved if offline mode is enabled")
+  @MethodSource("remoteUris")
+  @ParameterizedTest(name = "for URI {0}")
+  void remoteProtocolsCannotBeResolvedIfOfflineModeIsEnabled(URI uri) {
+    // Given
+    when(session.isOffline())
+        .thenReturn(true);
+
+    // Then
+    assertThatExceptionOfType(ResolutionException.class)
+        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, "foo", true))
+        .withMessage(
+            "Cannot resolve URI \"%s\". Only a limited number of URL protocols are supported "
+                + "in offline mode.",
+            uri
+        );
+
+    verifyNoInteractions(urlFactory);
+  }
+
+  @DisplayName("URIs are resolved and stored in local files")
+  @MethodSource({"fileUris", "remoteUris"})
+  @ParameterizedTest(name = "for URI {0}")
+  void urisAreResolvedAndStoredInLocalFiles(URI uri) throws Exception {
+    // Given
+    var url = someUrlWithResolvedContent(uri, "foobar");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
+
+    Path expectedFile;
+    if (uri.getPath() == null) {
+      expectedFile = temporarySpaceDir
+          .resolve(
+              Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                  + ".ext"
+          );
+    } else {
+      expectedFile = temporarySpaceDir
+          .resolve(
+              uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                  + "-"
+                  + Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                  + ".ext"
+          );
+    }
+
+    // When
+    var result = uriResourceFetcher.fetchFileFromUri(uri, ".ext", false);
+
+    // Then
+    assertThat(result)
+        .get(PATH)
+        .isEqualTo(expectedFile)
+        .hasBinaryContent("foobar".getBytes(StandardCharsets.UTF_8));
+
+    verify(urlFactory).create(uri);
+    verify(temporarySpace).createTemporarySpace("url", uri.getScheme());
+  }
+
+  @DisplayName("URLConnections are configured with the expected attributes")
   @Test
-  void fileUrisAreNotResolvedWhenTheyDoNotExist() throws Exception {
+  void urlConnectionsAreConfiguredWithTheExpectedAttributes() throws Exception {
     // Given
-    var file = tempDir.resolve("nekomata.nya");
-
-    var expectedOutputDir = tempDir.resolve("outputs");
-    Files.createDirectories(expectedOutputDir);
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(expectedOutputDir);
+    var uri = URI.create("some://google.com/foo/bar/baz.txt");
+    var url = someUrlWithResolvedContent(uri, "bazbork");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
 
     // When
-    var result = uriResourceFetcher.fetchFileFromUri(file.toUri(), ".thiren", false);
+    uriResourceFetcher.fetchFileFromUri(uri, ".ext", false);
 
     // Then
-    assertThat(result).isNotPresent();
-  }
-
-  @DisplayName("nested file URIs are not resolved when they do not exist")
-  @ValueSource(strings = {"jar", "zip"})
-  @ParameterizedTest(name = "for protocol {0}")
-  void nestedFileUrisAreNotResolvedWhenTheyDoNotExist(String protocol) throws Exception {
-    // Given
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(tempDir);
-
-    var expectedOutputDir = tempDir.resolve("outputs");
-    Files.createDirectories(expectedOutputDir);
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(expectedOutputDir);
-
-    var archiveFile = tempDir.resolve("inputs").resolve("archive." + protocol);
-    Files.createDirectories(archiveFile.getParent());
-    try (var outputStream = Files.newOutputStream(archiveFile)) {
-      createJar(
-          outputStream,
-          Map.entry("some/file.txt", "some content here"),
-          Map.entry("some/other/file.txt", "some more content here"),
-          Map.entry("foo/bar.txt", "Hello, World!"),
-          Map.entry("yet/another/file.bin", "blah blah blah")
-      );
-    }
-
-    var uri = URI.create(protocol + ":" + archiveFile.toUri() + "!/missing-file.txt");
-
-    // When
-    var result = uriResourceFetcher.fetchFileFromUri(uri, ".log", false);
-
-    // Then
-    assertThat(result)
-        .isEmpty();
-  }
-
-  @DisplayName("HTTP URIs are resolved when they exist")
-  @ValueSource(strings = {"bar.txt.bin", "foo/bar.txt.bin"})
-  @ParameterizedTest(name = "for path {0}")
-  void httpUrisAreResolvedWhenTheyExist(String requestedPath) throws Exception {
-    // Given
-    wireMockClient.register(get(urlEqualTo("/" + requestedPath))
-        .willReturn(aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "text/plain")
-            .withBody("Hello, World!")));
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(tempDir);
-
-    var uri = URI.create(wireMockBaseUri + "/" + requestedPath);
-    var digest = Digest.compute("SHA-1", uri.toURL().toExternalForm()).toHexString();
-    var expectedFileName = requestedPath.contains("/")
-        ? requestedPath.substring(requestedPath.lastIndexOf("/") + 1)
-        : requestedPath;
-
-    // When
-    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false);
-
-    // Then
-    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/" + requestedPath)));
-
-    assertThat(finalPath)
-        .isPresent()
-        .get(InstanceOfAssertFactories.PATH)
-        .isEqualTo(tempDir.resolve(expectedFileName + "-" + digest + ".textfile"))
-        .hasContent("Hello, World!");
-  }
-
-  @DisplayName("nested HTTP URIs are resolved when they exist")
-  @ValueSource(strings = {"jar", "zip"})
-  @ParameterizedTest(name = "for protocol {0}")
-  void nestedHttpUrisAreResolvedWhenTheyExist(String protocol) throws Exception {
-    // Given
-    var data = new ByteArrayOutputStream();
-    createJar(
-        data,
-        Map.entry("some/file.txt", "some content here"),
-        Map.entry("some/other/file.txt", "some more content here"),
-        Map.entry("foo/bar/baz.txt", "Hello, World!"),
-        Map.entry("yet/another/file.bin", "blah blah blah")
+    var conn = url.openConnection();
+    verify(conn).addRequestProperty(
+        eq("User-Agent"),
+        matches(
+            "^"
+                + "protobuf-maven-plugin/.*? \\(io.github.ascopes\\) "
+                + "Apache-Maven/.*? "
+                + "Java/.*? \\(.*?, .*?, .*?\\)"
+                + "$"
+        )
     );
-
-    wireMockClient.register(get(urlEqualTo("/some/archive." + protocol))
-        .willReturn(aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "application/octet-stream")
-            .withBody(data.toByteArray())));
-
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(tempDir);
-
-    var uri = URI.create(protocol + ":" + wireMockBaseUri
-        + "/some/archive." + protocol + "!/foo/bar/baz.txt");
-
-    var digest = Digest.compute("SHA-1", uri.toURL().toExternalForm()).toHexString();
-
-    // When
-    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false);
-
-    // Then
-    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/some/archive." + protocol)));
-
-    assertThat(finalPath)
-        .isPresent()
-        .get(InstanceOfAssertFactories.PATH)
-        .isEqualTo(tempDir.resolve("baz.txt-" + digest + ".textfile"))
-        .hasContent("Hello, World!");
+    verify(conn).setAllowUserInteraction(false);
+    verify(conn).setConnectTimeout(30_000);
+    verify(conn).setDoInput(true);
+    verify(conn).setDoOutput(false);
+    verify(conn).setReadTimeout(30_000);
+    verify(conn).setUseCaches(false);
   }
 
-  @DisplayName("Pathless HTTP URIs are resolved when they exist")
-  @Test
-  void pathlessHttpUrisAreResolvedWhenTheyExist() throws Exception {
-    // Given
-    wireMockClient.register(get(urlEqualTo("/"))
-        .willReturn(aResponse()
-            .withStatus(200)
-            .withHeader("Content-Type", "text/plain")
-            .withBody("Hello, World!")));
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(tempDir);
+  @DisplayName("Executable bits are set on the resulting file when instructed")
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest(name = "when setExecutable = {0}")
+  void executableBitsAreSetOnTheResultingFileWhenInstructed(
+      boolean setExecutable
+  ) throws Exception {
+    try (var fileUtilsMock = mockStatic(FileUtils.class, Answers.CALLS_REAL_METHODS)) {
+      // Given
+      var uri = URI.create("some://google.com/foo/bar/baz.txt");
+      var url = someUrlWithResolvedContent(uri, "bazbork");
+      when(urlFactory.create(any()))
+          .thenReturn(url);
 
-    var uri = URI.create(wireMockBaseUri);
-    var digest = Digest.compute("SHA-1", uri.toURL().toExternalForm()).toHexString();
+      Path expectedFile = temporarySpaceDir
+          .resolve(
+              uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                  + "-"
+                  + Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                  + ".ext"
+          );
 
-    // When
-    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false);
+      // When
+      uriResourceFetcher.fetchFileFromUri(uri, ".ext", setExecutable);
 
-    // Then
-    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/")));
-
-    assertThat(finalPath)
-        .isPresent()
-        .get(InstanceOfAssertFactories.PATH)
-        .isEqualTo(tempDir.resolve(digest + ".textfile"))
-        .hasContent("Hello, World!");
+      // Then
+      fileUtilsMock
+          .verify(() -> FileUtils.makeExecutable(expectedFile), times(setExecutable ? 1 : 0));
+    }
   }
 
-  @DisplayName("HTTP URIs are not resolved when they do not exist")
+  @DisplayName("URL resolution errors result in an exception being raised")
   @Test
-  void httpUrisAreNotResolvedWhenTheyDoNotExist() throws Exception {
+  void urlResolutionErrorsResultInAnExceptionBeingRaised() throws Exception {
     // Given
-    wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
-        .willReturn(aResponse().withStatus(404)));
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(tempDir);
-
-    var uri = URI.create(wireMockBaseUri + "/foo/bar.txt.bin");
-
-    // When
-    var finalPath = uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false);
+    var uri = URI.create("some://google.com/foo/bar/baz.txt");
+    var cause = new IOException("bang");
+    when(urlFactory.create(any()))
+        .thenThrow(cause);
 
     // Then
-    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/foo/bar.txt.bin")));
+    assertThatExceptionOfType(ResolutionException.class)
+        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, "something", false))
+        .withMessage("URI \"%s\" is invalid: %s", uri, cause)
+        .withCause(cause);
+  }
 
-    assertThat(finalPath)
+  @DisplayName("URL connect failures result in an exception being raised")
+  @Test
+  void urlConnectFailuresResultInAnExceptionBeingRaised() throws Exception {
+    // Given
+    var uri = URI.create("some://google.com/foo/bar/baz.txt");
+    var url = someUrlWithResolvedContent(uri, "bazbork");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
+    var cause = new IOException("bang");
+    when(url.openConnection())
+        .thenThrow(cause);
+
+    Path expectedFile = temporarySpaceDir
+        .resolve(
+            uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                + "-"
+                + Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                + ".something"
+        );
+
+    // Then
+    assertThatExceptionOfType(ResolutionException.class)
+        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".something", false))
+        .withMessage("Failed to transfer \"%s\" to \"%s\": %s", uri, expectedFile, cause)
+        .withCause(cause);
+  }
+
+  @DisplayName("URL transfer failures result in an exception being raised")
+  @Test
+  void urlTransferFailuresResultInAnExceptionBeingRaised() throws Exception {
+    // Given
+    var uri = URI.create("some://google.com/foo/bar/baz.txt");
+    var url = someUrlWithResolvedContent(uri, "bazbork");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
+
+    var cause = new IOException("bang");
+    var badInputStream = new BadInputStream(cause);
+    var conn = mock(URLConnection.class);
+    when(conn.getInputStream())
+        .thenReturn(badInputStream);
+    when(url.openConnection())
+        .thenReturn(conn);
+
+    Path expectedFile = temporarySpaceDir
+        .resolve(
+            uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                + "-"
+                + Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                + ".something"
+        );
+
+    // Then
+    assertThatExceptionOfType(ResolutionException.class)
+        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".something", false))
+        .withMessage("Failed to transfer \"%s\" to \"%s\": %s", uri, expectedFile, cause)
+        .withCause(cause);
+  }
+
+  @DisplayName("FileNotFoundExceptions raised during URL connect return an empty result")
+  @Test
+  void fileNotFoundExceptionsRaisedDuringUrlConnectReturnEmptyResult() throws Exception {
+    // Given
+    var uri = URI.create("some://google.com/foo/bar/baz.txt");
+    var url = someUrlWithResolvedContent(uri, "bazbork");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
+    var cause = new FileNotFoundException("bang");
+    when(url.openConnection())
+        .thenThrow(cause);
+
+    // When
+    var result = uriResourceFetcher.fetchFileFromUri(uri, ".foo", false);
+
+    // Then
+    assertThat(result)
         .isEmpty();
   }
 
-  @DisplayName("HTTP URIs raise exceptions if transfer fails")
+  @DisplayName("FileNotFoundExceptions raised during URL transfer return an empty result")
   @Test
-  void httpUrisRaiseExceptionsIfTransferFails() {
+  void fileNotFoundExceptionsRaisedDuringUrlTransferReturnEmptyResult() throws Exception {
     // Given
-    wireMockClient.register(get(urlEqualTo("/foo/bar.txt.bin"))
-        .willReturn(aResponse().withFault(Fault.MALFORMED_RESPONSE_CHUNK)));
-    when(temporarySpace.createTemporarySpace(any(), any()))
-        .thenReturn(tempDir);
+    var uri = URI.create("some://google.com/foo/bar/baz.txt");
+    var url = someUrlWithResolvedContent(uri, "bazbork");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
 
-    var uri = URI.create(wireMockBaseUri + "/foo/bar.txt.bin");
+    var cause = new FileNotFoundException("bang");
+    var badInputStream = new BadInputStream(cause);
+    var conn = mock(URLConnection.class);
+    when(conn.getInputStream())
+        .thenReturn(badInputStream);
+    when(url.openConnection())
+        .thenReturn(conn);
+
+    // When
+    var result = uriResourceFetcher.fetchFileFromUri(uri, ".foo", false);
 
     // Then
-    assertThatExceptionOfType(ResolutionException.class)
-        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false))
-        .withCauseInstanceOf(IOException.class);
-
-    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/foo/bar.txt.bin")));
+    assertThat(result)
+        .isEmpty();
   }
 
-  @DisplayName("HTTP URIs raise exceptions if offline mode is enabled")
-  @Test
-  void httpUrisRaiseExceptionsIfOfflineModeIsEnabled() {
-    // Given
-    when(mavenSession.isOffline())
-        .thenReturn(true);
-
-    var uri = URI.create(wireMockBaseUri + "/foo/bar.txt.bin");
-    // Then
-    assertThatExceptionOfType(ResolutionException.class)
-        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false))
-        .withMessage(
-            "Cannot resolve URI \"%s\". Only a limited number of URL protocols "
-                + "are supported in offline mode.",
-            uri
-        );
-
-    wireMockClient.verifyThat(0, anyRequestedFor(anyUrl()));
+  static Stream<URI> fileUris() {
+    return Stream
+        .of(
+            "file:foo/bar/baz.txt",
+            "tar:gz:file:foo/bar/baz.tgz!/foo.txt",
+            "tar:bz2:file:foo/bar/baz.tbz!/bar.txt",
+            "zip:file:foo/bar.zip!/cat.png",
+            "jar:file:foo/bar/baz/foo/bar.jar!/dog.tiff"
+        )
+        .map(URI::create);
   }
 
-  @DisplayName("nested HTTP URIs raise exceptions if offline mode is enabled")
-  @Test
-  void nestedHttpUrisRaiseExceptionsIfOfflineModeIsEnabled() {
-    // Given
-    when(mavenSession.isOffline())
-        .thenReturn(true);
-
-    var uri = URI.create("jar:" + wireMockBaseUri + "/foo/bar.txt.bin!/foo.txt");
-    // Then
-    assertThatExceptionOfType(ResolutionException.class)
-        .isThrownBy(() -> uriResourceFetcher.fetchFileFromUri(uri, ".textfile", false))
-        .withMessage(
-            "Cannot resolve URI \"%s\". Only a limited number of URL protocols "
-                + "are supported in offline mode.",
-            uri
-        );
-
-    wireMockClient.verifyThat(0, anyRequestedFor(anyUrl()));
+  static Stream<URI> remoteUris() {
+    return Stream
+        .of(
+            "ftp://example.com/foo/bar.txt",
+            "sftp://example.com/foo/bar.txt",
+            "http://example.com/foo/bar.txt",
+            "https://example.com/foo/bar.txt",
+            "tar:gz:ftp://example.com/foo/bar.tgz!/foo.txt",
+            "tar:bz2:sftp://example.com/foo/bar.tbz!/bar.txt",
+            "zip:http://example.com/foo/bar.zip!/cat.png",
+            "jar:https://example.com/foo/bar.jar!/dog.tiff"
+        )
+        .map(URI::create);
   }
 
-  @SafeVarargs
-  @SuppressWarnings("vararg")
-  static void createJar(
-      OutputStream outputStream,
-      Map.Entry<String, String>... files
-  ) throws IOException {
-    try (var zipOutputStream = new ZipOutputStream(outputStream)) {
-      for (var file : files) {
-        zipOutputStream.putNextEntry(new ZipEntry(file.getKey()));
-        zipOutputStream.write(file.getValue().getBytes());
-        zipOutputStream.closeEntry();
-      }
+  static URL someUrlWithResolvedContent(URI uri, String content) throws Exception {
+    return someUrlWithResolvedContent(uri, content.getBytes(StandardCharsets.UTF_8));
+  }
+
+  static URL someUrlWithResolvedContent(URI uri, byte[] content) throws Exception {
+    var connection = mock(URLConnection.class);
+    lenient().when(connection.getInputStream())
+        .thenReturn(new ByteArrayInputStream(content));
+
+    var url = mock(URL.class);
+    lenient().when(url.openConnection())
+        .thenReturn(connection);
+    lenient().when(url.toExternalForm())
+        .thenReturn(uri.toString());
+    // Quirk: URI.getPath() returns null when the corresponding URL would return empty string here.
+    lenient().when(url.getPath())
+        .thenReturn(requireNonNullElse(uri.getPath(), ""));
+    lenient().when(url.getProtocol())
+        .thenReturn(uri.getScheme());
+    return url;
+  }
+
+  // Overridden as mocking an InputStream and wrapping it in a BufferedInputStream seems to
+  // result in an infinite loop, memory leaks, and heap exhaustion on Zulu JDKs!
+  static class BadInputStream extends InputStream {
+
+    private final IOException ex;
+
+    BadInputStream(IOException ex) {
+      this.ex = ex;
+    }
+
+    @Override
+    public int read() throws IOException {
+      throw ex;
     }
   }
 }
