@@ -140,23 +140,6 @@ specific file system path:
 </plugin>
 ```
 
-Any protocols supported by your JRE should be able to be used here, including:
-
-- `file`
-- `http`
-- `https`
-- `ftp`
-- `zip`\* - can be used to dereference files within a ZIP archive,
-  e.g. `zip:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip!/plugin.exe`,
-  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.zip`
-  and internally extract `plugin.exe` from that archive.
-- `jar` - can be used to dereference files within a JAR archive, 
-  e.g. `jar:https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.jar!/plugin.exe`,
-  which would download `https://github.com/some-project/some-repo/releases/download/v1.1.1/plugin.jar`
-  and internally extract `plugin.exe` from that archive.
-
-<small>* The ZIP protocol was introduced in v3.2.0, prior to this, you should use JAR instead at the start of the URL. This will achieve the same thing.</small>
-
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
 individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
 cannot be resolved. This is useful for specific cases where resources may only be available during CI builds but do not
