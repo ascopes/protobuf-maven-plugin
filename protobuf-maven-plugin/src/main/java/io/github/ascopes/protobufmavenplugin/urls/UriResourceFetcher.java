@@ -50,15 +50,15 @@ import org.slf4j.LoggerFactory;
 public final class UriResourceFetcher {
 
   // Protocols that we allow in offline mode.
-  private static final Pattern OFFLINE_PROTOCOLS = Pattern.compile("^([A-Za-z0-9-]:)*file:");
+  private static final Pattern OFFLINE_PROTOCOLS = Pattern.compile("^([A-Za-z0-9-]+:)*file:.*");
 
   private static final int TIMEOUT = 30_000;
 
   private static final Logger log = LoggerFactory.getLogger(UriResourceFetcher.class);
 
   private final MavenSession mavenSession;
-  private final UrlFactory urlFactory;
   private final TemporarySpace temporarySpace;
+  private final UrlFactory urlFactory;
 
   @Inject
   public UriResourceFetcher(
