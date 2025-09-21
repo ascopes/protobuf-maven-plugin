@@ -106,8 +106,7 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <!-- Provided by Maven at runtime, so don't bundle it. -->
-      <scope>compile</scope>
-<!--      <scope>provided</scope>-->
+      <scope>provided</scope>
     </dependency>
 
     <!-- Test dependencies -->

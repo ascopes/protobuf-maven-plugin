@@ -8,6 +8,16 @@ To make life easier for users, a number of standard and non-standard protocols
 are included out of the box. This enables fetching of resources, extraction of
 resources from within archives, and decompression of archives.
 
+## Source directories and paths
+
+At the time of writing, due to other technical constraints, only ZIP and JAR archive types are
+supported when discovering Proto sources.
+
+This is reflected by the affected APIs only taking a local filesystem path, rather than a URI/URL.
+
+You can use other Maven plugins to first extract other archive types to work around this
+constraint.
+
 ## Protocol nesting
 
 Protocols within URLs are stackable and nestable. When being evaluated, the innermost
@@ -86,6 +96,8 @@ archiving_protocol ::= PROTOCOL ':' url '!/' PATH
 
 - `zip:...!/path/to/file` - treats `...` as a ZIP archive, fetching `path/to/file` from
   inside it (provided by Apache Commons Compress).
+- `kar:...!/path/to/file` - treats `...` as a KAR archive, fetching `path/to/file` from
+  inside it (provided by Apache Commons Compress).
 - `jar:...!/path/to/file` - treats `...` as a JAR archive, fetching `path/to/file` from
   inside it (provided by Apache Commons Compress).
 - `war:...!/path/to/file` - treats `...` as a WAR archive, fetching `path/to/file` from
@@ -110,8 +122,8 @@ archiving_protocol ::= PROTOCOL ':' url
 
 - `gzip:...`, `gz:` - treats `...` as a GZIP archive, decompressing it (provided by the
   Java standard library).
-- `bz2:...`, `bzip:...` - treats `...` as a BZip2 archive, decompressing it (provided by
-  Apache Commons Compress).
+- `bz:`, `bz2:...`, `bzip:...`, `bzip2:...` - treats `...` as a BZip2 archive, decompressing it
+  (provided by Apache Commons Compress).
 
 For more decompressing formats supported by Apache Commons Compress out of the box, please
 raise an issue with appropriate details.

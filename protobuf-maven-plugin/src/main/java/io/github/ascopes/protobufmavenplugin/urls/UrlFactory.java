@@ -73,7 +73,7 @@ public final class UrlFactory {
         new ArchiveUrlStreamHandlerFactory(
             this,
             ZipArchiveInputStream::new,
-            "zip"
+            "kar", "zip"
         ),
         new ArchiveUrlStreamHandlerFactory(
             this,
