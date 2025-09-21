@@ -68,11 +68,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Very expensive. Consider disabling?
           - title: macOS x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: macos-13
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
+          # Also very expensive.
           - title: macOS aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
             os-name: macos-15
             java-version: 11
