@@ -83,8 +83,7 @@ public final class SystemPathBinaryResolver {
     return path -> {
       var matchesName = FileUtils.getFileNameWithoutExtension(path)
           .equalsIgnoreCase(name);
-      var matchesExtension = FileUtils
-          .getFileExtension(path)
+      var matchesExtension = FileUtils.getFileExtension(path)
           .filter(hostSystem.getSystemPathExtensions()::contains)
           .isPresent();
       return matchesName && matchesExtension;
