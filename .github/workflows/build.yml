@@ -17,6 +17,7 @@ jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       default_maven_version: ${{ steps.determine_default_maven_version.outputs.default_maven_version }}
 
@@ -57,10 +58,10 @@ jobs:
           echo "Maven Version: ${maven_version}"
           echo "default_maven_version=${maven_version}" >> "${GITHUB_OUTPUT}"
 
-  build:
+  test:
     name: Test (${{ matrix.title }})
     runs-on: ${{ matrix.os-name }}
-    timeout-minutes: 60  # oh MacOS, why are you so slow?
+    timeout-minutes: 25
     needs:
       - validate
 
@@ -69,52 +70,52 @@ jobs:
       matrix:
         include:
           # Note: this runner is expensive!
-          - title: macos/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: osx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: macos-15
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: windows/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: win/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: windows-2025
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: windows/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
+          - title: win/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
             os-name: windows-11-arm
             java-version: 21  # This is the earliest-supported version on Windows ARM
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: linux/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: ubuntu-24.04-arm
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
+          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
             os-name: ubuntu-24.04
             java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
+          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
             os-name: ubuntu-24.04
             java-version: 21
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk25
+          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk25
             os-name: ubuntu-24.04
             java-version: 25
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: linux/x86/mvn3.8/jdk11
+          - title: lnx/x86/mvn3.8.8/jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: 3.8.8
 
-          - title: linux/x86/mvn4.0/jdk17
+          - title: lnx/x86/mvn4.0.0/jdk17
             os-name: ubuntu-24.04
             java-version: 17  # Minimum version supported by Maven 4
             maven-version: 4.0.0-rc-4
@@ -168,7 +169,7 @@ jobs:
   documentation:
     name: Documentation
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     needs:
       - validate
 
@@ -205,9 +206,9 @@ jobs:
   notify-coverage:
     name: Notify of coverage
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     needs:
-      - build
+      - test
       - documentation
       - validate
 
