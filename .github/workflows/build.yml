@@ -42,7 +42,7 @@ jobs:
       - name: Validate codecov.yml
         shell: bash
         if: always()
-        run: curl -si --fail-with-body --data-binary @- https://codecov.io/validate < codecov.yml
+        run: curl -si --fail-with-body --data-binary @codecov.yml https://codecov.io/validate
 
       - name: Validate license headers and code style
         shell: bash
