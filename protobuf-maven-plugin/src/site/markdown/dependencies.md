@@ -234,10 +234,14 @@ or paths on the local file system:
 
       <!-- Add something else from the local system -->
       <sourceDirectory>/path/to/something/else/to/include</sourceDirectory>
+      <sourceDirectory>/path/to/something/else/archive.jar</sourceDirectory>
+      <sourceDirectory>/path/to/something/else/archive.zip</sourceDirectory>
     </sourceDirectories>
   </configuration>
 </plugin>
 ```
+
+As demonstrated, `sourceDirectories` can also take JARs and ZIP archives (but not tarballs).
 
 ### Dependency management
 
