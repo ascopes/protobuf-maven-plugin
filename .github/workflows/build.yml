@@ -58,7 +58,7 @@ jobs:
           echo "default_maven_version=${maven_version}" >> "${GITHUB_OUTPUT}"
 
   build:
-    name: Tests - ${{ matrix.title }}
+    name: Test (${{ matrix.title }})
     runs-on: ${{ matrix.os-name }}
     timeout-minutes: 60  # oh MacOS, why are you so slow?
     needs:
@@ -68,61 +68,55 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Very expensive. Consider disabling?
-          - title: macOS x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
-            os-name: macos-13
-            java-version: 11
-            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
-
-          # Also very expensive.
-          - title: macOS aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          # Note: this runner is expensive!
+          - title: macos/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: macos-15
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Windows x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: windows/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: windows-2025
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Windows aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
+          - title: windows/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
             os-name: windows-11-arm
             java-version: 21  # This is the earliest-supported version on Windows ARM
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux aarch_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: linux/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: ubuntu-24.04-arm
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk11
+          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux x86_64 mvn ${{ needs.validate.outputs.default_maven_version }}, jdk17
+          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
             os-name: ubuntu-24.04
             java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk21
+          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
             os-name: ubuntu-24.04
             java-version: 21
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux x86_64, mvn ${{ needs.validate.outputs.default_maven_version }}, jdk25
+          - title: linux/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk25
             os-name: ubuntu-24.04
             java-version: 25
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: Linux x86_64, mvn 3.8.8, jdk11
+          - title: linux/x86/mvn3.8/jdk11
             os-name: ubuntu-24.04
             java-version: 11
             maven-version: 3.8.8
 
-          - title: Linux x86_64, mvn 4, jdk17
+          - title: linux/x86/mvn4.0/jdk17
             os-name: ubuntu-24.04
-            java-version: 17
+            java-version: 17  # Minimum version supported by Maven 4
             maven-version: 4.0.0-rc-4
 
     steps:
