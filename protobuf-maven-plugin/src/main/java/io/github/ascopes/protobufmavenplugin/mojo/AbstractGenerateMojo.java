@@ -506,8 +506,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>These will not be compiled into Java sources directly.
    *
-   * <p>If you wish to depend on a JAR containing protobuf sources, add it as a dependency
-   * with the {@code provided} or {@code test} scope instead, or use {@code importDependencies}.
+   * <p>If you wish to depend on a JAR Maven artifact containing protobuf sources, add it as a
+   * dependency with the {@code provided} or {@code test} scope instead, or use
+   * {@code importDependencies} rather than this parameter.
+   *
+   * <p>Import paths can also be specified as paths to ZIP or JAR archives on the local
+   * file system. This plugin will extract any {@code *.proto} files for you, and pass them to
+   * {@code protoc}.
+   *
+   * <p>If you wish to also compile proto sources, use the {@code sourceDirectories} parameter
+   * instead.
    *
    * @since 0.1.0
    */
@@ -994,6 +1002,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code excludes} - a set of exclusions to apply to transitive dependencies</li>
    * </ul>
    *
+   * <p>If you wish to use descriptor files from the local file system, use
+   * the {@code sourceDescriptorPaths} parameter instead.
+   *
    * @since 3.1.0
    */
   @Parameter
@@ -1007,9 +1018,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p><strong>Note that specifying custom directories will override the default
    * directories rather than adding to them.</strong>
    *
+   * <p>Source directories can also be specified as paths to ZIP or JAR archives on the local
+   * file system. This plugin will extract any {@code *.proto} files for you, and pass them to
+   * {@code protoc}.
+   *
+   * <p>If you wish to compile sources from within a Maven artifact holding a JAR or ZIP, use the
+   * {@code sourceDependencies} parameter instead.
+   *
+   * <p>If you wish to compile sources from descriptor files from the local file system, use
+   * the {@code sourceDescriptorPaths} parameter instead.
+   *
+   * <p>If you wish to compile sources from within a Maven artifact holding a Protobuf descriptor
+   * file, use {@code sourceDescriptorDependencies} instead.
+   *
    * @since 0.0.1
    */
-  @Parameter
+  @Parameter(alias = "sourcePaths")
   @Nullable List<Path> sourceDirectories;
 
   /**
