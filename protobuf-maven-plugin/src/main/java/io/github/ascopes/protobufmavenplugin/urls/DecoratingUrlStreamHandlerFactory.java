@@ -26,12 +26,12 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 3.10.0
  */
-final class TransformingUrlStreamHandlerFactory
-    extends AbstractDecoratingUrlStreamHandlerFactory {
+final class DecoratingUrlStreamHandlerFactory
+    extends AbstractRecursiveUrlStreamHandlerFactory {
 
   private final InputStreamDecorator<InputStream> decorator;
 
-  TransformingUrlStreamHandlerFactory(
+  DecoratingUrlStreamHandlerFactory(
       UrlFactory urlFactory,
       InputStreamDecorator<InputStream> decorator,
       String... protocols
@@ -41,7 +41,7 @@ final class TransformingUrlStreamHandlerFactory
   }
 
   @Override
-  protected InputStream decorateInputStream(
+  protected InputStream decorate(
       InputStream inputStream,
       @Nullable String file
   ) throws IOException {

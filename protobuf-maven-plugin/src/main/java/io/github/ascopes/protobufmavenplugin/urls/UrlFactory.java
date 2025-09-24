@@ -55,12 +55,12 @@ public final class UrlFactory {
   @PostConstruct
   void init() {
     urlStreamHandlerFactories = List.of(
-        new TransformingUrlStreamHandlerFactory(
+        new DecoratingUrlStreamHandlerFactory(
             this,
             BZip2CompressorInputStream::new,
             "bz", "bz2", "bzip", "bzip2"
         ),
-        new TransformingUrlStreamHandlerFactory(
+        new DecoratingUrlStreamHandlerFactory(
             this,
             GZIPInputStream::new,
             "gz", "gzip"

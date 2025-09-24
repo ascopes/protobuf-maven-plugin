@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @since 3.10.0
  */
 final class ArchiveUrlStreamHandlerFactory
-    extends AbstractDecoratingUrlStreamHandlerFactory {
+    extends AbstractRecursiveUrlStreamHandlerFactory {
 
   private static final Logger log = LoggerFactory.getLogger(ArchiveUrlStreamHandlerFactory.class);
 
@@ -56,7 +56,7 @@ final class ArchiveUrlStreamHandlerFactory
   }
 
   @Override
-  protected InputStream decorateInputStream(
+  protected InputStream decorate(
       InputStream inputStream,
       @Nullable String file
   ) throws IOException {
@@ -64,7 +64,16 @@ final class ArchiveUrlStreamHandlerFactory
     file = normalizeEntryName(file);
 
     try (
+        // Important that we close the original input stream here.
+        // The URLConnection API is arguably poorly designed because it
+        // provides no simple mechanism for closing any associated 
+        // resources. Instead, we have to close the associated input
+        // streams manually to avoid leaking resources.
         inputStream;
+        // The archive input stream is only kept alive for as long as
+        // we need it to read from. Everything else is rebuffered in
+        // memory so we can avoid resource leaks that the garbage collector
+        // cannot deal with itself.
         var archiveInputStream = decorator.decorate(inputStream)
     ) {
       ArchiveEntry entry;
@@ -73,7 +82,7 @@ final class ArchiveUrlStreamHandlerFactory
       while ((entry = archiveInputStream.getNextEntry()) != null) {
         name = normalizeEntryName(entry.getName());
 
-        log.debug(
+        log.trace(
             "Discovered entry '{}' (original name was '{}') in {} (wrapping {})",
             name,
             entry.getName(),
@@ -93,15 +102,19 @@ final class ArchiveUrlStreamHandlerFactory
         );
       }
 
-      // Transfer the file contents out so we can close the actual stream.
+      // Transfer the file contents out so we can close the input streams
+      // to avoid leaking resources.
       var baos = new ByteArrayOutputStream();
-      log.debug("Loading '{}' into new buffer", file);
+      log.trace("Loading '{}' into new buffer", file);
       archiveInputStream.transferTo(baos);
       return new ByteArrayInputStream(baos.toByteArray());
     }
   }
 
   private static String normalizeEntryName(String name) {
+    // Tarballs seem to do this sometimes. I'm not sure if there are other
+    // edge cases to worry about, so we may find this needs further expansion
+    // in the future.
     if (name.startsWith("./")) {
       name = name.substring(2);
     }

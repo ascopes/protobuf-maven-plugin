@@ -36,14 +36,14 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 3.10.0
  */
-abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHandlerFactory {
+abstract class AbstractRecursiveUrlStreamHandlerFactory implements URLStreamHandlerFactory {
 
   private final List<String> protocols;
   private final boolean archive;
   private final UrlFactory urlFactory;
   private final DecoratingUrlStreamHandlerImpl streamHandler;
 
-  AbstractDecoratingUrlStreamHandlerFactory(
+  AbstractRecursiveUrlStreamHandlerFactory(
       boolean archive,
       UrlFactory urlFactory,
       String... protocols
@@ -65,7 +65,7 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
         : null;
   }
 
-  protected abstract InputStream decorateInputStream(
+  protected abstract InputStream decorate(
       InputStream inputStream,
       @Nullable String file
   ) throws IOException;
@@ -91,14 +91,12 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
           );
         }
 
-        // +2 since prefix is 2 chars long; we don't want to include the first forwardslash.
+        // +2 since prefix "!/" is 2 chars long; we don't want to include the first forwardslash.
         file = rawInnerUri.substring(pathIndex + 2);
         rawInnerUri = rawInnerUri.substring(0, pathIndex);
       }
 
-      var innerUri = URI.create(rawInnerUri);
-      var innerUrl = urlFactory.create(innerUri);
-
+      var innerUrl = urlFactory.create(URI.create(rawInnerUri));
       return new DecoratingUrlConnection(url, innerUrl, file);
     }
   }
@@ -109,17 +107,17 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
    */
   private final class DecoratingUrlConnection extends URLConnection {
 
-    private final @Nullable String file;
     private final URL innerUrl;
+    private final @Nullable String file;
 
-    private @Nullable URLConnection innerUrlConnection;
+    private @Nullable URLConnection connection;
     private @Nullable InputStream decoratedInputStream;
 
     DecoratingUrlConnection(URL url, URL innerUrl, @Nullable String file) {
       super(url);
       this.innerUrl = innerUrl;
       this.file = file;
-      innerUrlConnection = null;
+      connection = null;
       decoratedInputStream = null;
     }
 
@@ -129,52 +127,52 @@ abstract class AbstractDecoratingUrlStreamHandlerFactory implements URLStreamHan
         return;
       }
 
-      innerUrlConnection = innerUrl.openConnection();
+      connection = innerUrl.openConnection();
 
       // Copy any settings across prior to connecting.
-      innerUrlConnection.setAllowUserInteraction(getAllowUserInteraction());
-      innerUrlConnection.setConnectTimeout(getConnectTimeout());
-      innerUrlConnection.setDoInput(getDoInput());
-      innerUrlConnection.setDoOutput(getDoOutput());
-      innerUrlConnection.setIfModifiedSince(getIfModifiedSince());
-      innerUrlConnection.setReadTimeout(getReadTimeout());
-      innerUrlConnection.setUseCaches(getUseCaches());
-      getRequestProperties().forEach((key, values) ->
-          values.forEach(value -> innerUrlConnection.addRequestProperty(key, value)));
+      connection.setAllowUserInteraction(getAllowUserInteraction());
+      connection.setConnectTimeout(getConnectTimeout());
+      connection.setDoInput(getDoInput());
+      connection.setDoOutput(getDoOutput());
+      connection.setIfModifiedSince(getIfModifiedSince());
+      connection.setReadTimeout(getReadTimeout());
+      connection.setUseCaches(getUseCaches());
+      getRequestProperties()
+          .forEach((key, values) -> values
+              .forEach(value -> connection.addRequestProperty(key, value)));
 
       // Handshake.
-      innerUrlConnection.connect();
+      connection.connect();
       connected = true;
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
       if (decoratedInputStream == null) {
-        var innerUrlConnection = requireNonNull(this.innerUrlConnection, "not connected");
+        var connection = requireNonNull(this.connection, "not connected");
 
         try {
-          decoratedInputStream = decorateInputStream(innerUrlConnection.getInputStream(), file);
+          decoratedInputStream = decorate(connection.getInputStream(), file);
         } catch (IOException ex) {
           // Clean up, we're in a bad state and cannot continue, and we do not
           // want to abandon any resources.
-          innerUrlConnection.getInputStream().close();
+          connection.getInputStream().close();
           throw new IOException(
               "Failed to wrap input stream with protocol "
                   + protocols.iterator().next()
-                  + ": "
+                  + " for URL \"" + url + "\": "
                   + ex,
               ex
           );
         }
       }
-
       return decoratedInputStream;
     }
 
+    // TODO(ascopes): do we actually ever want to expose this?
     @Override
     public OutputStream getOutputStream() throws IOException {
-      return requireNonNull(innerUrlConnection, "not connected").getOutputStream();
+      return requireNonNull(connection, "not connected").getOutputStream();
     }
   }
-
 }
