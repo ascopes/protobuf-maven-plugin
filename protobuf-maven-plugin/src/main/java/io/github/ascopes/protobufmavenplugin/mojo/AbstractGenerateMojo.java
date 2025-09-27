@@ -218,18 +218,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
    *
-   * <p>This includes support for:
-   *
-   * <ul>
-   *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
-   *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
-   *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
-   *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
-   * </ul>
-   *
-   * <p>Additionally, the {@code zip} or {@code jar} protocol can be used with any of the above to
-   * enable extracting a file from a ZIP or JAR and using it directly.
-   *
    * <p>For example:
    * <pre>{@code
    * <binaryUrlPlugins>
@@ -251,7 +239,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </binaryUrlPlugins>
    * }</pre>
    *
-   * <p>If you are using v3.1.3 or older, use {@code jar} in place of {@code zip}.
+   * <p>See the user guide for details on the supported protocols.
    *
    * <p>Objects support the following attributes:
    *
@@ -816,14 +804,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
-   * <p>You can also specify a URL that points to:
-   *
-   * <ul>
-   *   <li>Local file system objects, specified using {@code file://path/to/file}</li>
-   *   <li>HTTP resources, specified using {@code http://example.website/path/to/file}</li>
-   *   <li>HTTPS resources, specified using {@code https://example.website/path/to/file}</li>
-   *   <li>FTP resources, specified using {@code ftp://example.server/path/to/file}</li>
-   * </ul>
+   * <p>You can also specify a URL. See the user guide for a list of supported protocols.
    *
    * <p>Note that specifying {@code -Dprotobuf.compiler.version} in the {@code MAVEN_OPTS} or on
    * the command line overrides the version specified in the POM. This enables users to easily

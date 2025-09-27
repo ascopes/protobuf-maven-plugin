@@ -54,8 +54,12 @@ import org.slf4j.LoggerFactory;
 @Named
 final class ProtoSourceResolver {
 
-  private static final Set<String> XML_FILE_EXTENSIONS = Set.of(".pom", ".xml");
-  private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(".ear", ".jar", ".war", ".zip");
+  private static final Set<String> XML_FILE_EXTENSIONS = Set.of(
+      ".pom", ".xml"
+  );
+  private static final Set<String> ZIP_FILE_EXTENSIONS = Set.of(
+      ".ear", ".jar", ".kar", ".war", ".zip"
+  );
 
   private static final Logger log = LoggerFactory.getLogger(ProtoSourceResolver.class);
 
