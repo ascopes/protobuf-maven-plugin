@@ -211,6 +211,7 @@ jobs:
       # otherwise this will cause the Maven job to fall over and revert
       # everything.
       - maven-central-release
+      - github-pages-release
 
     permissions:
       contents: write
