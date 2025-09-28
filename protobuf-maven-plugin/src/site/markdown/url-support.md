@@ -75,7 +75,7 @@ Protocol support covers three main use cases:
   hosted at `server.net` (provided by the Java standard library).
 - `http://server.net/path/to/file.zip` - fetch `path/to/file.zip` from the HTTP server
   hosted at `server.net` (provided by the Java standard library).
-- `http://server.net/path/to/file.zip` - fetch `path/to/file.zip` from the HTTPS server
+- `https://server.net/path/to/file.zip` - fetch `path/to/file.zip` from the HTTPS server
   hosted at `server.net` (provided by the Java standard library).
 
 **Note:**
