@@ -86,8 +86,8 @@ jobs:
       - name: Initialize Java
         uses: actions/setup-java@v5
         with:
-          distribution: temurin
-          java-version: zulu
+          distribution: zulu
+          java-version: 25
           server-id: central
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_TOKEN
