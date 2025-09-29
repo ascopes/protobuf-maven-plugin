@@ -15,58 +15,74 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Standard type for wrapping variants of an Apache Commons Compress archivers into
- * {@link java.net.URLConnection}s.
- *
- * <p>When used, it will extract some kind of file entry if one exists, buffering it into memory
- * before closing the original input streams and returning a new in-memory stream of the buffered
- * data.
+ * URL stream handler factory for URLs that dereference the contents of
+ * archives.
  *
  * @author Ashley Scopes
- * @since 3.10.0
+ * @since 3.10.1
  */
-final class ArchiveUrlStreamHandlerFactory
-    extends AbstractRecursiveUrlStreamHandlerFactory {
-
-  private static final Logger log = LoggerFactory.getLogger(ArchiveUrlStreamHandlerFactory.class);
-
+final class ApacheArchiveUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
+  private final UrlFactory urlFactory;
   private final InputStreamDecorator<ArchiveInputStream<?>> decorator;
 
-  ArchiveUrlStreamHandlerFactory(
+  ApacheArchiveUrlStreamHandlerFactory(
       UrlFactory urlFactory,
       InputStreamDecorator<ArchiveInputStream<?>> decorator,
+      String protocol,
       String... protocols
   ) {
-    super(true, urlFactory, protocols);
+    super(protocol, protocols);
+    this.urlFactory = urlFactory;
     this.decorator = decorator;
   }
 
   @Override
-  protected InputStream decorate(
+  URLConnection createUrlConnection(URL url) throws IOException {
+    var rawInnerUri = url.getFile();
+    var pathIndex = rawInnerUri.lastIndexOf("!/");
+    if (pathIndex == -1) {
+      throw new IOException(
+          "URI '" + url + "' was missing a nested path fragment (e.g. '"
+              + url.getProtocol() + ":http://some-website.com/some-file!/path/within/archive"
+              + "')"
+      );
+    }
+
+    // +2 since prefix "!/" is 2 chars long; we don't want to include the first forwardslash.
+    var file = rawInnerUri.substring(pathIndex + 2);
+    rawInnerUri = rawInnerUri.substring(0, pathIndex);
+    var innerUrl = urlFactory.create(URI.create(rawInnerUri));
+
+    return new AbstractNestingUrlConnection(url, innerUrl) {
+      @Override
+      InputStream nestInputStream(InputStream inputStream) throws IOException {
+        return readFileFromArchive(inputStream, file);
+      }
+    };
+  }
+
+  private InputStream readFileFromArchive(
       InputStream inputStream,
-      @Nullable String file
+      String file
   ) throws IOException {
-    requireNonNull(file);
     file = normalizeEntryName(file);
 
     try (
         // Important that we close the original input stream here.
         // The URLConnection API is arguably poorly designed because it
-        // provides no simple mechanism for closing any associated 
+        // provides no simple mechanism for closing any associated
         // resources. Instead, we have to close the associated input
         // streams manually to avoid leaking resources.
         inputStream;
@@ -81,15 +97,6 @@ final class ArchiveUrlStreamHandlerFactory
 
       while ((entry = archiveInputStream.getNextEntry()) != null) {
         name = normalizeEntryName(entry.getName());
-
-        log.trace(
-            "Discovered entry '{}' (original name was '{}') in {} (wrapping {})",
-            name,
-            entry.getName(),
-            archiveInputStream,
-            inputStream
-        );
-
         if (file.equals(name)) {
           break;
         }
@@ -105,11 +112,11 @@ final class ArchiveUrlStreamHandlerFactory
       // Transfer the file contents out so we can close the input streams
       // to avoid leaking resources.
       var baos = new ByteArrayOutputStream();
-      log.trace("Loading '{}' into new buffer", file);
       archiveInputStream.transferTo(baos);
       return new ByteArrayInputStream(baos.toByteArray());
     }
   }
+
 
   private static String normalizeEntryName(String name) {
     // Tarballs seem to do this sometimes. I'm not sure if there are other
