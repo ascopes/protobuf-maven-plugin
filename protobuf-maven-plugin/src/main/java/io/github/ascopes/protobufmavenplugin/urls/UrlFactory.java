@@ -55,27 +55,27 @@ public final class UrlFactory {
   @PostConstruct
   void init() {
     urlStreamHandlerFactories = List.of(
-        new DecoratingUrlStreamHandlerFactory(
+        new NestingUrlStreamHandlerFactory(
             this,
             BZip2CompressorInputStream::new,
             "bz", "bz2", "bzip", "bzip2"
         ),
-        new DecoratingUrlStreamHandlerFactory(
+        new NestingUrlStreamHandlerFactory(
             this,
             GZIPInputStream::new,
             "gz", "gzip"
         ),
-        new ArchiveUrlStreamHandlerFactory(
+        new ApacheArchiveUrlStreamHandlerFactory(
             this,
             JarArchiveInputStream::new,
             "jar", "ear", "war"
         ),
-        new ArchiveUrlStreamHandlerFactory(
+        new ApacheArchiveUrlStreamHandlerFactory(
             this,
             ZipArchiveInputStream::new,
             "kar", "zip"
         ),
-        new ArchiveUrlStreamHandlerFactory(
+        new ApacheArchiveUrlStreamHandlerFactory(
             this,
             TarArchiveInputStream::new,
             "tar"
