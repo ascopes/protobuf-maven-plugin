@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.fixtures;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Random data fixtures.
@@ -26,10 +27,12 @@ import java.util.UUID;
  */
 public final class RandomFixtures {
 
-  private static final Random random = new Random();
-
   private RandomFixtures() {
     // Static-only class.
+  }
+
+  public static boolean someBoolean() {
+    return random().nextBoolean();
   }
 
   public static String someBasicString() {
@@ -37,12 +40,20 @@ public final class RandomFixtures {
   }
 
   public static int someInt() {
-    return random.nextInt();
+    return random().nextInt();
+  }
+
+  public static int somePositiveInt() {
+    return random().nextInt(Integer.MAX_VALUE);
   }
 
   public static <T> T oneOf(Iterable<T> items) {
     var list = new ArrayList<T>();
     items.forEach(list::add);
-    return list.get(random.nextInt(list.size()));
+    return list.get(random().nextInt(list.size()));
+  }
+
+  private static Random random() {
+    return ThreadLocalRandom.current();
   }
 }
