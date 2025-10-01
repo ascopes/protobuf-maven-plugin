@@ -24,7 +24,7 @@ function generateTableOfContents() {
 
   const section = getParentSection(targetElement);
   const headingTree = buildHeadingTree(section);
-  const tocHtml = buildTocHtml(headingTree);
+  const tocHtml = buildTocHtml(headingTree, 0);
 
   const heading = document.createElement("h4");
   const hr1 = document.createElement("hr");
@@ -54,7 +54,7 @@ function getParentSection(element) {
 }
 
 function buildHeadingTree(section) {
-  const headings = section.querySelectorAll("h1, h2, h3, h4, h5, h6");
+  const headings = section.querySelectorAll("h2, h3, h4, h5, h6");
   const roots = [];
   const stack = [];
 
@@ -96,15 +96,16 @@ function buildHeadingLevel(element) {
   };
 }
 
-function buildTocHtml(roots) {
+function buildTocHtml(roots, level) {
   const ol = document.createElement("ol");
+  ol.setAttribute("style", `list-style-type: ${listStyle(level)}`);
 
   for (const root of roots) {
     const a = document.createElement("a");
     a.setAttribute("href", `#${root.id}`);
     a.innerText = root.name;
 
-    const nestedList = buildTocHtml(root.children);
+    const nestedList = buildTocHtml(root.children, level + 1);
 
     const li = document.createElement("li");
     li.appendChild(a);
@@ -114,4 +115,8 @@ function buildTocHtml(roots) {
   }
 
   return ol;
+}
+
+function listStyle(level) {
+  return ["decimal", "lower-latin", "lower-roman"][level % 3];
 }
