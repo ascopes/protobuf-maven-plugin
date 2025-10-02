@@ -73,29 +73,34 @@ the following hierarchy:
                     ┗━ ticket_board.proto       
 ```
 
-We can add a dependency on this in our `pom.xml`, and the protobuf-maven-plugin will automatically
+We can add a `sourceDependency` on this in our `pom.xml`, and the protobuf-maven-plugin will automatically
 detect it and discover the proto files inside it, enabling our project to build successfully:
 
 ```xml
-<project>
+<configuration>
   ...
   
-  <dependencies>
-    <dependency>
+  <sourceDependencies>
+    <sourceDependency>
       <groupId>org.example</groupId>
       <artifactId>ticketsystem-ticket-board</artifactId>
       <version>...</version>
       <classifier>zip</classifier>
       <scope>compile</scope>      
-    </dependency>
-  </dependencies>
-</project>
+    </sourceDependency>
+  </sourceDependencies>
+</configuration>
 ```
 
 ## Maven Dependencies
 
 By default, the plugin will discover all `*.proto` files in all dependencies of the current Maven
 project. This occurs transitively, and all are added to the `protoc` import path.
+
+Note that when using regular Maven POM dependencies in the `<dependendencies>` blocks,
+these sources will not be compiled alongside your project, only imported. The expectation is made
+that any dependencies being used in this way will also have the corresponding class files bundled
+(like how `protobuf-java` is packaged).
 
 The idea here is that the behaviour for imports should almost exactly mimic how Java dependencies
 work and how they are resolved on the classpath.
