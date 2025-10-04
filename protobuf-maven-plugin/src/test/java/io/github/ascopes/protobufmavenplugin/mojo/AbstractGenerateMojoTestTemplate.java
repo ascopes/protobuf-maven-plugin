@@ -76,6 +76,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 
+@SuppressWarnings("removal")
 abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> {
 
   @TempDir

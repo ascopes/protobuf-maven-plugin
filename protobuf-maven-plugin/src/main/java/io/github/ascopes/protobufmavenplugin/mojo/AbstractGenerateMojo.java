@@ -300,16 +300,22 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Enable generating C++ sources and headers from the protobuf sources.
    *
+   * @deprecated will be removed in v4.0.0. Users wishing to generate C++ sources
+   *     should use the {@code arguments} to specify {@code --cpp_out=path}.
    * @since 1.1.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean cppEnabled;
 
   /**
    * Enable generating C# sources from the protobuf sources.
    *
+   * @deprecated will be removed in v4.0.0. Users wishing to generate C# sources
+   *     should use the {@code arguments} to specify {@code --csharp_out=path}.
    * @since 1.1.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean csharpEnabled;
 
@@ -422,8 +428,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Prior to {@code v2.4.0}, any invalid dependencies would result in an error being raised
    * and the build being aborted. In {@code v2.4.0}, this has been relaxed.
    *
+   * @deprecated will be removed in v4.0.0: invalid dependencies will be ignored.
    * @since 2.4.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean failOnInvalidDependencies;
 
@@ -435,8 +443,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
    * can explicitly set this to {@code false} instead.
    *
+   * @deprecated will be removed in v4.0.0: missing sources will always be an error.
    * @since 0.5.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_TRUE)
   boolean failOnMissingSources;
 
@@ -688,8 +698,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate Objective-C sources from the protobuf sources.
    *
+   * @deprecated will be removed in v4.0.0. Users wishing to generate Objective-C sources
+   *     should use the {@code arguments} to specify {@code --objc_out=path}.
    * @since 1.1.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean objcEnabled;
 
@@ -794,8 +807,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate PHP sources from the protobuf sources.
    *
+   * @deprecated will be removed in v4.0.0. Users wishing to generate PHP sources
+   *     should use the {@code arguments} to specify {@code --php_out=path}.
    * @since 1.1.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean phpEnabled;
 
@@ -900,8 +916,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate Rust sources from the protobuf sources.
    *
+   * @deprecated will be removed in v4.0.0. Users wishing to generate Rust sources
+   *     should use the {@code arguments} to specify {@code --rust_out=path}.
    * @since 1.1.0
    */
+  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean rustEnabled;
 
@@ -1108,6 +1127,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @throws MojoFailureException   if an error occurs.
    */
   @Override
+  @SuppressWarnings("removal")
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
       log.info("Execution of this plugin has been skipped in the configuration");
