@@ -93,7 +93,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   MavenProjectHelper mavenProjectHelper;
 
   /**
-   * Additional arguments to pass to {@code protoc}.
+   * Provide additional arguments to pass to the {@code protoc} executable.
    *
    * <p>Note that generally, you should not need to use this. It is useful, however, if your
    * use-case is not covered by other configuration parameters in this goal.
@@ -108,6 +108,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
+   *
+   * <p>Bianry plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * with {@code protoc} out of the box.
    *
    * <p>Plugin artifacts must be a <strong>native executable</strong>. By default, the OS and CPU
    * architecture is automatically generated and injected in the classifier if the classifier and
@@ -165,6 +168,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
    *
+   * <p>Bianry plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * with {@code protoc} out of the box.
+   *
    * <p>For example:
    * <pre>{@code
    * <binaryPathPlugins>
@@ -217,6 +223,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
+   *
+   * <p>Bianry plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * with {@code protoc} out of the box.
    *
    * <p>For example:
    * <pre>{@code
@@ -279,6 +288,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * If {@code true}, all output directories will be cleared before {@code protoc}
    * is invoked.
    *
+   * <p>Enable this to force a clean build on each invocation.
+   *
    * <p>Note that this is ignored if {@code incrementalCompilation} is enabled.
    *
    * @since 3.6.0
@@ -303,13 +314,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean csharpEnabled;
 
   /**
-   * The scope to resolve dependencies with.
+   * How to resolve transitive dependencies.
    *
    * <p>Supported values:
    *
    * <ul>
-   *   <li><code>TRANSITIVE</code> - resolve all dependencies.</li>
-   *   <li><code>DIRECT</code> - only resolve dependencies that were explicitly specified.</li>
+   *   <li><code>TRANSITIVE</code> - resolve transitive dependencies.</li>
+   *   <li><code>DIRECT</code> - only resolve direct dependencies that were explicitly
+   *       specified.</li>
    * </ul>
    *
    * @since 1.2.0
@@ -320,18 +332,25 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The dependency scopes to resolve dependencies for.
    *
+   * <p>If unspecified, this uses a sensible default, as documented in the goal
+   * description.
+   *
+   * <p>Valid values include: {@code compile}, {@code test}, {@code provided}, {@code runtime},
+   * {@code system}, and {@code import}.
+   *
+   * <p>Refer to the Maven documentation for scopes for more details on the implications of each.
+   *
    * @since 2.4.0
    */
   @Parameter
   @Nullable Set<String> dependencyScopes;
 
   /**
-   * Set whether to attach all compiled protobuf sources to the output of this
+   * Enable attaching all compiled protobuf sources to the output of this
    * Maven project so that they are included in any generated JAR.
    *
    * <p>Note that if you are using dependencies as sources, then those will also
-   * be attached, and may have license implications. Therefore, this will default
-   * to {@code false}.
+   * be attached, and may have license implications.
    *
    * @since 2.1.0
    */
@@ -348,7 +367,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code protoc}. Any environment variables specified here will be appended to the default
    * environment variables, overwriting any that have duplicate names.
    *
-   * <p>Note that this will not allow overriding aspects like the system path, as those are
+   * <p>Note that this will not support overriding aspects like the system path, as those are
    * resolved statically prior to any invocation.
    *
    * @since 3.7.0
@@ -357,7 +376,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Map<String, String> environmentVariables;
 
   /**
-   * Source paths to exclude from compilation.
+   * Source paths to protobuf sources to exclude from compilation.
    *
    * <p>This can be used to limit what is compiled by {@code protoc}.
    *
@@ -392,7 +411,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<String> excludes;
 
   /**
-   * Whether to fail if any invalid direct or transitive dependencies are encountered.
+   * Fail the build if any invalid direct or transitive dependencies are encountered.
    *
    * <p>If {@code true}, the build will be aborted with an error if any invalid dependency is
    * encountered.
@@ -409,7 +428,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean failOnInvalidDependencies;
 
   /**
-   * Whether to fail on missing sources.
+   * Fail on missing sources.
    *
    * <p>If no sources are detected, it is usually a sign that this plugin
    * is misconfigured, or that you are including this plugin in a project that does not need it. For
@@ -422,10 +441,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean failOnMissingSources;
 
   /**
-   * Whether to fail if no output languages and no plugins are enabled.
+   * Fail if no output languages and no plugins are enabled.
    *
    * <p>This defaults to {@code true}, but may be set to {@code false} if all plugins are optional
    * and no languages are enabled.
+   *
+   * <p>Users should prefer to {@code skip} the plugin if a known configuration has no targets.
    *
    * @since 2.0.0
    */
@@ -444,7 +465,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean fatalWarnings;
 
   /**
-   * Whether to ignore the {@code <dependencies/>} blocks in the Maven project when discovering
+   * Ignore the {@code <dependencies/>} blocks in the Maven project when discovering
    * {@code *.proto} files to add to the import paths.
    *
    * <p>Generally you will want to leave this enabled unless you have a very specific case where
@@ -511,7 +532,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<Path> importPaths;
 
   /**
-   * Source paths to include in compilation.
+   * Protobuf source paths to include in compilation.
    *
    * <p>This can be used to limit what is compiled by {@code protoc}.
    *
@@ -525,7 +546,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>If a file matches <strong>any</strong> of these patterns, it is automatically included.
    *
-   * <p>If not provided, then the default is to allow any Protobuf source file.
+   * <p>If not provided, then the default is to allow any protobuf source file.
    *
    * <p>For example, if you only wanted to compile files named {@code user.proto},
    * {@code message.proto}, or {@code service.proto}, you could use the following
@@ -546,7 +567,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<String> includes;
 
   /**
-   * Whether to enable "incremental" compilation.
+   * Enable "incremental" compilation.
    *
    * <p>When enabled, this plugin will track changes to sources and importable protobuf
    * dependencies between builds, making a best-effort attempt to only rebuild files when
@@ -641,7 +662,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<MavenProtocPluginBean> jvmMavenPlugins;
 
   /**
-   * Enable generating Kotlin API wrapper code around the generated Java code.
+   * Generate Kotlin API wrapper code around the generated Java code.
    *
    * <p>This may require {@code javaEnabled} to also be {@code true}, otherwise compilation
    * may fail unless other sources are generated to replace the expected Java ones.
@@ -652,10 +673,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean kotlinEnabled;
 
   /**
-   * Whether to only generate "lite" messages or not.
+   * Generate "lite" messages rather than full messages, where possible.
    *
    * <p>These are bare-bones sources that do not contain most of the metadata that regular
-   * Protobuf sources contain, and are designed for low-latency/low-overhead scenarios.
+   * protobuf sources contain, and are designed for low-latency/low-overhead scenarios.
    *
    * <p>See the protobuf documentation for the pros and cons of this.
    *
@@ -665,7 +686,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean liteOnly;
 
   /**
-   * Enable generating Objective-C sources from the protobuf sources.
+   * Generate Objective-C sources from the protobuf sources.
    *
    * @since 1.1.0
    */
@@ -673,7 +694,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean objcEnabled;
 
   /**
-   * Defines the file in which to write the file descriptor set descriptor..
+   * The path to write the protobuf descriptor file to.
    *
    * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
    * defined by {@code descriptor.proto}) containing all the input files in
@@ -689,7 +710,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Path outputDescriptorFile;
 
   /**
-   * Whether to attach the generated file descriptor set descriptor as a Maven project artifact.
+   * Attach the generated protobuf descriptor file as a Maven project artifact.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
@@ -700,7 +721,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorAttached;
 
   /**
-   * Defines the Maven artifact type for the file descriptor set descriptor when attached to the
+   * The Maven artifact type for the file descriptor set descriptor when attached to the
    * Maven project.
    *
    * <p>This is ignored if {@code outputDescriptorAttached} is false, or if
@@ -714,7 +735,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable String outputDescriptorAttachmentType;
 
   /**
-   * Defines the Maven artifact classifier for the file descriptor set descriptor when attached to
+   * The Maven artifact classifier for the file descriptor set descriptor when attached to
    * the Maven project.
    *
    * <p>This is ignored if {@code outputDescriptorAttached} is false.</p>
@@ -726,7 +747,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable String outputDescriptorAttachmentClassifier;
 
   /**
-   * Enable including imports in generated file descriptor set descriptor files.
+   * Include imports in generated file descriptor set descriptor files.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
@@ -737,7 +758,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorIncludeImports;
 
   /**
-   * Enable including source information in generated file descriptor set descriptors.
+   * Include source information in generated file descriptor set descriptors.
    * files.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
@@ -749,7 +770,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorIncludeSourceInfo;
 
   /**
-   * Enable retaining option details in generated file descriptor set descriptors.
+   * Retain option details in generated file descriptor set descriptors.
    *
    * <p>This is ignored if {@code outputDescriptorFile} is not provided.
    *
@@ -760,7 +781,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean outputDescriptorRetainOptions;
 
   /**
-   * Override the directory to output generated code to.
+   * The directory to output generated code to.
    *
    * <p>Leave unspecified or explicitly null to use the default for the
    * goal. This defaults to the Maven generated sources directory within {@code target/}.
@@ -771,7 +792,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Path outputDirectory;
 
   /**
-   * Enable generating PHP sources from the protobuf sources.
+   * Generate PHP sources from the protobuf sources.
    *
    * @since 1.1.0
    */
@@ -795,7 +816,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Digest protocDigest;
 
   /**
-   * Specifies where to find {@code protoc} or which version to download.
+   * Where to find {@code protoc} or which version to download.
    *
    * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
    * is in use.
@@ -832,7 +853,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   String protocVersion;
 
   /**
-   * Enable generating Python sources from the protobuf sources.
+   * Generate Python sources from the protobuf sources.
    *
    * <p>If you enable this, you probably will also want to enable Python stubs
    * to enable generating {@code *.pyi} files for static type checkers.
@@ -843,7 +864,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean pythonEnabled;
 
   /**
-   * Enable generating Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
+   * Generate Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
    * sources.
    *
    * <p>If you enable this, you probably will also want to enable Python itself
@@ -855,7 +876,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean pythonStubsEnabled;
 
   /**
-   * Whether to register the output directories as compilation roots with Maven.
+   * Register the output directories as compilation roots with Maven.
+   *
+   * <p>This allows {@code maven-compiler-plugin} to detect and compile generated code.
    *
    * <p>Generally, you want to do this, but there may be edge cases where you
    * wish to control this behaviour manually instead. In this case, set this parameter to be
@@ -867,7 +890,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean registerAsCompilationRoot;
 
   /**
-   * Enable generating Ruby sources from the protobuf sources.
+   * Generate Ruby sources from the protobuf sources.
    *
    * @since 1.1.0
    */
@@ -875,7 +898,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean rubyEnabled;
 
   /**
-   * Enable generating Rust sources from the protobuf sources.
+   * Generate Rust sources from the protobuf sources.
    *
    * @since 1.1.0
    */
@@ -883,7 +906,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean rustEnabled;
 
   /**
-   * Specify a corporate-sanctioned path to run native executables from.
+   * Corporate-sanctioned path to run native executables from.
    *
    * <p>Most users <strong>SHOULD NOT</strong> specify this.
    *
@@ -992,7 +1015,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<MavenDependencyBean> sourceDescriptorDependencies;
 
   /**
-   * Override the source directories to compile from.
+   * The source directories to compile protobuf sources from.
    *
    * <p>Leave unspecified or explicitly null/empty to use the defaults.
    *
@@ -1009,7 +1032,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If you wish to compile sources from descriptor files from the local file system, use
    * the {@code sourceDescriptorPaths} parameter instead.
    *
-   * <p>If you wish to compile sources from within a Maven artifact holding a Protobuf descriptor
+   * <p>If you wish to compile sources from within a Maven artifact holding a protobuf descriptor
    * file, use {@code sourceDescriptorDependencies} instead.
    *
    * @since 0.0.1
@@ -1018,7 +1041,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<Path> sourceDirectories;
 
   /**
-   * Specify paths to descriptor files to compile from.
+   * Descriptor files to compile from.
    *
    * @since 3.1.0
    */
