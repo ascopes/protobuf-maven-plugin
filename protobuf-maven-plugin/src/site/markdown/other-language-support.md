@@ -21,18 +21,6 @@ To enable other languages, use the following attributes within your `configurati
   </thead>
   <tbody>
     <tr>
-      <td>C++</td>
-      <td><code>cppEnabled</code></td>
-      <td><code>false</code></td>
-      <td/>
-    </tr>
-    <tr>
-      <td>C#</td>
-      <td><code>csharpEnabled</code></td>
-      <td><code>false</code></td>
-      <td/>
-    </tr>
-    <tr>
       <td>Java</td>
       <td><code>javaEnabled</code></td>
       <td><code>true</code></td>
@@ -43,18 +31,6 @@ To enable other languages, use the following attributes within your `configurati
       <td><code>kotlinEnabled</code></td>
       <td><code>false</code></td>
       <td>Generates JVM Kotlin descriptors. You should also ensure <code>javaEnabled</code> is true.</td>
-    </tr>
-    <tr>
-      <td>Objective-C</td>
-      <td><code>objcEnabled</code></td>
-      <td><code>false</code></td>
-      <td/>
-    </tr>
-    <tr>
-      <td>PHP</td>
-      <td><code>phpEnabled</code></td>
-      <td><code>false</code></td>
-      <td/>
     </tr>
     <tr>
       <td>Python</td>
@@ -74,14 +50,11 @@ To enable other languages, use the following attributes within your `configurati
       <td><code>false</code></td>
       <td/>
     </tr>
-    <tr>
-      <td>Rust</td>
-      <td><code>rustEnabled</code></td>
-      <td><code>false</code></td>
-      <td/>
-    </tr>
   </tbody>
 </table>
+
+Any other languages natively available in `protoc` can be enabled by passing `<arguments/>`
+in the plugin configuration (e.g. `--cpp_out=target/cpp` for C++).
 
 Any other language integrations can be provided to this plugin in the shape of
 third-party custom `protoc` plugins.
