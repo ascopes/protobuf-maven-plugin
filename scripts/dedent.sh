@@ -11,7 +11,7 @@ set -o nounset
 [[ -v DEBUG ]] && set -o xtrace
 
 if ! command -v expand >/dev/null; then
-  printf 'ERROR: expand not found on $PATH.\n' >&2
+  printf "ERROR: expand not found on \$PATH.\n" >&2
   exit 1
 fi
 
