@@ -108,7 +108,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     mojo = newInstance();
     mojo.sourceCodeGenerator = sourceCodeGenerator;
     mojo.mavenProject = mavenProject;
-    mojo.protocVersion = "4.26.0";
+    mojo.protoc = "4.26.0";
   }
 
   abstract A newInstance();
@@ -462,39 +462,6 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
     assertThat(actualRequest.getEnvironmentVariables()).isEmpty();
-  }
-
-
-  @DisplayName("failOnInvalidDependencies is set to the specified value")
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest(name = "for {0}")
-  void failOnInvalidDependenciesIsSetToSpecifiedValue(boolean value) throws Throwable {
-    mojo.failOnInvalidDependencies = value;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.isFailOnInvalidDependencies()).isEqualTo(value);
-  }
-
-  @DisplayName("failOnMissingSources is set to the specified value")
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest(name = "for {0}")
-  void failOnMissingSourcesIsSetToSpecifiedValue(boolean value) throws Throwable {
-    mojo.failOnMissingSources = value;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.isFailOnMissingSources()).isEqualTo(value);
   }
 
   @DisplayName("fatalWarnings is set to the specified value")
@@ -863,18 +830,18 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.getProtocDigest()).isSameAs(digest);
   }
 
-  @DisplayName("when protocVersion is null, expect an exception to be raised")
+  @DisplayName("when protoc is null, expect an exception to be raised")
   @Test
   @UsesSystemProperties
-  void whenProtocVersionNullExpectExceptionToBeRaised() {
+  void whenProtocNullExpectExceptionToBeRaised() {
     // Given
-    mojo.protocVersion = null;
+    mojo.protoc = null;
 
     // Then
     assertThatException()
         .isThrownBy(mojo::execute)
         .isInstanceOf(NullPointerException.class)
-        .withMessage("protocVersion has not been set");
+        .withMessage("<protoc/> has not been set");
   }
 
   @DisplayName("when protobuf.compiler.version is set, expect that to be used")
@@ -882,7 +849,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @UsesSystemProperties
   void whenProtocVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
     // Given
-    mojo.protocVersion = "1.2.3";
+    mojo.protoc = "1.2.3";
     System.setProperty("protobuf.compiler.version", "4.5.6");
 
     // When
@@ -900,7 +867,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @UsesSystemProperties
   void whenProtocVersionNotSetInSystemPropertiesExpectParameterToBeUsed() throws Throwable {
     // Given
-    mojo.protocVersion = "1.2.3";
+    mojo.protoc = "1.2.3";
 
     // When
     mojo.execute();
@@ -1202,16 +1169,11 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     return Stream.of(
         // Base cases
         arguments("nothing", consumer(), EnumSet.noneOf(Language.class)),
-        arguments("C++", consumer(a -> a.cppEnabled = true), EnumSet.of(Language.CPP)),
-        arguments("C#", consumer(a -> a.csharpEnabled = true), EnumSet.of(Language.C_SHARP)),
         arguments("Java", consumer(a -> a.javaEnabled = true), EnumSet.of(Language.JAVA)),
         arguments("Kotlin", consumer(a -> a.kotlinEnabled = true), EnumSet.of(Language.KOTLIN)),
-        arguments("ObjC", consumer(a -> a.objcEnabled = true), EnumSet.of(Language.OBJECTIVE_C)),
-        arguments("PHP", consumer(a -> a.phpEnabled = true), EnumSet.of(Language.PHP)),
         arguments("Python", consumer(a -> a.pythonEnabled = true), EnumSet.of(Language.PYTHON)),
         arguments("PYI", consumer(a -> a.pythonStubsEnabled = true), EnumSet.of(Language.PYI)),
         arguments("Ruby", consumer(a -> a.rubyEnabled = true), EnumSet.of(Language.RUBY)),
-        arguments("Rust", consumer(a -> a.rustEnabled = true), EnumSet.of(Language.RUST)),
         // Combined cases
         arguments(
             "Java, Kotlin",
@@ -1230,28 +1192,13 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
             EnumSet.of(Language.PYTHON, Language.PYI)
         ),
         arguments(
-            "C++, C#, Rust, Objective C",
-            consumer(a -> {
-              a.cppEnabled = true;
-              a.csharpEnabled = true;
-              a.objcEnabled = true;
-              a.rustEnabled = true;
-            }),
-            EnumSet.of(Language.CPP, Language.C_SHARP, Language.OBJECTIVE_C, Language.RUST)
-        ),
-        arguments(
             "everything",
             consumer(a -> {
-              a.cppEnabled = true;
-              a.csharpEnabled = true;
               a.javaEnabled = true;
               a.kotlinEnabled = true;
-              a.objcEnabled = true;
-              a.phpEnabled = true;
               a.pythonEnabled = true;
               a.pythonStubsEnabled = true;
               a.rubyEnabled = true;
-              a.rustEnabled = true;
             }),
             EnumSet.allOf(Language.class)
         )
