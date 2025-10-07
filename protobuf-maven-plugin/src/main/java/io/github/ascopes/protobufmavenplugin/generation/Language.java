@@ -24,16 +24,11 @@ import java.util.EnumSet;
  * @since 1.2.0
  */
 public enum Language {
-  CPP("cpp"),
-  C_SHARP("csharp"),
   JAVA("java"),
   KOTLIN("kotlin"),
-  OBJECTIVE_C("objc"),
-  PHP("php"),
   PYTHON("python"),
   PYI("pyi"),
-  RUBY("ruby"),
-  RUST("rust");
+  RUBY("ruby");
 
   private final String flagName;
 
