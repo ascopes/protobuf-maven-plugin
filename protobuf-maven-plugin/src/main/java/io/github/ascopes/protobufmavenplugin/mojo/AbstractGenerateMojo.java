@@ -298,28 +298,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean cleanOutputDirectories;
 
   /**
-   * Enable generating C++ sources and headers from the protobuf sources.
-   *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate C++ sources
-   *     should use the {@code arguments} to specify {@code --cpp_out=path}.
-   * @since 1.1.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean cppEnabled;
-
-  /**
-   * Enable generating C# sources from the protobuf sources.
-   *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate C# sources
-   *     should use the {@code arguments} to specify {@code --csharp_out=path}.
-   * @since 1.1.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean csharpEnabled;
-
-  /**
    * How to resolve transitive dependencies.
    *
    * <p>Supported values:
@@ -415,40 +393,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(property = "protobuf.compiler.excludes")
   @Nullable List<String> excludes;
-
-  /**
-   * Fail the build if any invalid direct or transitive dependencies are encountered.
-   *
-   * <p>If {@code true}, the build will be aborted with an error if any invalid dependency is
-   * encountered.
-   *
-   * <p>If {@code false}, then the build will report any invalid dependencies as errors in the logs,
-   * before proceeding with the build. Any invalid dependencies will be discarded.
-   *
-   * <p>Prior to {@code v2.4.0}, any invalid dependencies would result in an error being raised
-   * and the build being aborted. In {@code v2.4.0}, this has been relaxed.
-   *
-   * @deprecated will be removed in v4.0.0: invalid dependencies will be ignored.
-   * @since 2.4.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean failOnInvalidDependencies;
-
-  /**
-   * Fail on missing sources.
-   *
-   * <p>If no sources are detected, it is usually a sign that this plugin
-   * is misconfigured, or that you are including this plugin in a project that does not need it. For
-   * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
-   * can explicitly set this to {@code false} instead.
-   *
-   * @deprecated will be removed in v4.0.0: missing sources will always be an error.
-   * @since 0.5.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_TRUE)
-  boolean failOnMissingSources;
 
   /**
    * Fail if no output languages and no plugins are enabled.
@@ -693,17 +637,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean liteOnly;
 
   /**
-   * Generate Objective-C sources from the protobuf sources.
-   *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate Objective-C sources
-   *     should use the {@code arguments} to specify {@code --objc_out=path}.
-   * @since 1.1.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean objcEnabled;
-
-  /**
    * The path to write the protobuf descriptor file to.
    *
    * <p>Leave unspecified to disable. Writes a FileDescriptorSet (a protocol buffer,
@@ -802,17 +735,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Path outputDirectory;
 
   /**
-   * Generate PHP sources from the protobuf sources.
-   *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate PHP sources
-   *     should use the {@code arguments} to specify {@code --php_out=path}.
-   * @since 1.1.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean phpEnabled;
-
-  /**
    * Optional digest to verify {@code protoc} against.
    *
    * <p>Generally, you will not need to provide this, as the Maven Central
@@ -856,16 +778,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * The file extension is expected to match any extension in the {@code %PATHEXT%} environment
    * variable.
    *
-   * <strong>In v4.0.0, this will be renamed to {@code <protoc />}.</strong>
-   *
    * @since 0.0.1
    */
   @Parameter(
-      alias = "protoc",
+      alias = "protocVersion",
       required = true,
       property = COMPILER_VERSION_PROPERTY
   )
-  String protocVersion;
+  String protoc;
 
   /**
    * Generate Python sources from the protobuf sources.
@@ -911,17 +831,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
   boolean rubyEnabled;
-
-  /**
-   * Generate Rust sources from the protobuf sources.
-   *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate Rust sources
-   *     should use the {@code arguments} to specify {@code --rust_out=path}.
-   * @since 1.1.0
-   */
-  @Deprecated(since = "3.10.1", forRemoval = true)
-  @Parameter(defaultValue = DEFAULT_FALSE)
-  boolean rustEnabled;
 
   /**
    * Corporate-sanctioned path to run native executables from.
@@ -1126,7 +1035,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @throws MojoFailureException   if an error occurs.
    */
   @Override
-  @SuppressWarnings("removal")
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (Runtime.version().feature() < 17) {
       log.warn(
@@ -1142,16 +1050,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
 
     var enabledLanguages = Language.languageSet()
-        .addIf(cppEnabled, Language.CPP)
-        .addIf(csharpEnabled, Language.C_SHARP)
         .addIf(javaEnabled, Language.JAVA)
         .addIf(kotlinEnabled, Language.KOTLIN)
-        .addIf(objcEnabled, Language.OBJECTIVE_C)
-        .addIf(phpEnabled, Language.PHP)
         .addIf(pythonEnabled, Language.PYTHON)
         .addIf(pythonStubsEnabled, Language.PYI)
         .addIf(rubyEnabled, Language.RUBY)
-        .addIf(rustEnabled, Language.RUST)
         .build();
 
     var request = ImmutableGenerationRequest.builder()
@@ -1166,8 +1069,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .environmentVariables(nonNullMap(environmentVariables))
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
-        .failOnInvalidDependencies(failOnInvalidDependencies)
-        .failOnMissingSources(failOnMissingSources)
+        // TODO(ascopes): remove this
+        .failOnInvalidDependencies(false)
+        // TODO(ascopes): remove this
+        .failOnMissingSources(true)
         .failOnMissingTargets(failOnMissingTargets)
         .fatalWarnings(fatalWarnings)
         .ignoreProjectDependencies(ignoreProjectDependencies)
@@ -1187,7 +1092,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
         .protocDigest(protocDigest)
-        .protocVersion(protocVersion())
+        .protocVersion(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sanctionedExecutablePath(sanctionedExecutablePath)
         .sourceDependencies(nonNullList(sourceDependencies))
@@ -1230,12 +1135,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .orElseGet(this::defaultOutputDirectory);
   }
 
-  private String protocVersion() {
+  private String protoc() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty(COMPILER_VERSION_PROPERTY);
     return overriddenVersion == null
-        ? requireNonNull(protocVersion, "protocVersion has not been set")
+        ? requireNonNull(protoc, "<protoc/> has not been set")
         : overriddenVersion;
   }
 
