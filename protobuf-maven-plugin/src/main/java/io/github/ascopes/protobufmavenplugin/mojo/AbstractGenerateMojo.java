@@ -109,7 +109,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
    *
-   * <p>Bianry plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
    * with {@code protoc} out of the box.
    *
    * <p>Plugin artifacts must be a <strong>native executable</strong>. By default, the OS and CPU
@@ -168,7 +168,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
    *
-   * <p>Bianry plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
    * with {@code protoc} out of the box.
    *
    * <p>For example:
@@ -224,7 +224,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
    *
-   * <p>Bianry plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
    * with {@code protoc} out of the box.
    *
    * <p>For example:
@@ -582,9 +582,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>When enabled, this plugin will track changes to sources and importable protobuf
    * dependencies between builds, making a best-effort attempt to only rebuild files when
    * changes have been made since the last build.
-   *
-   * <p>Note that when disabled, any output directories and their contents will be deleted prior
-   * to invoking protoc to ensure clean builds.
    *
    * @since 2.7.0
    */
