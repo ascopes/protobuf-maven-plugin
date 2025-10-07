@@ -20,7 +20,7 @@ For generating gRPC stubs for Java, you can use the official gRPC Java plugin:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
     <binaryMavenPlugins>
       <binaryMavenPlugin>
         <groupId>io.grpc</groupId>
@@ -53,7 +53,7 @@ To configure protobuf-maven-plugin to use this `protoc` plugin, use the followin
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
 
     <binaryMavenPlugins>
       <binaryMavenPlugin>
@@ -84,7 +84,7 @@ For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
     <jvmMavenPlugins>
       <jvmMavenPlugin>
         <groupId>io.vertx</groupId>
@@ -204,7 +204,7 @@ This example shows how to generate JavaScript/TypeScript client code for a gRPC 
       <artifactId>protobuf-maven-plugin</artifactId>
 
       <configuration>
-        <protocVersion>${protobuf.version}</protocVersion>
+        <protoc>${protobuf.version}</protoc>
         <javaEnabled>false</javaEnabled>
 
         <binaryUrlPlugins>
@@ -319,7 +319,7 @@ If you need to generate code to different directories based on the target langua
         <goal>generate</goal>
       </goals>
       <configuration>
-        <protocVersion>${protobuf.version}</protocVersion>
+        <protoc>${protobuf.version}</protoc>
         <outputDirectory>${project.basedir}/target/java</outputDirectory>
       </configuration>
     </execution>
@@ -333,7 +333,7 @@ If you need to generate code to different directories based on the target langua
       <configuration>
         <javaEnabled>false</javaEnabled>
         <outputDirectory>${project.basedir}/target/python</outputDirectory>
-        <protocVersion>${protobuf.version}</protocVersion>
+        <protoc>${protobuf.version}</protoc>
         <pythonEnabled>true</pythonEnabled>
       </configuration>
     </execution>

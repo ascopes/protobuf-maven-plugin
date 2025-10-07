@@ -166,7 +166,7 @@
           <version>@project.version@</version>
 
           <configuration>
-            <protocVersion>${protobuf.version}</protocVersion>
+            <protoc>${protobuf.version}</protoc>
           </configuration>
         </plugin>
       </plugins>
