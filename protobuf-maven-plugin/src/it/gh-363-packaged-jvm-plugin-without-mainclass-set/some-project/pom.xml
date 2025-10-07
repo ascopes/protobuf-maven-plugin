@@ -48,7 +48,7 @@
           </jvmMavenPlugins>
 
           <javaEnabled>false</javaEnabled>
-          <protocVersion>${protobuf.version}</protocVersion>
+          <protoc>${protobuf.version}</protoc>
         </configuration>
 
         <executions>

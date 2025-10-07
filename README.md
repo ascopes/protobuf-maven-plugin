@@ -40,7 +40,7 @@ will automatically discover them and compile them to Java bytecode.
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf-java.version}</protocVersion>
+    <protoc>${protobuf-java.version}</protoc>
   </configuration>
 
   <executions>
@@ -75,7 +75,7 @@ The following will generate Java classes and corresponding Kotlin wrappers:
 
   <configuration>
     <kotlinEnabled>true</kotlinEnabled>
-    <protocVersion>${protobuf-java.version}</protocVersion>
+    <protoc>${protobuf-java.version}</protoc>
   </configuration>
 
   <executions>
@@ -113,7 +113,7 @@ artifact registry for bundles of Proto files seamlessly.
       <artifactId>protobuf-maven-plugin</artifactId>
 
       <configuration>
-        <protocVersion>${protobuf-java.version}</protocVersion>
+        <protoc>${protobuf-java.version}</protoc>
       </configuration>
 
       <executions>
@@ -140,7 +140,7 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf-java.version}</protocVersion>
+    <protoc>${protobuf-java.version}</protoc>
 
     <!-- Vanilla protoc plugins - these are platform specific executables
          just like protoc is. -->

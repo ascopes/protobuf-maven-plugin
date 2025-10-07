@@ -54,7 +54,7 @@
 
           <configuration>
             <embedSourcesInClassOutputs>true</embedSourcesInClassOutputs>
-            <protocVersion>${protobuf.version}</protocVersion>
+            <protoc>${protobuf.version}</protoc>
           </configuration>
         </plugin>
       </plugins>
