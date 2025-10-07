@@ -856,6 +856,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * The file extension is expected to match any extension in the {@code %PATHEXT%} environment
    * variable.
    *
+   * <strong>In v4.0.0, this will be renamed to {@code <protoc />}.</strong>
+   *
    * @since 0.0.1
    */
   @Parameter(
