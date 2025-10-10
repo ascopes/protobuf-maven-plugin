@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.urls;
 
 import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -27,7 +28,6 @@ import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.charset.StandardCharsets;
 
 /**
  * URL connection for HTTP and HTTPS requests
@@ -41,14 +41,14 @@ public class HttpClientUrlConnection extends URLConnection {
 
   private final HttpClient client;
   private final HttpRequest request;
-  private HttpResponse<String> response;
+  private HttpResponse<byte[]> response;
 
   public HttpClientUrlConnection(URL url) throws URISyntaxException {
     super(url);
     String protocol = url.getProtocol();
     this.client = HttpClient
         .newBuilder()
-        .version(protocol.equalsIgnoreCase("http") ? Version.HTTP_1_1: Version.HTTP_2)
+        .version(protocol.equalsIgnoreCase("http") ? Version.HTTP_1_1 : Version.HTTP_2)
         .build();
     this.request = HttpRequest
         .newBuilder()
@@ -59,25 +59,31 @@ public class HttpClientUrlConnection extends URLConnection {
 
   @Override
   public void connect() throws IOException {
-    if (connected) return;
+    if (connected) {
+      return;
+    }
     try {
-      response = client.send(request, BodyHandlers.ofString());
-      this.connected = true;
-
-      if (response != null && response.statusCode() >= 400){
-        throw HttpRequestException.fromHttpResponse(response, null);
-      }
-    }catch (IOException | InterruptedException e){
-      if (response != null){
-        throw HttpRequestException.fromHttpResponse(response, e);
-      }
+      response = client.send(request, BodyHandlers.ofByteArray());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IOException("HTTP request interrupted for " + url, e);
+    } catch (IOException e) {
       throw new IOException("Failed to fetch " + url, e);
+    }
+    this.connected = true;
+    if (response != null && response.statusCode() == 404) {
+      throw new FileNotFoundException(url.toString());
+    }
+    if (response != null && response.statusCode() >= 400) {
+      throw HttpRequestException.fromHttpResponse(response);
     }
   }
 
   @Override
   public InputStream getInputStream() throws IOException {
-    if (!connected) connect();
-    return new ByteArrayInputStream(response.body().getBytes(StandardCharsets.UTF_8));
+    if (!connected) {
+      connect();
+    }
+    return new ByteArrayInputStream(response.body());
   }
 }

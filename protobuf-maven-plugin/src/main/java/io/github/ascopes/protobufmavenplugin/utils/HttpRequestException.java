@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Exception raised if HTTP request fails
@@ -34,14 +35,13 @@ public final class HttpRequestException extends RuntimeException {
 
   public HttpRequestException(
       String message,
-      Throwable cause,
       int statusCode,
       String correlationId,
       String requestId,
       String wwwAuthenticate,
       String proxyAuthenticate,
       String responseBody) {
-    super(message, cause);
+    super(message);
     this.statusCode = statusCode;
     this.correlationId = correlationId;
     this.requestId = requestId;
@@ -50,17 +50,13 @@ public final class HttpRequestException extends RuntimeException {
     this.responseBody = responseBody;
   }
 
-  public static HttpRequestException fromHttpResponse(
-      HttpResponse<String> response,
-      Throwable cause
-  ){
-    String body = truncate(response.body(), 500);
+  public static HttpRequestException fromHttpResponse(HttpResponse<byte[]> response) {
+    String body = asText(response.body(), 500);
     String correlationId = extractHeader(response, "Correlation-Id", "X-Correlation-Id");
     String requestId = extractHeader(response, "Request-Id", "X-Request-Id");
 
     return new HttpRequestException(
         "HTTP " + response.statusCode() + " from " + response.uri(),
-        cause,
         response.statusCode(),
         correlationId,
         requestId,
@@ -70,30 +66,43 @@ public final class HttpRequestException extends RuntimeException {
     );
   }
 
-  private static String truncate(String body, int max){
-    if (body == null) return null;
-    return body.length() > max ? body.substring(0, max) + "... [truncated]" : body;
+  private static String asText(byte[] body, int maxLength) {
+    if (body == null || body.length == 0) {
+      return null;
+    }
+
+    try {
+      String text = new String(body, StandardCharsets.UTF_8);
+      if (text.length() > maxLength) {
+        return text.substring(0, maxLength) + "... [truncated]";
+      }
+      return text;
+    } catch (Exception e) {
+      return "<binary or unreadable body: " + body.length + " bytes>";
+    }
   }
 
   private static String extractHeader(
-      HttpResponse<String> response,
-      String... names){
-    for (String name: names){
+      HttpResponse<byte[]> response,
+      String... names) {
+    for (String name : names) {
       var val = response.headers().firstValue(name);
-      if (val.isPresent()) return val.get();
+      if (val.isPresent()) {
+        return val.get();
+      }
     }
     return null;
   }
 
   @Override
   public String toString() {
-    return "HttpClientUrlConnectionException{" +
-        "statusCode=" + statusCode +
-        ", correlationId='" + correlationId + '\'' +
-        ", requestId='" + requestId + '\'' +
-        ", wwwAuthenticate='" + wwwAuthenticate + '\'' +
-        ", proxyAuthenticate='" + proxyAuthenticate + '\'' +
-        ", responseBody='" + responseBody + '\'' +
-        '}';
+    return "HttpClientUrlConnectionException{"
+        + "statusCode=" + statusCode
+        + ", correlationId='" + correlationId + '\''
+        + ", requestId='" + requestId + '\''
+        + ", wwwAuthenticate='" + wwwAuthenticate + '\''
+        + ", proxyAuthenticate='" + proxyAuthenticate + '\''
+        + ", responseBody='" + responseBody + '\''
+        + '}';
   }
 }
