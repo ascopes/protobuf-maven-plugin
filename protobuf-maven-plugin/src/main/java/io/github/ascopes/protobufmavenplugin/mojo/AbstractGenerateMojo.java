@@ -1082,10 +1082,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .environmentVariables(nonNullMap(environmentVariables))
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
-        // TODO(ascopes): remove this
-        .failOnInvalidDependencies(false)
-        // TODO(ascopes): remove this
-        .failOnMissingSources(true)
         .failOnMissingTargets(failOnMissingTargets)
         .fatalWarnings(fatalWarnings)
         .ignoreProjectDependencies(ignoreProjectDependencies)

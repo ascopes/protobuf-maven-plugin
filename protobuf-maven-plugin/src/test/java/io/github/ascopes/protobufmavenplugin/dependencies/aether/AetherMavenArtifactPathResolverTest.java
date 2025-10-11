@@ -21,7 +21,6 @@ import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -194,8 +193,7 @@ class AetherMavenArtifactPathResolverTest {
   @ParameterizedTest(name = "{argumentSetName}")
   void resolveDependenciesWithoutProjectArtifactsResolvesTheDependencies(
       DependencyResolutionDepth dependencyResolutionDepth,
-      Set<String> dependencyScopes,
-      boolean failOnInvalidDependencies
+      Set<String> dependencyScopes
   ) throws ResolutionException {
     // Given
     try (var depMgmtStatic = mockStatic(AetherDependencyManagement.class)) {
@@ -247,7 +245,7 @@ class AetherMavenArtifactPathResolverTest {
       var aetherOutputArtifact5 = mock(Artifact.class, "output artifact 5");
       var aetherOutputArtifact6 = mock(Artifact.class, "output artifact 6");
 
-      when(aetherResolver.resolveDependencies(any(), any(), anyBoolean()))
+      when(aetherResolver.resolveDependencies(any(), any()))
           .thenReturn(List.of(
               aetherOutputArtifact1,
               aetherOutputArtifact2,
@@ -279,8 +277,7 @@ class AetherMavenArtifactPathResolverTest {
           List.of(inputArtifact1, inputArtifact2, inputArtifact3, inputArtifact4),
           dependencyResolutionDepth,
           dependencyScopes,
-          false,
-          failOnInvalidDependencies
+          false
       );
 
       // Then
@@ -309,8 +306,7 @@ class AetherMavenArtifactPathResolverTest {
               aetherFilledDependency3,
               aetherFilledDependency4
           ),
-          dependencyScopes,
-          failOnInvalidDependencies
+          dependencyScopes
       );
 
       depMgmtStatic.verify(AetherDependencyManagement::deduplicateArtifacts);
@@ -336,8 +332,7 @@ class AetherMavenArtifactPathResolverTest {
   @ParameterizedTest(name = "{argumentSetName}")
   void resolveDependenciesWithProjectArtifactsResolvesTheDependencies(
       DependencyResolutionDepth dependencyResolutionDepth,
-      Set<String> dependencyScopes,
-      boolean failOnInvalidDependencies
+      Set<String> dependencyScopes
   ) throws ResolutionException {
     // Given
     try (var depMgmtStatic = mockStatic(AetherDependencyManagement.class)) {
@@ -406,7 +401,7 @@ class AetherMavenArtifactPathResolverTest {
       var aetherOutputArtifact7 = mock(Artifact.class, "output artifact 7");
       var aetherOutputArtifact8 = mock(Artifact.class, "output artifact 8");
 
-      when(aetherResolver.resolveDependencies(any(), any(), anyBoolean()))
+      when(aetherResolver.resolveDependencies(any(), any()))
           .thenReturn(List.of(
               aetherOutputArtifact1,
               aetherOutputArtifact2,
@@ -449,8 +444,7 @@ class AetherMavenArtifactPathResolverTest {
           List.of(inputArtifact1, inputArtifact2, inputArtifact3, inputArtifact4),
           dependencyResolutionDepth,
           dependencyScopes,
-          true,
-          failOnInvalidDependencies
+          true
       );
 
       // Then
@@ -480,8 +474,7 @@ class AetherMavenArtifactPathResolverTest {
               aetherFilledDependency3,
               aetherFilledDependency4
           ),
-          dependencyScopes,
-          failOnInvalidDependencies
+          dependencyScopes
       );
 
       depMgmtStatic.verify(AetherDependencyManagement::deduplicateArtifacts);
@@ -523,20 +516,17 @@ class AetherMavenArtifactPathResolverTest {
         argumentSet(
             "DIRECT depth, compile and test scopes, fail on invalid dependencies",
             DependencyResolutionDepth.DIRECT,
-            Set.of("compile", "test"),
-            true
+            Set.of("compile", "test")
         ),
         argumentSet(
             "DIRECT depth, compile, provided, system scopes, allow invalid dependencies",
             DependencyResolutionDepth.DIRECT,
-            Set.of("compile", "provided", "system"),
-            false
+            Set.of("compile", "provided", "system")
         ),
         argumentSet(
             "TRANSITIVE depth, compile scope, allow invalid dependencies",
             DependencyResolutionDepth.TRANSITIVE,
-            Set.of("compile"),
-            false
+            Set.of("compile")
         )
     );
   }

@@ -105,8 +105,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth depth,
       Set<String> dependencyScopes,
-      boolean includeProjectArtifacts,
-      boolean failOnInvalidDependencies
+      boolean includeProjectArtifacts
   ) throws ResolutionException {
     var unresolvedDependencies = new ArrayList<Dependency>();
 
@@ -117,7 +116,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         .forEach(unresolvedDependencies::add);
 
     var resolvedArtifacts = aetherResolver
-        .resolveDependencies(unresolvedDependencies, dependencyScopes, failOnInvalidDependencies)
+        .resolveDependencies(unresolvedDependencies, dependencyScopes)
         .stream();
 
     if (includeProjectArtifacts) {
