@@ -311,6 +311,8 @@
                   <include>**/src/**/*.kt</include>
                   <include>**/src/**/*.properties</include>
                   <include>**/src/**/*.proto</include>
+                  <include>**/src/**/*.py</include>
+                  <include>**/src/**/*.pyi</include>
                   <include>**/src/**/*.scala</include>
                   <include>**/*.xml</include>
                 </includes>

@@ -33,6 +33,7 @@
   <packaging>pom</packaging>
 
   <properties>
+    <graalvm.version>25.0.0</graalvm.version>
     <grpc.version>1.75.0</grpc.version>
     <kotlin.version>2.2.20</kotlin.version>
     <proto-google-common-protos.version>2.61.3</proto-google-common-protos.version>
@@ -82,6 +83,26 @@
         <groupId>io.projectreactor</groupId>
         <artifactId>reactor-core</artifactId>
         <version>${reactor-core.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.graalvm.polyglot</groupId>
+        <artifactId>polyglot</artifactId>
+        <version>${graalvm.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.graalvm.polyglot</groupId>
+        <artifactId>python</artifactId>
+        <version>${graalvm.version}</version>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.graalvm.polyglot</groupId>
+        <artifactId>ruby</artifactId>
+        <version>${graalvm.version}</version>
+        <type>pom</type>
       </dependency>
 
       <dependency>
@@ -135,6 +156,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+        </plugin>
+
+        <plugin>
+          <groupId>org.graalvm.python</groupId>
+          <artifactId>graalpy-maven-plugin</artifactId>
+          <version>${graalvm.version}</version>
         </plugin>
 
         <plugin>

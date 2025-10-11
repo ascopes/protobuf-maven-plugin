@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2023 - 2025, Ashley Scopes.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>@project.groupId@.it</groupId>
+    <artifactId>integration-test-parent</artifactId>
+    <version>@project.version@</version>
+    <relativePath>../setup/pom.xml</relativePath>
+  </parent>
+
+  <groupId>graalpython</groupId>
+  <artifactId>graalpython</artifactId>
+
+  <properties>
+    <protobuf.version>4.32.1</protobuf.version>
+    <protobuf-python.version>6.32.1</protobuf-python.version>
+    <pytest.version>8.4.2</pytest.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.graalvm.polyglot</groupId>
+      <artifactId>polyglot</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.graalvm.polyglot</groupId>
+      <artifactId>python</artifactId>
+      <type>pom</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/python</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.py</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.graalvm.python</groupId>
+        <artifactId>graalpy-maven-plugin</artifactId>
+
+        <configuration>
+          <packages>
+            <package>protobuf==${protobuf-python.version}</package>
+            <package>pytest==${pytest.version}</package>
+          </packages>
+          <resourceDirectory>.</resourceDirectory>
+        </configuration>
+
+        <executions>
+          <execution>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>process-graalpy-resources</goal>
+              <goal>lock-packages</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>@project.groupId@</groupId>
+        <artifactId>@project.artifactId@</artifactId>
+
+        <configuration>
+          <javaEnabled>false</javaEnabled>
+          <protoc>${protobuf.version}</protoc>
+          <pythonEnabled>true</pythonEnabled>
+          <pythonStubsEnabled>true</pythonStubsEnabled>
+          <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+        </configuration>
+
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
