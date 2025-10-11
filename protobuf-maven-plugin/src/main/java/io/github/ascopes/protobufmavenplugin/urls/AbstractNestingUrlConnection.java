@@ -44,6 +44,10 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
     setDoOutput(false);
   }
 
+  public URL getNestedUrl() {
+    return nestedUrl;
+  }
+
   @Override
   public final void connect() throws NestedUrlException {
     if (connected) {

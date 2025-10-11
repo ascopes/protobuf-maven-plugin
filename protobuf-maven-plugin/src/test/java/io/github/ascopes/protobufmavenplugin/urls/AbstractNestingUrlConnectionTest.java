@@ -49,6 +49,30 @@ import org.mockito.stubbing.Answer;
 @DisplayName("AbstractNestingUrlConnection tests")
 class AbstractNestingUrlConnectionTest {
 
+  @DisplayName(".getNestedUrl() returns the nested URL")
+  @Test
+  void getNestedUrlReturnsTheNestedUrl() throws Exception {
+    // Given
+    var innerUrl = mock(URL.class);
+    var url = URI.create("file://something").toURL();
+    var connection = new ReversingUrlConnection(url, innerUrl);
+
+    // Then
+    assertThat(connection.getNestedUrl()).isSameAs(innerUrl);
+  }
+
+  @DisplayName(".getURL() returns the nested URL")
+  @Test
+  void getUrlReturnsTheUrl() throws Exception {
+    // Given
+    var innerUrl = mock(URL.class);
+    var url = URI.create("file://something").toURL();
+    var connection = new ReversingUrlConnection(url, innerUrl);
+
+    // Then
+    assertThat(connection.getURL()).isSameAs(url);
+  }
+
   @DisplayName(".connect() opens the inner connection and configures it sensibly")
   @Test
   void connectOpensInnerConnectionAndConfiguresItSensibly() throws Exception {
@@ -389,7 +413,7 @@ class AbstractNestingUrlConnectionTest {
         .satisfies(ex -> assertThat(ex).hasSuppressedException(closureException));
   }
 
-  static class ReversingUrlConnection extends AbstractNestingUrlConnection {
+  static final class ReversingUrlConnection extends AbstractNestingUrlConnection {
 
     ReversingUrlConnection(URL url, URL nestedUrl) {
       super(url, nestedUrl);
