@@ -94,6 +94,30 @@ public final class HttpRequestException extends RuntimeException {
     return null;
   }
 
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  public String getCorrelationId() {
+    return correlationId;
+  }
+
+  public String getRequestId() {
+    return requestId;
+  }
+
+  public String getWwwAuthenticate() {
+    return wwwAuthenticate;
+  }
+
+  public String getProxyAuthenticate() {
+    return proxyAuthenticate;
+  }
+
+  public String getResponseBody() {
+    return responseBody;
+  }
+
   @Override
   public String toString() {
     return "HttpClientUrlConnectionException{"

@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.http.HttpClient;
+import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -48,6 +49,7 @@ public class HttpClientUrlConnection extends URLConnection {
     String protocol = url.getProtocol();
     this.client = HttpClient
         .newBuilder()
+        .followRedirects(Redirect.ALWAYS)
         .version(protocol.equalsIgnoreCase("http") ? Version.HTTP_1_1 : Version.HTTP_2)
         .build();
     this.request = HttpRequest
