@@ -31,7 +31,7 @@
   <packaging>maven-plugin</packaging>
 
   <prerequisites>
-    <maven>3.8</maven>
+    <maven>3.9</maven>
   </prerequisites>
 
   <dependencies>
@@ -314,6 +314,7 @@
                 <parallelThreads>1</parallelThreads>
                 <!-- Disable object locking that we enabled elsewhere. -->
                 <properties />
+                <streamLogs>true</streamLogs>
               </configuration>
             </plugin>
           </plugins>
