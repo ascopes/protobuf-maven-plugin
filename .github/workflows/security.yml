@@ -1,7 +1,7 @@
 name: Security Analysis
 on:
   push:
-    branches: [main, "v*"]
+    branches: [main]
 
 jobs:
   submit-dependency-snapshot:

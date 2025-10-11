@@ -2,9 +2,9 @@ name: Build
 
 on:
   pull_request:
-    branches: [main, "v*"]
+    branches: [main]
   push:
-    branches: [main, "v*"]
+    branches: [main]
   schedule:
     # Run every week on a Sunday. The time we run at (3:43am) is
     # arbitrary, in the spirit of not contributing to the flood of
