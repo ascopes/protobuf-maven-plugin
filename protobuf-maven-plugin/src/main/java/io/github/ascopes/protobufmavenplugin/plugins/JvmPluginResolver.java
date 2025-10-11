@@ -170,8 +170,7 @@ final class JvmPluginResolver {
             List.of(plugin),
             DependencyResolutionDepth.TRANSITIVE,
             ALLOWED_SCOPES,
-            false,
-            true
+            false
         )
         .stream()
         .collect(Collectors.toUnmodifiableList());
