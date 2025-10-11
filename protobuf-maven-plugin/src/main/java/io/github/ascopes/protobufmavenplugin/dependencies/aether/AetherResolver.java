@@ -39,6 +39,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,11 @@ final class AetherResolver {
 
     var dependencyRequest = new DependencyRequest();
     dependencyRequest.setCollectRequest(collectRequest);
-    dependencyRequest.setFilter(new ScopeDependencyFilter(allowedDependencyScopes));
+    var filter = new ScopeDependencyFilter(
+        /* included: */ allowedDependencyScopes,
+        /* excluded */ List.of()
+    );
+    dependencyRequest.setFilter(filter);
 
     log.debug(
         "Resolving {} - {}",

@@ -62,12 +62,14 @@ public final class ProjectInputResolver {
   ) throws ResolutionException {
     var filter = new IncludesExcludesGlobFilter(request.getIncludes(), request.getExcludes());
 
-    // TODO(ascopes): run these in parallel
-    return ImmutableProjectInputListing.builder()
+    var listing = ImmutableProjectInputListing.builder()
         .compilableDescriptorFiles(resolveCompilableDescriptorSources(request, filter))
         .compilableProtoSources(resolveCompilableProtoSources(request, filter))
         .dependencyProtoSources(resolveDependencyProtoSources(request))
         .build();
+
+    log.trace("Created project input listing {}", listing);
+    return listing;
   }
 
   private Collection<SourceListing> resolveCompilableProtoSources(
