@@ -44,56 +44,111 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
     setDoOutput(false);
   }
 
+  public URL getNestedUrl() {
+    return nestedUrl;
+  }
+
   @Override
-  public void connect() throws IOException {
+  public final void connect() throws NestedUrlException {
     if (connected) {
       return;
     }
 
-    nestedConnection = nestedUrl.openConnection();
+    try {
+      nestedConnection = nestedUrl.openConnection();
 
-    // Copy any settings across prior to connecting.
-    nestedConnection.setAllowUserInteraction(getAllowUserInteraction());
-    nestedConnection.setConnectTimeout(getConnectTimeout());
-    nestedConnection.setDoInput(getDoInput());
-    nestedConnection.setIfModifiedSince(getIfModifiedSince());
-    nestedConnection.setReadTimeout(getReadTimeout());
-    nestedConnection.setUseCaches(getUseCaches());
-    getRequestProperties()
-        .forEach((key, values) -> values
-            .forEach(value -> nestedConnection.addRequestProperty(key, value)));
+      // Copy any settings across prior to connecting.
+      nestedConnection.setAllowUserInteraction(getAllowUserInteraction());
+      nestedConnection.setConnectTimeout(getConnectTimeout());
+      nestedConnection.setDoInput(getDoInput());
+      nestedConnection.setIfModifiedSince(getIfModifiedSince());
+      nestedConnection.setReadTimeout(getReadTimeout());
+      nestedConnection.setUseCaches(getUseCaches());
+      getRequestProperties()
+          .forEach((key, values) -> values
+              .forEach(value -> nestedConnection.addRequestProperty(key, value)));
 
-    // Never bother with outputs, we never use them.
-    nestedConnection.setDoOutput(false);
+      // Never bother with outputs, we never use them.
+      nestedConnection.setDoOutput(false);
 
-    // Handshake.
-    nestedConnection.connect();
-    connected = true;
+      // Handshake.
+      doConnect(nestedConnection);
+      connected = true;
+    } catch (IOException ex) {
+      throw maybeWrapIoException(ex);
+    }
   }
 
   @Override
-  public InputStream getInputStream() throws IOException {
-    if (nestedInputStream == null) {
-      requireNonNull(nestedConnection, "not connected");
-
-      try {
-        nestedInputStream = nestInputStream(nestedConnection.getInputStream());
-      } catch (IOException ex) {
-        // Clean up, we're in a bad state and cannot continue, and we do not
-        // want to abandon any resources.
-        nestedConnection.getInputStream().close();
-        throw new IOException(
-            "Failed to wrap input stream with protocol "
-                + url.getProtocol()
-                + " for URL \"" + url + "\": "
-                + ex,
-            ex
-        );
-      }
-    }
-
-    return nestedInputStream;
+  public final InputStream getInputStream() throws NestedUrlException {
+    return nestedInputStream == null
+        ? constructInputStream()
+        : nestedInputStream;
   }
 
+  private InputStream constructInputStream() throws NestedUrlException {
+    requireNonNull(nestedConnection, "not connected");
+
+    try {
+      // Side effects - eww.
+      return nestedInputStream = nestInputStream(nestedConnection.getInputStream());
+    } catch (IOException ex) {
+      var wrappedEx = maybeWrapIoException(ex);
+
+      // Clean up, we're in a bad state and cannot continue, and we do not
+      // want to abandon any resources.
+      // Treat this as best effort only. If it fails due to our broken state,
+      // then just ignore the resulting exception and continue anyway.
+      try {
+        nestedConnection.getInputStream().close();
+      } catch (Throwable closureEx) {
+        wrappedEx.addSuppressed(closureEx);
+      }
+
+      throw wrappedEx;
+    }
+  }
+
+  private NestedUrlException maybeWrapIoException(Throwable ex) {
+    if (ex instanceof NestedUrlException) {
+      // Continue to bubble upwards without adding more
+      // irrelevant information to the mix.
+      return (NestedUrlException) ex;
+    }
+
+    return new NestedUrlException(
+        "Failed to transfer '"
+            + nestedUrl
+            + "' wrapped with handler for protocol '"
+            + url.getProtocol()
+            + "', an inner exception was raised: "
+            + ex,
+        ex
+    );
+  }
+
+  // Can be overridden to add more logic in custom implementations if needed.
+  void doConnect(URLConnection nestedConnection) throws IOException {
+    nestedConnection.connect();
+  }
+
+  // Potentially wraps the input stream with another input stream, returning
+  // an input stream to replace the input with.
   abstract InputStream nestInputStream(InputStream inputStream) throws IOException;
+
+  /**
+   * Internally raised exception that wraps another exception.
+   *
+   * <p>If we catch this, we just rethrow it without cascading
+   * any further, as it means we have already reported the context
+   * of the actual exception.
+   *
+   * <p>This avoids obnoxiously verbose exception chains if a highly
+   * nested protocol fails to be handled correctly.
+   */
+  static final class NestedUrlException extends IOException {
+    NestedUrlException(String message, Throwable cause) {
+      super(message, cause);
+    }
+  }
 }

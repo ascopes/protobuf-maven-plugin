@@ -16,14 +16,13 @@
 package io.github.ascopes.protobufmavenplugin.urls;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -36,16 +35,11 @@ abstract class AbstractUrlStreamHandlerFactory implements URLStreamHandlerFactor
   private final List<String> protocols;
   private final UrlStreamHandlerImpl streamHandler;
 
-  AbstractUrlStreamHandlerFactory(
-      String protocol,
-      String... protocols
-  ) {
+  AbstractUrlStreamHandlerFactory(String protocol, String... protocols) {
     // Two args to enforce at least one protocol at any time.
-    var allProtocols = new String[protocols.length + 1];
-    allProtocols[0] = protocol;
-    System.arraycopy(protocols, 0, allProtocols, 1, protocols.length);
-    this.protocols = List.of(allProtocols);
-
+    this.protocols = Stream
+        .concat(Stream.of(protocol), Stream.of(protocols))
+        .collect(Collectors.toUnmodifiableList());
     streamHandler = new UrlStreamHandlerImpl();
   }
 
