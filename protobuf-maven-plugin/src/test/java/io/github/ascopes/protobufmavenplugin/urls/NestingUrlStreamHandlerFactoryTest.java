@@ -76,7 +76,8 @@ class NestingUrlStreamHandlerFactoryTest {
         "foo", "bar", "baz"
     );
     var nestedConnection = mock(URLConnection.class);
-    var nestedInputStream = new ByteArrayInputStream("Hello, World!".getBytes(StandardCharsets.UTF_8));
+    var data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
+    var nestedInputStream = new ByteArrayInputStream(data);
     when(nestedConnection.getInputStream()).thenReturn(nestedInputStream);
     var nestedUrl = mock(URL.class);
     when(nestedUrl.openConnection()).thenReturn(nestedConnection);
