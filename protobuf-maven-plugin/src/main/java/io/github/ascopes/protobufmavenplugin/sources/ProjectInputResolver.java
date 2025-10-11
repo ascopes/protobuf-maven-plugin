@@ -89,8 +89,7 @@ public final class ProjectInputResolver {
         request.getSourceDependencies(),
         request.getDependencyResolutionDepth(),
         request.getDependencyScopes(),
-        false,
-        request.isFailOnInvalidDependencies()
+        false
     );
 
     var sourceDependencyListings = sourceResolver.resolveSources(
@@ -116,8 +115,7 @@ public final class ProjectInputResolver {
         request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
         request.getDependencyScopes(),
-        !request.isIgnoreProjectDependencies(),
-        request.isFailOnInvalidDependencies()
+        !request.isIgnoreProjectDependencies()
     );
 
     var importPaths = Stream
@@ -140,8 +138,7 @@ public final class ProjectInputResolver {
         request.getSourceDescriptorDependencies(),
         DependencyResolutionDepth.DIRECT,
         request.getDependencyScopes(),
-        false,
-        request.isFailOnInvalidDependencies()
+        false
     );
 
     var descriptorFilePaths = Stream
