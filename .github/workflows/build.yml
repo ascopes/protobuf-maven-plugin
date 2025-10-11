@@ -110,11 +110,6 @@ jobs:
             java-version: 25
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: lnx/x86/mvn3.8.8/jdk11
-            os-name: ubuntu-24.04
-            java-version: 11
-            maven-version: 3.8.8
-
           - title: lnx/x86/mvn4.0.0/jdk17
             os-name: ubuntu-24.04
             java-version: 17  # Minimum version supported by Maven 4
