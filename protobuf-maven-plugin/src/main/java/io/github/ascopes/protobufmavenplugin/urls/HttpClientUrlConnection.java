@@ -44,13 +44,9 @@ public class HttpClientUrlConnection extends URLConnection {
   private final HttpRequest request;
   private HttpResponse<InputStream> response;
 
-  public HttpClientUrlConnection(URL url) throws URISyntaxException {
+  public HttpClientUrlConnection(URL url, HttpClient client) throws URISyntaxException {
     super(url);
-    this.client = HttpClient
-        .newBuilder()
-        .followRedirects(Redirect.ALWAYS)
-        .version(Version.HTTP_2)
-        .build();
+    this.client = client;
     this.request = HttpRequest
         .newBuilder()
         .uri(url.toURI())

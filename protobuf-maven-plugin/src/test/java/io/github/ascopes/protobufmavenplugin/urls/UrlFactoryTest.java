@@ -208,7 +208,7 @@ class UrlFactoryTest {
         .verifyThat(getRequestedFor(urlEqualTo("/" + path)));
   }
 
-  @DisplayName("HTTP protocol gets response with status code 404 and throws FileNotFoundException")
+  @DisplayName("HTTP protocol gets response with status code 500 and throws HttpRequestException")
   @ValueSource(strings = {"", "foo.txt", "bar/baz/bork.txt"})
   @ParameterizedTest(name = "for path \"{0}\"")
   void httpProtocolGetsResponseWithStatusCode500AndThrowsHttpRequestException(

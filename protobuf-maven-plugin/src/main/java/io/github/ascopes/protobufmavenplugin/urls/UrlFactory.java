@@ -80,9 +80,7 @@ public final class UrlFactory {
             TarArchiveInputStream::new,
             "tar"
         ),
-        new HttpUrlStreamHandlerFactory(
-            "http", "https"
-        )
+        new HttpUrlStreamHandlerFactory()
     );
   }
 

@@ -15,10 +15,14 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
+import io.github.ascopes.protobufmavenplugin.urls.AbstractNestingUrlConnection.NestedUrlException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.http.HttpClient;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpClient.Version;
 
 /**
  * URL stream handler factory for URLs that wrap HTTP and HTTPS connections
@@ -28,16 +32,23 @@ import java.net.URLConnection;
  */
 public class HttpUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
 
-  HttpUrlStreamHandlerFactory(String protocol, String... protocols) {
-    super(protocol, protocols);
+  private final HttpClient client;
+
+  HttpUrlStreamHandlerFactory() {
+    super("http", "https");
+    this.client = HttpClient
+        .newBuilder()
+        .followRedirects(Redirect.ALWAYS)
+        .version(Version.HTTP_2)
+        .build();
   }
 
   @Override
   URLConnection createUrlConnection(URL url) throws IOException {
     try {
-      return new HttpClientUrlConnection(url);
+      return new HttpClientUrlConnection(url, client);
     } catch (URISyntaxException uriException) {
-      throw new IOException("Failed to create connection for URL " + url, uriException);
+      throw new NestedUrlException("Failed to create connection for URL " + url, uriException);
     }
   }
 }
