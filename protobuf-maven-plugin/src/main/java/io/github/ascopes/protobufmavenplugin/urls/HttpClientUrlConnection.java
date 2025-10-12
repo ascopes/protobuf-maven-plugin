@@ -16,7 +16,6 @@
 package io.github.ascopes.protobufmavenplugin.urls;
 
 import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +23,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.http.HttpClient;
-import java.net.http.HttpClient.Redirect;
-import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -38,13 +35,13 @@ import java.net.http.HttpResponse.BodyHandlers;
  * @author Ilja Kanstanczuk
  * @since 3.10.1
  */
-public class HttpClientUrlConnection extends URLConnection {
+final class HttpClientUrlConnection extends URLConnection {
 
   private final HttpClient client;
   private final HttpRequest request;
   private HttpResponse<InputStream> response;
 
-  public HttpClientUrlConnection(URL url, HttpClient client) throws URISyntaxException {
+  HttpClientUrlConnection(URL url, HttpClient client) throws URISyntaxException {
     super(url);
     this.client = client;
     this.request = HttpRequest

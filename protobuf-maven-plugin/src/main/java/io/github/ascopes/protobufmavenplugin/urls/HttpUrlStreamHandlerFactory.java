@@ -30,7 +30,7 @@ import java.net.http.HttpClient.Version;
  * @author Ilja Kanstanczuk
  * @since 3.10.1
  */
-public class HttpUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
+final class HttpUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
 
   private final HttpClient client;
 
