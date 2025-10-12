@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +26,7 @@ import java.nio.charset.StandardCharsets;
  * @author Ilja Kanstanczuk
  * @since 3.10.1
  */
-public final class HttpRequestException extends RuntimeException {
+public final class HttpRequestException extends IOException {
 
   private final int statusCode;
   private final String correlationId;
