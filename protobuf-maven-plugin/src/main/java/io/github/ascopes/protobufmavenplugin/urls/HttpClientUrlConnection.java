@@ -42,15 +42,14 @@ public class HttpClientUrlConnection extends URLConnection {
 
   private final HttpClient client;
   private final HttpRequest request;
-  private HttpResponse<byte[]> response;
+  private HttpResponse<InputStream> response;
 
   public HttpClientUrlConnection(URL url) throws URISyntaxException {
     super(url);
-    String protocol = url.getProtocol();
     this.client = HttpClient
         .newBuilder()
         .followRedirects(Redirect.ALWAYS)
-        .version(protocol.equalsIgnoreCase("http") ? Version.HTTP_1_1 : Version.HTTP_2)
+        .version(Version.HTTP_2)
         .build();
     this.request = HttpRequest
         .newBuilder()
@@ -65,7 +64,7 @@ public class HttpClientUrlConnection extends URLConnection {
       return;
     }
     try {
-      response = client.send(request, BodyHandlers.ofByteArray());
+      response = client.send(request, BodyHandlers.ofInputStream());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new IOException("HTTP request interrupted for " + url, e);
@@ -86,6 +85,6 @@ public class HttpClientUrlConnection extends URLConnection {
     if (!connected) {
       connect();
     }
-    return new ByteArrayInputStream(response.body());
+    return response.body();
   }
 }

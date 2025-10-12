@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import java.io.InputStream;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
@@ -50,7 +51,7 @@ public final class HttpRequestException extends RuntimeException {
     this.responseBody = responseBody;
   }
 
-  public static HttpRequestException fromHttpResponse(HttpResponse<byte[]> response) {
+  public static HttpRequestException fromHttpResponse(HttpResponse<InputStream> response) {
     String body = asText(response.body(), 500);
     String correlationId = extractHeader(response, "Correlation-Id", "X-Correlation-Id");
     String requestId = extractHeader(response, "Request-Id", "X-Request-Id");
@@ -66,24 +67,24 @@ public final class HttpRequestException extends RuntimeException {
     );
   }
 
-  private static String asText(byte[] body, int maxLength) {
-    if (body == null || body.length == 0) {
+  private static String asText(InputStream stream, int maxLength) {
+    if (stream == null) {
       return null;
     }
-
-    try {
+    try (stream) {
+      byte[] body = stream.readNBytes(maxLength + 1);
       String text = new String(body, StandardCharsets.UTF_8);
       if (text.length() > maxLength) {
         return text.substring(0, maxLength) + "... [truncated]";
       }
       return text;
     } catch (Exception e) {
-      return "<binary or unreadable body: " + body.length + " bytes>";
+      return "<binary or unreadable response body";
     }
   }
 
   private static String extractHeader(
-      HttpResponse<byte[]> response,
+      HttpResponse<InputStream> response,
       String... names) {
     for (String name : names) {
       var val = response.headers().firstValue(name);
