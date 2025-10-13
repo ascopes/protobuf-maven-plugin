@@ -2,10 +2,10 @@
 
 <img align="center" alt="logo" src="protobuf-maven-plugin/src/site/resources/images/banner.jpg">
 
-<p align="center">  
+<p align="center">
   <!-- Note: do not put inner tags on newlines within <a/>, it messes up the rendering of text decorations leaving blue underlines between badges. -->
   <img alt="Java 17+" src="https://img.shields.io/badge/Java-17+-red?logo=openjdk&logoColor=white">
-  <img alt="Maven 3.8" src="https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven">
+  <img alt="Maven 3.9" src="https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven">
   <img alt="GitHub License" src="https://img.shields.io/github/license/ascopes/protobuf-maven-plugin">
   <a href="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml"><img alt="Build Status" src="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main"></a>
   <a href="https://codecov.io/gh/ascopes/protobuf-maven-plugin"><img alt="Coverage" src="https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main"></a>
