@@ -24,6 +24,7 @@ import java.util.Comparator;
  * @since 3.1.0
  */
 public interface ProtocTarget extends Comparable<ProtocTarget> {
+
   default int getOrder() {
     return 0;
   }

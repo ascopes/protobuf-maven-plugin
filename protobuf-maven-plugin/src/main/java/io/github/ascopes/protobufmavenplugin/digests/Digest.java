@@ -51,13 +51,10 @@ public final class Digest {
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (!(other instanceof Digest)) {
-      return false;
+    if (other instanceof Digest that) {
+      return Objects.equals(algorithm, that.algorithm) && Arrays.equals(digest, that.digest);
     }
-
-    var that = (Digest) other;
-
-    return Objects.equals(algorithm, that.algorithm) && Arrays.equals(digest, that.digest);
+    return false;
   }
 
   @Override

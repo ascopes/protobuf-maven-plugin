@@ -113,10 +113,10 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
   }
 
   private NestedUrlException maybeWrapIoException(Throwable ex) {
-    if (ex instanceof NestedUrlException) {
+    if (ex instanceof NestedUrlException nestedEx) {
       // Continue to bubble upwards without adding more
       // irrelevant information to the mix.
-      return (NestedUrlException) ex;
+      return nestedEx;
     }
 
     return new NestedUrlException(
