@@ -1049,14 +1049,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    if (Runtime.version().feature() < 17) {
-      log.warn(
-          "It looks like you are using a JDK older than Java 17. From v4.0.0 of this plugin, "
-              + "you will need to run Maven with Java 17 or newer for the build to succeed. "
-              + "Please consider updating to a newer JDK where possible."
-      );
-    }
-
     if (skip) {
       log.info("Execution of this plugin has been skipped in the configuration");
       return;
