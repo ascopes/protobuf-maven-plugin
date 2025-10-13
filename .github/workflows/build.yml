@@ -70,14 +70,14 @@ jobs:
       matrix:
         include:
           # Note: this runner is expensive!
-          - title: osx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: osx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
             os-name: macos-15
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: win/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: win/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
             os-name: windows-2025
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: win/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
@@ -85,14 +85,14 @@ jobs:
             java-version: 21  # This is the earliest-supported version on Windows ARM
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
             os-name: ubuntu-24.04-arm
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk11
+          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
             os-name: ubuntu-24.04
-            java-version: 11
+            java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
@@ -112,7 +112,7 @@ jobs:
 
           - title: lnx/x86/mvn4.0.0/jdk17
             os-name: ubuntu-24.04
-            java-version: 17  # Minimum version supported by Maven 4
+            java-version: 17
             maven-version: 4.0.0-rc-4
 
     steps:
