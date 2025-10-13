@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
  * Exception raised if HTTP request fails
  *
  * @author Ilja Kanstanczuk
- * @since 3.10.1
+ * @since 3.10.2
  */
 public final class HttpRequestException extends IOException {
 

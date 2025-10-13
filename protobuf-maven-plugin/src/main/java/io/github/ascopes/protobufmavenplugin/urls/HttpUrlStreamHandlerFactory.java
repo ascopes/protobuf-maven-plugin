@@ -28,7 +28,7 @@ import java.net.http.HttpClient.Version;
  * URL stream handler factory for URLs that wrap HTTP and HTTPS connections
  *
  * @author Ilja Kanstanczuk
- * @since 3.10.1
+ * @since 3.10.2
  */
 final class HttpUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
 
@@ -36,7 +36,7 @@ final class HttpUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory 
 
   HttpUrlStreamHandlerFactory() {
     super("http", "https");
-    this.client = HttpClient
+    client = HttpClient
         .newBuilder()
         .followRedirects(Redirect.ALWAYS)
         .version(Version.HTTP_2)

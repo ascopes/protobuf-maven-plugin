@@ -15,10 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
+import static java.util.Objects.requireNonNull;
+
 import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -26,20 +29,20 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import org.jspecify.annotations.Nullable;
 
 /**
  * URL connection for HTTP and HTTPS requests
  * that wraps HttpClient
  *
- *
  * @author Ilja Kanstanczuk
- * @since 3.10.1
+ * @since 3.10.2
  */
 final class HttpClientUrlConnection extends URLConnection {
 
   private final HttpClient client;
   private final HttpRequest request;
-  private HttpResponse<InputStream> response;
+  private @Nullable HttpResponse<InputStream> response;
 
   HttpClientUrlConnection(URL url, HttpClient client) throws URISyntaxException {
     super(url);
@@ -60,15 +63,17 @@ final class HttpClientUrlConnection extends URLConnection {
       response = client.send(request, BodyHandlers.ofInputStream());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      throw new IOException("HTTP request interrupted for " + url, e);
+      var newEx = new InterruptedIOException("HTTP request interrupted for " + url);
+      newEx.initCause(e);
+      throw newEx;
     } catch (IOException e) {
       throw new IOException("Failed to fetch " + url, e);
     }
-    this.connected = true;
-    if (response != null && response.statusCode() == 404) {
+    connected = true;
+    if (response.statusCode() == 404) {
       throw new FileNotFoundException(url.toString());
     }
-    if (response != null && response.statusCode() >= 400) {
+    if (response.statusCode() >= 400) {
       throw HttpRequestException.fromHttpResponse(response);
     }
   }
@@ -78,6 +83,6 @@ final class HttpClientUrlConnection extends URLConnection {
     if (!connected) {
       connect();
     }
-    return response.body();
+    return requireNonNull(response).body();
   }
 }
