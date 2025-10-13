@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Exception raised if HTTP request fails
@@ -29,20 +30,21 @@ import java.nio.charset.StandardCharsets;
 public final class HttpRequestException extends IOException {
 
   private final int statusCode;
-  private final String correlationId;
-  private final String requestId;
-  private final String wwwAuthenticate;
-  private final String proxyAuthenticate;
-  private final String responseBody;
+  private final @Nullable String correlationId;
+  private final @Nullable String requestId;
+  private final @Nullable String wwwAuthenticate;
+  private final @Nullable String proxyAuthenticate;
+  private final @Nullable String responseBody;
 
   public HttpRequestException(
       String message,
       int statusCode,
-      String correlationId,
-      String requestId,
-      String wwwAuthenticate,
-      String proxyAuthenticate,
-      String responseBody) {
+      @Nullable String correlationId,
+      @Nullable String requestId,
+      @Nullable String wwwAuthenticate,
+      @Nullable String proxyAuthenticate,
+      @Nullable String responseBody
+  ) {
     super(message);
     this.statusCode = statusCode;
     this.correlationId = correlationId;
@@ -53,17 +55,17 @@ public final class HttpRequestException extends IOException {
   }
 
   public static HttpRequestException fromHttpResponse(HttpResponse<InputStream> response) {
-    String body = asText(response.body(), 500);
-    String correlationId = extractHeader(response, "Correlation-Id", "X-Correlation-Id");
-    String requestId = extractHeader(response, "Request-Id", "X-Request-Id");
+    var body = asText(response.body(), 500);
+    var correlationId = extractHeader(response, "Correlation-Id", "X-Correlation-Id");
+    var requestId = extractHeader(response, "Request-Id", "X-Request-Id");
 
     return new HttpRequestException(
         "HTTP " + response.statusCode() + " from " + response.uri(),
         response.statusCode(),
         correlationId,
         requestId,
-        response.headers().firstValue("WWW-Authenticate").orElse(null),
-        response.headers().firstValue("Proxy-Authenticate").orElse(null),
+        extractHeader(response, "WWW-Authenticate"),
+        extractHeader(response, "Proxy-Authenticate"),
         body
     );
   }
@@ -73,21 +75,22 @@ public final class HttpRequestException extends IOException {
       return null;
     }
     try (stream) {
-      byte[] body = stream.readNBytes(maxLength + 1);
-      String text = new String(body, StandardCharsets.UTF_8);
+      var body = stream.readNBytes(maxLength + 1);
+      var text = new String(body, StandardCharsets.UTF_8);
       if (text.length() > maxLength) {
         return text.substring(0, maxLength) + "... [truncated]";
       }
       return text;
     } catch (Exception e) {
-      return "<binary or unreadable response body";
+      return "<binary or unreadable response body>";
     }
   }
 
-  private static String extractHeader(
+  private static @Nullable String extractHeader(
       HttpResponse<InputStream> response,
-      String... names) {
-    for (String name : names) {
+      String... names
+  ) {
+    for (var name : names) {
       var val = response.headers().firstValue(name);
       if (val.isPresent()) {
         return val.get();
@@ -100,23 +103,23 @@ public final class HttpRequestException extends IOException {
     return statusCode;
   }
 
-  public String getCorrelationId() {
+  public @Nullable String getCorrelationId() {
     return correlationId;
   }
 
-  public String getRequestId() {
+  public @Nullable String getRequestId() {
     return requestId;
   }
 
-  public String getWwwAuthenticate() {
+  public @Nullable String getWwwAuthenticate() {
     return wwwAuthenticate;
   }
 
-  public String getProxyAuthenticate() {
+  public @Nullable String getProxyAuthenticate() {
     return proxyAuthenticate;
   }
 
-  public String getResponseBody() {
+  public @Nullable String getResponseBody() {
     return responseBody;
   }
 
