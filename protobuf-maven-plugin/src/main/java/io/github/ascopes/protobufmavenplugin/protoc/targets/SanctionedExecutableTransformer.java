@@ -108,8 +108,7 @@ public final class SanctionedExecutableTransformer extends AbstractTemporaryLoca
     var transformedTargets = new TreeSet<ProtocTarget>();
 
     for (var target : invocation.getTargets()) {
-      if (target instanceof PluginProtocTarget) {
-        var pluginTarget = (PluginProtocTarget) target;
+      if (target instanceof PluginProtocTarget pluginTarget) {
         var prefix = "plugin-" + transformedTargets.size() + "-";
 
         target = ImmutablePluginProtocTarget.builder()
