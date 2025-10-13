@@ -403,7 +403,7 @@
             <parameters>true</parameters>
             <proc>full</proc>
             <showDeprecation>true</showDeprecation>
-            <release>11</release>
+            <release>17</release>
           </configuration>
         </plugin>
 
