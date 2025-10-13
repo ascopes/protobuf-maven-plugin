@@ -158,7 +158,6 @@ public final class ProtocExecutor {
     builder.add("--proto_path=" + path);
   }
 
-  //
   private void applyProtoSourceFileArgument(ArgumentFileBuilder builder, Path file) {
     builder.add(file);
   }
