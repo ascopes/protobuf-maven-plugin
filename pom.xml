@@ -135,7 +135,7 @@
     <!-- Plugin dependencies -->
     <checkstyle.version>10.26.1</checkstyle.version>
     <maven-fluido-skin.version>2.1.0</maven-fluido-skin.version>
-    <maven-surefire-junit5-tree-reporter.version>1.5.0</maven-surefire-junit5-tree-reporter.version>
+    <maven-surefire-junit5-tree-reporter.version>1.5.1</maven-surefire-junit5-tree-reporter.version>
 
     <!--
         - Force bytebuddy experimental support for some exotic platforms.
