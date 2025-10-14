@@ -306,7 +306,7 @@ class AbstractNestingUrlConnectionTest {
     // Then
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(connection::getInputStream)
-        .withMessage("not connected");
+        .withMessage("internals are not connected to '%s', this is a bug!", innerUrl);
   }
 
   @DisplayName("the exception is reraised if the nested input stream raises a NestedUrlException")
