@@ -1,0 +1,88 @@
+/*
+ * Copyright (C) 2023 - 2025, Ashley Scopes.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.ascopes.protobufmavenplugin.urls;
+
+import static java.util.Objects.requireNonNull;
+
+import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * URL connection for HTTP and HTTPS requests
+ * that wraps HttpClient
+ *
+ * @author Ilja Kanstanczuk
+ * @since 3.10.2
+ */
+final class HttpClientUrlConnection extends URLConnection {
+
+  private final HttpClient client;
+  private final HttpRequest request;
+  private @Nullable HttpResponse<InputStream> response;
+
+  HttpClientUrlConnection(URL url, HttpClient client) throws URISyntaxException {
+    super(url);
+    this.client = client;
+    this.request = HttpRequest
+        .newBuilder()
+        .uri(url.toURI())
+        .GET()
+        .build();
+  }
+
+  @Override
+  public void connect() throws IOException {
+    if (connected) {
+      return;
+    }
+    try {
+      response = client.send(request, BodyHandlers.ofInputStream());
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      var newEx = new InterruptedIOException("HTTP request interrupted for " + url);
+      newEx.initCause(e);
+      throw newEx;
+    } catch (IOException e) {
+      throw new IOException("Failed to fetch " + url, e);
+    }
+    connected = true;
+    if (response.statusCode() == 404) {
+      throw new FileNotFoundException(url.toString());
+    }
+    if (response.statusCode() >= 400) {
+      throw HttpRequestException.fromHttpResponse(response);
+    }
+  }
+
+  @Override
+  public InputStream getInputStream() throws IOException {
+    if (!connected) {
+      connect();
+    }
+    return requireNonNull(response).body();
+  }
+}

@@ -16,19 +16,20 @@
 package io.github.ascopes.protobufmavenplugin.urls;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -183,6 +184,99 @@ class UrlFactoryTest {
         .isEqualTo("Hello, World!");
     wireMockClient
         .verifyThat(getRequestedFor(urlEqualTo("/" + path)));
+  }
+
+  @DisplayName("HTTP protocol gets response with status code 404 and throws FileNotFoundException")
+  @ValueSource(strings = {"", "foo.txt", "bar/baz/bork.txt"})
+  @ParameterizedTest(name = "for path \"{0}\"")
+  void httpProtocolGetsResponseWithStatusCode404AndThrowsFileNotFoundException(
+      String path
+  ) throws Exception {
+    // Given
+    wireMockClient.register(get(urlEqualTo("/" + path))
+        .willReturn(aResponse()
+            .withStatus(404)));
+    var uri = URI.create(wireMockBaseUrl + "/" + path);
+
+    // When
+    var url = factory.create(uri);
+    Throwable thrown = catchThrowable(() -> readString(url));
+
+    // Then
+    assertThat(thrown).isInstanceOf(FileNotFoundException.class);
+    wireMockClient
+        .verifyThat(getRequestedFor(urlEqualTo("/" + path)));
+  }
+
+  @DisplayName("HTTP protocol gets response with status code 500 and throws HttpRequestException")
+  @ValueSource(strings = {"", "foo.txt", "bar/baz/bork.txt"})
+  @ParameterizedTest(name = "for path \"{0}\"")
+  void httpProtocolGetsResponseWithStatusCode500AndThrowsHttpRequestException(
+      String path
+  ) throws Exception {
+    // Given
+    wireMockClient.register(get(urlEqualTo("/" + path))
+        .willReturn(aResponse()
+            .withStatus(500)
+            .withHeader("Correlation-Id", "correlationId")
+            .withHeader("Request-Id", "requestId")
+            .withHeader("WWW-Authenticate", "auth")
+            .withHeader("Proxy-Authenticate", "proxy")
+            .withBody("failure")));
+    var uri = URI.create(wireMockBaseUrl + "/" + path);
+
+    // When
+    var url = factory.create(uri);
+    Throwable thrown = catchThrowable(() -> readString(url));
+
+    // Then
+    assertThat(thrown).isInstanceOf(HttpRequestException.class);
+    var ex = (HttpRequestException) thrown;
+    assertSoftly(softly -> {
+      softly.assertThat(ex.getStatusCode())
+          .isEqualTo(500);
+      softly.assertThat(ex.getCorrelationId())
+          .isEqualTo("correlationId");
+      softly.assertThat(ex.getRequestId())
+          .isEqualTo("requestId");
+      softly.assertThat(ex.getWwwAuthenticate())
+          .isEqualTo("auth");
+      softly.assertThat(ex.getProxyAuthenticate())
+          .isEqualTo("proxy");
+      softly.assertThat(ex.getResponseBody())
+          .isEqualTo("failure");
+    });
+    wireMockClient
+        .verifyThat(getRequestedFor(urlEqualTo("/" + path)));
+  }
+
+  @DisplayName("HTTP protocol follows 302 redirects automatically")
+  @ValueSource(strings = {"foo.txt", "bar/baz/bork.txt"})
+  @ParameterizedTest(name = "for path \"{0}\"")
+  void httpProtocolFollows302RedirectsAutomatically(String path) throws Exception {
+    // Given
+    var redirectedPath = "/redirected/" + path;
+    var redirectedBody = "Redirected content for " + path;
+    wireMockClient.register(get(urlEqualTo("/" + path))
+        .willReturn(aResponse()
+            .withStatus(302)
+            .withHeader("Location", wireMockBaseUrl + redirectedPath)));
+    wireMockClient.register(get(urlEqualTo(redirectedPath))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "text/plain")
+            .withBody(redirectedBody)));
+    var uri = URI.create(wireMockBaseUrl + "/" + path);
+
+    // When
+    var url = factory.create(uri);
+    var actualContent = readString(url);
+
+    // Then
+    assertThat(actualContent)
+        .isEqualTo(redirectedBody);
+    wireMockClient.verifyThat(getRequestedFor(urlEqualTo("/" + path)));
+    wireMockClient.verifyThat(getRequestedFor(urlEqualTo(redirectedPath)));
   }
 
   static Path pathForTestFile(String name) {

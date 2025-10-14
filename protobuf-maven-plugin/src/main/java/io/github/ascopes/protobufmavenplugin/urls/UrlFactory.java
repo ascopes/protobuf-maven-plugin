@@ -79,7 +79,8 @@ public final class UrlFactory {
             this,
             TarArchiveInputStream::new,
             "tar"
-        )
+        ),
+        new HttpUrlStreamHandlerFactory()
     );
   }
 
