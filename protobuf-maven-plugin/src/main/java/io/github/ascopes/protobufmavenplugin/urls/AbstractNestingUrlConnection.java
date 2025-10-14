@@ -38,7 +38,7 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
 
   AbstractNestingUrlConnection(URL url, URL nestedUrl) {
     super(url);
-    this.nestedUrl = nestedUrl;
+    this.nestedUrl = requireNonNull(nestedUrl);
 
     // No output for you.
     setDoOutput(false);
@@ -87,7 +87,10 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
   }
 
   private InputStream constructInputStream() throws NestedUrlException {
-    requireNonNull(nestedConnection, "not connected");
+    requireNonNull(
+        nestedConnection,
+        () -> "internals are not connected to '" + nestedUrl + "', this is a bug!"
+    );
 
     try {
       // Side effects - eww.
