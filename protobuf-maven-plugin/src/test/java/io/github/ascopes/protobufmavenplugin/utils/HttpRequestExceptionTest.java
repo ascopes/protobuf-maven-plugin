@@ -37,10 +37,9 @@ public class HttpRequestExceptionTest {
 
   HttpResponse<InputStream> mockedHttpResponse;
 
-  @SuppressWarnings("unchecked")
   @BeforeEach
   void setUp() {
-    mockedHttpResponse = mock(HttpResponse.class);
+    mockedHttpResponse = mock();
   }
 
   @DisplayName("method fromHttpResponse extracts all expected values from HttpResponse")
