@@ -16,7 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.urls;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.ascopes.protobufmavenplugin.urls.AbstractNestingUrlConnection.NestedUrlException;
 import java.net.URISyntaxException;
