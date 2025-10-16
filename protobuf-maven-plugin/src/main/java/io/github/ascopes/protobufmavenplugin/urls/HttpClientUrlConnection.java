@@ -17,7 +17,6 @@ package io.github.ascopes.protobufmavenplugin.urls;
 
 import static java.util.Objects.requireNonNull;
 
-import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;

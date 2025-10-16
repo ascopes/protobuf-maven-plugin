@@ -27,7 +27,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import io.github.ascopes.protobufmavenplugin.utils.HttpRequestException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.net.URI;
