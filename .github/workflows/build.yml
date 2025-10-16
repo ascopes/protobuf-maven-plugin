@@ -95,11 +95,6 @@ jobs:
             java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
-            os-name: ubuntu-24.04
-            java-version: 17
-            maven-version: "${{ needs.validate.outputs.default_maven_version }}"
-
           - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
             os-name: ubuntu-24.04
             java-version: 21
