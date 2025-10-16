@@ -402,7 +402,6 @@
             <failOnWarning>true</failOnWarning>
             <parameters>true</parameters>
             <proc>full</proc>
-            <showCompilationChanges>true</showCompilationChanges>
             <showDeprecation>true</showDeprecation>
             <release>11</release>
           </configuration>
