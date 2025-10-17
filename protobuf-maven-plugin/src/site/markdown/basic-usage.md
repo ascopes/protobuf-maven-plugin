@@ -42,7 +42,7 @@ header of this page.
         <version>%VERSION%</version>
 
         <configuration>
-          <protocVersion>${protobuf.version}</protocVersion>
+          <protoc>${protobuf.version}</protoc>
         </configuration>
       </plugin>
     </plugins>
@@ -125,7 +125,7 @@ The plugin configuration for this would look like the following:
   <version>%VERSION%</version>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
   </configuration>
 
   <executions>
@@ -150,7 +150,7 @@ would be in `src/test/protobuf`:
   <version>%VERSION%</version>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
   </configuration>
 
   <executions>
@@ -178,7 +178,7 @@ it in the plugin configuration globally:
   <version>%VERSION%</version>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
 
     <sourceDirectories>
       <sourceDirectory>path/to/directory</sourceDirectory>
@@ -200,7 +200,7 @@ configure their paths individually.
   <version>%VERSION%</version>
 
   <configuration>
-    <protocVersion>${protobuf.version}</protocVersion>
+    <protoc>${protobuf.version}</protoc>
   </configuration>
 
   <executions>

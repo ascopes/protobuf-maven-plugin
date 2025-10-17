@@ -16,7 +16,7 @@ as `PATH`.
   <version>...</version>
 
   <configuration>
-    <protocVersion>PATH</protocVersion>
+    <protoc>PATH</protoc>
   </configuration>
 
   ...
@@ -44,7 +44,7 @@ you can provide a URL with the `file` scheme to reference it:
   <version>...</version>
 
   <configuration>
-    <protocVersion>file:///opt/protoc/protoc.exe</protocVersion>
+    <protoc>file:///opt/protoc/protoc.exe</protoc>
   </configuration>
 </plugin>
 ```
@@ -66,11 +66,11 @@ directly:
   <version>...</version>
 
   <configuration>
-    <protocVersion>ftp://company-server.internal/protoc/protoc.exe</protocVersion>
+    <protoc>ftp://company-server.internal/protoc/protoc.exe</protoc>
     <!-- or -->
-    <protocVersion>http://company-server.internal/protoc/protoc.exe</protocVersion>
+    <protoc>http://company-server.internal/protoc/protoc.exe</protoc>
     <!-- or -->
-    <protocVersion>https://company-server.internal/protoc/protoc.exe</protocVersion>
+    <protoc>https://company-server.internal/protoc/protoc.exe</protoc>
   </configuration>
 </plugin>
 ```
