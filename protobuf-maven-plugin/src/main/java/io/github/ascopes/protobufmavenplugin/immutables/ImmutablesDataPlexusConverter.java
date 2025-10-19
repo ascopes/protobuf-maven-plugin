@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.immutables;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
@@ -49,20 +50,7 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
 
   @Override
   public boolean canConvert(Class<?> cls) {
-    // Ignore anything from the standard library or that has a primitive value associated with it.
-    if (cls.isPrimitive() || cls.getClassLoader() == null) {
-      return false;
-    }
-
-    // XXX: is this slow? If it is slow, do I care?
-    // Might need to eventually investigate this, as it reeks of slow code to me, but I doubt it
-    // makes enough of a difference to actually matter.
-    try {
-      datatypeFor(cls);
-      return true;
-    } catch (NoSuchElementException ex) {
-      return false;
-    }
+    return datatypeFor(cls).isPresent();
   }
 
   @Override
@@ -76,7 +64,8 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
-    var datatype = datatypeFor(type);
+    var datatype = datatypeFor(type)
+        .orElseThrow(() -> new NoSuchElementException("No datatype converter " + type.getName()));
 
     var builder = (Builder<Object>) datatype.builder();
     for (var child : configuration.getChildren()) {
@@ -105,7 +94,11 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
     return builder.build();
   }
 
-  private <T> Datatype<T> datatypeFor(Class<T> cls) {
+  private <T> Optional<Datatype<T>> datatypeFor(Class<T> cls) {
+    if (cls.isPrimitive() || cls.getClassLoader() == null) {
+      return Optional.empty();
+    }
+
     @SuppressWarnings("unchecked")
     var datatype = (Datatype<T>) knownDatatypes.computeIfAbsent(cls, ignored -> {
       var loader = cls.getClassLoader();
@@ -115,16 +108,12 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
         var outerCls = loader.loadClass(outerClsName);
         return (Datatype<?>) outerCls.getMethod("_" + cls.getSimpleName()).invoke(null);
       } catch (ClassNotFoundException ex) {
-        var newEx = new NoSuchElementException("No datatype converter " + outerClsName);
-        //noinspection UnnecessaryInitCause - only JDK15 and newer
-        newEx.initCause(ex);
-        throw newEx;
-
+        return null;
       } catch (ReflectiveOperationException ex) {
         throw new IllegalStateException("Failed to find datatype for " + cls.getName(), ex);
       }
     });
 
-    return datatype;
+    return Optional.ofNullable(datatype);
   }
 }
