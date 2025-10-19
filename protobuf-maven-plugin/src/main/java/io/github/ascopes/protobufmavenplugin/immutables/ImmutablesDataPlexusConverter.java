@@ -15,19 +15,21 @@
  */
 package io.github.ascopes.protobufmavenplugin.immutables;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
+import org.codehaus.plexus.component.configurator.converters.ParameterizedConfigurationConverter;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
-import org.immutables.data.Datatype;
-import org.immutables.data.Datatype.Builder;
-import org.immutables.data.Datatype.Feature;
+import org.immutables.datatype.Datatype;
+import org.immutables.datatype.Datatype.Builder;
+import org.immutables.datatype.Datatype.Feature;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -35,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * on the interface it was derived from.
  *
  * <p>Note that all objects must be annotated with both {@link org.immutables.value.Value}
- * <strong>and</strong> {@link org.immutables.data.Data}, otherwise deserialization will fail at
+ * <strong>and</strong> {@link org.immutables.datatype.Data}, otherwise deserialization will fail at
  * runtime.
  *
  * @author Ashley Scopes
@@ -71,17 +73,37 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
     for (var child : configuration.getChildren()) {
       try {
         var feature = (Feature<Object, Object>) datatype.feature(child.getName());
-        var valueType = feature.type().getRawType();
-        var converter = lookup.lookupConverterForType(valueType);
-        var value = converter.fromConfiguration(
-            lookup,
-            child,
-            valueType,
-            null,
-            loader,
-            evaluator,
-            listener
-        );
+        var valueType = feature.type();
+
+        var converter = lookup.lookupConverterForType(valueType.getClass());
+
+        Object value;
+
+        // If it is a collection type, we have to handle this sensibly with generic type
+        // information, otherwise we'll be unable to suss out the right container member type.
+        if (converter instanceof ParameterizedConfigurationConverter) {
+          var parameterizedConverter = (ParameterizedConfigurationConverter) converter;
+          value = parameterizedConverter.fromConfiguration(
+              lookup,
+              child,
+              valueType.getClass(),
+              ((ParameterizedType) valueType).getActualTypeArguments(),
+              valueType.getClass().getEnclosingClass(),
+              loader,
+              evaluator,
+              listener
+          );
+        } else {
+          value = converter.fromConfiguration(
+              lookup,
+              child,
+              valueType.getClass(),
+              valueType.getClass().getEnclosingClass(),
+              loader,
+              evaluator,
+              listener
+          );
+        }
         builder.set(feature, value);
       } catch (NoSuchElementException ex) {
         throw new ComponentConfigurationException(

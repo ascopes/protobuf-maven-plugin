@@ -17,7 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.net.URI;
-import org.immutables.data.Data;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
