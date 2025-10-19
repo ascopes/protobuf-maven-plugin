@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.immutables;
 
-import org.immutables.data.Data;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value;
 
 @Data

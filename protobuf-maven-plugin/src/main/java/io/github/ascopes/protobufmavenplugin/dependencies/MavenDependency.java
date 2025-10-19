@@ -16,7 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import java.util.Set;
-import org.immutables.data.Data;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
