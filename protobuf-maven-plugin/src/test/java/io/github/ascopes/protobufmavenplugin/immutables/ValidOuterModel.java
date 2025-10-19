@@ -15,14 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.immutables;
 
+import java.util.Set;
 import org.immutables.datatype.Data;
 import org.immutables.value.Value;
 
 @Data
 @Value.Immutable
-interface ValidModel {
+interface ValidOuterModel {
 
-  String getFoo();
-
-  int getBar();
+  Set<ValidInnerModel> getValidInnerModels();
 }

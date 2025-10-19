@@ -132,7 +132,10 @@ public final class ImmutablesDataPlexusConverter extends AbstractBasicConverter 
       } catch (ClassNotFoundException ex) {
         return null;
       } catch (ReflectiveOperationException ex) {
-        throw new IllegalStateException("Failed to find datatype for " + cls.getName(), ex);
+        throw new IllegalStateException(
+            "Failed to find datatype for " + cls.getName() + ": " + ex,
+            ex
+        );
       }
     });
 

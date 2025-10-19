@@ -18,8 +18,13 @@ package io.github.ascopes.protobufmavenplugin.immutables;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.io.StringReader;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
+import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
+import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,6 +52,16 @@ class ImmutablesDataPlexusConverterTest {
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
+
+  static PlexusConfiguration xml2PlexusConfiguration(String... lines) {
+    try {
+      var dom = Xpp3DomBuilder.build(new StringReader(String.join("\n", lines)));
+      return new XmlPlexusConfiguration(dom);
+    } catch (Exception ex) {
+      throw new RuntimeException("Failed to parse XML... welp", ex);
+    }
+  }
+
   static Stream<Arguments> canConvertTestCases() {
     return Stream.of(
         arguments(void.class, false),
@@ -61,9 +76,14 @@ class ImmutablesDataPlexusConverterTest {
         arguments(Object.class, false),
         arguments(String.class, false),
         arguments(List.class, false),
-        arguments(List.class, false),
-        arguments(ValidModel.class, true)
+        arguments(Set.class, false),
+        arguments(Class.class, false),
+        arguments(SomeJunkType.class, false),
+        arguments(ValidInnerModel.class, true),
+        arguments(ValidOuterModel.class, true)
     );
   }
 
+  interface SomeJunkType {
+  }
 }
