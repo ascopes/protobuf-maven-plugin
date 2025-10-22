@@ -62,8 +62,8 @@ will automatically discover them and compile them to Java bytecode.
 
 Other language generation targets are also available. This plugin provides support for generating
 all
-the languages that protoc supports out of the box, including Kotlin, Python, Python typeshed stubs,
-Ruby, PHP, C#, C++, and Rust.
+the languages that protoc supports out of the box, including Kotlin (JVM), Python, Python typeshed
+stubs, and Ruby.
 
 The following will generate Java classes and corresponding Kotlin wrappers:
 
@@ -74,6 +74,7 @@ The following will generate Java classes and corresponding Kotlin wrappers:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
+    <javaEnabled>true</javaEnabled>
     <kotlinEnabled>true</kotlinEnabled>
     <protoc>${protobuf-java.version}</protoc>
   </configuration>
