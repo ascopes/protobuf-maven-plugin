@@ -12,6 +12,9 @@ needs to be backported to older versions. If this is a requirement,
 please raise an issue, along with details of why you are unable to use
 the newer versions.
 
+The previous major version will usually not be updated, but this can be requested if you have a use case
+for this and there are no technical blockers for implementing or maintaining the update.
+
 ### Maven 4 support
 
 Maven 3 and 4 are supported by this plugin. Many of the underlying Maven libraries
