@@ -8,11 +8,6 @@ on:
         default: false
         type: boolean
 
-      skip-github-release:
-        description: "Skip creating a GitHub release"
-        default: false
-        type: boolean
-
       skip-maven-release:
         description: "Skip the Maven release and rollback steps"
         default: false
@@ -111,20 +106,13 @@ jobs:
               -Dpassword='${{ secrets.GITHUB_TOKEN }}' \
               -DreleaseVersion="${{ needs.prepare.outputs.release_version }}" \
               -DsignTag=false \
-              -DskipTests='${{ inputs.skip-tests }}' \
+              -Dmaven.test.skip='${{ inputs.skip-tests }}' \
               -Dtag="v${{ needs.prepare.outputs.release_version }}" \
               clean verify release:prepare release:perform
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_TOKEN: ${{ secrets.CENTRAL_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
-      - name: Publish code coverage
-        uses: codecov/codecov-action@v5
-        continue-on-error: true
-        if: ${{ always() && ! inputs.dry-run }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build logs as artifacts
         uses: actions/upload-artifact@v4
@@ -135,6 +123,7 @@ jobs:
             **/build.log
             **/maven-status/**
             **/surefire-reports/**.txt
+            **/surefire-reports/**.xml
           compression-level: 9
           retention-days: 90  # max
           include-hidden-files: true
@@ -188,7 +177,7 @@ jobs:
       - name: Generate site
         run: |-
           ./mvnw -B versions:set -DnewVersion="${{ needs.prepare.outputs.release_version }}"
-          ./mvnw -B site -DskipTests -Dinvoker.skip
+          ./mvnw -B site -Dlicense.skip -Dcheckstyle.skip -Dmaven.test.skip -Dinvoker.skip
 
       - name: Upload site to GitHub API
         if: ${{ ! inputs.dry-run }}
