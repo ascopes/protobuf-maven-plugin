@@ -56,7 +56,7 @@ will automatically discover them and compile them to Java bytecode.
 > [!TIP]
 > Any `*.proto` files that are discovered in project dependencies will be made available
 > to `protoc`,
-> so you can import them in exactly the same way you would with Java classes 
+> so you can import them in exactly the same way you would with Java classes!
 
 ### Other language support
 
