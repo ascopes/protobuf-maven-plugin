@@ -1239,7 +1239,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : overriddenVersion;
   }
 
-  private static Collection<Path> determinePaths(
+  private Collection<Path> determinePaths(
       @Nullable Collection<Path> inputPaths,
       Supplier<Collection<Path>> defaultIfMissing
   ) {
@@ -1254,21 +1254,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : transformed;
 
     return finalValue.stream()
-        .filter(path -> {
-          if (Files.notExists(path)) {
-            log.info("Ignoring non-existent path \"{}\"", path);
-            return false;
-          }
-          return true;
-        })
+        .filter(Files::exists)
         .collect(Collectors.toUnmodifiableList());
   }
 
-  private static <T> List<T> nonNullList(@Nullable List<T> list) {
+  private <L> List<L> nonNullList(@Nullable List<L> list) {
     return requireNonNullElseGet(list, List::of);
   }
 
-  private static <K, V> Map<K, V> nonNullMap(@Nullable Map<K, V> map) {
+  private <K, V> Map<K, V> nonNullMap(@Nullable Map<K, V> map) {
     return requireNonNullElseGet(map, Map::of);
   }
 }
