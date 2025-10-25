@@ -39,6 +39,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,8 +126,7 @@ final class AetherResolver {
 
   Collection<Artifact> resolveDependencies(
       List<Dependency> dependencies,
-      Set<String> allowedDependencyScopes,
-      boolean failOnResolutionErrors
+      Set<String> allowedDependencyScopes
   ) throws ResolutionException {
     var collectRequest = new CollectRequest();
     collectRequest.setDependencies(dependencies);
@@ -134,7 +134,11 @@ final class AetherResolver {
 
     var dependencyRequest = new DependencyRequest();
     dependencyRequest.setCollectRequest(collectRequest);
-    dependencyRequest.setFilter(new ScopeDependencyFilter(allowedDependencyScopes));
+    var filter = new ScopeDependencyFilter(
+        /* included: */ allowedDependencyScopes,
+        /* excluded */ List.of()
+    );
+    dependencyRequest.setFilter(filter);
 
     log.debug(
         "Resolving {} - {}",
@@ -154,28 +158,19 @@ final class AetherResolver {
 
     var artifacts = new ArrayList<Artifact>();
     var exceptions = new ArrayList<>(dependencyResult.getCollectExceptions());
-    var isMissing = false;
 
     for (var artifactResult : dependencyResult.getArtifactResults()) {
       var artifact = artifactResult.getArtifact();
-      if (artifact != null) {
+      if (artifactResult.isResolved() && artifact != null) {
         log.debug("Resolution of dependencies returned artifact \"{}\"", artifact);
         artifacts.add(artifact);
       }
 
       if (artifactResult.isMissing()) {
-        isMissing = true;
+        log.debug("Artifact \"{}\" is missing!", artifact);
       }
 
       exceptions.addAll(artifactResult.getExceptions());
-    }
-
-    // Looks like we can get resolution exceptions even if things resolve correctly, as it appears
-    // to raise for the local repository first.
-    // If this happens, don't bother raising as it is normal behaviour. If anything else goes wrong,
-    // then we can panic about it.
-    if (isMissing && failOnResolutionErrors) {
-      throw mapExceptions("Failed to resolve dependencies", exceptions);
     }
 
     reportWarnings(exceptions);
@@ -205,7 +200,8 @@ final class AetherResolver {
       // hidden unless Maven was invoked with --errors.
       //noinspection LoggingPlaceholderCountMatchesArgumentCount
       log.debug(
-          "Dependency resolution warning was reported - {}: {}",
+          "Dependency resolution warning was reported. "
+              + "This might be okay or it might be bad - {}: {}",
           exception.getClass().getName(),
           exception.getMessage(),
           exception
