@@ -443,10 +443,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
    * can explicitly set this to {@code false} instead.
    *
-   * @deprecated will be removed in v4.0.0: missing sources will always be an error.
    * @since 0.5.0
    */
-  @Deprecated(since = "3.10.1", forRemoval = true)
   @Parameter(defaultValue = DEFAULT_TRUE)
   boolean failOnMissingSources;
 
