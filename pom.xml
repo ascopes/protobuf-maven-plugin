@@ -97,7 +97,7 @@
     <jsonassert.version>2.0-rc1</jsonassert.version>
     <junit.version>5.14.0</junit.version>
     <maven-core.version>3.9.11</maven-core.version>
-    <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
+    <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.11</maven-plugin-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.24</maven-resolver-api.version>
