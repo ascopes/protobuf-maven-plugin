@@ -177,10 +177,16 @@ public final class ProtobufBuildOrchestrator {
   }
 
   private GenerationResult handleMissingInputs(GenerationRequest request) {
-    log.error(
-        "No protobuf sources found. If this is unexpected, check your configuration and try again. "
-            + "If this is expected, run Maven with -Dprotobuf.skip to skip the plugin execution.");
-    return GenerationResult.NO_SOURCES;
+    var message = "No protobuf sources found. If this is unexpected, check your "
+        + "configuration and try again.";
+
+    if (request.isFailOnMissingSources()) {
+      log.error("{}", message);
+      return GenerationResult.NO_SOURCES;
+    }
+
+    log.warn("{}", message);
+    return GenerationResult.NOTHING_TO_DO;
   }
 
   private GenerationResult handleMissingTargets(GenerationRequest request) {

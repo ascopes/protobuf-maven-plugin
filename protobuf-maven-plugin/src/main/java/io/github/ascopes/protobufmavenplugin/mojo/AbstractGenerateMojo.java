@@ -408,6 +408,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<String> excludes;
 
   /**
+   * Fail on missing sources.
+   *
+   * <p>If no sources are detected, it is usually a sign that this plui  is misconfigured, or that
+   * one is including this plugin in a project that does not need it. For this reason, the plugin
+   * defaults this setting to being enabled.
+   *
+   * @since 0.5.0
+   */
+  @Parameter(defaultValue = DEFAULT_TRUE)
+  boolean failOnMissingSources;
+
+  /**
    * Fail if no output languages and no plugins are enabled.
    *
    * <p>This defaults to {@code true}, but may be set to {@code false} if all plugins are optional
@@ -1074,6 +1086,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .environmentVariables(nonNullMap(environmentVariables))
         .enabledLanguages(enabledLanguages)
         .excludes(nonNullList(excludes))
+        .failOnMissingSources(failOnMissingSources)
         .failOnMissingTargets(failOnMissingTargets)
         .fatalWarnings(fatalWarnings)
         .ignoreProjectDependencies(ignoreProjectDependencies)
