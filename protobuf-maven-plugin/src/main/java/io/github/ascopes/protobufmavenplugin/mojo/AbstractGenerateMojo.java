@@ -340,18 +340,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Set<String> dependencyScopes;
 
   /**
-   * Enable attaching all compiled protobuf sources to the output of this
-   * Maven project so that they are included in any generated JAR.
+   * Enable attaching all compiled protobuf sources to the output of this Maven project so that
+   * they are included in any generated JAR.
    *
    * <p>If one is using dependencies as sources, then those will also be attached, and may have
    * license implications.
    *
-   * <p>In v4.0.0, the default value for this attribute will change from {@code false} to
-   * {@code true}.
+   * <p>Prior to v4.0.0, this defaulted to {@code false}. As of v4.0.0, this defaults to
+   * {@code true} to improve the semantics around creating importable libraries.
    *
    * @since 2.1.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = DEFAULT_TRUE)
   boolean embedSourcesInClassOutputs;
 
   /**
