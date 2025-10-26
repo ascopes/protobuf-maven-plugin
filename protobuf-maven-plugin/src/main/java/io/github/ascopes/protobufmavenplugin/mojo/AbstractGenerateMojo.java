@@ -95,11 +95,19 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Provide additional arguments to pass to the {@code protoc} executable.
    *
-   * <p>Note that generally, you should not need to use this. It is useful, however, if your
-   * use-case is not covered by other configuration parameters in this goal.
+   * <p>Generally, users do not need to use this. It is useful, however, if their use-case is not
+   * covered by other configuration parameters in this goal.
    *
    * <p>Configuring arguments that are covered by other parameters in this goal is undefined
    * behaviour and should be avoided.
+   *
+   * <p>Example:
+   * <pre>{@code
+   *   <arguments>
+   *     <argument>--experimental_allow_proto3_optional</argument>
+   *     <argument>--php_out=${project.build.directory}/generated-sources/php</argument>
+   *   </arguments>
+   * }</pre>
    *
    * @since 3.8.0
    */
@@ -116,7 +124,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * architecture is automatically generated and injected in the classifier if the classifier and
    * type are not provided explicitly.
    *
-   * <p>For example:
+   * <p>Example:
    * <pre>{@code
    * <binaryMavenPlugins>
    *   <binaryMavenPlugin>
@@ -127,7 +135,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * </binaryMavenPlugins>
    * }</pre>
    *
-   * <p>If you have a Java-based plugin that does not distribute a native
+   * <p>If users wish to use a Java-based plugin that does not distribute a native
    * executable, or are using a more obscure system architecture, then using a
    * {@code jvmMavenPlugin} may be more preferable.
    *
@@ -146,7 +154,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       code generators in {@code protoc} and descriptor generation has
    *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if you want to control whether the plugin runs via a
+   *       useful if one wishes to control whether the plugin runs via a
    *       property - optional.</li>
    *   <li>{@code outputDirectory} - where to write the generated outputs to.
    *       - if unspecified, then the {@link #outputDirectory} on the Maven
@@ -171,7 +179,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
    * with {@code protoc} out of the box.
    *
-   * <p>For example:
+   * <p>Example:
    * <pre>{@code
    * <binaryPathPlugins>
    *   <binaryPathPlugin>
@@ -195,7 +203,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       code generators in {@code protoc} and descriptor generation has
    *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if you want to control whether the plugin runs via a
+   *       useful if one wishes to control whether the plugin runs via a
    *       property - optional.</li>
    *   <li>{@code outputDirectory} - where to write the generated outputs to.
    *       - if unspecified, then the {@link #outputDirectory} on the Maven
@@ -227,7 +235,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
    * with {@code protoc} out of the box.
    *
-   * <p>For example:
+   * <p>Example:
    * <pre>{@code
    * <binaryUrlPlugins>
    *   <!-- FTP resource -->
@@ -261,7 +269,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       code generators in {@code protoc} and descriptor generation has
    *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if you want to control whether the plugin runs via a
+   *       useful if one wishes to control whether the plugin runs via a
    *       property - optional.</li>
    *   <li>{@code outputDirectory} - where to write the generated outputs to.
    *       - if unspecified, then the {@link #outputDirectory} on the Maven
@@ -275,8 +283,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       value instead.</li>
    *   <li>{@code digest} - an optional digest to verify the binary against.
    *       If specified, this is a string in the format {@code sha512:1a2b3c4d...},
-   *       using any supported message digest provided by your JDK (e.g. {@code md5},
-   *       {@code sha1}, {@code sha256}, {@code sha512}, etc).</li>
+   *       using any supported message digest provided by the current JDK
+   *       (e.g. {@code md5}, {@code sha1}, {@code sha256}, {@code sha512}, etc).</li>
    * </ul>
    *
    * @since 2.0.0
@@ -290,7 +298,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Enable this to force a clean build on each invocation.
    *
-   * <p>Note that this is ignored if {@code incrementalCompilation} is enabled.
+   * <p>This is ignored if {@code incrementalCompilation} is enabled, since it would discard the
+   * information needed to support incremental compilation. In this case, it will be considered to
+   * be false regardless.
    *
    * @since 3.6.0
    */
@@ -300,7 +310,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Enable generating C++ sources and headers from the protobuf sources.
    *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate C++ sources
+   * @deprecated This will be removed in v4.0.0. Users wishing to generate C++ sources
    *     should use the {@code arguments} to specify {@code --cpp_out=path}.
    * @since 1.1.0
    */
@@ -311,7 +321,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Enable generating C# sources from the protobuf sources.
    *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate C# sources
+   * @deprecated This will be removed in v4.0.0. Users wishing to generate C# sources
    *     should use the {@code arguments} to specify {@code --csharp_out=path}.
    * @since 1.1.0
    */
@@ -355,8 +365,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Enable attaching all compiled protobuf sources to the output of this
    * Maven project so that they are included in any generated JAR.
    *
-   * <p>Note that if you are using dependencies as sources, then those will also
-   * be attached, and may have license implications.
+   * <p>If one is using dependencies as sources, then those will also be attached, and may have
+   * license implications.
    *
    * @since 2.1.0
    */
@@ -373,8 +383,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code protoc}. Any environment variables specified here will be appended to the default
    * environment variables, overwriting any that have duplicate names.
    *
-   * <p>Note that this will not support overriding aspects like the system path, as those are
-   * resolved statically prior to any invocation.
+   * <p>This will not support overriding aspects like the system path, as those are resolved
+   * statically prior to any invocation.
    *
    * @since 3.7.0
    */
@@ -398,8 +408,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>If not provided, then the default is to not exclude anything.
    *
-   * <p>For example, if you wanted to not compile files named {@code user.proto},
-   * {@code message.proto}, or {@code service.proto}, you could use the following
+   * <p>For example, if one wishes to not compile files named {@code user.proto},
+   * {@code message.proto}, or {@code service.proto}, they should use the following
    * configuration.
    *
    * <pre><code>&lt;excludes&gt;
@@ -409,7 +419,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * &lt;/excludes&gt;
    * </code></pre>
    *
-   * <p>Use {@code includes} if you wish to instead include files for compilation.
+   * <p>Use {@code includes} if one wishes to instead include files for compilation.
    *
    * @since 2.2.0
    */
@@ -428,7 +438,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>Prior to {@code v2.4.0}, any invalid dependencies would result in an error being raised
    * and the build being aborted. In {@code v2.4.0}, this has been relaxed.
    *
-   * @deprecated will be removed in v4.0.0: invalid dependencies will be ignored.
+   * @deprecated This will be removed in v4.0.0: invalid dependencies will be ignored.
    * @since 2.4.0
    */
   @Deprecated(since = "3.10.1", forRemoval = true)
@@ -438,10 +448,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Fail on missing sources.
    *
-   * <p>If no sources are detected, it is usually a sign that this plugin
-   * is misconfigured, or that you are including this plugin in a project that does not need it. For
-   * this reason, the plugin defaults this setting to being enabled. If you wish to not fail, you
-   * can explicitly set this to {@code false} instead.
+   * <p>If no sources are detected, it is usually a sign that this plugin is misconfigured, or that
+   * the user is including this plugin in a project that does not need it. For this reason, the
+   * plugin defaults this setting to being enabled.
    *
    * @since 0.5.0
    */
@@ -476,8 +485,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Ignore the {@code <dependencies/>} blocks in the Maven project when discovering
    * {@code *.proto} files to add to the import paths.
    *
-   * <p>Generally you will want to leave this enabled unless you have a very specific case where
-   * you wish to take control of how dependency resolution works.
+   * <p>Generally users will want to leave this enabled unless they have a very specific case where
+   * they wish to take control of how dependency resolution works.
    *
    * @since 1.2.0
    */
@@ -523,16 +532,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>These will not be compiled into Java sources directly.
    *
-   * <p>If you wish to depend on a JAR Maven artifact containing protobuf sources, add it as a
-   * dependency with the {@code provided} or {@code test} scope instead, or use
+   * <p>If users wish to depend on a JAR Maven artifact containing protobuf sources, then they
+   * should add it as a dependency with the {@code provided} or {@code test} scope instead, or use
    * {@code importDependencies} rather than this parameter.
    *
    * <p>Import paths can also be specified as paths to ZIP or JAR archives on the local
-   * file system. This plugin will extract any {@code *.proto} files for you, and pass them to
+   * file system. This plugin will extract any {@code *.proto} files, and pass them to
    * {@code protoc}.
    *
-   * <p>If you wish to also compile proto sources, use the {@code sourceDirectories} parameter
-   * instead.
+   * <p>If users wish to compile these proto sources rather than simply including them on the
+   * import path, they should use the {@code sourceDirectories} parameter instead.
    *
    * @since 0.1.0
    */
@@ -556,8 +565,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>If not provided, then the default is to allow any protobuf source file.
    *
-   * <p>For example, if you only wanted to compile files named {@code user.proto},
-   * {@code message.proto}, or {@code service.proto}, you could use the following
+   * <p>For example, if a user only wanted to compile files named {@code user.proto},
+   * {@code message.proto}, or {@code service.proto}, then they would use the following
    * configuration.
    *
    * <pre><code>&lt;includes&gt;
@@ -567,7 +576,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * &lt;/includes&gt;
    * </code></pre>
    *
-   * <p>Use {@code excludes} if you wish to instead omit files from compilation.
+   * <p>Use {@code excludes} to instead omit files from compilation.
    *
    * @since 2.2.0
    */
@@ -633,7 +642,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       code generators in {@code protoc} and descriptor generation has
    *       an order of 0.</li>
    *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if you want to control whether the plugin runs via a
+   *       useful if one wishes to control whether the plugin runs via a
    *       property - optional.</li>
    *   <li>{@code outputDirectory} - where to write the generated outputs to.
    *       - if unspecified, then the {@link #outputDirectory} on the Maven
@@ -646,9 +655,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *       specified, then the project setting is ignored in favour of this
    *       value instead.</li>
    *   <li>{@code mainClass} - if the plugin is not an assembled JAR at the time
-   *       the {@code protobuf-maven-plugin} is run, then you will need to provide
-   *       the fully qualified class name of the plugin entrypoint here. This is
-   *       usually only needed if you are creating the JVM plugin within the
+   *       the {@code protobuf-maven-plugin} is run, then users must ensure they
+   *       provide the fully qualified class name of the plugin entrypoint here.
+   *       This is usually only needed if creating the JVM plugin within the
    *       same project. If the plugin is an assembled JAR, then this option is
    *       optional, the {@code Main-Class} manifest entry will be used when
    *       present if this is not provided.</li>
@@ -693,7 +702,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate Objective-C sources from the protobuf sources.
    *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate Objective-C sources
+   * @deprecated This will be removed in v4.0.0. Users wishing to generate Objective-C sources
    *     should use the {@code arguments} to specify {@code --objc_out=path}.
    * @since 1.1.0
    */
@@ -802,7 +811,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate PHP sources from the protobuf sources.
    *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate PHP sources
+   * @deprecated This will be removed in v4.0.0. Users wishing to generate PHP sources
    *     should use the {@code arguments} to specify {@code --php_out=path}.
    * @since 1.1.0
    */
@@ -813,13 +822,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Optional digest to verify {@code protoc} against.
    *
-   * <p>Generally, you will not need to provide this, as the Maven Central
+   * <p>Generally, users should not need to provide this, as the Maven Central
    * {@code protoc} binaries will already be digest-verified as part of distribution.
-   * You may wish to specify this if you are using a {@code PATH}-based binary, or
-   * using a URL for {@code protoc}.
+   * Users may wish to specify this if using a {@code PATH}-based binary, or using a URL for
+   * {@code protoc}.
    *
    * <p>This is a string in the format {@code sha512:1a2b3c...}, using any
-   * message digest algorithm supported by your JDK.
+   * message digest algorithm supported by the current JDK.
    *
    * @since 3.5.0
    */
@@ -833,10 +842,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * is in use.
    *
    * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
-   * being downloaded. This is useful if you need to use an unsupported architecture/OS, or a
+   * being downloaded. This is useful if users need to use an unsupported architecture/OS, or a
    * development version of {@code protoc}.
    *
-   * <p>You can also specify a URL. See the user guide for a list of supported protocols.
+   * <p>Users may also specify a URL. See the user guide for a list of supported protocols.
    *
    * <p>Note that specifying {@code -Dprotobuf.compiler.version} in the {@code MAVEN_OPTS} or on
    * the command line overrides the version specified in the POM. This enables users to easily
@@ -868,8 +877,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate Python sources from the protobuf sources.
    *
-   * <p>If you enable this, you probably will also want to enable Python stubs
-   * to enable generating {@code *.pyi} files for static type checkers.
+   * <p>Users may also want to enable Python stubs to enable generating {@code *.pyi} files for
+   * static type checkers.
    *
    * @since 1.1.0
    */
@@ -880,8 +889,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Generate Python stubs ({@code *.pyi} files) for static typechecking from the protobuf
    * sources.
    *
-   * <p>If you enable this, you probably will also want to enable Python itself
-   * to get actual source code to accompany the stubs.
+   * <p>Users will also want to enable Python itself to get actual source code to accompany the
+   * stubs.
    *
    * @since 1.1.0
    */
@@ -893,9 +902,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>This allows {@code maven-compiler-plugin} to detect and compile generated code.
    *
-   * <p>Generally, you want to do this, but there may be edge cases where you
-   * wish to control this behaviour manually instead. In this case, set this parameter to be
-   * {@code false}.
+   * <p>Generally, users want to do this, but there may be edge cases where one
+   * wishes to control this behaviour manually instead. In this case, they should set this
+   * parameter to be {@code false}.
    *
    * @since 0.5.0
    */
@@ -913,7 +922,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Generate Rust sources from the protobuf sources.
    *
-   * @deprecated will be removed in v4.0.0. Users wishing to generate Rust sources
+   * @deprecated This will be removed in v4.0.0. Users wishing to generate Rust sources
    *     should use the {@code arguments} to specify {@code --rust_out=path}.
    * @since 1.1.0
    */
@@ -926,9 +935,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Most users <strong>SHOULD NOT</strong> specify this.
    *
-   * <p>If you operate in an overly locked-down corporate environment that disallows running
-   * shell/batch scripts or native executables outside sanctioned locations on your local
-   * file system, you can specify the path here either via this configuration parameter
+   * <p>If users operate in an overly locked-down corporate environment that disallows running
+   * shell/batch scripts or native executables outside sanctioned locations on their local
+   * file system, they can specify the path here either via this configuration parameter
    * or via a property such that any executables are first moved to a directory within this
    * location. This is designed to be able to be used within a Maven profile if desired.
    *
@@ -1022,7 +1031,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *   <li>{@code excludes} - a set of exclusions to apply to transitive dependencies</li>
    * </ul>
    *
-   * <p>If you wish to use descriptor files from the local file system, use
+   * <p>If users wish to use descriptor files from the local file system, use
    * the {@code sourceDescriptorPaths} parameter instead.
    *
    * @since 3.1.0
@@ -1039,16 +1048,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * directories rather than adding to them.</strong>
    *
    * <p>Source directories can also be specified as paths to ZIP or JAR archives on the local
-   * file system. This plugin will extract any {@code *.proto} files for you, and pass them to
+   * file system. This plugin will extract any {@code *.proto} files, and pass them to
    * {@code protoc}.
    *
-   * <p>If you wish to compile sources from within a Maven artifact holding a JAR or ZIP, use the
+   * <p>If users wish to compile sources from within a Maven artifact holding a JAR or ZIP, use the
    * {@code sourceDependencies} parameter instead.
    *
-   * <p>If you wish to compile sources from descriptor files from the local file system, use
+   * <p>If users wish to compile sources from descriptor files from the local file system, use
    * the {@code sourceDescriptorPaths} parameter instead.
    *
-   * <p>If you wish to compile sources from within a Maven artifact holding a protobuf descriptor
+   * <p>If uzers wish to compile sources from within a Maven artifact holding a protobuf descriptor
    * file, use {@code sourceDescriptorDependencies} instead.
    *
    * @since 0.0.1
