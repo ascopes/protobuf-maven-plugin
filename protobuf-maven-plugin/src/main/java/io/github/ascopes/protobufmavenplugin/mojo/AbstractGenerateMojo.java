@@ -368,6 +368,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>If one is using dependencies as sources, then those will also be attached, and may have
    * license implications.
    *
+   * <p>In v4.0.0, the default value for this attribute will change from {@code false} to
+   * {@code true}.
+   *
    * @since 2.1.0
    */
   @Parameter(defaultValue = DEFAULT_FALSE)
