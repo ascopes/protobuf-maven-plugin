@@ -9,7 +9,7 @@
   <img alt="GitHub License" src="https://img.shields.io/github/license/ascopes/protobuf-maven-plugin">
   <a href="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml"><img alt="Build Status" src="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main"></a>
   <a href="https://codecov.io/gh/ascopes/protobuf-maven-plugin"><img alt="Coverage" src="https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main"></a>
-  <a href="https://search.maven.org/search?q=g:%22io.github.ascopes%22%20AND%20a:%22protobuf-maven-plugin%22"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin.svg?label=Maven%20Central"></a>
+  <a href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.ascopes/protobuf-maven-plugin.svg?label=Maven%20Central"></a>
   <a href="https://ascopes.github.io/protobuf-maven-plugin"><img alt="Documentation" src="https://img.shields.io/badge/documentation-latest-purple?logo=apache-maven"></a>
   <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin">
 </p>
