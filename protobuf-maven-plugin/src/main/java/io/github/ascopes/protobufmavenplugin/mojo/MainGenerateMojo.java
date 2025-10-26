@@ -35,7 +35,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * <p>Any project dependencies using the {@code compile}, {@code provided},
  * or {@code system} scopes will be made available to import from protobuf sources.
  *
- * <p>By default, sources will be read from {@code src/main/protobuf} ({@code src/main/proto},
+ * <p>By default, sources will be read from {@code src/main/protobuf} ({@code src/main/proto}
  * is also supported to assist in migration off of other unmaintained Maven plugins),
  * and generated sources will be written to {@code target/generated-sources/protobuf}.
  *
