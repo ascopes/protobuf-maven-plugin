@@ -90,6 +90,8 @@
     <!-- Dependencies -->
     <assertj.version>4.0.0-M1</assertj.version>
     <commons-compress.version>1.28.0</commons-compress.version>
+    <!-- Newer versions need Java 21 so this should be pinned. -->
+    <errorprone.version>2.42.0</errorprone.version>
     <immutables.version>2.11.6</immutables.version>
     <javax-annotation.version>1.3.2</javax-annotation.version>
     <jspecify.version>1.0.0</jspecify.version>
@@ -103,6 +105,7 @@
     <maven-resolver-api.version>1.9.24</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.2</memoryfilesystem.version>
     <mockito.version>5.20.0</mockito.version>
+    <nullaway.version>0.10.15</nullaway.version>
     <protobuf.version>4.33.0</protobuf.version>
     <slf4j.version>2.0.17</slf4j.version>
     <wiremock.version>3.13.1</wiremock.version>
@@ -397,8 +400,36 @@
           <version>${maven-compiler-plugin.version}</version>
 
           <configuration>
-            <compilerArgs>
+            <annotationProcessorPaths combine.children="append">
+              <annotationProcessorPath>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_core</artifactId>
+                <version>${errorprone.version}</version>
+              </annotationProcessorPath>
+              <annotationProcessorPath>
+                <groupId>com.uber.nullaway</groupId>
+                <artifactId>nullaway</artifactId>
+                <version>${nullaway.version}</version>
+              </annotationProcessorPath>
+              <annotationProcessorPath>
+                <groupId>org.immutables</groupId>
+                <artifactId>value-processor</artifactId>
+                <version>${immutables.version}</version>
+              </annotationProcessorPath>
+            </annotationProcessorPaths>
+            <compilerArgs combine.children="append">
               <compilerArg>-Xlint:all,-classfile,-processing,-requires-automatic,-serial</compilerArg>
+              <!-- ErrorProne + NullAway -->
+              <compilerArg>--should-stop=ifError=FLOW</compilerArg>
+              <compilerArg>
+                -Xplugin:ErrorProne
+                -XepDisableWarningsInGeneratedCode
+                -XepExcludedPaths:.*/(target/generated.*|src/test)/.*
+                -XepOpt:NullAway:AnnotatedPackages=io.github.ascopes.protobufmavenplugin
+                <!-- See https://github.com/uber/NullAway/issues/1319 -->
+                -XepOpt:NullAway:ExcludedFieldAnnotations=org.apache.maven.plugins.annotations.Parameter
+              </compilerArg>
+              <compilerArg>-XDcompilePolicy=simple</compilerArg>
             </compilerArgs>
             <failOnWarning>true</failOnWarning>
             <parameters>true</parameters>
