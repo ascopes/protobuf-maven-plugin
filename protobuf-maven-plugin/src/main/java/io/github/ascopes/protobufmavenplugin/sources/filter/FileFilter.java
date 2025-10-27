@@ -33,7 +33,7 @@ public interface FileFilter {
     var spoofedPathRoot = Path.of("");
     var spoofedPath = spoofedPathRoot;
 
-    for (var part : relativeFilePath.split("/")) {
+    for (var part : relativeFilePath.split("/", -1)) {
       spoofedPath = spoofedPath.resolve(part);
     }
 

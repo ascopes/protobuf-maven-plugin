@@ -19,7 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import org.jspecify.annotations.Nullable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Helper that consumes a stream for a subprocess on a separate thread,
@@ -43,7 +43,7 @@ final class OutputRedirectorDaemon {
   ) {
     this.name = name;
     this.pid = pid;
-    reader = new BufferedReader(new InputStreamReader(inputStream));
+    reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     this.logger = logger;
     thread = new Thread(this::redirect);
     thread.setDaemon(true);
@@ -73,6 +73,6 @@ final class OutputRedirectorDaemon {
 
   @FunctionalInterface
   interface Logger {
-    void log(String format, @Nullable Object ... args);
+    void log(String format, Object ... args);
   }
 }
