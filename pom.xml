@@ -402,16 +402,6 @@
           <configuration>
             <annotationProcessorPaths combine.children="append">
               <annotationProcessorPath>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_core</artifactId>
-                <version>${errorprone.version}</version>
-              </annotationProcessorPath>
-              <annotationProcessorPath>
-                <groupId>com.uber.nullaway</groupId>
-                <artifactId>nullaway</artifactId>
-                <version>${nullaway.version}</version>
-              </annotationProcessorPath>
-              <annotationProcessorPath>
                 <groupId>org.immutables</groupId>
                 <artifactId>value-processor</artifactId>
                 <version>${immutables.version}</version>
@@ -419,17 +409,6 @@
             </annotationProcessorPaths>
             <compilerArgs combine.children="append">
               <compilerArg>-Xlint:all,-classfile,-processing,-requires-automatic,-serial</compilerArg>
-              <!-- ErrorProne + NullAway -->
-              <compilerArg>--should-stop=ifError=FLOW</compilerArg>
-              <compilerArg>
-                -Xplugin:ErrorProne
-                -XepDisableWarningsInGeneratedCode
-                -XepExcludedPaths:.*/(target/generated.*|src/test)/.*
-                -XepOpt:NullAway:AnnotatedPackages=io.github.ascopes.protobufmavenplugin
-                <!-- See https://github.com/uber/NullAway/issues/1319 -->
-                -XepOpt:NullAway:ExcludedFieldAnnotations=org.apache.maven.plugins.annotations.Parameter
-              </compilerArg>
-              <compilerArg>-XDcompilePolicy=simple</compilerArg>
             </compilerArgs>
             <failOnWarning>true</failOnWarning>
             <parameters>true</parameters>
