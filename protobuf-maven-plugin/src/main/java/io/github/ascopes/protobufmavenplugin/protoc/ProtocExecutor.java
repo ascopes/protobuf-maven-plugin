@@ -110,12 +110,12 @@ public final class ProtocExecutor {
   }
 
   private void applyProtocTargetArguments(ArgumentFileBuilder builder, ProtocTarget target) {
-    if (target instanceof DescriptorFileProtocTarget) {
-      applyDescriptorFileProtocTargetArguments(builder, (DescriptorFileProtocTarget) target);
-    } else if (target instanceof LanguageProtocTarget) {
-      applyLanguageProtocTargetArguments(builder, (LanguageProtocTarget) target);
-    } else if (target instanceof PluginProtocTarget) {
-      applyPluginProtocTargetArguments(builder, (PluginProtocTarget) target);
+    if (target instanceof DescriptorFileProtocTarget castTarget) {
+      applyDescriptorFileProtocTargetArguments(builder, castTarget);
+    } else if (target instanceof LanguageProtocTarget castTarget) {
+      applyLanguageProtocTargetArguments(builder, castTarget);
+    } else if (target instanceof PluginProtocTarget castTarget) {
+      applyPluginProtocTargetArguments(builder, castTarget);
     } else {
       throw new IllegalStateException("Unknown target " + target);
     }
