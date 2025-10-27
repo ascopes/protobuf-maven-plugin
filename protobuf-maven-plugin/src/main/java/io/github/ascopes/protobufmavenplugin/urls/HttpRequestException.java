@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.urls;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import org.jspecify.annotations.Nullable;
@@ -27,8 +28,9 @@ import org.jspecify.annotations.Nullable;
  * @author Ilja Kanstanczuk
  * @since 3.10.2
  */
-public final class HttpRequestException extends IOException {
+final class HttpRequestException extends IOException {
 
+  private final URI uri;
   private final int statusCode;
   private final @Nullable String correlationId;
   private final @Nullable String requestId;
@@ -36,8 +38,8 @@ public final class HttpRequestException extends IOException {
   private final @Nullable String proxyAuthenticate;
   private final @Nullable String responseBody;
 
-  public HttpRequestException(
-      String message,
+  HttpRequestException(
+      URI uri,
       int statusCode,
       @Nullable String correlationId,
       @Nullable String requestId,
@@ -45,7 +47,7 @@ public final class HttpRequestException extends IOException {
       @Nullable String proxyAuthenticate,
       @Nullable String responseBody
   ) {
-    super(message);
+    this.uri = uri;
     this.statusCode = statusCode;
     this.correlationId = correlationId;
     this.requestId = requestId;
@@ -54,13 +56,53 @@ public final class HttpRequestException extends IOException {
     this.responseBody = responseBody;
   }
 
-  public static HttpRequestException fromHttpResponse(HttpResponse<InputStream> response) {
+  URI getUri() {
+    return uri;
+  }
+
+  int getStatusCode() {
+    return statusCode;
+  }
+
+  @Nullable String getCorrelationId() {
+    return correlationId;
+  }
+
+  @Nullable String getRequestId() {
+    return requestId;
+  }
+
+  @Nullable String getWwwAuthenticate() {
+    return wwwAuthenticate;
+  }
+
+  @Nullable String getProxyAuthenticate() {
+    return proxyAuthenticate;
+  }
+
+  @Nullable String getResponseBody() {
+    return responseBody;
+  }
+
+  @Override
+  public String getMessage() {
+    return "An HTTP error occurred. Further details: "
+        + "uri='" + uri + '\''
+        + ", statusCode=" + statusCode
+        + ", correlationId='" + correlationId + '\''
+        + ", requestId='" + requestId + '\''
+        + ", wwwAuthenticate='" + wwwAuthenticate + '\''
+        + ", proxyAuthenticate='" + proxyAuthenticate + '\''
+        + ", responseBody='" + responseBody + '\'';
+  }
+
+  static HttpRequestException fromHttpResponse(HttpResponse<InputStream> response) {
     var body = asText(response.body(), 500);
     var correlationId = extractHeader(response, "Correlation-Id", "X-Correlation-Id");
     var requestId = extractHeader(response, "Request-Id", "X-Request-Id");
 
     return new HttpRequestException(
-        "HTTP " + response.statusCode() + " from " + response.uri(),
+        response.uri(),
         response.statusCode(),
         correlationId,
         requestId,
@@ -70,7 +112,7 @@ public final class HttpRequestException extends IOException {
     );
   }
 
-  private static String asText(InputStream stream, int maxLength) {
+  private static @Nullable String asText(InputStream stream, int maxLength) {
     if (stream == null) {
       return null;
     }
@@ -97,41 +139,5 @@ public final class HttpRequestException extends IOException {
       }
     }
     return null;
-  }
-
-  public int getStatusCode() {
-    return statusCode;
-  }
-
-  public @Nullable String getCorrelationId() {
-    return correlationId;
-  }
-
-  public @Nullable String getRequestId() {
-    return requestId;
-  }
-
-  public @Nullable String getWwwAuthenticate() {
-    return wwwAuthenticate;
-  }
-
-  public @Nullable String getProxyAuthenticate() {
-    return proxyAuthenticate;
-  }
-
-  public @Nullable String getResponseBody() {
-    return responseBody;
-  }
-
-  @Override
-  public String toString() {
-    return "HttpClientUrlConnectionException{"
-        + "statusCode=" + statusCode
-        + ", correlationId='" + correlationId + '\''
-        + ", requestId='" + requestId + '\''
-        + ", wwwAuthenticate='" + wwwAuthenticate + '\''
-        + ", proxyAuthenticate='" + proxyAuthenticate + '\''
-        + ", responseBody='" + responseBody + '\''
-        + '}';
   }
 }

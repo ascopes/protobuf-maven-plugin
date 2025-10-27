@@ -42,9 +42,9 @@ public class HttpRequestExceptionTest {
     mockedHttpResponse = mock();
   }
 
-  @DisplayName("method fromHttpResponse extracts all expected values from HttpResponse")
+  @DisplayName(".fromHttpResponse(...) extracts all expected values from HttpResponse")
   @Test
-  void methodFromHttpResponseExtractsAllExpectedValuesFromHttpResponse() throws Exception {
+  void fromHttpResponseExtractsAllExpectedValuesFromHttpResponse() throws Exception {
     // Given
     var headers = HttpHeaders.of(Map.of(
         "Correlation-Id", List.of("123"),
@@ -66,21 +66,24 @@ public class HttpRequestExceptionTest {
     var ex = HttpRequestException.fromHttpResponse(mockedHttpResponse);
 
     // Then
+    assertThat(ex.getUri())
+        .asString()
+        .isEqualTo("http://whatever");
     assertThat(ex.getStatusCode()).isEqualTo(500);
     assertThat(ex.getCorrelationId()).isEqualTo("123");
     assertThat(ex.getRequestId()).isEqualTo("456");
     assertThat(ex.getWwwAuthenticate()).isEqualTo("auth");
     assertThat(ex.getProxyAuthenticate()).isEqualTo("proxy");
     assertThat(ex.getResponseBody()).isEqualTo("Error text");
-    assertThat(ex).hasMessageContaining("HTTP 500 from http://whatever");
+    assertThat(ex).hasMessageContaining("500");
+    assertThat(ex).hasMessageContaining("http://whatever");
   }
 
-  @DisplayName("method fromHttpResponse handles missing headers and null response body")
+  @DisplayName(".fromHttpResponse(...) handles missing headers and null response body")
   @Test
-  void methodFromHttpResponseHandlesMissingHeadersAndNullResponseBody() throws Exception {
+  void fromHttpResponseHandlesMissingHeadersAndNullResponseBody() throws Exception {
     // Given
-    var headers = HttpHeaders.of(Map.of(),
-        (a, b) -> true);
+    var headers = HttpHeaders.of(Map.of(), (a, b) -> true);
 
     // When
     when(mockedHttpResponse.statusCode())
@@ -94,22 +97,25 @@ public class HttpRequestExceptionTest {
     var ex = HttpRequestException.fromHttpResponse(mockedHttpResponse);
 
     // Then
+    assertThat(ex.getUri())
+        .asString()
+        .isEqualTo("http://whatever");
     assertThat(ex.getStatusCode()).isEqualTo(404);
     assertThat(ex.getCorrelationId()).isNull();
     assertThat(ex.getRequestId()).isNull();
     assertThat(ex.getWwwAuthenticate()).isNull();
     assertThat(ex.getProxyAuthenticate()).isNull();
     assertThat(ex.getResponseBody()).isNull();
-    assertThat(ex).hasMessageContaining("HTTP 404 from http://whatever");
+    assertThat(ex).hasMessageContaining("404");
+    assertThat(ex).hasMessageContaining("http://whatever");
   }
 
-  @DisplayName("method fromHttpResponse returns readable fallback for unreadable body")
+  @DisplayName(".fromHttpResponse(...) returns readable fallback for unreadable body")
   @Test
-  void methodFromHttpResponseReturnsReadableFallbackForUnreadableBody() throws Exception {
+  void fromHttpResponseReturnsReadableFallbackForUnreadableBody() throws Exception {
     // Given
     var badStream = mock(InputStream.class);
-    var headers = HttpHeaders.of(Map.of(),
-        (a, b) -> true);
+    var headers = HttpHeaders.of(Map.of(), (a, b) -> true);
 
     // When
     when(badStream.readNBytes(anyInt()))
@@ -129,11 +135,11 @@ public class HttpRequestExceptionTest {
         .isEqualTo("<binary or unreadable response body>");
   }
 
-  @DisplayName("method toString includes all required information")
+  @DisplayName(".getMessage() includes all required information")
   @Test
-  void methodToStringIncludesAllRequiredInformation() {
+  void getMessageIncludesAllRequiredInformation() {
     var ex = new HttpRequestException(
-        "HTTP 400 from http://whatever",
+        URI.create("http://whatever"),
         400,
         "123",
         "456",
@@ -141,8 +147,8 @@ public class HttpRequestExceptionTest {
         "proxy",
         "error-body"
     );
-    assertThat(ex.toString())
-        .contains("400", "123", "456", "auth", "proxy", "error-body");
+    assertThat(ex)
+        .message()
+        .contains("http://whatever", "400", "123", "456", "auth", "proxy", "error-body");
   }
-
 }

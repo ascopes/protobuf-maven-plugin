@@ -55,7 +55,7 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
     }
 
     try {
-      nestedConnection = nestedUrl.openConnection();
+      var nestedConnection = nestedUrl.openConnection();
 
       // Copy any settings across prior to connecting.
       nestedConnection.setAllowUserInteraction(getAllowUserInteraction());
@@ -74,6 +74,9 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
       // Handshake.
       doConnect(nestedConnection);
       connected = true;
+
+      // Assign at the end to keep NullAway happy.
+      this.nestedConnection = nestedConnection;
     } catch (IOException ex) {
       throw maybeWrapIoException(ex);
     }
@@ -93,8 +96,9 @@ abstract class AbstractNestingUrlConnection extends URLConnection {
     );
 
     try {
-      // Side effects - eww.
-      return nestedInputStream = nestInputStream(nestedConnection.getInputStream());
+      var nestedInputStream = nestInputStream(nestedConnection.getInputStream());
+      this.nestedInputStream = nestedInputStream;
+      return nestedInputStream;
     } catch (IOException ex) {
       var wrappedEx = maybeWrapIoException(ex);
 

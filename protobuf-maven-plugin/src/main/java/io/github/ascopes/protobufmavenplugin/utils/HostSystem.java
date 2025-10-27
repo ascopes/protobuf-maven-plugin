@@ -24,9 +24,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -58,7 +58,7 @@ public final class HostSystem {
   private final Path javaHome;
   private final String javaVendor;
   private final List<Path> path;
-  private final SortedSet<String> pathExt;
+  private final NavigableSet<String> pathExt;
 
   @Inject
   public HostSystem() {
@@ -103,7 +103,7 @@ public final class HostSystem {
 
     pathExt = envProvider.apply("PATHEXT")
         .map(value -> parsePathExt(value, pathSeparator))
-        .orElseGet(Collections::emptySortedSet);
+        .orElseGet(Collections::emptyNavigableSet);
     log.debug("Parsed path extensions: {}", pathExt);
   }
 
@@ -146,7 +146,7 @@ public final class HostSystem {
     return pathSeparator;
   }
 
-  public SortedSet<String> getSystemPathExtensions() {
+  public NavigableSet<String> getSystemPathExtensions() {
     return pathExt;
   }
 
@@ -155,14 +155,14 @@ public final class HostSystem {
         rawPath,
         pathSeparator,
         paths -> paths
-            .flatMap(tryParseSystemFilePath())
+            .flatMap(HostSystem::tryParseSystemFilePath)
             .distinct()
             .filter(Files::isDirectory)
             .collect(Collectors.toUnmodifiableList())
     );
   }
 
-  private static SortedSet<String> parsePathExt(String rawPathExt, String pathSeparator) {
+  private static NavigableSet<String> parsePathExt(String rawPathExt, String pathSeparator) {
     return tokenizeFilePath(
         rawPathExt,
         pathSeparator,
@@ -170,7 +170,7 @@ public final class HostSystem {
             .map(String::toLowerCase)
             .collect(Collectors.collectingAndThen(
                 Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
-                Collections::unmodifiableSortedSet
+                Collections::unmodifiableNavigableSet
             ))
     );
   }
@@ -191,30 +191,28 @@ public final class HostSystem {
     }
   }
 
-  private static Function<String, Stream<Path>> tryParseSystemFilePath() {
-    return path -> {
-      return Stream.of(path)
-          .map(String::trim)
-          .filter(not(String::isBlank))
-          .flatMap(trimmedPath -> {
-            try {
-              return Stream.of(Path.of(trimmedPath));
-            } catch (InvalidPathException ex) {
-              // GH-557: Do not crash if the user has garbage contents in their $PATH.
-              // Warn and drop instead.
-              log.warn(
-                  "Ignoring path \"{}\" in $PATH environment variable because - {}: {}. "
-                      + "Please check your system settings!",
-                  trimmedPath,
-                  ex.getClass().getName(),
-                  ex.getMessage(),
-                  ex
-              );
-              return Stream.empty();
-            }
-          })
-          .map(FileUtils::normalize);
-    };
+  private static Stream<Path> tryParseSystemFilePath(String rawPath) {
+    return Stream.of(rawPath)
+        .map(String::trim)
+        .filter(not(String::isBlank))
+        .flatMap(trimmedPath -> {
+          try {
+            return Stream.of(Path.of(trimmedPath));
+          } catch (InvalidPathException ex) {
+            // GH-557: Do not crash if the user has garbage contents in their $PATH.
+            // Warn and drop instead.
+            log.warn(
+                "Ignoring path \"{}\" in $PATH environment variable because - {}: {}. "
+                    + "Please check your system settings!",
+                trimmedPath,
+                ex.getClass().getName(),
+                ex.getMessage(),
+                ex
+            );
+            return Stream.empty();
+          }
+        })
+        .map(FileUtils::normalize);
   }
 
   private static <A, R> Function<A, Optional<R>> optionalFunction(Function<A, @Nullable R> fn) {

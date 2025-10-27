@@ -48,13 +48,13 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
-  public <T> ArgumentFileBuilder apply(Consumer<ArgumentFileBuilder> operator) {
+  public ArgumentFileBuilder apply(Consumer<ArgumentFileBuilder> operator) {
     operator.accept(this);
     return this;
   }
 
   public <T> ArgumentFileBuilder applyForEach(
-      Iterable<T> items, 
+      Iterable<T> items,
       BiConsumer<ArgumentFileBuilder, T> operator
   ) {
     for (var item : items) {

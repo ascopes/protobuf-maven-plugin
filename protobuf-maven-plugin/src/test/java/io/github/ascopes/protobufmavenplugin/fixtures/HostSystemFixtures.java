@@ -89,7 +89,7 @@ public final class HostSystemFixtures {
     var extensionSet = Stream.of(extensions)
         .collect(Collectors.collectingAndThen(
             Collectors.toCollection(() -> new TreeSet<>(String::compareToIgnoreCase)),
-            Collections::unmodifiableSortedSet
+            Collections::unmodifiableNavigableSet
         ));
 
     return namedConfigurer(
