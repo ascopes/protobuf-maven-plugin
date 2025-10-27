@@ -895,7 +895,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.isRegisterAsCompilationRoot()).isEqualTo(value);
   }
 
-  @DisplayName("when ssnctionedExecutablePath is provided, expect it to be set on the request")
+  @DisplayName("when sanctionedExecutablePath is provided, expect it to be set on the request")
   @Test
   void whenSanctionedExecutablePathIsProvidedExpectItToBeSetOnTheRequest(
       @TempDir Path tempDir
