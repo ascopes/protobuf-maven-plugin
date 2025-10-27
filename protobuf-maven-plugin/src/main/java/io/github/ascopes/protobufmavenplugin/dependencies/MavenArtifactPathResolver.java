@@ -52,9 +52,6 @@ public interface MavenArtifactPathResolver {
    * @param dependencyScopes                 the allowed dependency scopes to resolve.
    * @param includeProjectDependencies       whether to also resolve project dependencies and return
    *                                         them in the result.
-   * @param failOnInvalidDependencies        if {@code false}, resolution of invalid dependencies
-   *                                         will result in errors being logged, but the build will
-   *                                         not be halted.
    * @return the paths to each resolved artifact.
    * @throws ResolutionException if resolution failed in the backend.
    */
@@ -62,7 +59,6 @@ public interface MavenArtifactPathResolver {
       Collection<? extends MavenArtifact> artifacts,
       DependencyResolutionDepth defaultDependencyResolutionDepth,
       Set<String> dependencyScopes,
-      boolean includeProjectDependencies,
-      boolean failOnInvalidDependencies
+      boolean includeProjectDependencies
   ) throws ResolutionException;
 }

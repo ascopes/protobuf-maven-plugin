@@ -68,7 +68,7 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <protocVersion>PATH</protocVersion>
+          <protoc>PATH</protoc>
         </configuration>
 
         <executions>

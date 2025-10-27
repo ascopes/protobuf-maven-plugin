@@ -273,13 +273,6 @@ public interface GenerationRequest {
   boolean isEmbedSourcesInClassOutputs();
 
   /**
-   * Whether to treat invalid dependencies as a build error.
-   *
-   * @return the boolean preference.
-   */
-  boolean isFailOnInvalidDependencies();
-
-  /**
    * Whether to treat non-existent source roots as a build error.
    *
    * @return the boolean preference.

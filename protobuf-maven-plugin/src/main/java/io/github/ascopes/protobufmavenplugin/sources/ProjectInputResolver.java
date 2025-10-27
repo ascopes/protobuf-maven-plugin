@@ -62,12 +62,14 @@ public final class ProjectInputResolver {
   ) throws ResolutionException {
     var filter = new IncludesExcludesGlobFilter(request.getIncludes(), request.getExcludes());
 
-    // TODO(ascopes): run these in parallel
-    return ImmutableProjectInputListing.builder()
+    var listing = ImmutableProjectInputListing.builder()
         .compilableDescriptorFiles(resolveCompilableDescriptorSources(request, filter))
         .compilableProtoSources(resolveCompilableProtoSources(request, filter))
         .dependencyProtoSources(resolveDependencyProtoSources(request))
         .build();
+
+    log.trace("Created project input listing {}", listing);
+    return listing;
   }
 
   private Collection<SourceListing> resolveCompilableProtoSources(
@@ -87,8 +89,7 @@ public final class ProjectInputResolver {
         request.getSourceDependencies(),
         request.getDependencyResolutionDepth(),
         request.getDependencyScopes(),
-        false,
-        request.isFailOnInvalidDependencies()
+        false
     );
 
     var sourceDependencyListings = sourceResolver.resolveSources(
@@ -114,8 +115,7 @@ public final class ProjectInputResolver {
         request.getImportDependencies(),
         request.getDependencyResolutionDepth(),
         request.getDependencyScopes(),
-        !request.isIgnoreProjectDependencies(),
-        request.isFailOnInvalidDependencies()
+        !request.isIgnoreProjectDependencies()
     );
 
     var importPaths = Stream
@@ -138,8 +138,7 @@ public final class ProjectInputResolver {
         request.getSourceDescriptorDependencies(),
         DependencyResolutionDepth.DIRECT,
         request.getDependencyScopes(),
-        false,
-        request.isFailOnInvalidDependencies()
+        false
     );
 
     var descriptorFilePaths = Stream

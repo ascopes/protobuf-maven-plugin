@@ -43,7 +43,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -134,7 +133,7 @@ public final class ProtobufBuildOrchestrator {
     // Determine the sources we need to regenerate. This will be all the sources usually but
     // if incremental compilation is enabled then we will only output the files that have changed
     // unless we deem a full rebuild necessary.
-    var compilableFiles = computeFilesToCompile(request, projectInputs, incrementalCompilation);
+    var compilableFiles = computeFilesToCompile(projectInputs, incrementalCompilation);
     if (compilableFiles.isEmpty()) {
       // Nothing to compile. If we hit here, then we likely received inputs but were using
       // incremental compilation and nothing changed since the last build.
@@ -268,7 +267,6 @@ public final class ProtobufBuildOrchestrator {
 
   // TODO: migrate this logic to a compilation strategy.
   private FilesToCompile computeFilesToCompile(
-      GenerationRequest request,
       ProjectInputListing projectInputs,
       boolean incrementalCompilation
   ) throws IOException {

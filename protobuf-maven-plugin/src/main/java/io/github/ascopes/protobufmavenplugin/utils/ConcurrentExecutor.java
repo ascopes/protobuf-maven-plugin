@@ -84,7 +84,8 @@ public final class ConcurrentExecutor {
 
   public <R> FutureTask<R> submit(Callable<R> task) {
     var futureTask = new FutureTask<>(task);
-    executorService.submit(futureTask);
+    var future = executorService.submit(futureTask);
+    log.trace("Scheduled future task {} for callable {} as {}", futureTask, task, future);
     return futureTask;
   }
 

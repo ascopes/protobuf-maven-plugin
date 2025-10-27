@@ -48,13 +48,13 @@ public final class ArgumentFileBuilder {
     return this;
   }
 
-  public <T> ArgumentFileBuilder apply(Consumer<ArgumentFileBuilder> operator) {
+  public ArgumentFileBuilder apply(Consumer<ArgumentFileBuilder> operator) {
     operator.accept(this);
     return this;
   }
 
   public <T> ArgumentFileBuilder applyForEach(
-      Iterable<T> items, 
+      Iterable<T> items,
       BiConsumer<ArgumentFileBuilder, T> operator
   ) {
     for (var item : items) {
@@ -82,27 +82,13 @@ public final class ArgumentFileBuilder {
       for (var i = 0; i < argument.length(); ++i) {
         var nextChar = argument.charAt(i);
         switch (nextChar) {
-          case '"':
-            appendable.append("\\\"");
-            break;
-          case '\'':
-            appendable.append("\\'");
-            break;
-          case '\\':
-            appendable.append("\\\\");
-            break;
-          case '\n':
-            appendable.append("\\n");
-            break;
-          case '\r':
-            appendable.append("\\r");
-            break;
-          case '\t':
-            appendable.append("\\t");
-            break;
-          default:
-            appendable.append(nextChar);
-            break;
+          case '"' -> appendable.append("\\\"");
+          case '\'' -> appendable.append("\\'");
+          case '\\' -> appendable.append("\\\\");
+          case '\n' -> appendable.append("\\n");
+          case '\r' -> appendable.append("\\r");
+          case '\t' -> appendable.append("\\t");
+          default -> appendable.append(nextChar);
         }
       }
       appendable.append("\"\n");

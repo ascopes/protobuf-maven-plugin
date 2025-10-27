@@ -170,8 +170,7 @@ final class JvmPluginResolver {
             List.of(plugin),
             DependencyResolutionDepth.TRANSITIVE,
             ALLOWED_SCOPES,
-            false,
-            true
+            false
         )
         .stream()
         .collect(Collectors.toUnmodifiableList());
@@ -387,24 +386,12 @@ final class JvmPluginResolver {
     for (var i = 0; i < arg.length(); ++i) {
       var c = arg.charAt(i);
       switch (c) {
-        case '\\':
-          appendable.append("\\\\");
-          break;
-        case '\'':
-          appendable.append("'\"'\"'");
-          break;
-        case '\n':
-          appendable.append("'$'\\n''");
-          break;
-        case '\r':
-          appendable.append("'$'\\r''");
-          break;
-        case '\t':
-          appendable.append("'$'\\t''");
-          break;
-        default:
-          appendable.append(c);
-          break;
+        case '\\' -> appendable.append("\\\\");
+        case '\'' -> appendable.append("'\"'\"'");
+        case '\n' -> appendable.append("'$'\\n''");
+        case '\r' -> appendable.append("'$'\\r''");
+        case '\t' -> appendable.append("'$'\\t''");
+        default -> appendable.append(c);
       }
     }
     appendable.append('\'');

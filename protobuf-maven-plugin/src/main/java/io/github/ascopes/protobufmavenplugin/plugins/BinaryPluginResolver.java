@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNullElse;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
-import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.urls.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
@@ -198,14 +197,6 @@ final class BinaryPluginResolver {
 
   private Runnable skipUnresolvedPlugin(ProtocPlugin plugin) {
     return () -> log.info("Skipping unresolved missing plugin {}", plugin);
-  }
-
-  private void makeExecutable(Path path) throws ResolutionException {
-    try {
-      FileUtils.makeExecutable(path);
-    } catch (IOException ex) {
-      throw new ResolutionException("Failed to set executable bit on protoc plugin", ex);
-    }
   }
 
   @FunctionalInterface

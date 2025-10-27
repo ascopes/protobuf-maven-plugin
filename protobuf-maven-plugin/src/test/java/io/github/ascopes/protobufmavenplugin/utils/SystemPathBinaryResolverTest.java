@@ -421,6 +421,7 @@ class SystemPathBinaryResolverTest {
       fs.givenFileExists(fooDir, "me");
 
       path(fooDir, barDir, bazDir, borkDir)
+          .and(pathExtensions(".COM", ".EXE", ".BAT", ".CMD", ".VBS", ".JS", ".MSC"))
           .and(osConfigurer)
           .configure(hostSystem);
 

@@ -2,10 +2,10 @@
 
 <img align="center" alt="logo" src="protobuf-maven-plugin/src/site/resources/images/banner.jpg">
 
-<p align="center">  
+<p align="center">
   <!-- Note: do not put inner tags on newlines within <a/>, it messes up the rendering of text decorations leaving blue underlines between badges. -->
-  <img alt="Java 11+" src="https://img.shields.io/badge/Java-11+-red?logo=openjdk&logoColor=white">
-  <img alt="Maven 3.8" src="https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven">
+  <img alt="Java 17+" src="https://img.shields.io/badge/Java-17+-red?logo=openjdk&logoColor=white">
+  <img alt="Maven 3.9" src="https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven">
   <img alt="GitHub License" src="https://img.shields.io/github/license/ascopes/protobuf-maven-plugin">
   <a href="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml"><img alt="Build Status" src="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main"></a>
   <a href="https://codecov.io/gh/ascopes/protobuf-maven-plugin"><img alt="Coverage" src="https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main"></a>
@@ -40,7 +40,7 @@ will automatically discover them and compile them to Java bytecode.
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf-java.version}</protocVersion>
+    <protoc>${protobuf-java.version}</protoc>
   </configuration>
 
   <executions>
@@ -62,8 +62,8 @@ will automatically discover them and compile them to Java bytecode.
 
 Other language generation targets are also available. This plugin provides support for generating
 all
-the languages that protoc supports out of the box, including Kotlin, Python, Python typeshed stubs,
-Ruby, PHP, C#, C++, and Rust.
+the languages that protoc supports out of the box, including Kotlin (JVM), Python, Python typeshed
+stubs, and Ruby.
 
 The following will generate Java classes and corresponding Kotlin wrappers:
 
@@ -74,8 +74,9 @@ The following will generate Java classes and corresponding Kotlin wrappers:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
+    <javaEnabled>true</javaEnabled>
     <kotlinEnabled>true</kotlinEnabled>
-    <protocVersion>${protobuf-java.version}</protocVersion>
+    <protoc>${protobuf-java.version}</protoc>
   </configuration>
 
   <executions>
@@ -113,7 +114,7 @@ artifact registry for bundles of Proto files seamlessly.
       <artifactId>protobuf-maven-plugin</artifactId>
 
       <configuration>
-        <protocVersion>${protobuf-java.version}</protocVersion>
+        <protoc>${protobuf-java.version}</protoc>
       </configuration>
 
       <executions>
@@ -140,7 +141,7 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protocVersion>${protobuf-java.version}</protocVersion>
+    <protoc>${protobuf-java.version}</protoc>
 
     <!-- Vanilla protoc plugins - these are platform specific executables
          just like protoc is. -->
