@@ -11,8 +11,15 @@ set -o pipefail
 
 readonly host=127.0.0.1
 readonly port=9000
+base_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+site_dir=${base_dir}/protobuf-maven-plugin/target/site
 
-cd "$(git rev-parse --show-toplevel)/protobuf-maven-plugin/target/site"
+if [[ ! -d ${site_dir} ]] || [[ "${*}" =~ .*--build.* ]]; then
+  cd "${base_dir}"
+  ./mvnw site -Dlicense.skip -Dcheckstyle.skip -Dinvoker.skip -Dmaven.test.skip -T10
+fi
+cd "${site_dir}"
+
 python3 -m http.server -b "${host}" "${port}" &
 readonly pid=$!
 trap 'kill -SIGTERM "$pid" &> /dev/null; trap - EXIT INT TERM' EXIT INT TERM

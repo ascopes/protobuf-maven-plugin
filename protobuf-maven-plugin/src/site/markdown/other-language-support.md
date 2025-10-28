@@ -6,6 +6,8 @@ While Maven does not provide official plugins for most other programming
 languages, the protobuf-maven-plugin allows you to generate source code for
 a number of other programming languages.
 
+## Languages directly supported by `protoc`
+
 By default, only Java generation is enabled. You can turn this off if desired.
 
 To enable other languages, use the following attributes within your `configuration` block;
@@ -53,11 +55,28 @@ To enable other languages, use the following attributes within your `configurati
   </tbody>
 </table>
 
+### Further support
+
 Any other languages natively available in `protoc` can be enabled by passing `<arguments/>`
-in the plugin configuration (e.g. `--cpp_out=target/cpp` for C++).
+in the plugin configuration. For example:
+
+```xml
+<configuration>
+  <arguments>
+    <argument>--cpp_out=target/generated-sources/cxx</argument>
+  </arguments>
+  <protoc>...</protoc>
+</configuration>
+```
+
+## Languages and tooling without first-class support
 
 Any other language integrations can be provided to this plugin in the shape of
 third-party custom `protoc` plugins.
+
+See "[using protoc plugins](./using-protoc-plugins.md)" for full details.
+
+### Caveats
 
 It is also important to note that you need to provide a valid compiler or tooling to
 make use of the generared sources (other than Java). For example, Kotlin generation

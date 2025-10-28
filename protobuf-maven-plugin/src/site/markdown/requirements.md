@@ -99,3 +99,21 @@ Refer to the `protocVersion` parameter documentation on the
 
 You may also try something like `docker buildx` and use a cross-platform container to build
 on the desired platform. Virtual machines are also an option.
+
+## "But Google released binaries for this architecture!"
+
+In the unlikely event that Google adds new architecture support as a first class citizen
+to `protoc`, please raise a
+[feature request](https://github.com/ascopes/protobuf-maven-plugin/issues)
+and I will get onto it as soon as possible.
+
+## What about this WASM thing I've heard about?
+
+Some projects like Quarkus have began to experiment with transpiling
+`protoc` to web assembly, enabling them to be run in a WASM interpreter
+within the JVM, or within Graal's polyglot runtime.
+
+This is something that I am looking to eventually support where possible.
+If you are interested in helping out with this, please reach out on the
+[discussions](https://github.com/ascopes/protobuf-maven-plugin/discussions)
+page.
