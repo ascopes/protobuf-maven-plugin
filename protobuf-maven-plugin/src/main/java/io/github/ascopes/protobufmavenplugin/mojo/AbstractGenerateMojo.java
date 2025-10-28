@@ -105,7 +105,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <pre>{@code
    *   <arguments>
    *     <argument>--experimental_allow_proto3_optional</argument>
-   *     <argument>--php_out=${project.build.directory}/generated-sources/php</argument>
+   *     <argument>--php_out=target/generated-sources/php</argument>
    *   </arguments>
    * }</pre>
    *
