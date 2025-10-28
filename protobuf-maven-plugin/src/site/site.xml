@@ -76,6 +76,7 @@
       <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
     </menu>
     <menu name="Development">
+      <item name="Code of Conduct" href="gh-code-of-conduct.html"/>
       <item name="Contributing Guide" href="gh-contributing.html"/>
       <item name="Security Policy" href="gh-security.html"/>
       <item name="Issues and Bugs" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
