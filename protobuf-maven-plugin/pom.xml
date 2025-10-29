@@ -31,7 +31,8 @@
   <packaging>maven-plugin</packaging>
 
   <prerequisites>
-    <maven>3.9</maven>
+    <!-- Versions before 3.9.6 cannot handle Java 17 bytecode in Eclipse Sisu. -->
+    <maven>3.9.6</maven>
   </prerequisites>
 
   <dependencies>
