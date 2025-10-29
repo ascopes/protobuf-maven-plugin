@@ -21,7 +21,7 @@ generation.
 Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
 and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
-> ![NOTE]
+> [!NOTE]
 > The v4 release of this plugin requires a minimum of Java 17 and Maven 3.9 to operate. If you
 > require the ability to use Maven 3.8 or Java 11, please use the latest v3 release from Maven Central!
 
