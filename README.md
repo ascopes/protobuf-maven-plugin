@@ -5,7 +5,7 @@
 <p align="center">
   <!-- Note: do not put inner tags on newlines within <a/>, it messes up the rendering of text decorations leaving blue underlines between badges. -->
   <img alt="Java 17+" src="https://img.shields.io/badge/Java-17+-red?logo=openjdk&logoColor=white">
-  <img alt="Maven 3.9" src="https://img.shields.io/badge/maven-3.8,%204.x-blue?logo=apache-maven">
+  <img alt="Maven 3.9" src="https://img.shields.io/badge/maven-3.9,%204.x-blue?logo=apache-maven">
   <img alt="GitHub License" src="https://img.shields.io/github/license/ascopes/protobuf-maven-plugin">
   <a href="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml"><img alt="Build Status" src="https://github.com/ascopes/protobuf-maven-plugin/actions/workflows/build.yml/badge.svg?branch=main"></a>
   <a href="https://codecov.io/gh/ascopes/protobuf-maven-plugin"><img alt="Coverage" src="https://img.shields.io/codecov/c/github/ascopes/protobuf-maven-plugin/main"></a>
@@ -14,16 +14,16 @@
   <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin">
 </p>
 
-
 A scratch-built, modern Maven plugin for seamless `protoc` integration. Provides support for native
 and JVM-based `protoc` plugins, as well as automatic dependency resolution and incremental code
 generation.
 
-> [!NOTE]
-> Full documentation with usage examples can be
-> found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
-> and examples are
-> present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
+Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
+and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
+
+> ![NOTE]
+> The v4 release of this plugin requires a minimum of Java 17 and Maven 3.9 to operate. If you
+> require the ability to use Maven 3.8 or Java 11, please use the latest v3 release from Maven Central!
 
 ## Quick start
 
