@@ -88,19 +88,20 @@ public final class ProtocResolver {
       );
     }
 
-    if (version.equalsIgnoreCase("PATH")) {
-      return systemPathResolver.resolve(EXECUTABLE_NAME);
-    }
+    Optional<Path> path;
 
-    // It is likely a URL, not a version string.
-    var path = version.contains(":")
-        ? resolveFromUri(version)
-        : resolveFromMavenRepositories(version);
+    if (version.equalsIgnoreCase("PATH")) {
+      path = systemPathResolver.resolve(EXECUTABLE_NAME);
+    } else if (version.contains(":")) {
+      path = resolveFromUri(version);
+    } else {
+      path = resolveFromMavenRepositories(version);
+    }
 
     if (path.isEmpty()) {
       return Optional.empty();
-
     }
+
     var resolvedPath = path.get();
 
     if (digest != null) {
