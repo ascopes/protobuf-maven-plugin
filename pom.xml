@@ -21,7 +21,7 @@
 
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin-parent</artifactId>
-  <version>3.10.2</version>
+  <version>3.10.3-SNAPSHOT</version>
 
   <name>Protobuf Maven Plugin Parent</name>
   <description>Parent POM for the Protobuf Maven Plugin.</description>
