@@ -144,7 +144,7 @@ jobs:
         with:
           tag: v${{ needs.prepare.outputs.release_version }}
           name: v${{ needs.prepare.outputs.release_version }}
-          generateReleaseNotes: true
+          generateReleaseNotes: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
   github-pages:
