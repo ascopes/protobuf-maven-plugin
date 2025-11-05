@@ -15,7 +15,9 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
-import org.immutables.value.Value.Modifiable;
+import static java.util.Objects.requireNonNullElse;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * Marker to exclude a specific transitive dependency.
@@ -26,24 +28,18 @@ import org.immutables.value.Value.Modifiable;
  * @author Ashley Scopes
  * @since 2.12.0
  */
-@Modifiable
-public interface MavenExclusion {
+public record MavenExclusion(
+    String groupId,
+    String artifactId,
+    @Nullable String classifier,
+    @Nullable String type
+) {
 
-  /**
-   * Value used by Eclipse Aether internally to imply a match for
-   * any value.
-   */
-  String WILDCARD = "*";
-
-  String getGroupId();
-
-  String getArtifactId();
-
-  default String getClassifier() {
-    return WILDCARD;
+  public String classifier() {
+    return requireNonNullElse(classifier, "*");
   }
 
-  default String getType() {
-    return WILDCARD;
+  public String getType() {
+    return requireNonNullElse(type, "*");
   }
 }
