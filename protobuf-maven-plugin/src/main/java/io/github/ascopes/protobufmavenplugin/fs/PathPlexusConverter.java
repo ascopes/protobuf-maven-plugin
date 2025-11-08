@@ -67,8 +67,8 @@ public final class PathPlexusConverter extends FileConverter {
         lookup, configuration, type, enclosingType, loader, evaluator, listener
     );
 
-    return result instanceof File
-        ? ((File) result).toPath()
+    return result instanceof File file
+        ? file.toPath()
         : result;
   }
 }
