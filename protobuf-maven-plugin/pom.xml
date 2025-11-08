@@ -164,12 +164,6 @@
   <build>
     <plugins>
       <plugin>
-        <!-- Java compiler config. -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-
-      <plugin>
         <!-- Used for Mockito agent support in JDK21+. We have to know the JAR path of the dependency. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -297,10 +291,8 @@
 
   <profiles>
     <profile>
-      <!--
-          Enabling this profile will enable the Java debugger socket and pause
-          execution of test projects until a remote debugger is attached.
-      -->
+      <!-- Enabling this profile will enable the Java debugger socket and pause
+           execution of test projects until a remote debugger is attached. -->
       <id>invoker-debug</id>
       <build>
         <pluginManagement>
@@ -324,10 +316,8 @@
     </profile>
 
     <profile>
-      <!--
-          Enabling this profile will force all tests to run using the
-          protoc binary that is on the system path.
-      -->
+      <!-- Enabling this profile will force all tests to run using the
+           protoc binary that is on the system path. -->
       <id>invoker-path-protoc</id>
       <build>
         <pluginManagement>
@@ -387,6 +377,61 @@
             <artifactId>maven-invoker-plugin</artifactId>
             <configuration>
               <cloneProjectsTo>${invoker-project-path-override}</cloneProjectsTo>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- ErrorProne only works with Java 21 and newer. If we're on Java 17, we cannot
+           enable it within the compiler. This is somewhat unfortunate but should be okay
+           as a workaround for now since we build on multiple JDKs on GitHub. -->
+      <id>errorprone</id>
+      <activation>
+        <jdk>[21,)</jdk>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+
+            <configuration>
+              <annotationProcessorPaths>
+                <annotationProcessorPath>
+                  <groupId>com.google.errorprone</groupId>
+                  <artifactId>error_prone_core</artifactId>
+                  <version>${errorprone.version}</version>
+                </annotationProcessorPath>
+                <annotationProcessorPath>
+                  <!-- Override what Maven is pulling in. This is fine during compilation as our
+                       code doesn't use Guava at all. This is needed for ErrorProne to not crash
+                       on startup. -->
+                  <groupId>com.google.guava</groupId>
+                  <artifactId>guava</artifactId>
+                  <version>[33,)</version>
+                </annotationProcessorPath>
+                <annotationProcessorPath>
+                  <groupId>com.uber.nullaway</groupId>
+                  <artifactId>nullaway</artifactId>
+                  <version>${nullaway.version}</version>
+                </annotationProcessorPath>
+              </annotationProcessorPaths>
+
+              <compilerArgs>
+                <compilerArg>--should-stop=ifError=FLOW</compilerArg>
+                <compilerArg>
+                  -Xplugin:ErrorProne
+                  -XepDisableWarningsInGeneratedCode
+                  -XepExcludedPaths:.*/(target/generated.*|src/test)/.*
+                  -XepOpt:NullAway:AnnotatedPackages=io.github.ascopes.protobufmavenplugin
+                  <!-- See https://github.com/uber/NullAway/issues/1319 -->
+                  -XepOpt:NullAway:ExcludedFieldAnnotations=org.apache.maven.plugins.annotations.Parameter
+                </compilerArg>
+                <compilerArg>-XDcompilePolicy=simple</compilerArg>
+              </compilerArgs>
             </configuration>
           </plugin>
         </plugins>
