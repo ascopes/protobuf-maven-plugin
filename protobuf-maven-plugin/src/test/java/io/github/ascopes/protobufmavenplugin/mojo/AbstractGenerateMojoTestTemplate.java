@@ -1167,12 +1167,36 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   static Stream<Arguments> languageEnablingCases() {
     return Stream.of(
         // Base cases
-        arguments("nothing", consumer(), EnumSet.noneOf(Language.class)),
-        arguments("Java", consumer(a -> a.javaEnabled = true), EnumSet.of(Language.JAVA)),
-        arguments("Kotlin", consumer(a -> a.kotlinEnabled = true), EnumSet.of(Language.KOTLIN)),
-        arguments("Python", consumer(a -> a.pythonEnabled = true), EnumSet.of(Language.PYTHON)),
-        arguments("PYI", consumer(a -> a.pythonStubsEnabled = true), EnumSet.of(Language.PYTHON_STUBS)),
-        arguments("Ruby", consumer(a -> a.rubyEnabled = true), EnumSet.of(Language.RUBY)),
+        arguments(
+            "nothing",
+            consumer(),
+            EnumSet.noneOf(Language.class)
+        ),
+        arguments(
+            "Java",
+            consumer(a -> a.javaEnabled = true),
+            EnumSet.of(Language.JAVA)
+        ),
+        arguments(
+            "Kotlin",
+            consumer(a -> a.kotlinEnabled = true),
+            EnumSet.of(Language.KOTLIN)
+        ),
+        arguments(
+            "Python",
+            consumer(a -> a.pythonEnabled = true),
+            EnumSet.of(Language.PYTHON)
+        ),
+        arguments(
+            "Python stubs",
+            consumer(a -> a.pythonStubsEnabled = true),
+            EnumSet.of(Language.PYTHON_STUBS)
+        ),
+        arguments(
+            "Ruby",
+            consumer(a -> a.rubyEnabled = true),
+            EnumSet.of(Language.RUBY)
+        ),
         // Combined cases
         arguments(
             "Java, Kotlin",
