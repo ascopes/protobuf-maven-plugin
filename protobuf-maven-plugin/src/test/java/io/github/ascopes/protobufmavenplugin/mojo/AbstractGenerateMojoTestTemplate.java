@@ -76,7 +76,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 
-@SuppressWarnings("removal")
 abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> {
 
   @TempDir
@@ -1172,7 +1171,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         arguments("Java", consumer(a -> a.javaEnabled = true), EnumSet.of(Language.JAVA)),
         arguments("Kotlin", consumer(a -> a.kotlinEnabled = true), EnumSet.of(Language.KOTLIN)),
         arguments("Python", consumer(a -> a.pythonEnabled = true), EnumSet.of(Language.PYTHON)),
-        arguments("PYI", consumer(a -> a.pythonStubsEnabled = true), EnumSet.of(Language.PYI)),
+        arguments("PYI", consumer(a -> a.pythonStubsEnabled = true), EnumSet.of(Language.PYTHON_STUBS)),
         arguments("Ruby", consumer(a -> a.rubyEnabled = true), EnumSet.of(Language.RUBY)),
         // Combined cases
         arguments(
@@ -1189,7 +1188,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
               a.pythonEnabled = true;
               a.pythonStubsEnabled = true;
             }),
-            EnumSet.of(Language.PYTHON, Language.PYI)
+            EnumSet.of(Language.PYTHON, Language.PYTHON_STUBS)
         ),
         arguments(
             "everything",

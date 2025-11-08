@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.generation;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Supported generated source languages.
@@ -27,7 +28,7 @@ public enum Language {
   JAVA("java"),
   KOTLIN("kotlin"),
   PYTHON("python"),
-  PYI("pyi"),
+  PYTHON_STUBS("pyi"),
   RUBY("ruby");
 
   private final String flagName;
@@ -45,7 +46,7 @@ public enum Language {
     return flagName;
   }
 
-  public static LanguageSetBuilder languageSet() {
+  public static LanguageSetBuilder setBuilder() {
     return new LanguageSetBuilder();
   }
 
@@ -64,15 +65,13 @@ public enum Language {
     }
 
     public LanguageSetBuilder addIf(boolean condition, Language language) {
-      return condition ? add(language) : this;
-    }
-
-    public LanguageSetBuilder add(Language language) {
-      values.add(language);
+      if (condition) {
+        values.add(language);
+      }
       return this;
     }
 
-    public EnumSet<Language> build() {
+    public Set<Language> build() {
       return values;
     }
   }

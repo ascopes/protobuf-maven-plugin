@@ -1066,11 +1066,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       return;
     }
 
-    var enabledLanguages = Language.languageSet()
+    var enabledLanguages = Language.setBuilder()
         .addIf(javaEnabled, Language.JAVA)
         .addIf(kotlinEnabled, Language.KOTLIN)
         .addIf(pythonEnabled, Language.PYTHON)
-        .addIf(pythonStubsEnabled, Language.PYI)
+        .addIf(pythonStubsEnabled, Language.PYTHON_STUBS)
         .addIf(rubyEnabled, Language.RUBY)
         .build();
 
