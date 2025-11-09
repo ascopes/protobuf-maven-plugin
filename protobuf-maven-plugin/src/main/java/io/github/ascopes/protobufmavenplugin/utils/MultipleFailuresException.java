@@ -16,7 +16,6 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Exception that gets raised when one or more concurrent tasks fail.

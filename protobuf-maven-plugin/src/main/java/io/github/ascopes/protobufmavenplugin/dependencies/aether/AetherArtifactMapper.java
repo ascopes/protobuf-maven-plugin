@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
-import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;

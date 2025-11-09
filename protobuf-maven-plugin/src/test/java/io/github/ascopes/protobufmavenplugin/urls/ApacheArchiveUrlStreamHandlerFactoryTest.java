@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
-import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.any;

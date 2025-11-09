@@ -17,7 +17,6 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.mojo.ProtobufMavenPluginConfigurator;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
