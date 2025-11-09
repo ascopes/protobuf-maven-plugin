@@ -17,7 +17,8 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import java.util.Map;
+import java.io.IOException;
+import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -33,64 +34,34 @@ import org.eclipse.sisu.Description;
 @Named
 public final class PlatformClassifierFactory {
 
-  private static final Map<String, String> LINUX_MAPPING = Map.of(
-      "aarch64", "linux-aarch_64",
-      "amd64", "linux-x86_64",
-      "ppc64", "linux-ppcle_64",
-      "ppc64le", "linux-ppcle_64",
-      "s390x", "linux-s390_64",
-      "zarch_64", "linux-s390_64"
-  );
-
-  private static final Map<String, String> MAC_OS_MAPPING = Map.of(
-      "aarch64", "osx-aarch_64",
-      "amd64", "osx-x86_64",
-      "x86_64", "osx-x86_64"
-  );
-
-  private static final Map<String, String> WINDOWS_MAPPING = Map.of(
-      "amd64", "windows-x86_64",
-      "x86", "windows-x86_32",
-      "x86_32", "windows-x86_32",
-      "x86_64", "windows-x86_64",
-      // Protoc's developers have no plans to support an ARM release of
-      // protoc. The Prism emulator is included in Windows 10 and Windows
-      // 11 to execute x86 binaries on the ARM instruction set.
-      // Reportedly, Windows 10 only supports 32-bit ARM emulation, whereas
-      // Windows 11 supports both.
-      // At this time, we pin to the 64 bit version since Windows 10 is
-      // near EOL at the time of writing, and more support in protoc
-      // plugins will be available by vendors for 64 bit releases.
-      "aarch64", "windows-x86_64"
-  );
-
-  private static final Map<String, String> FALLBACK_MAPPING = Map.of();
-
   private final HostSystem hostSystem;
+  private final Properties platformMapping;
 
   @Inject
-  public PlatformClassifierFactory(HostSystem hostSystem) {
+  public PlatformClassifierFactory(HostSystem hostSystem) throws IOException {
     this.hostSystem = hostSystem;
+
+    try (var is = getClass().getResourceAsStream("platforms.properties")) {
+      platformMapping = new Properties();
+      platformMapping.load(is);
+    }
   }
 
   public String getClassifier(String binaryName) throws ResolutionException {
-    Map<String, String> osMapping;
+    String osKey;
 
     if (hostSystem.isProbablyLinux()) {
-      osMapping = LINUX_MAPPING;
-
+      osKey = "linux";
     } else if (hostSystem.isProbablyMacOs()) {
-      osMapping = MAC_OS_MAPPING;
-
+      osKey = "macos";
     } else if (hostSystem.isProbablyWindows()) {
-      osMapping = WINDOWS_MAPPING;
-
+      osKey = "windows";
     } else {
-      osMapping = FALLBACK_MAPPING;
+      osKey = "unknown";
     }
 
     var rawArch = hostSystem.getCpuArchitecture();
-    var classifier = osMapping.get(rawArch);
+    var classifier = platformMapping.getProperty(osKey + "." + rawArch);
 
     if (classifier != null) {
       return classifier;

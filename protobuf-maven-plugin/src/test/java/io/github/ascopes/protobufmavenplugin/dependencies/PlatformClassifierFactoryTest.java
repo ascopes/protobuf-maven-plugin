@@ -47,7 +47,7 @@ class PlatformClassifierFactoryTest {
   void getClassifierReturnsExpectedResultsOnValidSystems(
       HostSystemMockConfigurer configurer,
       String expectedClassifier
-  ) throws ResolutionException {
+  ) throws Exception {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
@@ -66,7 +66,7 @@ class PlatformClassifierFactoryTest {
   @ParameterizedTest(name = "when {0}, then expect an exception")
   void getClassifierRaisesAnExceptionForUnknownSystems(
       HostSystemMockConfigurer configurer
-  ) {
+  ) throws Exception {
     // Given
     var hostSystem = hostSystem();
     configurer.configure(hostSystem);
