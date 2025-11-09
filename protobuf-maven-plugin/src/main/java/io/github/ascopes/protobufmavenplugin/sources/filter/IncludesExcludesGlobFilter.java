@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * File filter that handles inclusion and exclusion glob lists.
@@ -56,7 +55,7 @@ public final class IncludesExcludesGlobFilter implements FileFilter {
     return globs.stream()
         .map("glob:"::concat)
         .map(FileSystems.getDefault()::getPathMatcher)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private static Predicate<PathMatcher> path(Path path) {

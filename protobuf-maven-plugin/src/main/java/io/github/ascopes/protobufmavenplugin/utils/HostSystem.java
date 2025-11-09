@@ -158,7 +158,7 @@ public final class HostSystem {
             .flatMap(HostSystem::tryParseSystemFilePath)
             .distinct()
             .filter(Files::isDirectory)
-            .collect(Collectors.toUnmodifiableList())
+            .toList()
     );
   }
 

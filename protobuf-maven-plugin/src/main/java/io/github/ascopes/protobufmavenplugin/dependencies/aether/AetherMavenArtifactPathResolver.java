@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -143,6 +142,6 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         .map(aetherArtifactMapper::mapEclipseArtifactToPath)
         // Order matters here, so don't convert to an unordered container in the
         // future. We make assumptions on the order of this elsewhere.
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 }

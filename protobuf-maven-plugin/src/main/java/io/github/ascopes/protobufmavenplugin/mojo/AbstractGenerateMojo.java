@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -1166,7 +1165,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .filter(not(Collection::isEmpty))
         .stream()
         .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     var finalValue = transformed.isEmpty()
         ? defaultIfMissing.get()
@@ -1174,7 +1173,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
     return finalValue.stream()
         .filter(Files::exists)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private <L> List<L> nonNullList(@Nullable List<L> list) {

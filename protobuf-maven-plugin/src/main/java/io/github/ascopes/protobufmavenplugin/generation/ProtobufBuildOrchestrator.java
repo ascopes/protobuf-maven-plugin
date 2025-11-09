@@ -43,7 +43,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -226,7 +225,7 @@ public final class ProtobufBuildOrchestrator {
                 .filter(Objects::nonNull)
         )
         .flatMap(identity())
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     if (!incrementalCompilation && request.isCleanOutputDirectories()) {
       for (var outputDirectory : outputDirectories) {
@@ -376,12 +375,12 @@ public final class ProtobufBuildOrchestrator {
         .of(projectInputs.getCompilableProtoSources(), projectInputs.getDependencyProtoSources())
         .flatMap(Collection::stream)
         .map(SourceListing::getSourceRoot)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     var inputDescriptorFiles = projectInputs.getCompilableDescriptorFiles()
         .stream()
         .map(DescriptorListing::getDescriptorFilePath)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     return ImmutableProtocInvocation.builder()
         .arguments(request.getArguments())

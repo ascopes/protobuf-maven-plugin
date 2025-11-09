@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin.sources;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -37,6 +36,6 @@ public interface SourceListing {
     return listings.stream()
         .map(SourceListing::getSourceFiles)
         .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 }

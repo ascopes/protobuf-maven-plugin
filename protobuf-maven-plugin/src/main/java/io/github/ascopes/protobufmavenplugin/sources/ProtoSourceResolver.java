@@ -90,7 +90,7 @@ final class ProtoSourceResolver {
         .collect(concurrentExecutor.awaiting())
         .stream()
         .flatMap(Optional::stream)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private Optional<DescriptorListing> resolveDescriptor(
@@ -150,7 +150,7 @@ final class ProtoSourceResolver {
         .collect(concurrentExecutor.awaiting())
         .stream()
         .flatMap(Optional::stream)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private Optional<SourceListing> resolveSources(

@@ -43,7 +43,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -173,7 +172,7 @@ final class JvmPluginResolver {
             false
         )
         .stream()
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     var args = new ArgumentFileBuilder();
 
@@ -301,7 +300,7 @@ final class JvmPluginResolver {
         .map(FileUtils::normalize)
         // Sort as the order of output is arbitrary, and this ensures reproducible builds.
         .sorted(Comparator.comparing(Path::toString))
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private Predicate<String> checkValidJvmConfigArg(MavenProtocPlugin plugin) {

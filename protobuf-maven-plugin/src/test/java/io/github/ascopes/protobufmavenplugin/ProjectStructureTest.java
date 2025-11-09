@@ -50,9 +50,7 @@ class ProjectStructureTest {
   private boolean hasChildFiles(Path baseDir) {
     try (var files = Files.walk(baseDir, 1)) {
       return files
-          .filter(Files::isRegularFile)
-          .findAny()
-          .isPresent();
+          .anyMatch(Files::isRegularFile);
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }

@@ -21,7 +21,6 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +38,7 @@ abstract class AbstractUrlStreamHandlerFactory implements URLStreamHandlerFactor
     // Two args to enforce at least one protocol at any time.
     this.protocols = Stream
         .concat(Stream.of(protocol), Stream.of(protocols))
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
     streamHandler = new UrlStreamHandlerImpl();
   }
 

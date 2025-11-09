@@ -26,7 +26,6 @@ import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,7 +75,7 @@ class ProjectPluginResolverTest {
             resolvedJvmMavenPlugins
         )
         .flatMap(Collection::stream)
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     var binaryMavenPlugins = List.<MavenProtocPlugin>of(mock(), mock(), mock());
     var binaryPathPlugins = List.<PathProtocPlugin>of(mock(), mock());

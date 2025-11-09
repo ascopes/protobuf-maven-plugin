@@ -23,7 +23,6 @@ import io.github.ascopes.protobufmavenplugin.sources.filter.IncludesExcludesGlob
 import io.github.ascopes.protobufmavenplugin.sources.filter.ProtoFileFilter;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -100,7 +99,7 @@ public final class ProjectInputResolver {
     return Stream
         .concat(sourcePathsListings.stream(), sourceDependencyListings.stream())
         .distinct()
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private Collection<SourceListing> resolveDependencyProtoSources(
@@ -121,7 +120,7 @@ public final class ProjectInputResolver {
     var importPaths = Stream
         .concat(request.getImportPaths().stream(), artifactPaths.stream())
         .distinct()
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     return sourceResolver.resolveSources(importPaths, filter);
   }
@@ -144,7 +143,7 @@ public final class ProjectInputResolver {
     var descriptorFilePaths = Stream
         .concat(request.getSourceDescriptorPaths().stream(), artifactPaths.stream())
         .distinct()
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     return sourceResolver.resolveDescriptors(descriptorFilePaths, filter);
   }
