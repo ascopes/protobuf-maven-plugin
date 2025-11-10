@@ -425,7 +425,7 @@
                 <compilerArg>
                   -Xplugin:ErrorProne
                   -XepDisableWarningsInGeneratedCode
-                  -XepExcludedPaths:.*/(target/generated.*|src/test)/.*
+                  -XepExcludedPaths:.*/target/generated.*?/.*
                   -XepOpt:NullAway:AnnotatedPackages=io.github.ascopes.protobufmavenplugin
                   <!-- See https://github.com/uber/NullAway/issues/1319 -->
                   -XepOpt:NullAway:ExcludedFieldAnnotations=org.apache.maven.plugins.annotations.Parameter
