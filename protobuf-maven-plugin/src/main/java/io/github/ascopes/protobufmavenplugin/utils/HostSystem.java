@@ -107,6 +107,13 @@ public final class HostSystem {
     log.debug("Parsed path extensions: {}", pathExt);
   }
 
+  /*
+   * OS and CPU detection.
+   *
+   * Based loosely upon the implementation of JLine within OpenJDK. See:
+   * https://github.com/openjdk/jdk/blob/f77a5117db2d01a935762e948aef2d0ade3512a3/src/jdk.internal.le/share/classes/jdk/internal/org/jline/utils/OSUtils.java#L16
+   */
+
   public String getOperatingSystem() {
     return operatingSystem;
   }
@@ -124,12 +131,16 @@ public final class HostSystem {
   }
 
   public boolean isProbablyMacOs() {
-    return operatingSystem.toLowerCase(Locale.ROOT).startsWith("mac os");
+    return operatingSystem.toLowerCase(Locale.ROOT).startsWith("mac");
   }
 
   public boolean isProbablyWindows() {
-    return operatingSystem.toLowerCase(Locale.ROOT).startsWith("windows");
+    return operatingSystem.toLowerCase(Locale.ROOT).startsWith("win");
   }
+
+  /*
+   * JDK configuration.
+   */
 
   public Path getJavaExecutablePath() {
     var executableName = isProbablyWindows()
@@ -137,6 +148,10 @@ public final class HostSystem {
         : "java";
     return javaHome.resolve("bin").resolve(executableName);
   }
+
+  /*
+   * Host environment implementation details and userspace settings.
+   */
 
   public List<Path> getSystemPath() {
     return path;
