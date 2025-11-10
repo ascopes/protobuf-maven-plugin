@@ -75,7 +75,7 @@
           <binaryUrlPlugins>
             <binaryUrlPlugin>
               <url>zip:https://github.com/scalapb/ScalaPB/releases/download/v${scalapb.version}/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
-              <digest>sha1:bca1d071820bab1ebb0ddd058e6fb621aca321c5</digest>
+              <digest>${scalapb.digest}</digest>
               <options>flat_package,grpc,scala3_sources</options>
             </binaryUrlPlugin>
           </binaryUrlPlugins>
