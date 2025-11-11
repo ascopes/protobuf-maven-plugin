@@ -24,6 +24,7 @@ import static org.mockito.Mockito.withSettings;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -37,10 +38,10 @@ class OutputRedirectorDaemonTest {
   @Timeout(10)
   void logsAreEmittedToTheLoggerLinewise() throws Exception {
     var inputStream = new ByteArrayInputStream(
-        "Foo bar baz\nDo ray me\nEggs spam".getBytes()
+        "Foo bar baz\nDo ray me\nEggs spam".getBytes(StandardCharsets.UTF_8)
     );
     OutputRedirectorDaemon.Logger logger = mock();
-    var daemon = new OutputRedirectorDaemon(
+    new OutputRedirectorDaemon(
         "foobar",
         1243L,
         inputStream,
@@ -66,7 +67,7 @@ class OutputRedirectorDaemonTest {
       throw ex;
     }));
     OutputRedirectorDaemon.Logger logger = mock();
-    var daemon = new OutputRedirectorDaemon(
+    new OutputRedirectorDaemon(
         "foobar",
         1243L,
         inputStream,
@@ -86,7 +87,7 @@ class OutputRedirectorDaemonTest {
   @Timeout(10)
   void awaitWaitsForTheLoggerToBeExhausted() throws Exception {
     var inputStream = new ByteArrayInputStream(
-        "Foo bar baz\nDo ray me\nEggs spam".getBytes()
+        "Foo bar baz\nDo ray me\nEggs spam".getBytes(StandardCharsets.UTF_8)
     );
     OutputRedirectorDaemon.Logger logger = mock();
     var daemon = new OutputRedirectorDaemon(
