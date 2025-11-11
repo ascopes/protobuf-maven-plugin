@@ -181,8 +181,8 @@ class ConcurrentExecutorTest {
     var task1 = new FutureTask<>(() -> sleepWait(10_000));
     var task2 = new FutureTask<>(() -> sleepWait(10_000));
 
-    executor.executorService.submit(task1);
-    executor.executorService.submit(task2);
+    var unused = executor.executorService.submit(task1);
+    unused = executor.executorService.submit(task2);
 
     // Give tasks the chance to start.
     Thread.sleep(1_000);
@@ -209,8 +209,8 @@ class ConcurrentExecutorTest {
     var task1 = new FutureTask<>(() -> spinWait(10_000));
     var task2 = new FutureTask<>(() -> spinWait(10_000));
 
-    executor.executorService.submit(task1);
-    executor.executorService.submit(task2);
+    var unused = executor.executorService.submit(task1);
+    unused = executor.executorService.submit(task2);
 
     // Give tasks the chance to start.
     Thread.sleep(1_000);
@@ -423,7 +423,7 @@ class ConcurrentExecutorTest {
 
   // Spin-based waits should not perform IO, so should be un-cancellable and
   // uninterruptible, representing CPU bound work or a buggy/stubborn task.
-  @SuppressWarnings("SameParameterValue")
+  @SuppressWarnings({"SameParameterValue", "RedundantControlFlow"})
   private static @Nullable Void spinWait(int timeoutMs) {
     var deadline = System.nanoTime() + timeoutMs * 1_000_000L;
     // Do not perform anything that can be interrupted.
