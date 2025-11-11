@@ -86,7 +86,7 @@ class ArgumentFileBuilderTest {
     builder.apply(afb -> afb.add("foo"));
 
     // Then
-    assertThat(builder).asString().isEqualTo(String.join("\n", "foo"));
+    assertThat(builder).asString().isEqualTo("foo");
   }
 
   @DisplayName(".applyForEach() applies the builder to each item")
@@ -100,7 +100,11 @@ class ArgumentFileBuilderTest {
     builder.applyForEach(items, ArgumentFileBuilder::add);
 
     // Then
-    assertThat(builder).asString().isEqualTo(String.join("\n", "foo", "bar", "baz"));
+    assertThat(builder).asString().isEqualTo("""
+        foo
+        bar
+        baz
+        """.stripIndent().trim());
   }
 
   @DisplayName(".addIfTrue() adds to the builder when the condition is met")
@@ -117,7 +121,12 @@ class ArgumentFileBuilderTest {
         .add("bork");
 
     // Then
-    assertThat(builder).asString().isEqualTo(String.join("\n", "foo", "bar", "baz", "bork"));
+    assertThat(builder).asString().isEqualTo("""
+        foo
+        bar
+        baz
+        bork
+        """.stripIndent().trim());
   }
 
   @DisplayName(".addIfTrue() does not add to the builder when the condition is not met")
@@ -134,7 +143,11 @@ class ArgumentFileBuilderTest {
         .add("bork");
 
     // Then
-    assertThat(builder).asString().isEqualTo(String.join("\n", "foo", "bar", "bork"));
+    assertThat(builder).asString().isEqualTo("""
+        foo
+        bar
+        bork
+        """.stripIndent().trim());
   }
 
   @DisplayName(".toString() returns the expected result")
