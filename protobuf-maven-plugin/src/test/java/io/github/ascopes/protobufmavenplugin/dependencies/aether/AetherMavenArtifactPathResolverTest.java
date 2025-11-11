@@ -92,10 +92,10 @@ class AetherMavenArtifactPathResolverTest {
 
   @BeforeEach
   void setUp() throws IOException {
-    temporarySpacePath = Files.createDirectories(tempDir.resolve("temporary-space"));
-
+    temporarySpacePath = tempDir.resolve("temporary-space");
     when(temporarySpace.createTemporarySpace(any(String[].class)))
         .thenReturn(temporarySpacePath);
+    Files.createDirectories(temporarySpacePath);
   }
 
   @DisplayName(".resolveExecutable(...) resolves the artifact")

@@ -618,6 +618,7 @@ class AetherArtifactMapperTest {
   @DisplayName(".mapPmpArtifactToEclipseDependency(MavenArtifact, DependencyResolutionDepth) "
       + "returns the expected result")
   @Test
+  @SuppressWarnings("DirectInvocationOnMock")
   void mapPmpArtifactArtifactToEclipseDependencyReturnsTheExpectedResult() {
     // Given
     var inputMavenArtifact = mock(io.github.ascopes.protobufmavenplugin.dependencies
