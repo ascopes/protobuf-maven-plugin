@@ -47,7 +47,8 @@ jobs:
       - name: Validate license headers and code style
         shell: bash
         if: always()
-        run: ./mvnw -B validate
+        # Purposely compile here so errorprone can run
+        run: ./mvnw -B validate compile test-compile -DskipTests
 
       - name: Determine default Maven version
         id: determine_default_maven_version
