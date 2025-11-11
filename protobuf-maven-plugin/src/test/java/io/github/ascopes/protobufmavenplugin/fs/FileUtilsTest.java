@@ -281,7 +281,7 @@ class FileUtilsTest {
     var file = dir.resolve("file.txt");
 
     // When
-    var is = new ByteArrayInputStream("Hello, World!".getBytes());
+    var is = new ByteArrayInputStream("Hello, World!".getBytes(StandardCharsets.UTF_8));
     try (var os = FileUtils.newBufferedOutputStream(file)) {
       assertThat(os).isInstanceOf(BufferedOutputStream.class);
       is.transferTo(os);
