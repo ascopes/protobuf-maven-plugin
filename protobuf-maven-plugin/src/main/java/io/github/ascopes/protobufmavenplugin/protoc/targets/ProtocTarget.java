@@ -15,28 +15,14 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc.targets;
 
-import java.util.Comparator;
-
 /**
  * Base model for a {@code protoc} target.
  *
  * @author Ashley Scopes
  * @since 3.1.0
  */
-public interface ProtocTarget extends Comparable<ProtocTarget> {
+public sealed interface ProtocTarget
+    permits DescriptorFileProtocTarget, LanguageProtocTarget, PluginProtocTarget {
 
-  default int getOrder() {
-    return 0;
-  }
-
-  @Override
-  default int compareTo(ProtocTarget that) {
-    // Compare by order first, then by the key string representation. The latter
-    // enables stable ordering between instances of the same class and
-    // instances of different classes between builds and machines.
-    return Comparator
-        .comparingInt(ProtocTarget::getOrder)
-        .thenComparing(ProtocTarget::toString)
-        .compare(this, that);
-  }
+  int getOrder();
 }

@@ -26,7 +26,7 @@ import org.immutables.value.Value.Immutable;
  * @since 3.1.0
  */
 @Immutable
-public interface LanguageProtocTarget extends ProtocTarget {
+public non-sealed interface LanguageProtocTarget extends ProtocTarget {
   Language getLanguage();
 
   Path getOutputPath();
