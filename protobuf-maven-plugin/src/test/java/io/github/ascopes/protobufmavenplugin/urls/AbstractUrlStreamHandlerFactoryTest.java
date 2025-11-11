@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 
 import java.net.URL;
 import java.net.URLConnection;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,7 +72,7 @@ class AbstractUrlStreamHandlerFactoryTest {
 
   static final class SomeUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
     private final URLConnection mockUrlConnection;
-    private URL createUrlConnectionUrl;
+    private @Nullable URL createUrlConnectionUrl;
 
     SomeUrlStreamHandlerFactory(
         URLConnection mockUrlConnection,
