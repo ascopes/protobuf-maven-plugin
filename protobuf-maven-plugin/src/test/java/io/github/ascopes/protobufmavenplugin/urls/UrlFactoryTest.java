@@ -280,7 +280,7 @@ class UrlFactoryTest {
 
   static Path pathForTestFile(String name) {
     var path = Path.of("src", "test", "resources");
-    for (var frag : UrlFactoryTest.class.getPackageName().split("\\.")) {
+    for (var frag : UrlFactoryTest.class.getPackageName().split("\\.", -1)) {
       path = path.resolve(frag);
     }
     return path.resolve(name);
