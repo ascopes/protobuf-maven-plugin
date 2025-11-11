@@ -421,5 +421,10 @@ class UriResourceFetcherTest {
     public int read() throws IOException {
       throw ex;
     }
+
+    @Override
+    public int read(byte[] array, int offset, int count) throws IOException {
+      throw ex;
+    }
   }
 }

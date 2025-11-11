@@ -69,7 +69,7 @@ class UriPlexusConverterTest {
     var evaluator = new DefaultExpressionEvaluator();
 
     // When
-    var result = converter.fromConfiguration(
+    converter.fromConfiguration(
         converterLookup,
         configuration,
         URI.class,
