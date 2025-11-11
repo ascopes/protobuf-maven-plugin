@@ -15,12 +15,15 @@
  */
 package io.github.ascopes.protobufmavenplugin.fixtures;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Properties;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +54,11 @@ public @interface UsesSystemProperties {
       implements BeforeEachCallback, AfterEachCallback {
 
     private final Logger log = LoggerFactory.getLogger(UsesSystemProperties.class);
-    private Properties originalProperties;
+    private @Nullable Properties originalProperties;
+
+    UsesSystemPropertiesExtension() {
+      originalProperties = null;
+    }
 
     @Override
     public void beforeEach(ExtensionContext extensionContext) {
@@ -65,7 +72,7 @@ public @interface UsesSystemProperties {
 
     @Override
     public void afterEach(ExtensionContext extensionContext) {
-      System.setProperties(originalProperties);
+      System.setProperties(requireNonNull(originalProperties));
       log.debug(
           "Restored original system properties since completion of test in {}",
           extensionContext.getTestMethod()
