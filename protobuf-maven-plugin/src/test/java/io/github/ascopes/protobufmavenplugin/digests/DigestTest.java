@@ -23,6 +23,7 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.stream.Stream;
@@ -136,7 +137,7 @@ class DigestTest {
   @Test
   void verifySucceedsIfTheDigestMatchesTheContent() throws Throwable {
     // Given
-    var stream = new ByteArrayInputStream("hello, world".getBytes());
+    var stream = new ByteArrayInputStream("hello, world".getBytes(StandardCharsets.UTF_8));
     var digest = Digest.from(
         "SHA-256",
         "09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b"
@@ -151,7 +152,7 @@ class DigestTest {
   @Test
   void verifyRaisesIfTheDigestDoesNotMatchTheContent() throws Throwable {
     // Given
-    var stream = new ByteArrayInputStream("goodbye, world".getBytes());
+    var stream = new ByteArrayInputStream("goodbye, world".getBytes(StandardCharsets.UTF_8));
     var digest = Digest.from(
         "SHA-256",
         "09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b"
@@ -342,7 +343,7 @@ class DigestTest {
 
 
   static byte[] getDigestOf(String algorithm, String data) throws Throwable {
-    return MessageDigest.getInstance(algorithm).digest(data.getBytes());
+    return MessageDigest.getInstance(algorithm).digest(data.getBytes(StandardCharsets.UTF_8));
   }
 
   static byte[] bytes(int... ints) {
