@@ -57,6 +57,7 @@ class IncrementalCacheSerializerTest {
 
   @DisplayName("serialization rethrows any errors")
   @Test
+  @SuppressWarnings("NullAway")
   void serializationRethrowsAnyErrors() {
     // Given
     var serializer = new IncrementalCacheSerializer();
