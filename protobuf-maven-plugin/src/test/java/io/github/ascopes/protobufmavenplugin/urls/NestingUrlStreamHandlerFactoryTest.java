@@ -98,6 +98,7 @@ class NestingUrlStreamHandlerFactoryTest {
         .isEqualTo("!dlroW ,olleH");
   }
 
+  @SuppressWarnings("all")
   static final class ReversingInputStream extends InputStream {
     private final InputStream inputStream;
 
