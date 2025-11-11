@@ -146,7 +146,7 @@ class ApacheArchiveUrlStreamHandlerFactoryTest {
 
   URL urlForTestFile(String name) throws Exception {
     var path = Path.of("src", "test", "resources");
-    for (var frag : getClass().getPackageName().split("\\.")) {
+    for (var frag : getClass().getPackageName().split("\\.", -1)) {
       path = path.resolve(frag);
     }
     return path.resolve(name).toUri().toURL();
