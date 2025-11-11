@@ -107,7 +107,9 @@ public class HttpClientUrlConnectionTest {
     connection.connect();
 
     // Then
-    assertThat(new String(connection.getInputStream().readAllBytes()))
+    var receivedData = connection.getInputStream().readAllBytes();
+    var receivedString = new String(receivedData, StandardCharsets.UTF_8);
+    assertThat(receivedString)
         .isEqualTo("OK");
   }
 
