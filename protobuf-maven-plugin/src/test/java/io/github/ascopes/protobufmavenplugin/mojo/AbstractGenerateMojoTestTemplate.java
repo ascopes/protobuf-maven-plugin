@@ -76,6 +76,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.quality.Strictness;
 
+@SuppressWarnings("UnnecessaryAssignment")
 abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> {
 
   @TempDir
@@ -832,6 +833,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @DisplayName("when protoc is null, expect an exception to be raised")
   @Test
   @UsesSystemProperties
+  @SuppressWarnings("NullAway")
   void whenProtocNullExpectExceptionToBeRaised() {
     // Given
     mojo.protoc = null;
