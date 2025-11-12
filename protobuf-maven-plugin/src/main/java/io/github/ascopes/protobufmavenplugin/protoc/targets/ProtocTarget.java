@@ -24,7 +24,5 @@ package io.github.ascopes.protobufmavenplugin.protoc.targets;
 public sealed interface ProtocTarget
     permits DescriptorFileProtocTarget, LanguageProtocTarget, PluginProtocTarget {
 
-  default int getOrder() {
-    return 0;
-  }
+  int getOrder();
 }
