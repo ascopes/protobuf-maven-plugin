@@ -26,7 +26,7 @@ import org.immutables.value.Value.Immutable;
  * @since 3.1.0
  */
 @Immutable
-public non-sealed interface PluginProtocTarget extends ProtocTarget {
+public interface PluginProtocTarget extends ProtocTarget {
   ResolvedProtocPlugin getPlugin();
 
   @Derived

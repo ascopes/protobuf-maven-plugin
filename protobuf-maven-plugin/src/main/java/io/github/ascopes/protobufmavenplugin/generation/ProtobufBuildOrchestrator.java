@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -344,12 +343,7 @@ public final class ProtobufBuildOrchestrator {
       ProjectInputListing projectInputs,
       FilesToCompile filesToCompile
   ) {
-    // Compare by order first, then by the key string representation. The latter
-    // enables stable ordering between instances of the same class and
-    // instances of different classes between builds and machines.
-    var targets = new TreeSet<ProtocTarget>(Comparator
-        .comparingInt(ProtocTarget::getOrder)
-        .thenComparing(ProtocTarget::toString));
+    var targets = new TreeSet<ProtocTarget>();
 
     request.getEnabledLanguages()
         .stream()

@@ -25,7 +25,7 @@ import org.immutables.value.Value.Immutable;
  * @since 3.1.0
  */
 @Immutable
-public non-sealed interface DescriptorFileProtocTarget extends ProtocTarget {
+public interface DescriptorFileProtocTarget extends ProtocTarget {
   Path getOutputFile();
 
   boolean isIncludeImports();

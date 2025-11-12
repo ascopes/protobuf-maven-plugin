@@ -110,24 +110,15 @@ public final class ProtocExecutor {
   }
 
   private void applyProtocTargetArguments(ArgumentFileBuilder builder, ProtocTarget target) {
-    // TODO: Java 25: switch expression
     if (target instanceof DescriptorFileProtocTarget castTarget) {
       applyDescriptorFileProtocTargetArguments(builder, castTarget);
-      return;
-    }
-
-    if (target instanceof LanguageProtocTarget castTarget) {
+    } else if (target instanceof LanguageProtocTarget castTarget) {
       applyLanguageProtocTargetArguments(builder, castTarget);
-      return;
-    }
-
-    if (target instanceof PluginProtocTarget castTarget) {
+    } else if (target instanceof PluginProtocTarget castTarget) {
       applyPluginProtocTargetArguments(builder, castTarget);
-      return;
+    } else {
+      throw new IllegalStateException("Unknown target " + target);
     }
-
-    // Impossible to reach since we are using algebraic sealed types.
-    throw new IllegalStateException("Unreachable!");
   }
 
   private void applyDescriptorFileProtocTargetArguments(
