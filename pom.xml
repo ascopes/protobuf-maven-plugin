@@ -729,6 +729,7 @@
           <reportSet>
             <reports>
               <report>jxr-no-fork</report>
+              <report>test-jxr-no-fork</report>
             </reports>
           </reportSet>
         </reportSets>
