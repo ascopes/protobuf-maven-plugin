@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  * Strategy for registration of additional artifacts to attach
  * to the Maven project.
  *
+ * @author {@literal @jaredstehler}
  * @since 2.11.0
  */
 public final class OutputDescriptorAttachmentRegistrar {
