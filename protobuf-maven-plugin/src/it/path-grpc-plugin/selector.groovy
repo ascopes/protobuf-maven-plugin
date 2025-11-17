@@ -40,3 +40,4 @@ String executablePath(String name) {
 }
 
 return executablePath("protoc") != null
+    && executablePath("protoc-gen-grpc-java") != null

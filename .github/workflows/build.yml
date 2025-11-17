@@ -127,11 +127,16 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: zulu
 
-      - name: Configure runner
+      - name: Install dependencies
         shell: bash
         run: |-
           scripts/prepare-runner.sh
           scripts/install-protoc-to-github-runner.sh
+          scripts/install-grpc-java-to-github-runner.sh
+
+      - name: Override Maven version in project
+        shell: bash
+        run: |-
           ./mvnw -B -T1 -q wrapper:wrapper "-Dmaven=${{ matrix.maven-version }}"
           ./mvnw --version
 
