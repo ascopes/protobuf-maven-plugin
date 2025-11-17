@@ -90,8 +90,11 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
-      - name: Install Protoc to $PATH
-        run: scripts/install-protoc-to-github-runner.sh
+      - name: Install dependencies
+        run: |-
+          scripts/prepare-runner.sh
+          scripts/install-protoc-to-github-runner.sh
+          scripts/install-grpc-java-to-github-runner.sh
 
       - name: Configure Git
         run: |-
