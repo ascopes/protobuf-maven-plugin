@@ -14,9 +14,22 @@
   <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/ascopes/protobuf-maven-plugin">
 </p>
 
-A scratch-built, modern Maven plugin for seamless `protoc` integration. Provides support for native
-and JVM-based `protoc` plugins, as well as automatic dependency resolution and incremental code
-generation.
+A scratch-built, modern Maven plugin for seamless `protoc` integration. Features include:
+
+- Running `protoc` from Maven Central, the system path, or URLs
+- Running `protoc` plugins from binaries on the system path, Maven Central, or from various URLs
+    - This includes when packaged within tarballs or ZIP files!
+- Running `protoc` plugins that are packaged as regular JARs
+- Building from descriptor files
+- Building from dependencies
+- Generating descriptor files
+- Discovering `*.proto` sources from your project dependencies
+- Filtering sources based upon globs
+- Injecting custom arguments and environment variables into `protoc`
+- Incremental analysis to avoid rebuilding large projects when no changes have been made
+- Digest verification of `protoc` and any plugins
+- Running any executables from an optional sanctioned path, for corporate users in tightly-locked-down build environments
+- Ability to dynamically skip plugins if not resolved on certain platforms (e.g. if working with plugins that are only packaged for Linux)
 
 Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
 and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
@@ -175,7 +188,3 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
   </executions>
 </plugin>
 ```
-
----
-
-[![Star History Chart](https://api.star-history.com/svg?repos=ascopes/protobuf-maven-plugin&type=Timeline&theme=dark)](https://www.star-history.com/#ascopes/protobuf-maven-plugin&Timeline)
