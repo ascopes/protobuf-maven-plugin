@@ -26,11 +26,10 @@ function usage() {
 
 function get_current_version_tuple() {
   echo "Fetching current version..." >&2
-  local raw_version
   # Use of sed and tail here works around the fact Maven 4 outputs content with a prefix by
   # default. There are flags to control this but these flags do not exist in Maven 3.8, so
   # this is the only cross-compatible solution.
-  raw_version=$(
+  local raw_version; raw_version=$(
       ./mvnw help:evaluate -q -DforceStdout=true -Dexpression=project.version 2>/dev/null \
       | sed 's/ /\n/g' \
       | tail -n1
@@ -57,30 +56,24 @@ function set_version() {
 }
 
 function bump_minor_version() {
-  local version_tuple
-  version_tuple=$(get_current_version_tuple)
-  local version
-  readarray -t version <<< "${version_tuple}"
+  local version_tuple; version_tuple=$(get_current_version_tuple)
+  local version; readarray -t version <<< "${version_tuple}"
   if ((version[2] == 0)); then
     echo "Already prepared to release a new minor version. Nothing to change." >&2
     return 0
   fi
-
   version[1]=$((version[1] + 1))
   version[2]=0
   set_version "${version[@]}"
 }
 
 function bump_major_version() {
-  local version_tuple
-  version_tuple=$(get_current_version_tuple)
-  local version
-  readarray -t version <<< "${version_tuple}"
-  if (( version[1] == 0 )); then
+  local version_tuple; version_tuple=$(get_current_version_tuple)
+  local version; readarray -t version <<< "${version_tuple}"
+  if ((version[1] == 0)) && ((version[2] == 0)); then
     echo "Already prepared to release a new major version. Nothing to change." >&2
     return 0
   fi
-
   version[0]=$((version[0] + 1))
   version[1]=0
   version[2]=0
@@ -90,8 +83,9 @@ function bump_major_version() {
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 case "${1:-}" in
-  "" | -h | --help) usage ;;
-  -m | --minor)     bump_minor_version ;;
-  -M | --major)     bump_major_version ;;
-  *)                echo "ERROR: Unknown argument ${1}." >&2; usage; exit 1 ;;
+  "")            usage; exit 1 ;;
+  -h | --help)   usage; exit 0 ;;
+  -m | --minor)  bump_minor_version ;;
+  -M | --major)  bump_major_version ;;
+  *)             echo "ERROR: Unknown argument ${1}." >&2; usage; exit 1 ;;
 esac
