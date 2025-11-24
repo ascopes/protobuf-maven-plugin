@@ -124,7 +124,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       // as Maven can cache this stuff however it wants to. This also seems to
       // help avoid GH-596 which can cause heap exhaustion from within Aether
       // for some reason.
-      log.debug("Querying project dependencies from Maven model...");
+      log.debug("Querying project dependencies from Maven model, as requested.");
 
       var projectArtifacts = mavenSession.getCurrentProject().getArtifacts()
           .stream()

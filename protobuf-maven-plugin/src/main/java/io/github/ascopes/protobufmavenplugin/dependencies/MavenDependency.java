@@ -29,9 +29,15 @@ import org.jspecify.annotations.Nullable;
  */
 @Immutable
 @Modifiable
-public interface MavenDependency extends MavenArtifact {
+public abstract class MavenDependency extends MavenArtifact {
 
-  @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
+  public abstract @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
 
-  Set<MavenExclusionBean> getExclusions();
+  public abstract Set<MavenExclusionBean> getExclusions();
+
+  // Must be overridden to keep immutables happy.
+  @Override
+  public String toString() {
+    return super.toString();
+  }
 }

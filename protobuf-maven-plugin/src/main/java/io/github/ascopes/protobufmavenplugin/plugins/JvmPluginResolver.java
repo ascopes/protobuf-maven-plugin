@@ -107,7 +107,7 @@ final class JvmPluginResolver {
 
     for (var plugin : plugins) {
       if (plugin.isSkip()) {
-        log.info("Skipping plugin {}", plugin);
+        log.info("User requested to skip plugin \"{}\"", plugin);
         continue;
       }
 
@@ -128,7 +128,7 @@ final class JvmPluginResolver {
   ) throws ResolutionException {
 
     log.debug(
-        "Resolving JVM-based Maven protoc plugin {} and generating OS-specific bootstrap scripts",
+        "Resolving JVM-based Maven protoc plugin \"{}\" and generating bootstrap scripts",
         plugin
     );
 
@@ -137,7 +137,7 @@ final class JvmPluginResolver {
     var javaPath = hostSystem.getJavaExecutablePath();
     var scratchDir = temporarySpace.createTemporarySpace("plugins", "jvm", id);
 
-    log.debug("Arguments for JVM plugin {} (id \"{}\") are:\n{}", plugin, id, argLine);
+    log.debug("Arguments for JVM plugin \"{}\" (id \"{}\") are:\n{}", plugin, id, argLine);
 
     var scriptPath = hostSystem.isProbablyWindows()
         ? writeWindowsScripts(javaPath, scratchDir, argLine)
@@ -218,7 +218,7 @@ final class JvmPluginResolver {
 
     if (plugin.getMainClass() != null) {
       // The user provided it explicitly in the configuration, so trust their judgement.
-      log.debug("Using user-provided main class for {}", plugin);
+      log.debug("Using user-provided main class for plugin \"{}\"", plugin);
       return plugin.getMainClass();
     }
 
@@ -232,12 +232,16 @@ final class JvmPluginResolver {
       if (mainClass == null) {
         // Not my fault! Please provide a Main-Class attribute on the JAR instead...
         log.warn(
-            "No Main-Class manifest attribute found in {}, this is probably a bug with how that"
+            "No Main-Class manifest attribute found in \"{}\", this is probably a bug with how that"
                 + " JAR was built",
             pluginPath
         );
       } else {
-        log.debug("Determined main class to be \"{}\" from manifest for {}", mainClass, pluginPath);
+        log.debug(
+            "Determined main class to be \"{}\" from manifest for \"{}\"",
+            mainClass,
+            pluginPath
+        );
         return mainClass;
       }
     }

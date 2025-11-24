@@ -32,14 +32,22 @@ import org.jspecify.annotations.Nullable;
  */
 @Immutable
 @Modifiable
-public interface MavenProtocPlugin extends MavenArtifact, ProtocPlugin {
+public abstract class MavenProtocPlugin extends MavenArtifact implements ProtocPlugin {
 
+  // Version is never null here as we do not infer from dependency management.
   @Override
-  @NonNull String getVersion();
+  public abstract @NonNull String getVersion();
 
-  @Nullable List<String> getJvmArgs();
+  public abstract @Nullable List<String> getJvmArgs();
 
-  @Nullable List<String> getJvmConfigArgs();
+  public abstract @Nullable List<String> getJvmConfigArgs();
 
-  @Nullable String getMainClass();
+  // Null if unset or inferred from MANIFEST.MF.
+  public abstract @Nullable String getMainClass();
+
+  // Must be provided to keep immutables happy.
+  @Override
+  public String toString() {
+    return super.toString();
+  }
 }

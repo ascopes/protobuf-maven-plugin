@@ -206,7 +206,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThatException()
         .isThrownBy(mojo::execute)
         .isInstanceOf(MojoFailureException.class)
-        .withMessage("Generation failed due to an unexpected error - %s", exceptionCause)
+        .withMessage("Generation aborted due to an unexpected error - %s", exceptionCause)
         .withCause(exceptionCause);
   }
 
