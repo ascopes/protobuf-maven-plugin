@@ -75,7 +75,7 @@ final class AetherArtifactMapper {
     var artifactType = Optional.ofNullable(artifactTypeRegistry.get(extension))
         .orElseGet(() -> new FallbackEclipseArtifactType(extension));
 
-    log.debug(
+    log.trace(
         "Resolved extension \"{}\" to Aether artifact type (classifier: \"{}\", type: \"{}\", "
             + "id: \"{}\", properties={})",
         mavenArtifact.getType(),

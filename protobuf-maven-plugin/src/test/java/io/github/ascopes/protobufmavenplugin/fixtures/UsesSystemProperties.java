@@ -62,8 +62,8 @@ public @interface UsesSystemProperties {
 
     @Override
     public void beforeEach(ExtensionContext extensionContext) {
-      log.debug(
-          "Replacing system properties with empty map for duration of test in {}",
+      log.info(
+          "Replacing system properties with empty map for duration of test in \"{}\"",
           extensionContext.getTestMethod()
       );
       originalProperties = System.getProperties();
@@ -73,8 +73,8 @@ public @interface UsesSystemProperties {
     @Override
     public void afterEach(ExtensionContext extensionContext) {
       System.setProperties(requireNonNull(originalProperties));
-      log.debug(
-          "Restored original system properties since completion of test in {}",
+      log.info(
+          "Restored original system properties since completion of test in \"{}\"",
           extensionContext.getTestMethod()
       );
     }

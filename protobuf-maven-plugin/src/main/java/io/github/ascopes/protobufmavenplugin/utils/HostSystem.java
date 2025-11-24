@@ -76,25 +76,25 @@ public final class HostSystem {
   ) {
     operatingSystem = propertyProvider.apply("os.name")
         .orElse("");
-    log.debug("Reported OS: '{}'", operatingSystem);
+    log.debug("Reported OS: \"{}\"", operatingSystem);
 
     cpuArchitecture = propertyProvider.apply("os.arch")
         .orElse("");
-    log.debug("Reported CPU: '{}'", cpuArchitecture);
+    log.debug("Reported CPU: \"{}\"", cpuArchitecture);
 
     pathSeparator = propertyProvider.apply("path.separator")
         .orElse(":");
-    log.debug("Reported path separator: '{}'", pathSeparator);
+    log.debug("Reported path separator: \"{}\"", pathSeparator);
 
     javaHome = propertyProvider.apply("java.home")
         .map(Path::of)
         .map(FileUtils::normalize)
         .orElseGet(() -> FileUtils.normalize(Path.of("")));
-    log.debug("Reported java.home: '{}'", javaHome);
+    log.debug("Reported java.home: \"{}\"", javaHome);
 
     javaVendor = propertyProvider.apply("java.vendor")
         .orElse("");
-    log.debug("Reported java.vendor: '{}'", javaVendor);
+    log.debug("Reported java.vendor: \"{}\"", javaVendor);
 
     path = envProvider.apply("PATH")
         .map(value -> parsePath(value, pathSeparator))

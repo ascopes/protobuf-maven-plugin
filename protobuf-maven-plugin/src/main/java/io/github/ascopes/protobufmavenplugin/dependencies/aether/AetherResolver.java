@@ -88,7 +88,7 @@ final class AetherResolver {
   }
 
   Artifact resolveRequiredArtifact(Artifact artifact) throws ResolutionException {
-    log.info("Attempting to resolve artifact \"{}\"", artifact);
+    log.info("Resolving artifact \"{}\"", artifact);
 
     var request = new ArtifactRequest();
     request.setArtifact(artifact);
@@ -99,7 +99,7 @@ final class AetherResolver {
     try {
       result = repositorySystem.resolveArtifact(repositorySystemSession, request);
     } catch (ArtifactResolutionException ex) {
-      log.debug("Discarding internal exception", ex);
+      log.debug("Discarding internal exception while resolving \"{}\"", artifact, ex);
       result = ex.getResult();
     }
 
@@ -141,8 +141,10 @@ final class AetherResolver {
     dependencyRequest.setFilter(filter);
 
     log.debug(
-        "Resolving {} - {}",
+        "Resolving {} with {} {} - {}",
         StringUtils.pluralize(dependencies.size(), "dependency", "dependencies"),
+        StringUtils.pluralize(allowedDependencyScopes.size(), "scope", "scopes"),
+        allowedDependencyScopes,
         dependencies
     );
 
@@ -152,7 +154,7 @@ final class AetherResolver {
       dependencyResult = repositorySystem
           .resolveDependencies(repositorySystemSession, dependencyRequest);
     } catch (DependencyResolutionException ex) {
-      log.debug("Discarding internal exception", ex);
+      log.debug("Discarding internal exception while resolving {}", dependencies, ex);
       dependencyResult = ex.getResult();
     }
 
@@ -167,7 +169,7 @@ final class AetherResolver {
       }
 
       if (artifactResult.isMissing()) {
-        log.debug("Artifact \"{}\" is missing!", artifact);
+        log.debug("Could not find artifact \"{}\" during dependency resolution", artifact);
       }
 
       exceptions.addAll(artifactResult.getExceptions());
@@ -201,7 +203,7 @@ final class AetherResolver {
       //noinspection LoggingPlaceholderCountMatchesArgumentCount
       log.debug(
           "Dependency resolution warning was reported. "
-              + "This might be okay or it might be bad - {}: {}",
+              + "This might be okay, or it could indicate a further issue - {}: {}",
           exception.getClass().getName(),
           exception.getMessage(),
           exception

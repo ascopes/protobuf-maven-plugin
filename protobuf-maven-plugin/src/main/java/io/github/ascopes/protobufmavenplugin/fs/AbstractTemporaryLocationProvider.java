@@ -63,7 +63,7 @@ public abstract class AbstractTemporaryLocationProvider {
       dir = dir.resolve(bit);
     }
 
-    log.trace("Creating temporary location at '{}' if it does not already exist...", dir);
+    log.trace("Creating temporary location at \"{}\" if it does not already exist...", dir);
 
     // This should be concurrent-safe as it will not break if the directory already exists unless
     // the directory is instead a regular file.

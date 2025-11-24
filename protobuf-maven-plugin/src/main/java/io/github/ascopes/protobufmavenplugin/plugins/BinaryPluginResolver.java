@@ -106,7 +106,7 @@ final class BinaryPluginResolver {
 
     plugin = pluginBuilder.build();
 
-    log.debug("Resolving Maven protoc plugin {}", plugin);
+    log.debug("Resolving Maven protoc plugin \"{}\"", plugin);
     var path = artifactPathResolver.resolveExecutable(plugin);
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path));
   }
@@ -116,7 +116,7 @@ final class BinaryPluginResolver {
       Path defaultOutputDirectory
   ) throws ResolutionException {
 
-    log.debug("Resolving Path protoc plugin {}", plugin);
+    log.debug("Resolving Path protoc plugin \"{}\"", plugin);
     var maybePath = systemPathResolver.resolve(plugin.getName());
 
     if (maybePath.isEmpty() && plugin.isOptional()) {
@@ -134,7 +134,7 @@ final class BinaryPluginResolver {
       UriProtocPlugin plugin,
       Path defaultOutputDirectory
   ) throws ResolutionException {
-    log.debug("Resolving URL protoc plugin {}", plugin);
+    log.debug("Resolving URL protoc plugin \"{}\"", plugin);
 
     var maybePath = urlResourceFetcher.fetchFileFromUri(plugin.getUrl(), ".exe", true);
 
@@ -185,7 +185,7 @@ final class BinaryPluginResolver {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
     for (var plugin : plugins) {
       if (plugin.isSkip()) {
-        log.info("Skipping plugin {}", plugin);
+        log.info("User requested to skip proto plugin \"{}\"", plugin);
         continue;
       }
 
@@ -196,7 +196,7 @@ final class BinaryPluginResolver {
   }
 
   private Runnable skipUnresolvedPlugin(ProtocPlugin plugin) {
-    return () -> log.info("Skipping unresolved missing plugin {}", plugin);
+    return () -> log.info("Skipping unresolvable plugin \"{}\"", plugin);
   }
 
   @FunctionalInterface

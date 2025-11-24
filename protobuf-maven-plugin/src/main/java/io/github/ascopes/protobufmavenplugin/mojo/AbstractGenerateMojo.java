@@ -1061,7 +1061,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
-      log.info("Execution of this plugin has been skipped in the configuration");
+      log.info("User has requested to skip execution of this goal.");
       return;
     }
 
@@ -1122,9 +1122,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     } catch (Exception ex) {
       // Log the message separately so that it appears even if the user did not pass --errors
       // to Maven.
-      log.error("Generation failed due to an unexpected error - {}", ex.getMessage(), ex);
+      log.error("Generation aborted due to an unexpected error - {}", ex, ex);
       throw new MojoFailureException(
-          "Generation failed due to an unexpected error - " + ex,
+          "Generation aborted due to an unexpected error - " + ex,
           ex
       );
     }

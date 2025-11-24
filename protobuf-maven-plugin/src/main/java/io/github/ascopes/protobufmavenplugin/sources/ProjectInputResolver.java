@@ -67,7 +67,7 @@ public final class ProjectInputResolver {
         .dependencyProtoSources(resolveDependencyProtoSources(request))
         .build();
 
-    log.trace("Created project input listing {}", listing);
+    log.trace("Created project input listing \"{}\"", listing);
     return listing;
   }
 

@@ -87,7 +87,7 @@ public final class FileUtils {
     // will open multiple file system objects. Other constructors do not appear to do this,
     // so would not be thread-safe for concurrent plugin executions.
     try {
-      log.trace("Opening a new NIO virtual file system for {}", zipPath);
+      log.trace("Opening a new NIO virtual file system for \"{}\"", zipPath);
 
       return FileSystemProvider.installedProviders()
           .stream()
@@ -104,14 +104,16 @@ public final class FileUtils {
 
   public static void makeExecutable(Path file) throws IOException {
     try {
-      log.trace("Ensuring {} is executable", file);
+      log.trace("Ensuring \"{}\" is executable, if possible", file);
       var perms = new HashSet<>(Files.getPosixFilePermissions(file));
       perms.add(PosixFilePermission.OWNER_EXECUTE);
       Files.setPosixFilePermissions(file, perms);
     } catch (UnsupportedOperationException ex) {
       log.trace(
-          "File system does not support setting POSIX file permissions, "
-              + "this is probably fine, continuing anyway...");
+          "File system holding \"{}\" does not support setting POSIX file permissions, "
+              + "continuing without setting executable bits",
+          file
+      );
     }
   }
 
@@ -133,7 +135,7 @@ public final class FileUtils {
       }
 
       log.trace(
-          "Copying {} to {} (existing root={}, new root={})",
+          "Copying \"{}\" to \"{}\" (existing root=\"{}\", new root=\"{}\")",
           existingPath,
           newPath,
           existingRoot,
@@ -195,7 +197,7 @@ public final class FileUtils {
         }
       });
     } catch (NoSuchFileException ex) {
-      log.trace("Not deleting \"{}\", it does not exist", path, ex);
+      log.trace("Ignoring error deleting non-existent path \"{}\"", path);
     }
   }
 }

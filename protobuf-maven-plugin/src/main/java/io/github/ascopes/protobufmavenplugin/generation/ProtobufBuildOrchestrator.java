@@ -179,26 +179,38 @@ public final class ProtobufBuildOrchestrator {
     var message = "No protobuf sources found. If this is unexpected, check your "
         + "configuration and try again.";
 
-    if (request.isFailOnMissingSources()) {
-      log.error("{}", message);
-      return GenerationResult.NO_SOURCES;
-    }
-
-    log.warn("{}", message);
-    return GenerationResult.NOTHING_TO_DO;
+    return handleMissingEntity(
+        request.isFailOnMissingSources(),
+        message,
+        GenerationResult.NO_SOURCES,
+        GenerationResult.NOTHING_TO_DO
+    );
   }
 
   private GenerationResult handleMissingTargets(GenerationRequest request) {
     var message = "No output languages or descriptors are enabled and no plugins were found. "
         + "If this is unexpected, check your configuration and try again.";
 
-    if (request.isFailOnMissingTargets()) {
-      log.error("{}", message);
-      return GenerationResult.NO_TARGETS;
-    }
+    return handleMissingEntity(
+        request.isFailOnMissingTargets(),
+        message,
+        GenerationResult.NO_TARGETS,
+        GenerationResult.NOTHING_TO_DO
+    );
+  }
 
-    log.warn("{}", message);
-    return GenerationResult.NOTHING_TO_DO;
+  // Helper that either logs an error and returns some value corresponding to an error,
+  // or logs a warning and returns a value corresponding to a warning.
+  // Used to handle behaviour like failing on missing sources, where the user can opt out of the
+  // functionality in cases where they expect this.
+  private <T> T handleMissingEntity(boolean failOnMissing, String message, T ifFail, T ifWarn) {
+    if (failOnMissing) {
+      log.error("{}", message);
+      return ifFail;
+    } else {
+      log.warn("{}", message);
+      return ifWarn;
+    }
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
@@ -300,7 +312,6 @@ public final class ProtobufBuildOrchestrator {
     return filesToCompile;
   }
 
-  // TODO: migrate this logic to a compilation strategy
   private boolean shouldIncrementallyCompile(GenerationRequest request) {
     if (!request.isIncrementalCompilationEnabled()) {
       log.debug("Incremental compilation was disabled by the user");

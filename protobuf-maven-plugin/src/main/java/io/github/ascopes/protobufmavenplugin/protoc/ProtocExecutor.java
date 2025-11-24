@@ -75,7 +75,7 @@ public final class ProtocExecutor {
     var argumentFileBuilder = createArgumentFileBuilder(invocation);
     var argumentFile = writeArgumentFile(argumentFileBuilder);
 
-    log.info("Invoking protoc (enable debug logs for more details)");
+    log.info("Invoking protoc. Enable debug logs (--debug --errors) for more details");
     log.debug("Protoc binary is located at \"{}\"", invocation.getProtocPath());
     log.debug("Protoc argument file:\n{}", argumentFileBuilder);
 
