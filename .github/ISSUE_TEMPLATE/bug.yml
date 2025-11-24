@@ -52,7 +52,17 @@ body:
         You can show the trace logs by passing the following flag to the Maven command:
 
         ```
+        -Dorg.slf4j.simpleLogger.showThreadId=true
+        -Dorg.slf4j.simpleLogger.showThreadName=true
+        -Dorg.slf4j.simpleLogger.showShortLogName=true
         -Dorg.slf4j.simpleLogger.log.io.github.ascopes.protobufmavenplugin=trace
+        ```
+
+        Note that You may be asked to also provide logs from a run including the following
+        later on, but avoid including this to begin with as it is incredibly noisy:
+
+        ```
+        -Dorg.slf4j.simpleLogger.defaultLogLevel=debug
         ```
       render: text
 
@@ -72,6 +82,8 @@ body:
       label: JDK version
       description: >-
         What version of Java are you using?
+
+        Run `java --version` and paste the output here
     validations:
       required: true
 
@@ -81,6 +93,8 @@ body:
       label: Maven version
       description: >-
         What version of Maven are you using?
+
+        Run `./mvnw --version` or `mvn --version` and paste the output here
     validations:
       required: true
 
@@ -90,6 +104,8 @@ body:
       label: Plugin version
       description: >-
         What version of this project are you using?
+
+        You should have this in your POM somewhere. Failing that, it will be in your Maven logs.
     validations:
       required: true
 
@@ -99,6 +115,10 @@ body:
       label: Protoc version
       description: >-
         What version of `protoc` are you using?
+
+        If you are using `protoc` from your system path, paste the output
+        of `protoc --version` here. Otherwise, paste the version number or
+        URL you provided to the `<protoc/>` parameter.
     validations:
       required: true
 
@@ -108,12 +128,10 @@ body:
       label: Additional details
       description: >-
         Is there anything else we need to know? If possible, use this area
-        to link to a reproduction project, too.
-
-        If this is not possible then not to worry!
+        to link to a reproduction project, too, if relevant and possible.
 
   - type: checkboxes
-    id: checkboxes
+    id: checkbox-contribute
     attributes:
       label: Would you like to contribute a bugfix?
       description: >-
@@ -123,6 +141,17 @@ body:
       options:
         - label: Yes, I'd like to contribute a bugfix!
           required: false
+
+  - type: checkboxes
+    id: checkbox-confidential
+    attributes:
+      label: I've redacted any private information from my responses
+      description: >-
+        If you are working in a company, just double check you haven't leaked any sensitive
+        information in the logs. Remember, everyone can see this bug report once you submit it.
+      options:
+        - label: Yes, there is no sensitive information here.
+          required: true
 
   - type: markdown
     attributes:
