@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.net.URI;
+import java.util.Optional;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
@@ -31,9 +32,22 @@ import org.jspecify.annotations.Nullable;
  * @since 2.0.0
  */
 @Modifiable
-public interface UriProtocPlugin extends OptionalProtocPlugin {
+public abstract class UriProtocPlugin implements OptionalProtocPlugin {
 
-  URI getUrl();
+  public abstract URI getUrl();
 
-  @Nullable Digest getDigest();
+  public abstract @Nullable Digest getDigest();
+
+  @Override
+  public String toString() {
+    var sb = new StringBuilder()
+        .append(getUrl());
+
+    Optional.ofNullable(getDigest())
+        .map(Digest::toString)
+        .map("#digest="::concat)
+        .ifPresent(sb::append);
+
+    return sb.toString();
+  }
 }

@@ -15,28 +15,52 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
+import static java.util.Objects.requireNonNullElse;
+
 import org.jspecify.annotations.Nullable;
 
 
 /**
- * Base interface for a parameter that references a deployed Maven artifact
+ * Base for a parameter that references a deployed Maven artifact
  * somewhere.
  *
- * <p>Implementation interfaces should extend this type rather than using it
+ * <p>Implementations should extend this type rather than using it
  * directly.
  *
  * @author Ashley Scopes
  * @since 1.2.0
  */
-public interface MavenArtifact {
+public abstract class MavenArtifact {
 
-  String getGroupId();
+  public abstract String getGroupId();
 
-  String getArtifactId();
+  public abstract String getArtifactId();
 
-  @Nullable String getVersion();
+  public abstract @Nullable String getVersion();
 
-  @Nullable String getType();
+  public abstract @Nullable String getType();
 
-  @Nullable String getClassifier();
+  public abstract @Nullable String getClassifier();
+
+  @Override
+  public String toString() {
+    var sb = new StringBuilder("mvn");
+    appendFragment(sb, getGroupId());
+    appendFragment(sb, getArtifactId());
+    appendFragment(sb, getVersion());
+    appendFragment(sb, getType());
+    appendFragment(sb, getClassifier());
+
+    // Remove trailing colons with nothing after them.
+    int lastIndex;
+    while ((lastIndex = sb.lastIndexOf(":")) == sb.length() - 1) {
+      sb.deleteCharAt(lastIndex);
+    }
+
+    return sb.toString();
+  }
+
+  private static void appendFragment(StringBuilder sb, @Nullable String fragment) {
+    sb.append(":").append(requireNonNullElse(fragment, ""));
+  }
 }
