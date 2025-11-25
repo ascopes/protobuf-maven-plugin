@@ -17,9 +17,11 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
-
+import org.eclipse.sisu.Description;
 
 /**
  * Plexus parameter converter for URIs.
@@ -41,7 +43,10 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * @author Ashley Scopes
  * @since 3.1.3
  */
-public final class UriPlexusConverter extends AbstractBasicConverter {
+@Description("A polyfill for Maven <3.9.8 to support parsing URI objects")
+@Named
+@Singleton
+final class UriPlexusConverter extends AbstractBasicConverter {
 
   @Override
   public boolean canConvert(Class<?> type) {
