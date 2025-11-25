@@ -50,6 +50,13 @@ body:
         If applicable, describe the current workaround you are using that this feature
         would replace. If this isn't applicable then just leave this blank.
 
+  - type: textarea
+    id: details
+    attributes:
+      label: Further details
+      description: >-
+        Discuss any relevant additional details here, if applicable.
+
   - type: checkboxes
     id: checkboxes
     attributes:
