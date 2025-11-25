@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.fs;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.io.File;
 import java.nio.file.Path;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.basic.FileConverter;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
 
-
 /**
- * Plexus/Sisu parameter converter for Path objects on the root file system.
+ * Plexus parameter converter for Path objects on the root file system.
  *
  * <p>We provide this to avoid using the URL and File APIs in the Mojo interface.
  *
@@ -37,7 +39,10 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 3.1.3
  */
-public final class PathPlexusConverter extends FileConverter {
+@Description("A polyfill for Maven <3.9.8 to support parsing NIO Path objects")
+@Named
+@Singleton
+final class PathPlexusConverter extends FileConverter {
 
   @Override
   public boolean canConvert(Class<?> type) {

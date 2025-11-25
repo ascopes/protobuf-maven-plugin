@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.digests;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.digests.DigestException;
 import java.util.stream.Stream;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;

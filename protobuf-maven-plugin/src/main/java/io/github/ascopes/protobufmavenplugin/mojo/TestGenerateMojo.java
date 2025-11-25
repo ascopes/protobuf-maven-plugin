@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.mojo;
 
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
+import io.github.ascopes.protobufmavenplugin.plexus.PluginConfigurator;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +47,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  */
 @Mojo(
     name = "generate-test",
-    configurator = ProtobufMavenPluginConfigurator.NAME,
+    configurator = PluginConfigurator.NAME,
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     requiresDependencyCollection = ResolutionScope.TEST,
     requiresDependencyResolution = ResolutionScope.TEST,

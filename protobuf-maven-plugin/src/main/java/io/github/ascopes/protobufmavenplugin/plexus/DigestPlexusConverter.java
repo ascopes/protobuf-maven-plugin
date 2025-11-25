@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.digests;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.security.Security;
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,8 +25,11 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
+import org.eclipse.sisu.Description;
 
 /**
  * Converter for {@link Digest}s.
@@ -33,7 +37,10 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * @author Ashley Scopes
  * @since 3.5.0
  */
-public final class DigestPlexusConverter extends AbstractBasicConverter {
+@Description("Plexus converter for parsing Digest objects")
+@Named
+@Singleton
+final class DigestPlexusConverter extends AbstractBasicConverter {
 
   private static final Pattern PATTERN = Pattern.compile(
       "^(?<algorithm>[-a-z0-9]+):(?<digest>[0-9a-f]+)$",

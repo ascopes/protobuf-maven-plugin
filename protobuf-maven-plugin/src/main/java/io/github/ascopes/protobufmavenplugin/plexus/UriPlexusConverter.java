@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.urls;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
-
+import org.eclipse.sisu.Description;
 
 /**
- * Plexus/Sisu parameter converter for URIs.
+ * Plexus parameter converter for URIs.
  *
  * <p>We provide this to avoid using the URL and File APIs in the Mojo interface. URLs do an
  * immediate lookup for the URL scheme's appropriate URLStreamHandlerProvider upon construction, and
@@ -30,7 +32,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * point because the URL class is hardcoded to only consider the system classloader. Since Maven
  * uses ClassWorlds to run multiple classloaders for each plugin and component, we will not be
  * loaded as part of that default classloader. By deferring this operation to as late as possible
- * (i.e. in {@link UriResourceFetcher}), we can
+ * (i.e. in {@code UriResourceFetcher}), we can
  * ensure we provide the desired URL handler directly instead. This allows us to hook custom URL
  * handlers in via {@link java.util.ServiceLoader} dynamically, like we would be able to outside a
  * Maven plugin running in Plexus.
@@ -41,7 +43,10 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
  * @author Ashley Scopes
  * @since 3.1.3
  */
-public final class UriPlexusConverter extends AbstractBasicConverter {
+@Description("A polyfill for Maven <3.9.8 to support parsing URI objects")
+@Named
+@Singleton
+final class UriPlexusConverter extends AbstractBasicConverter {
 
   @Override
   public boolean canConvert(Class<?> type) {
