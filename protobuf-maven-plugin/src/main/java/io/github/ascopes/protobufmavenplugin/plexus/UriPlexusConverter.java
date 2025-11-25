@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.urls;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,7 +22,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 
 
 /**
- * Plexus/Sisu parameter converter for URIs.
+ * Plexus parameter converter for URIs.
  *
  * <p>We provide this to avoid using the URL and File APIs in the Mojo interface. URLs do an
  * immediate lookup for the URL scheme's appropriate URLStreamHandlerProvider upon construction, and

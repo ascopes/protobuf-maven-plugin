@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.digests;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import java.security.Security;
 import java.util.Collections;
 import java.util.Comparator;

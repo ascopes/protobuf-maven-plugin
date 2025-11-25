@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.fs;
+package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 
 /**
- * Plexus/Sisu parameter converter for Path objects on the root file system.
+ * Plexus parameter converter for Path objects on the root file system.
  *
  * <p>We provide this to avoid using the URL and File APIs in the Mojo interface.
  *
