@@ -32,7 +32,7 @@ import org.eclipse.sisu.Description;
  * point because the URL class is hardcoded to only consider the system classloader. Since Maven
  * uses ClassWorlds to run multiple classloaders for each plugin and component, we will not be
  * loaded as part of that default classloader. By deferring this operation to as late as possible
- * (i.e. in {@link UriResourceFetcher}), we can
+ * (i.e. in {@code UriResourceFetcher}), we can
  * ensure we provide the desired URL handler directly instead. This allows us to hook custom URL
  * handlers in via {@link java.util.ServiceLoader} dynamically, like we would be able to outside a
  * Maven plugin running in Plexus.
