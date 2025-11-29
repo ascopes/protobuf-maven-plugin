@@ -13,39 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.dependencies;
+package io.github.ascopes.protobufmavenplugin.plexus.testdata;
 
+import java.util.Set;
 import org.immutables.datatype.Data;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value;
 
-/**
- * Marker to exclude a specific transitive dependency.
- *
- * <p>Holds an optional classifier and optional extension, in addition to the group ID and
- * artifact ID.
- *
- * @author Ashley Scopes
- * @since 2.12.0
- */
 @Data
-@Immutable
-public interface MavenExclusion {
+@Value.Immutable
+public interface ValidOuterModel {
 
-  /**
-   * Value used by Eclipse Aether internally to imply a match for
-   * any value.
-   */
-  String WILDCARD = "*";
+  String getFoo();
 
-  String getGroupId();
+  int getBar();
 
-  String getArtifactId();
-
-  default String getClassifier() {
-    return WILDCARD;
-  }
-
-  default String getType() {
-    return WILDCARD;
-  }
+  Set<ValidInnerModel> getValidInnerModels();
 }
