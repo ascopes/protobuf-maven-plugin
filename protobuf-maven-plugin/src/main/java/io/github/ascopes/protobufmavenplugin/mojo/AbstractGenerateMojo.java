@@ -522,7 +522,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code kind} attribute must be set on each to allow determining which type of plugin is
    * being specified.
    *
-   * @since TBC
+   * @since 4.1.0
    */
   @Parameter
   @Nullable List<ProtocPlugin> plugins;

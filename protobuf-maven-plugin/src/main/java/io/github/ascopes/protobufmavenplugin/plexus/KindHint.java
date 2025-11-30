@@ -26,7 +26,7 @@ import org.immutables.value.Value.Style;
  * Marker to advise the "kind" of the implementation when used with a sealed-type hierarchy.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.0
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

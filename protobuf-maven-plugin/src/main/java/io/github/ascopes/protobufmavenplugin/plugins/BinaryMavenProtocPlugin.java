@@ -27,7 +27,7 @@ import org.jspecify.annotations.NonNull;
  * repository and corresponds to a native executable.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.0
  */
 @Immutable
 @Modifiable

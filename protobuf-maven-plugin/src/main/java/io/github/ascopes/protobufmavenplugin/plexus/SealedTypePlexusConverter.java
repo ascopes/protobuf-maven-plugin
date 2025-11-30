@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * <p>This is threadsafe.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.0
  */
 @Named
 @Singleton
