@@ -21,13 +21,16 @@ import org.jspecify.annotations.Nullable;
 /**
  * Base interface for a Protoc plugin reference.
  *
- * <p>Plugins can be marked as skippable, but by default will not be
- * skipped.
+ * <p>Plugins can be marked as skippable, but by default will not be skipped.
  *
  * @author Ashley Scopes
  * @since 2.0.0
  */
-public interface ProtocPlugin {
+public sealed interface ProtocPlugin
+    permits BinaryMavenProtocPlugin,
+            JvmMavenProtocPlugin,
+            PathProtocPlugin,
+            UriProtocPlugin {
 
   @Nullable String getOptions();
 

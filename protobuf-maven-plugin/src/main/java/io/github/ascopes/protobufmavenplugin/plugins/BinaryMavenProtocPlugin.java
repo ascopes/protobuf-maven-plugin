@@ -15,32 +15,34 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.NonNull;
 
 
 /**
- * Implementation independent descriptor for a protoc plugin that can be resolved from the system
- * {@code $PATH}.
- *
- * <p>Path-based plugins can be marked as optional if they should be skipped when the resource is
- * unable to be resolved.
+ * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
+ * repository and corresponds to a native executable.
  *
  * @author Ashley Scopes
- * @since 2.0.0
+ * @since TBC
  */
+@Immutable
 @Modifiable
-@KindHint(kind = "path", implementation = PathProtocPluginBean.class)
-public abstract non-sealed class PathProtocPlugin implements ProtocPlugin {
+@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocPluginBean.class)
+public abstract non-sealed class BinaryMavenProtocPlugin
+    extends MavenArtifact
+    implements ProtocPlugin {
 
-  public abstract String getName();
+  // Version is never null here as we do not infer from dependency management.
+  @Override
+  public abstract @NonNull String getVersion();
 
-  @Default.Boolean(false)
-  public abstract boolean isOptional();
-
+  // Must be provided to keep immutables happy.
   @Override
   public String toString() {
-    return "path:" + getName();
+    return super.toString();
   }
 }

@@ -28,12 +28,16 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,184 +116,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable List<String> arguments;
-
-  /**
-   * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
-   *
-   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
-   * with {@code protoc} out of the box.
-   *
-   * <p>Plugin artifacts must be a <strong>native executable</strong>. By default, the OS and CPU
-   * architecture is automatically generated and injected in the classifier if the classifier and
-   * type are not provided explicitly.
-   *
-   * <p>Example:
-   * <pre>{@code
-   * <binaryMavenPlugins>
-   *   <binaryMavenPlugin>
-   *     <groupId>com.salesforce.servicelibs</groupId>
-   *     <artifactId>reactor-grpc</artifactId>
-   *     <version>1.2.4</version>
-   *   </binaryMavenPlugin>
-   * </binaryMavenPlugins>
-   * }</pre>
-   *
-   * <p>If users wish to use a Java-based plugin that does not distribute a native
-   * executable, or are using a more obscure system architecture, then using a
-   * {@code jvmMavenPlugin} may be more preferable.
-   *
-   * <p>Objects support the following attributes:
-   *
-   * <ul>
-   *   <li>{@code groupId} - the group ID - required</li>
-   *   <li>{@code artifactId} - the artifact ID - required</li>
-   *   <li>{@code version} - the version - required</li>
-   *   <li>{@code type} - the artifact type - optional</li>
-   *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code options} - a string of options to pass to the plugin
-   *       - optional.</li>
-   *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 0. Higher numbers run later than lower numbers. The built-in
-   *       code generators in {@code protoc} and descriptor generation has
-   *       an order of 0.</li>
-   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if one wishes to control whether the plugin runs via a
-   *       property - optional.</li>
-   *   <li>{@code outputDirectory} - where to write the generated outputs to.
-   *       - if unspecified, then the {@link #outputDirectory} on the Maven
-   *       plugin is used instead - optional.</li>
-   *   <li>{@code registerAsCompilationRoot} - whether to register the output
-   *       directory as a source directory for later compilation steps. If
-   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
-   *       If the {@code outputDirectory} is not overridden, this setting has
-   *       no effect, and the project-wide setting is used. If explicitly
-   *       specified, then the project setting is ignored in favour of this
-   *       value instead.</li>
-   * </ul>
-   *
-   * @since 0.3.0
-   */
-  @Parameter
-  @Nullable List<MavenProtocPluginBean> binaryMavenPlugins;
-
-  /**
-   * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
-   *
-   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
-   * with {@code protoc} out of the box.
-   *
-   * <p>Example:
-   * <pre>{@code
-   * <binaryPathPlugins>
-   *   <binaryPathPlugin>
-   *     <name>protoc-gen-grpc-java</name>
-   *   </binaryPathPlugin>
-   *   <binaryPathPlugin>
-   *     <name>protoc-gen-something-else</name>
-   *     <options>foo=bar,baz=bork</options>
-   *   </binaryPathPlugin>
-   * </binaryPathPlugins>
-   * }</pre>
-   *
-   * <p>Objects support the following attributes:
-   *
-   * <ul>
-   *   <li>{@code name} - the name of the binary to resolve.</li>
-   *   <li>{@code options} - a string of options to pass to the plugin
-   *       - optional.</li>
-   *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 0. Higher numbers run later than lower numbers. The built-in
-   *       code generators in {@code protoc} and descriptor generation has
-   *       an order of 0.</li>
-   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if one wishes to control whether the plugin runs via a
-   *       property - optional.</li>
-   *   <li>{@code outputDirectory} - where to write the generated outputs to.
-   *       - if unspecified, then the {@link #outputDirectory} on the Maven
-   *       plugin is used instead - optional.</li>
-   *   <li>{@code registerAsCompilationRoot} - whether to register the output
-   *       directory as a source directory for later compilation steps. If
-   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
-   *       If the {@code outputDirectory} is not overridden, this setting has
-   *       no effect, and the project-wide setting is used. If explicitly
-   *       specified, then the project setting is ignored in favour of this
-   *       value instead.</li>
-   * </ul>
-   *
-   * <p>On Linux, macOS, and other POSIX-like systems, resolution looks for an executable
-   * binary matching the exact name in any directory in the {@code $PATH} environment variable.
-   *
-   * <p>On Windows, the case-insensitive {@code %PATH%} environment variable is searched for an
-   * executable that matches the name, ignoring case and any file extension. The file
-   * extension is expected to match any extension in the {@code %PATHEXT%} environment variable.
-   *
-   * @since 2.0.0
-   */
-  @Parameter
-  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
-
-  /**
-   * Binary plugins to use with the protobuf compiler, specified as a valid URL.
-   *
-   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
-   * with {@code protoc} out of the box.
-   *
-   * <p>Example:
-   * <pre>{@code
-   * <binaryUrlPlugins>
-   *   <!-- FTP resource -->
-   *   <binaryUrlPlugin>
-   *     <url>ftp://myorganisation.org/protoc/plugins/myplugin.exe</url>
-   *   </binaryUrlPlugin>
-   *
-   *   <!-- HTTP resource with custom options-->
-   *   <binaryUrlPlugin>
-   *     <url>https://myorganisation.org/protoc/plugins/myplugin2.exe</url>
-   *     <options>foo=bar,baz=bork</options>
-   *   </binaryUrlPlugin>
-   *
-   *   <!-- HTTP resource that is a ZIP holding the binary we want. -->
-   *   <binaryUrlPlugin>
-   *     <url>zip:https://myorganisation.org/protoc/plugins/myplugin3.zip!/protoc-gen-something.exe</url>
-   *   </binaryUrlPlugin>
-   * </binaryUrlPlugins>
-   * }</pre>
-   *
-   * <p>See the user guide for details on the supported protocols.
-   *
-   * <p>Objects support the following attributes:
-   *
-   * <ul>
-   *   <li>{@code url} - the URL to resolve.</li>
-   *   <li>{@code options} - a string of options to pass to the plugin
-   *       - optional.</li>
-   *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 0. Higher numbers run later than lower numbers. The built-in
-   *       code generators in {@code protoc} and descriptor generation has
-   *       an order of 0.</li>
-   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if one wishes to control whether the plugin runs via a
-   *       property - optional.</li>
-   *   <li>{@code outputDirectory} - where to write the generated outputs to.
-   *       - if unspecified, then the {@link #outputDirectory} on the Maven
-   *       plugin is used instead - optional.</li>
-   *   <li>{@code registerAsCompilationRoot} - whether to register the output
-   *       directory as a source directory for later compilation steps. If
-   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
-   *       If the {@code outputDirectory} is not overridden, this setting has
-   *       no effect, and the project-wide setting is used. If explicitly
-   *       specified, then the project setting is ignored in favour of this
-   *       value instead.</li>
-   *   <li>{@code digest} - an optional digest to verify the binary against.
-   *       If specified, this is a string in the format {@code sha512:1a2b3c4d...},
-   *       using any supported message digest provided by the current JDK
-   *       (e.g. {@code md5}, {@code sha1}, {@code sha256}, {@code sha512}, etc).</li>
-   * </ul>
-   *
-   * @since 2.0.0
-   */
-  @Parameter
-  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
 
   /**
    * If {@code true}, all output directories will be cleared before {@code protoc}
@@ -568,75 +394,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   boolean javaEnabled;
 
   /**
-   * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
-   *
-   * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
-   * protoc compiler API, and will be provided to the compiler via generated scripts.
-   *
-   * <p>For example:
-   * <pre>{@code
-   * <jvmMavenPlugins>
-   *   <jvmMavenPlugin>
-   *     <groupId>com.salesforce.servicelibs</groupId>
-   *     <artifactId>reactor-grpc</artifactId>
-   *     <version>1.2.4</version>
-   *   </jvmMavenPlugin>
-   * </jvmMavenPlugins>
-   * }</pre>
-   *
-   * <p>This mechanism allows plugin vendors to implement their plugins in
-   * Java and just distribute platform-independent JAR instead.
-   *
-   * <p>Objects support the following attributes:
-   *
-   * <ul>
-   *   <li>{@code groupId} - the group ID - required</li>
-   *   <li>{@code artifactId} - the artifact ID - required</li>
-   *   <li>{@code version} - the version - required</li>
-   *   <li>{@code type} - the artifact type - optional</li>
-   *   <li>{@code classifier} - the artifact classifier - optional</li>
-   *   <li>{@code options} - a string of options to pass to the plugin. This
-   *       uses the standard {@code protoc} interface for specifying options
-   *       - optional.</li>
-   *   <li>{@code order} - an integer order to run the plugins in. Defaults
-   *       to 0. Higher numbers run later than lower numbers. The built-in
-   *       code generators in {@code protoc} and descriptor generation has
-   *       an order of 0.</li>
-   *   <li>{@code skip} - set to {@code true} to skip invoking this plugin -
-   *       useful if one wishes to control whether the plugin runs via a
-   *       property - optional.</li>
-   *   <li>{@code outputDirectory} - where to write the generated outputs to.
-   *       - if unspecified, then the {@link #outputDirectory} on the Maven
-   *       plugin is used instead - optional.</li>
-   *   <li>{@code registerAsCompilationRoot} - whether to register the output
-   *       directory as a source directory for later compilation steps. If
-   *       unspecified/null, then {@link #registerAsCompilationRoot} is used.
-   *       If the {@code outputDirectory} is not overridden, this setting has
-   *       no effect, and the project-wide setting is used. If explicitly
-   *       specified, then the project setting is ignored in favour of this
-   *       value instead.</li>
-   *   <li>{@code mainClass} - if the plugin is not an assembled JAR at the time
-   *       the {@code protobuf-maven-plugin} is run, then users must ensure they
-   *       provide the fully qualified class name of the plugin entrypoint here.
-   *       This is usually only needed if creating the JVM plugin within the
-   *       same project. If the plugin is an assembled JAR, then this option is
-   *       optional, the {@code Main-Class} manifest entry will be used when
-   *       present if this is not provided.</li>
-   *   <li>{@code jvmArgs} - a list of commandline arguments to pass to the
-   *       plugin process - optional.</li>
-   *   <li>{@code jvmConfigArgs} - a list of commandline arguments to configure
-   *       the JVM itself. This is used to control factors such as JIT compilation,
-   *       JVM properties, heap size, etc. Users should leave this as the default
-   *       value (which optimises for short-lived processes) unless they know
-   *       exactly what they are doing - optional.
-   * </ul>
-   *
-   * @since 0.3.0
-   */
-  @Parameter
-  @Nullable List<MavenProtocPluginBean> jvmMavenPlugins;
-
-  /**
    * Generate Kotlin API wrapper code around the generated Java code.
    *
    * <p>This may require {@code javaEnabled} to also be {@code true}, otherwise compilation
@@ -757,6 +514,18 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable Path outputDirectory;
+
+  /**
+   * Protoc plugins to invoke as part of the build.
+   *
+   * <p>This is a list of zero or more plugin descriptors, which can have varying types. The
+   * {@code kind} attribute must be set on each to allow determining which type of plugin is
+   * being specified.
+   *
+   * @since TBC
+   */
+  @Parameter
+  @Nullable List<ProtocPlugin> plugins;
 
   /**
    * Optional digest to verify {@code protoc} against.
@@ -1000,6 +769,75 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<Path> sourceDescriptorPaths;
 
   /*
+   * Deprecated parameters to remove in v5.
+   */
+
+  /**
+   * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
+   *
+   * <p>See the
+   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
+   * for more details on the parameters that this block can take.
+   *
+   * @since 0.3.0
+   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
+   */
+  @Deprecated(forRemoval = true)
+  @Parameter
+  @Nullable List<BinaryMavenProtocPluginBean> binaryMavenPlugins;
+
+  /**
+   * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
+   *
+   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * with {@code protoc} out of the box.
+   *
+   * <p>See the
+   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
+   * for more details on the parameters that this block can take.
+   *
+   * @since 2.0.0
+   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
+   */
+  @Deprecated(forRemoval = true)
+  @Parameter
+  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
+
+  /**
+   * Binary plugins to use with the protobuf compiler, specified as a valid URL.
+   *
+   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
+   * with {@code protoc} out of the box.
+   *
+   * <p>See the
+   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
+   * for more details on the parameters that this block can take.
+   *
+   * @since 2.0.0
+   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
+   */
+  @Deprecated(forRemoval = true)
+  @Parameter
+  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
+
+  /**
+   * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
+   *
+   * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
+   * protoc compiler API, and will be provided to the compiler via generated scripts.
+   *
+   * <p>See the
+   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
+   * for more details on the parameters that this block can take.
+   *
+   * @since 0.3.0
+   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
+   */
+  @Deprecated(forRemoval = true)
+  @Parameter
+  @Nullable List<JvmMavenProtocPluginBean> jvmMavenPlugins;
+
+  /*
    * Implementation-specific details.
    */
 
@@ -1075,9 +913,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
     var request = ImmutableGenerationRequest.builder()
         .arguments(nonNullList(arguments))
-        .binaryMavenPlugins(nonNullList(binaryMavenPlugins))
-        .binaryPathPlugins(nonNullList(binaryPathPlugins))
-        .binaryUrlPlugins(nonNullList(binaryUrlPlugins))
         .cleanOutputDirectories(cleanOutputDirectories)
         .dependencyResolutionDepth(dependencyResolutionDepth)
         .dependencyScopes(dependencyScopes())
@@ -1093,7 +928,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .importPaths(determinePaths(importPaths, List::of))
         .includes(nonNullList(includes))
         .incrementalCompilationEnabled(incrementalCompilation)
-        .jvmMavenPlugins(nonNullList(jvmMavenPlugins))
         .liteEnabled(liteOnly)
         .outputDescriptorAttached(outputDescriptorAttached)
         .outputDescriptorAttachmentClassifier(outputDescriptorAttachmentClassifier)
@@ -1105,6 +939,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
         .protocDigest(protocDigest)
+        .protocPlugins(protocPlugins())
         .protocVersion(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sanctionedExecutablePath(sanctionedExecutablePath)
@@ -1155,6 +990,17 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     return overriddenVersion == null
         ? requireNonNull(protoc, "<protoc/> has not been set")
         : overriddenVersion;
+  }
+
+  @Deprecated(forRemoval = true)
+  private Collection<ProtocPlugin> protocPlugins() {
+    var allPlugins = new ArrayList<ProtocPlugin>();
+    allPlugins.addAll(nonNullList(plugins));
+    allPlugins.addAll(nonNullList(binaryMavenPlugins));
+    allPlugins.addAll(nonNullList(binaryPathPlugins));
+    allPlugins.addAll(nonNullList(binaryUrlPlugins));
+    allPlugins.addAll(nonNullList(jvmMavenPlugins));
+    return Collections.unmodifiableList(allPlugins);
   }
 
   private Collection<Path> determinePaths(

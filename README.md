@@ -149,34 +149,32 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
 
 ```xml
 
-<plugin>
+<plugins>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
     <protoc>${protobuf-java.version}</protoc>
-
-    <!-- Vanilla protoc plugins - these are platform specific executables
-         just like protoc is. -->
-    <binaryMavenPlugins>
-      <binaryMavenPlugin>
+    
+    <plugins>
+      <!-- Vanilla protoc plugins - these are platform specific executables
+           just like protoc is. -->
+      <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-      </binaryMavenPlugin>
-    </binaryMavenPlugins>
+      </plugin>
 
-    <!-- JVM plugins are distributed as JARs rather than native system
-         executables. The protobuf-maven-plugin will automatically bootstrap
-         them for you, without the need for additional
-         tooling for your platform. It should "just work". -->
-    <jvmMavenPlugins>
-      <jvmMavenPlugin>
+      <!-- JVM plugins are distributed as JARs rather than native system
+           executables. The protobuf-maven-plugin will automatically bootstrap
+           them for you, without the need for additional
+           tooling for your platform. It should "just work". -->
+      <plugin kind="jvm-maven">
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
-      </jvmMavenPlugin>
-    </jvmMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 
   <executions>

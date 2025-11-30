@@ -86,19 +86,19 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <binaryMavenPlugins>
-            <binaryMavenPlugin>
+          <plugins>
+            <plugin kind="binary-maven">
               <groupId>io.grpc</groupId>
               <artifactId>protoc-gen-grpc-java</artifactId>
               <version>${grpc.version}</version>
-            </binaryMavenPlugin>
+            </plugin>
 
-            <binaryMavenPlugin>
+            <plugin kind="binary-maven">
               <groupId>com.salesforce.servicelibs</groupId>
               <artifactId>reactor-grpc</artifactId>
               <version>${reactor-grpc.version}</version>
-            </binaryMavenPlugin>
-          </binaryMavenPlugins>
+            </plugin>
+          </plugins>
         </configuration>
 
         <executions>

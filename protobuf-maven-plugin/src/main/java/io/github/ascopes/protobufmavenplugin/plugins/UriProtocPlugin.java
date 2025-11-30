@@ -16,8 +16,10 @@
 package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.net.URI;
 import java.util.Optional;
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
@@ -32,11 +34,15 @@ import org.jspecify.annotations.Nullable;
  * @since 2.0.0
  */
 @Modifiable
-public abstract class UriProtocPlugin implements OptionalProtocPlugin {
+@KindHint(kind = "url", implementation = UriProtocPluginBean.class)
+public abstract non-sealed class UriProtocPlugin implements ProtocPlugin {
+
+  public abstract @Nullable Digest getDigest();
 
   public abstract URI getUrl();
 
-  public abstract @Nullable Digest getDigest();
+  @Default.Boolean(false)
+  public abstract boolean isOptional();
 
   @Override
   public String toString() {

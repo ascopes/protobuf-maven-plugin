@@ -38,14 +38,14 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <binaryUrlPlugins>
-            <binaryUrlPlugin>
+          <plugins>
+            <plugin kind="url">
               <!-- See https://github.com/pseudomuto/protoc-gen-doc -->
               <url>tar:gz:https://github.com/pseudomuto/protoc-gen-doc/releases/download/v1.5.1/protoc-gen-doc_1.5.1_linux_amd64.tar.gz!/protoc-gen-doc</url>
               <digest>sha1:490824e4d9d38b54811c511d9cf61314533f287c</digest>
               <outputDirectory>${project.build.directory}/protobuf-docs</outputDirectory>
-            </binaryUrlPlugin>
-          </binaryUrlPlugins>
+            </plugin>
+          </plugins>
 
           <javaEnabled>false</javaEnabled>
         </configuration>

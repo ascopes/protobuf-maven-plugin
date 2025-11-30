@@ -38,14 +38,14 @@
         <version>@project.version@</version>
 
         <configuration>
-          <jvmMavenPlugins>
-            <jvmMavenPlugin>
+          <plugins>
+            <plugin kind="jvm-maven">
               <groupId>${project.groupId}</groupId>
               <artifactId>protoc-plugin</artifactId>
               <version>${project.version}</version>
               <mainClass>org.example.protocplugin.ProtocPlugin</mainClass>
-            </jvmMavenPlugin>
-          </jvmMavenPlugins>
+            </plugin>
+          </plugins>
 
           <javaEnabled>false</javaEnabled>
           <protoc>${protobuf.version}</protoc>

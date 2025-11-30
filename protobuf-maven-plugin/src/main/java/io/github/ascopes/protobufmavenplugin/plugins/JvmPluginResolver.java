@@ -99,7 +99,7 @@ final class JvmPluginResolver {
   }
 
   Collection<ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> plugins,
+      Collection<? extends JvmMavenProtocPlugin> plugins,
       Path defaultOutputDirectory
   ) throws ResolutionException {
     var resolvedPlugins = new ArrayList<ResolvedProtocPlugin>();
@@ -122,7 +122,7 @@ final class JvmPluginResolver {
   }
 
   private ResolvedProtocPlugin resolveMavenPlugin(
-      MavenProtocPlugin plugin,
+      JvmMavenProtocPlugin plugin,
       Path defaultOutputDirectory,
       int index
   ) throws ResolutionException {
@@ -153,7 +153,7 @@ final class JvmPluginResolver {
         .build();
   }
 
-  private String hashPlugin(MavenProtocPlugin plugin, int index) {
+  private String hashPlugin(JvmMavenProtocPlugin plugin, int index) {
     // GH-421: Ensure duplicate plugin definitions retain a unique name
     // when in the same execution, rather than trampling over each-other's
     // files.
@@ -161,7 +161,7 @@ final class JvmPluginResolver {
         + "-" + index;
   }
 
-  private ArgumentFileBuilder buildArgLine(MavenProtocPlugin plugin) throws ResolutionException {
+  private ArgumentFileBuilder buildArgLine(JvmMavenProtocPlugin plugin) throws ResolutionException {
     // Expectation: this always has at least one item in it, and the first item is the plugin
     // artifact itself.
     var dependencies = artifactPathResolver
@@ -205,7 +205,7 @@ final class JvmPluginResolver {
   }
 
   private String determineMainClass(
-      MavenProtocPlugin plugin,
+      JvmMavenProtocPlugin plugin,
       Path pluginPath
   ) throws ResolutionException {
     // GH-363: It appears that we have to avoid calling `java -jar` when running JARs as the
@@ -307,7 +307,7 @@ final class JvmPluginResolver {
         .toList();
   }
 
-  private Predicate<String> checkValidJvmConfigArg(MavenProtocPlugin plugin) {
+  private Predicate<String> checkValidJvmConfigArg(JvmMavenProtocPlugin plugin) {
     return arg -> {
       // JVM args must begin with a hyphen and be greater than zero in size,
       // otherwise Java may interpret them as being the application entrypoint

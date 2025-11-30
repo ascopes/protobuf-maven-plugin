@@ -20,6 +20,7 @@ import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -37,8 +38,13 @@ import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
@@ -246,114 +252,6 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.getArguments()).isEqualTo(arguments);
   }
 
-  @DisplayName("when binaryMavenPlugins is null, expect an empty list in the request")
-  @NullAndEmptySource
-  @ParameterizedTest(name = "when {0}")
-  void whenBinaryMavenPluginsNullExpectEmptyListInRequest(
-      @Nullable List<MavenProtocPluginBean> plugins
-  ) throws Throwable {
-    // Given
-    mojo.binaryMavenPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryMavenPlugins()).isEmpty();
-  }
-
-  @DisplayName("when binaryMavenPlugins is provided, expect the plugins in the request")
-  @Test
-  void whenBinaryMavenPluginsProvidedExpectPluginsInRequest() throws Throwable {
-    // Given
-    List<MavenProtocPluginBean> plugins = mock();
-    mojo.binaryMavenPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryMavenPlugins()).isSameAs(plugins);
-  }
-
-  @DisplayName("when binaryPathPlugins is null, expect an empty list in the request")
-  @NullAndEmptySource
-  @ParameterizedTest(name = "when {0}")
-  void whenBinaryPathPluginsNullExpectEmptyListInRequest(
-      @Nullable List<PathProtocPluginBean> plugins
-  ) throws Throwable {
-    // Given
-    mojo.binaryPathPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryPathPlugins()).isEmpty();
-  }
-
-  @DisplayName("when binaryPathPlugins is provided, expect the plugins in the request")
-  @Test
-  void whenBinaryPathPluginsProvidedExpectPluginsInRequest() throws Throwable {
-    // Given
-    List<PathProtocPluginBean> plugins = mock();
-    mojo.binaryPathPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryPathPlugins()).isSameAs(plugins);
-  }
-
-  @DisplayName("when binaryUrlPlugins is null, expect an empty list in the request")
-  @NullAndEmptySource
-  @ParameterizedTest(name = "when {0}")
-  void whenBinaryUrlPluginsNullExpectEmptyListInRequest(
-      @Nullable List<UriProtocPluginBean> plugins
-  ) throws Throwable {
-    // Given
-    mojo.binaryUrlPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryUrlPlugins()).isEmpty();
-  }
-
-  @DisplayName("when binaryUrlPlugins is provided, expect the plugins in the request")
-  @Test
-  void whenBinaryUrlPluginsProvidedExpectPluginsInRequest() throws Throwable {
-    // Given
-    List<UriProtocPluginBean> plugins = mock();
-    mojo.binaryUrlPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryUrlPlugins()).isSameAs(plugins);
-  }
-
   @DisplayName("cleanOutputDirectories is set on the request")
   @ValueSource(booleans = {true, false})
   @ParameterizedTest(name = "when {0}")
@@ -390,7 +288,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getBinaryUrlPlugins()).isEmpty();
+    assertThat(actualRequest.getDependencyResolutionDepth()).isSameAs(dependencyResolutionDepth);
   }
 
   @DisplayName("defaultDependencyScopes() are used when no user provided scopes are present")
@@ -592,8 +490,9 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @DisplayName("when jvmMavenPlugins is null, expect an empty list in the request")
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
+  @SuppressWarnings("removal")
   void whenJvmMavenPluginsNullExpectEmptyListInRequest(
-      @Nullable List<MavenProtocPluginBean> plugins
+      @Nullable List<JvmMavenProtocPluginBean> plugins
   ) throws Throwable {
     // Given
     mojo.jvmMavenPlugins = plugins;
@@ -605,24 +504,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getJvmMavenPlugins()).isEmpty();
-  }
-
-  @DisplayName("when jvmMavenPlugins is provided, expect the plugins in the request")
-  @Test
-  void whenJvmMavenPluginsProvidedExpectPluginsInRequest() throws Throwable {
-    // Given
-    List<MavenProtocPluginBean> plugins = mock();
-    mojo.jvmMavenPlugins = plugins;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getJvmMavenPlugins()).isSameAs(plugins);
+    assertThat(actualRequest.getProtocPlugins()).isEmpty();
   }
 
   @DisplayName("liteOnly is set to the specified value")
@@ -828,6 +710,101 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
     assertThat(actualRequest.getProtocDigest()).isSameAs(digest);
+  }
+
+  @DisplayName("when plugins is null, expect an empty list in the request")
+  @NullAndEmptySource
+  @ParameterizedTest(name = "when {0}")
+  void whenPluginsNullExpectEmptyListInRequest(
+      @Nullable List<ProtocPlugin> plugins
+  ) throws Throwable {
+    // Given
+    mojo.plugins = plugins;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getProtocPlugins()).isEmpty();
+  }
+
+  @DisplayName("when plugins are provided, expect the plugins in the request")
+  @Test
+  void whenPluginsProvidedExpectPluginsInRequest() throws Throwable {
+    // Given
+    List<ProtocPlugin> plugins = List.of(
+        mock(JvmMavenProtocPluginBean.class),
+        mock(BinaryMavenProtocPlugin.class),
+        mock(UriProtocPlugin.class),
+        mock(PathProtocPlugin.class)
+    );
+    mojo.plugins = plugins;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+    assertThat(actualRequest.getProtocPlugins()).containsAll(plugins);
+  }
+
+  @DisplayName("when legacy plugins are provided, expect the plugins in the request")
+  @Test
+  @SuppressWarnings("removal")
+  void whenLegacyPluginsProvidedExpectPluginsInRequest() throws Throwable {
+    // Given
+    List<BinaryMavenProtocPluginBean> binaryMavenPlugins = List.of(
+        mock("<binaryMavenPlugin 1>"),
+        mock("<binaryMavenPlugin 2>")
+    );
+    mojo.binaryMavenPlugins = binaryMavenPlugins;
+
+    List<PathProtocPluginBean> binaryPathPlugins = List.of(
+        mock("<binaryPathPlugin 1>"),
+        mock("<binaryPathPlugin 2>")
+    );
+    mojo.binaryPathPlugins = binaryPathPlugins;
+
+    List<UriProtocPluginBean> binaryUrlPlugins = List.of(
+        mock("<binaryUrlPlugin 1>"),
+        mock("<binaryUrlPlugin 2>")
+    );
+    mojo.binaryUrlPlugins = binaryUrlPlugins;
+
+    List<JvmMavenProtocPluginBean> jvmMavenPlugins = List.of(
+        mock("<jvmMavenPlugin 1>"),
+        mock("<jvmMavenPlugin 2>")
+    );
+    mojo.jvmMavenPlugins = jvmMavenPlugins;
+
+    List<ProtocPlugin> plugins = List.of(
+        mock(JvmMavenProtocPluginBean.class, "<plugin 1>"),
+        mock(BinaryMavenProtocPlugin.class, "<plugin 2>"),
+        mock(UriProtocPlugin.class, "<plugin 3>"),
+        mock(PathProtocPlugin.class, "<plugin 4>")
+    );
+    mojo.plugins = plugins;
+
+    // When
+    mojo.execute();
+
+    // Then
+    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
+    verify(mojo.sourceCodeGenerator).generate(captor.capture());
+    var actualRequest = captor.getValue();
+
+    assertSoftly(softly -> softly
+        .assertThat(actualRequest.getProtocPlugins())
+        .containsAll(binaryMavenPlugins)
+        .containsAll(binaryPathPlugins)
+        .containsAll(binaryUrlPlugins)
+        .containsAll(jvmMavenPlugins)
+        .containsAll(plugins));
   }
 
   @DisplayName("when protoc is null, expect an exception to be raised")

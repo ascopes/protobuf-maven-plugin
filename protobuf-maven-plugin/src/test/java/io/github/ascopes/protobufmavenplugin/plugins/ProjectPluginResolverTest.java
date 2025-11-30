@@ -77,23 +77,20 @@ class ProjectPluginResolverTest {
         .flatMap(Collection::stream)
         .toList();
 
-    var binaryMavenPlugins = List.<MavenProtocPlugin>of(mock(), mock(), mock());
+    var binaryMavenPlugins = List.<BinaryMavenProtocPlugin>of(mock(), mock(), mock());
     var binaryPathPlugins = List.<PathProtocPlugin>of(mock(), mock());
     var binaryUrlPlugins = List.<UriProtocPlugin>of(mock(), mock());
-    var jvmMavenPlugins = List.<MavenProtocPlugin>of(mock(), mock(), mock());
+    var jvmMavenPlugins = List.<JvmMavenProtocPlugin>of(mock(), mock(), mock());
     var outputDirectory = mock(Path.class);
 
     var generationRequest = mock(GenerationRequest.class);
 
     // Use .thenAnswer to work around generic wildcards.
-    when(generationRequest.getBinaryMavenPlugins())
-        .thenAnswer(ctx -> binaryMavenPlugins);
-    when(generationRequest.getBinaryPathPlugins())
-        .thenAnswer(ctx -> binaryPathPlugins);
-    when(generationRequest.getBinaryUrlPlugins())
-        .thenAnswer(ctx -> binaryUrlPlugins);
-    when(generationRequest.getJvmMavenPlugins())
-        .thenAnswer(ctx -> jvmMavenPlugins);
+    when(generationRequest.getProtocPlugins())
+        .thenAnswer(ctx -> Stream
+            .of(binaryMavenPlugins, binaryPathPlugins, binaryUrlPlugins, jvmMavenPlugins)
+            .flatMap(List::stream)
+            .toList());
     when(generationRequest.getOutputDirectory())
         .thenAnswer(ctx -> outputDirectory);
 
