@@ -169,11 +169,27 @@
       </dependency>
 
       <dependency>
+        <!-- Included here to allow dependabot to keep the version up to date.
+             Only actually used within Maven Compiler Plugin. -->
+        <groupId>com.google.errorprone</groupId>
+        <artifactId>error_prone_core</artifactId>
+        <version>${errorprone.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-bom</artifactId>
         <version>${protobuf.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <!-- Included here to allow dependabot to keep the version up to date.
+             Only actually used within Maven Compiler Plugin. -->
+        <groupId>com.uber.nullaway</groupId>
+        <artifactId>nullaway</artifactId>
+        <version>${nullaway.version}</version>
       </dependency>
 
       <dependency>
