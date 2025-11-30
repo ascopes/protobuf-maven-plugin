@@ -99,8 +99,7 @@
     <dependency>
       <groupId>org.jspecify</groupId>
       <artifactId>jspecify</artifactId>
-      <!-- Annotations only -->
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
