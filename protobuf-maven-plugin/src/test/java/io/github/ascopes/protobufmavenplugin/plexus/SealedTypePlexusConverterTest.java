@@ -278,7 +278,7 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  public sealed interface User permits Person, Bot, Admin {
+  public sealed interface User permits Person, Bot, Admin, InvalidLeafType {
     String getName();
   }
 
@@ -334,6 +334,14 @@ class SealedTypePlexusConverterTest {
   }
 
   public static final class Owner extends Admin {}
+
+  // Missing annotation
+  public static final class InvalidLeafType implements User {
+    @Override
+    public String getName() {
+      return "";
+    }
+  }
 
   /*
    * Other helpers
