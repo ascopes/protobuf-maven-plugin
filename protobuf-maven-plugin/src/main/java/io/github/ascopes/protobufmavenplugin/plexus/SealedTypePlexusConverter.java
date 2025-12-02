@@ -20,6 +20,7 @@ import static java.util.function.Predicate.not;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
@@ -80,7 +81,8 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     return Optional.of(type)
         .filter(Class::isSealed)
         .map(Class::getPermittedSubclasses)
-        .filter(implementations -> implementations.length > 0)
+        .map(List::of)
+        .filter(not(List::isEmpty))
         .isPresent();
   }
 
