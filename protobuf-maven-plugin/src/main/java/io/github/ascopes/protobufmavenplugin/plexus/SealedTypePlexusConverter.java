@@ -124,8 +124,9 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     return getKindMappingFor(base)
         .keySet()
         .stream()
+        .map(kind -> "\"" + kind + "\"")
         .sorted()
-        .collect(Collectors.joining(","));
+        .collect(Collectors.joining(", "));
   }
 
   private Map<String, Class<?>> getKindMappingFor(Class<?> base) {

@@ -16,12 +16,14 @@
 package io.github.ascopes.protobufmavenplugin.plexus;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 import java.io.StringReader;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.DefaultExpressionEvaluator;
@@ -137,6 +139,88 @@ class SealedTypePlexusConverterTest {
             owner -> assertThat(owner.employeeId)
                 .as("owner.employeeId")
                 .isEqualTo("54321"));
+  }
+
+  @DisplayName(".fromConfiguration(...) raises an exception for missing kind attributes")
+  @Test
+  void fromConfigurationRaisesExceptionForMissingKindAttributes() throws Exception {
+    // Given
+    var configuration = xml2PlexusConfiguration(
+        """
+        <database>
+          <users>
+            <user>
+              <name>Bob</name>
+            </user>
+            <user kind="bot">
+              <id>12345</id>
+            </user>
+            <user kind="admin">
+              <name>Ashley</name>
+              <employeeId>54321</employeeId>
+            </user>
+          </users>
+        </database>
+        """.stripIndent());
+
+    // Then
+    assertThatExceptionOfType(ComponentConfigurationException.class)
+        .isThrownBy(() -> converterLookup.lookupConverterForType(Database.class)
+            .fromConfiguration(
+                converterLookup,
+                configuration,
+                Database.class,
+                null,
+                Database.class.getClassLoader(),
+                expressionEvaluator,
+                null
+            ))
+        .withMessage("Missing \"kind\" attribute. Valid kinds are: "
+            + "\"admin\", \"bot\", \"person\"")
+        .extracting(ComponentConfigurationException::getFailedConfiguration)
+        .as("exception#getFailedConfiguration()")
+        .isEqualTo(configuration.getChild(0).getChild(0));
+  }
+
+  @DisplayName(".fromConfiguration(...) raises an exception for unknown kind attribute values")
+  @Test
+  void fromConfigurationRaisesExceptionForUnknownKindAttributeValues() throws Exception {
+    // Given
+    var configuration = xml2PlexusConfiguration(
+        """
+        <database>
+          <users>
+            <user kind="smurf">
+              <name>Bob</name>
+            </user>
+            <user kind="bot">
+              <id>12345</id>
+            </user>
+            <user kind="admin">
+              <name>Ashley</name>
+              <employeeId>54321</employeeId>
+            </user>
+          </users>
+        </database>
+        """.stripIndent());
+
+    // Then
+    assertThatExceptionOfType(ComponentConfigurationException.class)
+        .isThrownBy(() -> converterLookup.lookupConverterForType(Database.class)
+            .fromConfiguration(
+                converterLookup,
+                configuration,
+                Database.class,
+                null,
+                Database.class.getClassLoader(),
+                expressionEvaluator,
+                null
+            ))
+        .withMessage("Invalid kind \"smurf\" specified. Valid kinds are: "
+            + "\"admin\", \"bot\", \"person\"")
+        .extracting(ComponentConfigurationException::getFailedConfiguration)
+        .as("exception#getFailedConfiguration()")
+        .isEqualTo(configuration.getChild(0).getChild(0));
   }
 
   /*
