@@ -38,8 +38,8 @@
         <version>@project.version@</version>
 
         <configuration>
-          <jvmMavenPlugins>
-            <jvmMavenPlugin>
+          <plugins>
+            <plugin kind="jvm-maven">
               <groupId>${project.groupId}</groupId>
               <artifactId>protoc-plugin</artifactId>
               <version>${project.version}</version>
@@ -49,8 +49,8 @@
                 <jvmConfigArg>-Xmx128m</jvmConfigArg>
                 <jvmConfigArg>-Dthis.should.be.set=if it works</jvmConfigArg>
               </jvmConfigArgs>
-            </jvmMavenPlugin>
-          </jvmMavenPlugins>
+            </plugin>
+          </plugins>
 
           <javaEnabled>false</javaEnabled>
           <protoc>${protobuf.version}</protoc>

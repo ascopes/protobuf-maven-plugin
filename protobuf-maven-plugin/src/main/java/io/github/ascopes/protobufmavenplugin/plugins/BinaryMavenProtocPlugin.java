@@ -16,34 +16,29 @@
 package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
-import java.util.List;
+import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 
 /**
  * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
- * repository.
+ * repository and corresponds to a native executable.
  *
  * @author Ashley Scopes
- * @since 2.0.0
+ * @since 4.1.0
  */
 @Immutable
 @Modifiable
-public abstract class MavenProtocPlugin extends MavenArtifact implements ProtocPlugin {
+@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocPluginBean.class)
+public abstract non-sealed class BinaryMavenProtocPlugin
+    extends MavenArtifact
+    implements ProtocPlugin {
 
   // Version is never null here as we do not infer from dependency management.
   @Override
   public abstract @NonNull String getVersion();
-
-  public abstract @Nullable List<String> getJvmArgs();
-
-  public abstract @Nullable List<String> getJvmConfigArgs();
-
-  // Null if unset or inferred from MANIFEST.MF.
-  public abstract @Nullable String getMainClass();
 
   // Must be provided to keep immutables happy.
   @Override

@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Modifiable;
 
 
@@ -29,9 +31,13 @@ import org.immutables.value.Value.Modifiable;
  * @since 2.0.0
  */
 @Modifiable
-public abstract class PathProtocPlugin implements OptionalProtocPlugin {
+@KindHint(kind = "path", implementation = PathProtocPluginBean.class)
+public abstract non-sealed class PathProtocPlugin implements ProtocPlugin {
 
   public abstract String getName();
+
+  @Default.Boolean(false)
+  public abstract boolean isOptional();
 
   @Override
   public String toString() {

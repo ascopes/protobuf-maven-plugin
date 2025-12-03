@@ -15,45 +15,41 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
-import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import java.net.URI;
-import java.util.Optional;
-import org.immutables.value.Value.Default;
+import java.util.List;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 
 /**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a URI.
- *
- * <p>URI-based plugins can be marked as optional if they should be skipped when the resource
- * is unable to be resolved.
+ * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
+ * repository.
  *
  * @author Ashley Scopes
  * @since 2.0.0
  */
 @Modifiable
-@KindHint(kind = "url", implementation = UriProtocPluginBean.class)
-public abstract non-sealed class UriProtocPlugin implements ProtocPlugin {
+@KindHint(kind = "jvm-maven", implementation = JvmMavenProtocPluginBean.class)
+public abstract non-sealed class JvmMavenProtocPlugin
+    extends MavenArtifact
+    implements ProtocPlugin {
 
-  public abstract @Nullable Digest getDigest();
+  // Version is never null here as we do not infer from dependency management.
+  @Override
+  public abstract @NonNull String getVersion();
 
-  public abstract URI getUrl();
+  public abstract @Nullable List<String> getJvmArgs();
 
-  @Default.Boolean(false)
-  public abstract boolean isOptional();
+  public abstract @Nullable List<String> getJvmConfigArgs();
 
+  // Null if unset or inferred from MANIFEST.MF.
+  public abstract @Nullable String getMainClass();
+
+  // Must be provided to keep immutables happy.
   @Override
   public String toString() {
-    var sb = new StringBuilder()
-        .append(getUrl());
-
-    Optional.ofNullable(getDigest())
-        .map(Digest::toString)
-        .map("#digest="::concat)
-        .ifPresent(sb::append);
-
-    return sb.toString();
+    return super.toString();
   }
 }

@@ -18,9 +18,7 @@ package io.github.ascopes.protobufmavenplugin.generation;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
-import io.github.ascopes.protobufmavenplugin.plugins.MavenProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -45,29 +43,6 @@ public interface GenerationRequest {
   List<String> getArguments();
 
   /**
-   * Binary {@code protoc} plugins that should be resolved from Maven
-   * repositories.
-   *
-   * @return the collection of plugins.
-   */
-  Collection<? extends MavenProtocPlugin> getBinaryMavenPlugins();
-
-  /**
-   * Binary {@code protoc} plugins that should be resolved from the system
-   * {@code $PATH}.
-   *
-   * @return the collection of plugins.
-   */
-  Collection<? extends PathProtocPlugin> getBinaryPathPlugins();
-
-  /**
-   * Binary {@code protoc} plugins that should be resolved from URLs.
-   *
-   * @return the collection of plugins.
-   */
-  Collection<? extends UriProtocPlugin> getBinaryUrlPlugins();
-
-  /**
    * The preference for how to resolve transitive dependencies by default.
    *
    * @return the dependency resolution depth preference.
@@ -75,8 +50,8 @@ public interface GenerationRequest {
   DependencyResolutionDepth getDependencyResolutionDepth();
 
   /**
-   * The dependency scopes to allow when searching the Maven project
-   * dependency list for {@code *.proto} files.
+   * The dependency scopes to allow when searching the Maven project dependency list for
+   * {@code *.proto} files.
    *
    * @return the set of scopes.
    */
@@ -90,8 +65,8 @@ public interface GenerationRequest {
   Collection<Language> getEnabledLanguages();
 
   /**
-   * The collection of {@code *.proto} path patterns to exclude from being
-   * passed to {@code protoc}.
+   * The collection of {@code *.proto} path patterns to exclude from being passed to
+   * {@code protoc}.
    *
    * @return the collection of glob patterns.
    */
@@ -103,36 +78,26 @@ public interface GenerationRequest {
   Map<String, String> getEnvironmentVariables();
 
   /**
-   * Additional user-defined Maven dependencies to include in the {@code protoc}
-   * import path.
+   * Additional user-defined Maven dependencies to include in the {@code protoc} import path.
    *
    * @return the collection of dependencies.
    */
   Collection<? extends MavenArtifact> getImportDependencies();
 
   /**
-   * Additional user-defined paths relative to the project root to include in the
-   * {@code protoc} import path.
+   * Additional user-defined paths relative to the project root to include in the {@code protoc}
+   * import path.
    *
    * @return the collection of paths.
    */
   Collection<Path> getImportPaths();
 
   /**
-   * The collection of {@code *.proto} path patterns to include to be passed to
-   * {@code protoc}.
+   * The collection of {@code *.proto} path patterns to include to be passed to {@code protoc}.
    *
    * @return the collection of glob patterns.
    */
   List<String> getIncludes();
-
-  /**
-   * Java executable projects that satisfy the {@code protoc} plugin interface
-   * to wrap in bootstrapping scripts and pass to {@code protoc}.
-   *
-   * @return the collection of plugins.
-   */
-  Collection<? extends MavenProtocPlugin> getJvmMavenPlugins();
 
   /**
    * The path to write all output files to.
@@ -142,8 +107,8 @@ public interface GenerationRequest {
   Path getOutputDirectory();
 
   /**
-   * The output {@code protobin} descriptor file to create, or {@code null} if
-   * no descriptor file should be created.
+   * The output {@code protobin} descriptor file to create, or {@code null} if no descriptor file
+   * should be created.
    *
    * @return the path to the descriptor file to output, or {@code null}.
    */
@@ -157,24 +122,24 @@ public interface GenerationRequest {
   boolean isOutputDescriptorAttached();
 
   /**
-   * The Maven artifact type to use when attaching the {@code protobin} descriptor
-   * file to the Maven project.
+   * The Maven artifact type to use when attaching the {@code protobin} descriptor file to the Maven
+   * project.
    *
    * @return the artifact type, or {@code null}.
    */
   @Nullable String getOutputDescriptorAttachmentType();
 
   /**
-   * The Maven artifact classifier to use when attaching the {@code protobin}
-   * descriptor file to the Maven project.
+   * The Maven artifact classifier to use when attaching the {@code protobin} descriptor file to the
+   * Maven project.
    *
    * @return the artifact classifier, or {@code null}.
    */
   @Nullable String getOutputDescriptorAttachmentClassifier();
 
   /**
-   * The digest of the {@code protoc} binary to verify, or {@code null} if
-   * no verification should take place.
+   * The digest of the {@code protoc} binary to verify, or {@code null} if no verification should
+   * take place.
    *
    * <p>This does not affect any verification performed by Aether.
    *
@@ -182,6 +147,13 @@ public interface GenerationRequest {
    * @since 3.5.0
    */
   @Nullable Digest getProtocDigest();
+
+  /**
+   * The various {@code protoc} plugins to invoke.
+   *
+   * @return the list of plugins.
+   */
+  List<ProtocPlugin> getProtocPlugins();
 
   /**
    * The version of {@code protoc} to use.
@@ -211,8 +183,8 @@ public interface GenerationRequest {
   @Nullable Path getSanctionedExecutablePath();
 
   /**
-   * Additional user-defined Maven dependencies to include in the {@code protoc}
-   * import path, and to compile.
+   * Additional user-defined Maven dependencies to include in the {@code protoc} import path, and to
+   * compile.
    *
    * @return the collection of dependencies.
    */
@@ -234,8 +206,7 @@ public interface GenerationRequest {
   Collection<Path> getSourceDescriptorPaths();
 
   /**
-   * Paths relative to the project root that contain {@code *.proto} sources to
-   * compile.
+   * Paths relative to the project root that contain {@code *.proto} sources to compile.
    *
    * @return the source directory paths.
    */
@@ -265,8 +236,7 @@ public interface GenerationRequest {
   boolean isCleanOutputDirectories();
 
   /**
-   * Whether to include input {@code proto} sources in the output class
-   * directory.
+   * Whether to include input {@code proto} sources in the output class directory.
    *
    * @return the boolean preference.
    */
@@ -280,8 +250,8 @@ public interface GenerationRequest {
   boolean isFailOnMissingSources();
 
   /**
-   * Whether to treat builds with no enabled languages, plugins, or descriptor
-   * file outputs as a build error.
+   * Whether to treat builds with no enabled languages, plugins, or descriptor file outputs as a
+   * build error.
    *
    * @return the boolean preference.
    */
@@ -295,8 +265,8 @@ public interface GenerationRequest {
   boolean isFatalWarnings();
 
   /**
-   * Whether to skip discovering {@code *.proto} files to import from the Maven
-   * project {@code <dependencies/>} block.
+   * Whether to skip discovering {@code *.proto} files to import from the Maven project
+   * {@code <dependencies/>} block.
    *
    * @return the boolean preference.
    */
@@ -324,16 +294,14 @@ public interface GenerationRequest {
   boolean isOutputDescriptorIncludeImports();
 
   /**
-   * Whether to include source information in the output {@code protobin}
-   * descriptor.
+   * Whether to include source information in the output {@code protobin} descriptor.
    *
    * @return the boolean preference.
    */
   boolean isOutputDescriptorIncludeSourceInfo();
 
   /**
-   * Whether to retain build option metadata in the output {@code protobin}
-   * descriptor.
+   * Whether to retain build option metadata in the output {@code protobin} descriptor.
    *
    * @return the boolean preference.
    */

@@ -21,13 +21,13 @@ For generating gRPC stubs for Java, you can use the official gRPC Java plugin:
 
   <configuration>
     <protoc>${protobuf.version}</protoc>
-    <binaryMavenPlugins>
-      <binaryMavenPlugin>
+    <plugins>
+      <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-      </binaryMavenPlugin>
-    </binaryMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 </plugin>
 ```
@@ -48,28 +48,26 @@ To configure protobuf-maven-plugin to use this `protoc` plugin, use the followin
 
 ```xml
 
-<plugin>
+<plugins>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
     <protoc>${protobuf.version}</protoc>
 
-    <binaryMavenPlugins>
-      <binaryMavenPlugin>
+    <plugins>
+      <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-      </binaryMavenPlugin>
-    </binaryMavenPlugins>
+      </plugin>
 
-    <jvmMavenPlugins>
-      <jvmMavenPlugin>
+      <plugin kind="jvm-maven">
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
-      </jvmMavenPlugin>
-    </jvmMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 </plugin>
 ```
@@ -85,8 +83,8 @@ For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
 
   <configuration>
     <protoc>${protobuf.version}</protoc>
-    <jvmMavenPlugins>
-      <jvmMavenPlugin>
+    <plugins>
+      <plugin kind="jvm-maven">
         <groupId>io.vertx</groupId>
         <artifactId>vertx-grpc-protoc-plugin2</artifactId>
         <version>${vertx.version}</version>
@@ -96,8 +94,8 @@ For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
           <jvmArg>--grpc-service</jvmArg>
           <jvmArg>--service-prefix=Vertx</jvmArg>
         </jvmArgs>
-      </jvmMavenPlugin>
-    </jvmMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 </plugin>
 ```
@@ -121,12 +119,12 @@ A suitable Maven plugin for providing Scala compilation is also required.
     <configuration>
       <javaEnabled>false</javaEnabled>
 
-      <binaryUrlPlugins>
-        <binaryUrlPlugin>
+      <plugins>
+        <plugin kind="url">
           <url>zip:https://github.com/scalapb/ScalaPB/releases/download/v${scalapb.version}/protoc-gen-scala-${scalapb.version}-linux-x86_64.zip!/protoc-gen-scala</url>
           <options>flat_package,grpc,scala3_sources</options>
-        </binaryUrlPlugin>
-      </binaryUrlPlugins>
+        </plugin>
+      </plugins>
     </configuration>
 
     <executions>
@@ -207,20 +205,20 @@ This example shows how to generate JavaScript/TypeScript client code for a gRPC 
         <protoc>${protobuf.version}</protoc>
         <javaEnabled>false</javaEnabled>
 
-        <binaryUrlPlugins>
-          <binaryUrlPlugin>
+        <plugins>
+          <plugin kind="url">
             <!-- Generate JavaScript protobuf messages -->
             <url>${protoc.gen.js.url}</url>
             <options>import_style=commonjs</options>
             <outputDirectory>${project.basedir}/target/js/protobuf</outputDirectory>
-          </binaryUrlPlugin>
-          <binaryUrlPlugin>
+          </plugin>
+          <plugin kind="url">
             <!-- Generate JavaScript gRPC stubs -->
             <url>${protoc.gen.grpc.web.url}</url>
             <options>import_style=typescript,mode=grpcwebtext</options>
             <outputDirectory>${project.basedir}/target/js/grpc</outputDirectory>
-          </binaryUrlPlugin>
-        </binaryUrlPlugins>
+          </plugin>
+        </plugins>
       </configuration>
   
       <executions>

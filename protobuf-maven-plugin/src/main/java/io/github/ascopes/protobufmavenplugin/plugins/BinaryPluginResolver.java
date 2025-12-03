@@ -68,7 +68,7 @@ final class BinaryPluginResolver {
   }
 
   Collection<ResolvedProtocPlugin> resolveMavenPlugins(
-      Collection<? extends MavenProtocPlugin> plugins,
+      Collection<? extends BinaryMavenProtocPlugin> plugins,
       Path defaultOutputDirectory
   ) throws ResolutionException {
     return resolveAll(plugins, defaultOutputDirectory, this::resolveMavenPlugin);
@@ -89,10 +89,10 @@ final class BinaryPluginResolver {
   }
 
   private Optional<ResolvedProtocPlugin> resolveMavenPlugin(
-      MavenProtocPlugin plugin,
+      BinaryMavenProtocPlugin plugin,
       Path defaultOutputDirectory
   ) throws ResolutionException {
-    var pluginBuilder = ImmutableMavenProtocPlugin.builder()
+    var pluginBuilder = ImmutableBinaryMavenProtocPlugin.builder()
         .from(plugin);
 
     if (plugin.getClassifier() == null) {

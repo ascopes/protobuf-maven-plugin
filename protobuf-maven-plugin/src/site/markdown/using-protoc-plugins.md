@@ -25,6 +25,29 @@ you are adding (see the sections below), but all plugins share some common attri
 - `skip` - a boolean that, when true, skips the execution of the plugin entirely. Defaults to
   `false`.
 
+## Variants
+
+There are a few different kinds of plugin, so you will need to instruct `protobuf-maven-plugin`
+on what type of plugin you are describing. This is achieved by specifying the `kind` attribute
+on each plugin like so:
+
+```xml
+<plugins>
+  <plugin kind="binary-maven">
+    ...
+  </plugin>
+  <plugin kind="jvm-maven">
+    ...
+  </plugin>
+  <plugin kind="path">
+    ...
+  </plugin>
+  <plugin kind="url">
+    ...
+  </plugin>
+</plugins>
+```
+
 ## Binary plugins
 
 Binary plugins are OS-specific executables that are passed to `protoc` directly, and are the 
@@ -35,6 +58,11 @@ standard way of handling plugins with `protoc`.
 If the plugin you wish to use is on Maven Central or any other Maven repository, you can reference
 that plugin directly via the group ID, artifact ID, and version (like any other Maven artifact).
 
+Binary Maven plugins should have the `kind` attribute set to `binary-maven`.
+
+**Note that this is equivalent to passing a list of `<binaryMavenPlugins>` in previous versions. 
+This old behaviour will be removed in v5.0.0.**
+
 ```xml
 <plugin>
   <groupId>io.github.ascopes</groupId>
@@ -43,13 +71,13 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
 
   <configuration>
     ...
-    <binaryMavenPlugins>
-      <binaryMavenPlugin>
+    <plugins>
+      <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-      </binaryMavenPlugin>
-    </binaryMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 
   ...
@@ -66,7 +94,12 @@ to avoid dependencies on `javax.annotation-api`.
 ### Binary plugins from the system path
 
 If you instead wish to read the executable from the system `$PATH`, then you can specify an
-executable name instead:
+executable name to find instead.
+
+Path plugins should have the `kind` attribute set to `path`.
+
+**Note that this is equivalent to passing a list of `<binaryPathPlugins>` in previous versions. This
+old behaviour will be removed in v5.0.0.**
 
 ```xml
 <plugin>
@@ -76,11 +109,11 @@ executable name instead:
 
   <configuration>
     ...
-    <binaryPathPlugins>
-      <binaryPathPlugin>
+    <plugins>
+      <plugin kind="path">
         <name>protoc-gen-grpc-java</name>
-      </binaryPathPlugin>
-    </binaryPathPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 
   ...
@@ -99,11 +132,11 @@ individual plugin objects. This will prevent the Maven plugin from failing the b
 cannot be resolved on the system path. This is useful for specific cases where resources may only be available 
 during CI builds but do not prevent the application being built locally.
 
-On Linux, MacOS, and other POSIX-like operating systems, this will read the `$PATH` environment
+On Linux, macOS, and other POSIX-like operating systems, this will read the `$PATH` environment
 variable and search for a binary named the given name case-sensitively. The executable **MUST** be
 executable by the current user (i.e. `chmod +x /path/to/binary`), otherwise it will be ignored.
 
-On Windows, this will respect the `%PATH%` environment variable (case insensitive). The path will
+On Windows, this will respect the `%PATH%` environment variable (case-insensitive). The path will
 be searched for files where their name matches the binary case-insensitively, ignoring the file
 extension. The file extension must match one of the extensions specified in the `%PATHEXT%`
 environment variable. The above example would therefore match `protoc-gen-grpc-java.EXE` on Windows,
@@ -112,7 +145,12 @@ as an example.
 ### Binary plugins from specific locations
 
 In some situations, you may wish to download plugins directly from a URL or run them from a 
-specific file system path:
+specific file system path. URL plugins help you achieve this goal.
+
+URL Maven plugins should have the `kind` attribute set to `url`.
+
+**Note that this is equivalent to passing a list of `<binaryUrlPlugins>` in previous versions. This
+old behaviour will be removed in v5.0.0.**
 
 ```xml
 <plugin>
@@ -122,18 +160,18 @@ specific file system path:
 
   <configuration>
     ...
-    <binaryUrlPlugins>
-      <binaryUrlPlugin>
+    <plugins>
+      <plugin kind="url">
         <url>file:///opt/protoc/protoc-gen-grpc-java</url>
-      </binaryUrlPlugin>
-      <binaryUrlPlugin>
+      </plugin>
+      <plugin kind="url">
         <url>ftp://company-server.internal/some-other-plugin.exe</url>
-      </binaryUrlPlugin>
-      <binaryUrlPlugin>
+      </plugin>
+      <plugin kind="url">
         <url>https://some-website.net/downloads/my-cool-protoc-plugin.exe</url>
         <options>some-option=some-value</options>
-      </binaryUrlPlugin>
-    </binaryUrlPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 
   ...
@@ -163,6 +201,11 @@ executable, you can instruct this Maven plugin to invoke the artifact as part of
 do this, simply specify the `jvmMavenPlugins` configuration property, passing in a list of
 dependencies to execute.
 
+JVM Maven plugins should have the `kind` attribute set to `jvm-maven`.
+
+**Note that this is equivalent to passing a list of `<jvmMavenPlugins>` in previous versions. This
+old behaviour will be removed in v5.0.0.**
+
 ```xml
 <plugin>
   <groupId>io.github.ascopes</groupId>
@@ -171,14 +214,14 @@ dependencies to execute.
 
   <configuration>
     ...
-    <jvmMavenPlugins>
-      <jvmMavenPlugin>
+    <plugins>
+      <plugin kind="jvm-maven">
         <!-- Use the JAR that Salesforce distributes -->
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
-      </jvmMavenPlugin>
-    </jvmMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 
   ...
@@ -194,14 +237,12 @@ manifest, then you can specify (or override) the main class via the `mainClass`
 attribute.
 
 ```xml
-<jvmMavenPlugins>
-  <jvmMavenPlugin>
-    <groupId>${project.parent.groupId}</groupId>
-    <artifactId>my-super-awesome-plugin</artifactId>
-    <version>${project.parent.version}</version>
-    <mainClass>org.example.protocplugin.MySuperAwesomePluginMainClass</mainClass>
-  </jvmMavenPlugin>
-</jvmMavenPlugins>
+<plugin kind="jvm-maven">
+  <groupId>${project.parent.groupId}</groupId>
+  <artifactId>my-super-awesome-plugin</artifactId>
+  <version>${project.parent.version}</version>
+  <mainClass>org.example.protocplugin.MySuperAwesomePluginMainClass</mainClass>
+</plugin>
 ```
 
 ### Commandline arguments
@@ -210,19 +251,19 @@ Since JVM plugins work by internally bootstrapping a Java process per invocation
 options here.
 
 If you wish to provide some commandline arguments, you can provide the `<jvmArgs>` parameter in each
-`<jvmMavenPlugin>` block. This is a list of string arguments. Of course, support for this relies entirely
+`<plugin kind="jvm-maven">` block. This is a list of string arguments. Of course, support for this relies entirely
 on the plugin supporting the use of commandline arguments in the first place.
 
 For example:
 
 ```xml
-<jvmMavenPlugin>
+<plugin kind="jvm-maven">
   ...
   <jvmArgs>
     <jvmArg>--logger.level=DEBUG</jvmArg>
     <jvmArg>--include-comments</jvmArg>
   </jvmArgs>
-</jvmMavenPlugin>
+</plugin>
 ```
 
 ### JVM configuration arguments
@@ -235,7 +276,7 @@ where supported. This optimises build times for short-lived JVM processes. Overr
 An example of providing custom arguments would be:
 
 ```xml
-<jvmMavenPlugin>
+<plugin kind="jvm-maven">
   ...
   <jvmConfigArgs>
     <jvmConfigArg>-Xshare:off</jvmConfigArg>
@@ -243,7 +284,7 @@ An example of providing custom arguments would be:
     <jvmConfigArg>-Xmx500m</jvmConfigArg>
     <jvmConfigArg>-Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG</jvmConfigArg>
   </jvmConfigArgs>
-</jvmMavenPlugin>
+</plugin>
 ```
 
 ## Mixing plugins
@@ -253,28 +294,26 @@ Multiple plugins can be provided if needed. For example, if you are using the
 then you can provide the following:
 
 ```xml
-<plugin>
+<plugins>
   <groupId>io.github.ascopes</groupId>
   <artifactId>protobuf-maven-plugin</artifactId>
   <version>...</version>
 
   <configuration>
     ...
-    <binaryMavenPlugins>
-      <binaryMavenPlugin>
+    <plugins>
+      <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
-      </binaryMavenPlugin>
-    </binaryMavenPlugins>
-    <jvmMavenPlugins>
-      <jvmMavenPlugin>
+      </plugin>
+      <plugin kind="jvm-maven">
         <!-- Use the JAR that Salesforce distributes -->
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
-      </jvmMavenPlugin>
-    </jvmMavenPlugins>
+      </plugin>
+    </plugins>
   </configuration>
 
   ...
@@ -285,7 +324,7 @@ It would also be valid to use a binary plugin for Salesforce here if you prefer.
 
 ## Plugin ordering
 
-Plugins are inheriantly orderable and can be ordered relative to eachother, as well as
+Plugins are inherently orderable and can be ordered relative to each-other, as well as
 relative to the built-in generators in `protoc` and the generation of descriptors.
 
 By default, plugins are applied with the same precedence as descriptors and languages,
@@ -295,11 +334,11 @@ plugin first, or to a positive integer to run the plugin last.
 The order can be specified with the `order` attribute on any plugin block. For example:
 
 ```xml
-<jvmMavenPlugin>
+<plugin kind="jvm-maven">
   ...
   <!-- Always run before generating Java sources. -->
   <order>-999</order>
-</jvmMavenPlugin>
+</plugin>
 ```
 
 The order that generation is performed in for equally-ordered plugins is undefined, but
@@ -321,9 +360,9 @@ If you wish for plugins in the child POM to be appended to the list in the paren
 add the `combine.children="append"` XML attribute to the parent POM elements:
 
 ```xml
-<binaryMavenPlugins combine.children="append">
+<plugins combine.children="append">
   ...
-</binaryMavenPlugins>
+</plugins>
 ```
 
 You can alternatively use `combine.self="override"` if you want child POMs to totally replace

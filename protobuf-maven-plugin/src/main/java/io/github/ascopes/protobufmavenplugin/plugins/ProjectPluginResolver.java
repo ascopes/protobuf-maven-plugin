@@ -51,25 +51,34 @@ public final class ProjectPluginResolver {
   public Collection<ResolvedProtocPlugin> resolveProjectPlugins(
       GenerationRequest request
   ) throws ResolutionException {
-    // XXX: we could run this in parallel
+    // XXX: we could run this in parallel?
+
     var plugins = new ArrayList<ResolvedProtocPlugin>();
     plugins.addAll(binaryPluginResolver.resolveMavenPlugins(
-        request.getBinaryMavenPlugins(),
+        extract(request, BinaryMavenProtocPlugin.class),
         request.getOutputDirectory()
     ));
     plugins.addAll(binaryPluginResolver.resolvePathPlugins(
-        request.getBinaryPathPlugins(),
+        extract(request, PathProtocPlugin.class),
         request.getOutputDirectory()
     ));
     plugins.addAll(binaryPluginResolver.resolveUrlPlugins(
-        request.getBinaryUrlPlugins(),
+        extract(request, UriProtocPlugin.class),
         request.getOutputDirectory()
     ));
     plugins.addAll(jvmPluginResolver.resolveMavenPlugins(
-        request.getJvmMavenPlugins(),
+        extract(request, JvmMavenProtocPlugin.class),
         request.getOutputDirectory()
     ));
     plugins.trimToSize();
     return Collections.unmodifiableList(plugins);
+  }
+
+  private <T> Collection<T> extract(GenerationRequest request, Class<T> implementationType) {
+    return request.getProtocPlugins()
+        .stream()
+        .filter(implementationType::isInstance)
+        .map(implementationType::cast)
+        .toList();
   }
 }

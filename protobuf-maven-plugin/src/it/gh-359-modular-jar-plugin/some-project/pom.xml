@@ -37,13 +37,13 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <jvmMavenPlugins>
-            <jvmMavenPlugin>
+          <plugins>
+            <plugin kind="jvm-maven">
               <groupId>${project.groupId}</groupId>
               <artifactId>protoc-plugin-frontend</artifactId>
               <version>${project.version}</version>
-            </jvmMavenPlugin>
-          </jvmMavenPlugins>
+            </plugin>
+          </plugins>
 
           <javaEnabled>false</javaEnabled>
         </configuration>

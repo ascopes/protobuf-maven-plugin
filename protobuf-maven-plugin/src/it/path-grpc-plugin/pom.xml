@@ -80,11 +80,11 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
-          <binaryPathPlugins>
-            <binaryPathPlugin>
+          <plugins>
+            <plugin kind="path">
               <name>protoc-gen-grpc-java</name>
-            </binaryPathPlugin>
-          </binaryPathPlugins>
+            </plugin>
+          </plugins>
           <protoc>PATH</protoc>
         </configuration>
 
