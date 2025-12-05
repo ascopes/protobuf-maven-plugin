@@ -5,26 +5,6 @@
 If you wish to generate gRPC stubs, or outputs for other languages like Scala that are not already
 covered by the protoc executable, you can add custom plugins to your build.
 
-## Common options
-
-Each plugin is defined as an XML object with various attributes. Many depend on the type of plugin
-you are adding (see the sections below), but all plugins share some common attributes:
-
-- `outputDirectory` - directory to write generated code to. The default is for this to be
-  unspecified, which will result in the output directory specified on the Maven plugin to be used
-  instead.
-- `registerAsCompilationRoot` - overrides the project-global setting for registering output
-  code directories as compilation roots for future compiler steps in the Maven build. If 
-  unspecified/null, the project global setting will be used. Otherwise, the explicitly provided
-  value will be used instead.
-- `options` - a string value that can be passed to the plugin as a parameter. Defaults to being
-  unspecified.
-- `order` - an integer that controls the plugin execution order relative to other plugins.
-  Smaller numbers make plugins run before those with larger numbers. Defaults to `100000`, meaning
-  you can place plugins before or after those that do not define an order if you wish.
-- `skip` - a boolean that, when true, skips the execution of the plugin entirely. Defaults to
-  `false`.
-
 ---
 
 ## Variants
@@ -107,6 +87,7 @@ If you instead wish to read the executable from the system `$PATH`, then you can
 executable name to find instead.
 
 Path plugins should have the `kind` attribute set to `path`.
+
 
 **Note that this is equivalent to passing a list of `<binaryPathPlugins>` in previous versions. This
 old behaviour will be removed in v5.0.0.**
