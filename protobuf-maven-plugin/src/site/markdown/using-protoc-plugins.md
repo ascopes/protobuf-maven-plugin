@@ -101,13 +101,6 @@ This old behaviour will be removed in v5.0.0.**
 | `registerAsCompilationRoot` | `boolean` | `true`            | If `true`, Maven will consider the output sources as compilable sources for `maven-compiler-plugin`. |
 | `skip`                      | `boolean` | `false`           | Set to `true` to skip resolution and invocation. |
 
-Note that for gRPC versions prior to 1.74.0, you should also pass the following options
-to avoid dependencies on `javax.annotation-api`.
-
-```xml
-<options>@generated=omit</options>
-```
-
 ### Binary plugins from the system path
 
 If you instead wish to read the executable from the system `$PATH`, then you can specify an
@@ -148,13 +141,6 @@ old behaviour will be removed in v5.0.0.**
 | `registerAsCompilationRoot` | `boolean`      | `true`            | If `true`, Maven will consider the output sources as compilable sources for `maven-compiler-plugin`. |
 | `skip`                      | `boolean`      | `false`           | Set to `true` to skip resolution and invocation. |
 
-
-Note that for gRPC versions prior to 1.74.0, you should also pass the following options
-to avoid dependencies on `javax.annotation-api`.
-
-```xml
-<options>@generated=omit</options>
-```
 
 #### Skipping if unavailable
 
@@ -222,16 +208,22 @@ old behaviour will be removed in v5.0.0.**
 | `registerAsCompilationRoot` | `boolean`      | `true`            | If `true`, Maven will consider the output sources as compilable sources for `maven-compiler-plugin`. |
 | `skip`                      | `boolean`      | `false`           | Set to `true` to skip resolution and invocation. |
 
+#### Skipping if unavailable
+
 You can also mark these plugins as being optional by setting `<optional>true</optional>` on the
 individual plugin objects. This will prevent the Maven plugin from failing the build if the `protoc` plugin
 cannot be resolved. This is useful for specific cases where resources may only be available during CI builds but do not
 prevent the application being built locally. If set to optional, then any "not found" response provided by
 the underlying URL protocol will be ignored.
 
+#### Digests
+
 If you wish to verify that the content of a URL's resource matches the expected digest, you can
 provide the `digest` attribute to verify the integrity. This takes the format
 `<digest>md5:6c224d84618c71e2ebb46dd9c4459aa6</digest>`, and supports `md5`, `sha1`, `sha256`,
 `sha512`, and any other JDK-provided message digest types.
+
+#### Caveats
 
 This is not recommended outside specific use cases, and care should be taken to ensure the
 legitimacy and security of any URLs being provided prior to adding them.
@@ -377,12 +369,14 @@ then you can provide the following:
         <groupId>io.grpc</groupId>
         <artifactId>protoc-gen-grpc-java</artifactId>
         <version>${grpc.version}</version>
+        <order>1</order>
       </plugin>
       <plugin kind="jvm-maven">
         <!-- Use the JAR that Salesforce distributes -->
         <groupId>com.salesforce.servicelibs</groupId>
         <artifactId>reactor-grpc</artifactId>
         <version>${reactor-grpc.version}</version>
+        <order>2</order>
       </plugin>
     </plugins>
   </configuration>
