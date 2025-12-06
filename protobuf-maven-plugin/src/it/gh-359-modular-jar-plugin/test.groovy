@@ -34,8 +34,7 @@ Path expectedScriptsDirectory = baseProjectDir.resolve("some-project")
     .resolve("protobuf-maven-plugin")
     .resolve("generate")
     .resolve("default")
-    .resolve("plugins")
-    .resolve("jvm")
+    .resolve("java-apps")
 
 // Verify compilation succeeded but that no JAR was created for the plugin itself.
 assertThat(protocPluginFrontendTargetDir).isDirectory()

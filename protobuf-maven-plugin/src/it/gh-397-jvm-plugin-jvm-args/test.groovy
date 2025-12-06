@@ -18,8 +18,6 @@ import java.nio.file.Path
 import static org.assertj.core.api.Assertions.assertThat
 
 Path baseProjectDir = basedir.toPath().toAbsolutePath()
-Path protocPluginTargetDir = baseProjectDir.resolve("protoc-plugin")
-    .resolve("target")
 Path expectedGeneratedFile = baseProjectDir.resolve("some-project")
     .resolve("target")
     .resolve("generated-sources")

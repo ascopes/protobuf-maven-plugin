@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.jar.Manifest;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -108,6 +109,8 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
     }
 
     requireNonNullElse(app.getJvmConfigArgs(), DEFAULT_JVM_ARGS)
+        .stream()
+        .filter(checkValidJvmConfigArg(app))
         .forEach(args::add);
 
     // First dependency is always the entrypoint due to how Aether resolves
@@ -118,6 +121,24 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
         .forEach(args::add);
 
     return args;
+  }
+
+  private Predicate<String> checkValidJvmConfigArg(JavaApp app) {
+    return arg -> {
+      // JVM args must begin with a hyphen and be greater than zero in size,
+      // otherwise Java may interpret them as being the application entrypoint
+      // class and accidentally clobber the invocation.
+      if (arg.startsWith("-") && arg.length() > 1) {
+        return true;
+      }
+
+      log.warn(
+          "Dropping illegal JVM argument \"{}\" for app \"{}\"",
+          arg,
+          app
+      );
+      return false;
+    };
   }
 
   private String determineMainClass(JavaApp app) throws ResolutionException {
