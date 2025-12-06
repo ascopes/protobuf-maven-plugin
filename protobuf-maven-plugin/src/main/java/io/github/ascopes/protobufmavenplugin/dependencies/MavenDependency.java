@@ -16,8 +16,8 @@
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import java.util.Set;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
 
@@ -27,13 +27,13 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 3.3.1
  */
+@Data
 @Immutable
-@Modifiable
 public abstract class MavenDependency extends MavenArtifact {
 
   public abstract @Nullable DependencyResolutionDepth getDependencyResolutionDepth();
 
-  public abstract Set<MavenExclusionBean> getExclusions();
+  public abstract Set<MavenExclusion> getExclusions();
 
   // Must be overridden to keep immutables happy.
   @Override

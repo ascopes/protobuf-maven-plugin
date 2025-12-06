@@ -18,7 +18,8 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.util.List;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.datatype.Data;
+import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -30,8 +31,9 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
-@Modifiable
-@KindHint(kind = "jvm-maven", implementation = JvmMavenProtocPluginBean.class)
+@Data
+@Immutable
+@KindHint("jvm-maven")
 public abstract non-sealed class JvmMavenProtocPlugin
     extends MavenArtifact
     implements ProtocPlugin {
