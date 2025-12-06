@@ -522,6 +522,9 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code kind} attribute must be set on each to allow determining which type of plugin is
    * being specified.
    *
+   * <p>See <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">
+   * "using protoc plugins"</a> for usage examples and documentation.
+   *
    * @since 4.1.0
    */
   @Parameter
