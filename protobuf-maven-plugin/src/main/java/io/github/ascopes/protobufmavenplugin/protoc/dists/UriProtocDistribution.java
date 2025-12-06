@@ -16,8 +16,10 @@
 package io.github.ascopes.protobufmavenplugin.protoc.dists;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.net.URI;
 import java.util.Optional;
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
@@ -29,13 +31,14 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since TBC
  */
+@KindHint(kind = "url", implementation = UriProtocDistributionBean.class)
 @Modifiable
 public abstract non-sealed class UriProtocDistribution
     implements ProtocDistribution {
 
-  // TODO(ascopes): make use of 'URI' vs 'URL' consistent for protoc plugins
-  public abstract URI getUri();
+  public abstract URI getUrl();
 
+  @Default
   public @Nullable Digest getDigest() {
     return null;
   }
@@ -43,7 +46,7 @@ public abstract non-sealed class UriProtocDistribution
   @Override
   public String toString() {
     var sb = new StringBuilder()
-        .append(getUri());
+        .append(getUrl());
 
     Optional.ofNullable(getDigest())
         .map(Digest::toString)

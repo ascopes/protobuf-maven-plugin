@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.protoc.dists;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
 
@@ -27,6 +28,7 @@ import org.jspecify.annotations.NonNull;
  * @author Ashley Scopes
  * @since TBC
  */
+@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocDistributionBean.class)
 @Modifiable
 public abstract non-sealed class BinaryMavenProtocDistribution
     extends MavenArtifact
