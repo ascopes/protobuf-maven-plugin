@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.nio.file.Path
-
-import static org.assertj.core.api.Assertions.assertThat
-
-Path baseProjectDir = basedir.toPath().toAbsolutePath()
-Path expectedGeneratedFile = baseProjectDir.resolve("some-project")
-    .resolve("target")
-    .resolve("generated-sources")
-    .resolve("protobuf")
-    .resolve("jvm-args.txt")
-
-// Verify the JVM plugin produced the expected output file
-assertThat(expectedGeneratedFile)
-    .exists()
-    .isRegularFile()
-    .content()
-    .containsOnlyOnce("this.should.be.set=if it works\n")
-
-return true
+/**
+ * Components for converting Java applications into native executables.
+ */
+package io.github.ascopes.protobufmavenplugin.java;

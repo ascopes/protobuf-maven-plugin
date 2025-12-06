@@ -13,22 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.nio.file.Path
+package io.github.ascopes.protobufmavenplugin.java;
 
-import static org.assertj.core.api.Assertions.assertThat
+import java.nio.file.Path;
+import java.util.List;
+import org.immutables.value.Value.Immutable;
+import org.jspecify.annotations.Nullable;
 
-Path baseProjectDir = basedir.toPath().toAbsolutePath()
-Path expectedGeneratedFile = baseProjectDir.resolve("some-project")
-    .resolve("target")
-    .resolve("generated-sources")
-    .resolve("protobuf")
-    .resolve("jvm-args.txt")
+/**
+ * Descriptor for a Java application.
+ *
+ * @author Ashley Scopes
+ * @since TBC
+ */
+@Immutable
+public interface JavaApp {
+  String getUniqueName();
 
-// Verify the JVM plugin produced the expected output file
-assertThat(expectedGeneratedFile)
-    .exists()
-    .isRegularFile()
-    .content()
-    .containsOnlyOnce("this.should.be.set=if it works\n")
+  List<Path> getDependencies();
 
-return true
+  @Nullable List<String> getJvmArgs();
+
+  @Nullable List<String> getJvmConfigArgs();
+
+  // Null if unset or inferred from MANIFEST.MF.
+  @Nullable String getMainClass();
+}
