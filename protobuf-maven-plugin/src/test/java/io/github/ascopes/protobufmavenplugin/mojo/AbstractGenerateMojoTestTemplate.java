@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -46,6 +47,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.BinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -112,9 +114,10 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         .thenReturn(tempDir.toFile());
 
     mojo = newInstance();
+    mojo.protocDistributionConverter = mock();
     mojo.sourceCodeGenerator = sourceCodeGenerator;
     mojo.mavenProject = mavenProject;
-    mojo.protoc = "4.26.0";
+    mojo.protoc = mock(BinaryMavenProtocDistribution.class);
   }
 
   abstract A newInstance();
@@ -695,7 +698,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullSource
   @ValueSource(strings = "non-null")
   @ParameterizedTest(name = "for {0} digest")
-  void protocDigestIsSetInTheRequest(@Nullable String digestValue) throws Throwable {
+  @SuppressWarnings("removal")
+  void protocDistributionDigestIsSetInTheRequest(@Nullable String digestValue) throws Throwable {
     // Given
     var digest = Optional.ofNullable(digestValue)
         .map(v -> Digest.compute("SHA-1", v))
@@ -811,7 +815,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   @UsesSystemProperties
   @SuppressWarnings("NullAway")
-  void whenProtocNullExpectExceptionToBeRaised() {
+  void whenProtocDistributionNullExpectExceptionToBeRaised() {
     // Given
     mojo.protoc = null;
 
@@ -825,9 +829,13 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @DisplayName("when protobuf.compiler.version is set, expect that to be used")
   @Test
   @UsesSystemProperties
-  void whenProtocVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
+  void whenProtocDistributionVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
     // Given
-    mojo.protoc = "1.2.3";
+    var expectedDistribution = mock(BinaryMavenProtocDistribution.class);
+    when(mojo.protocDistributionConverter.fromString(any()))
+        .thenReturn(expectedDistribution);
+
+    mojo.protoc = mock(BinaryMavenProtocDistribution.class);
     System.setProperty("protobuf.compiler.version", "4.5.6");
 
     // When
@@ -837,15 +845,22 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getProtocVersion()).isEqualTo("4.5.6");
+    assertThat(actualRequest.getProtocDistribution())
+        .isSameAs(expectedDistribution);
+
+    verify(mojo.protocDistributionConverter).fromString("4.5.6");
+    verifyNoMoreInteractions(mojo.protocDistributionConverter);
   }
 
   @DisplayName("when protobuf.compiler.version is not set, expect the parameter to be used")
   @Test
   @UsesSystemProperties
-  void whenProtocVersionNotSetInSystemPropertiesExpectParameterToBeUsed() throws Throwable {
+  void whenProtocDistributionVersionNotSetInSystemPropertiesExpectParameterToBeUsed()
+      throws Throwable {
+
     // Given
-    mojo.protoc = "1.2.3";
+    var protoc = mock(BinaryMavenProtocDistribution.class);
+    mojo.protoc = protoc;
 
     // When
     mojo.execute();
@@ -854,7 +869,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getProtocVersion()).isEqualTo("1.2.3");
+    assertThat(actualRequest.getProtocDistribution())
+        .isSameAs(protoc);
   }
 
   @DisplayName("registerAsCompilationRoot is set to the specified value")

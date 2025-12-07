@@ -28,11 +28,13 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
+import io.github.ascopes.protobufmavenplugin.plexus.ProtocDistributionConverter;
 import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.ProtocDistribution;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -64,7 +66,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private static final String DEFAULT_FALSE = "false";
   private static final String DEFAULT_TRUE = "true";
   private static final String DEFAULT_TRANSITIVE = "TRANSITIVE";
-
   private static final String COMPILER_VERSION_PROPERTY = "protobuf.compiler.version";
 
   private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
@@ -94,6 +95,12 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Inject
   MavenProjectHelper mavenProjectHelper;
+
+  /**
+   * Converter for {@link ProtocDistribution} types.
+   */
+  @Inject
+  ProtocDistributionConverter protocDistributionConverter;
 
   /**
    * Provide additional arguments to pass to the {@code protoc} executable.
@@ -531,48 +538,43 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<ProtocPlugin> plugins;
 
   /**
-   * Optional digest to verify {@code protoc} against.
-   *
-   * <p>Generally, users should not need to provide this, as the Maven Central
-   * {@code protoc} binaries will already be digest-verified as part of distribution.
-   * Users may wish to specify this if using a {@code PATH}-based binary, or using a URL for
-   * {@code protoc}.
-   *
-   * <p>This is a string in the format {@code sha512:1a2b3c...}, using any
-   * message digest algorithm supported by the current JDK.
-   *
-   * @since 3.5.0
-   */
-  @Parameter(property = "protobuf.compiler.digest")
-  @Nullable Digest protocDigest;
-
-  /**
    * Where to find {@code protoc} or which version to download.
    *
    * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
    * is in use.
    *
-   * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
-   * being downloaded. This is useful if users need to use an unsupported architecture/OS, or a
-   * development version of {@code protoc}.
+   * <p>This can take several types of value. These fall into two categories: strings, and nested
+   * objects.
    *
-   * <p>Users may also specify a URL. See the user guide for a list of supported protocols.
+   * <h4>Valid string values</h4>
    *
-   * <p>Note that specifying {@code -Dprotobuf.compiler.version} in the {@code MAVEN_OPTS} or on
-   * the command line overrides the version specified in the POM. This enables users to easily
-   * override the version of {@code protoc} in use if their system is unable to support the
-   * version specified in the POM. Termux users in particular will find
-   * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
-   * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
+   * <ul>
+   *   <li>A version number - will pull the given version of
+   *     {@code mvn:com.google.protobuf:protoc:exe}, working out the correct classifier to use
+   *     for the given OS and CPU.</li>
+   *   <li>The literal string {@code PATH} - will look for an executable named {@code protoc}
+   *     on the system path.</li>
+   *   <li>A URL to a {@code protoc} binary to download.</li>
+   * </ul>
    *
-   * <p>Path resolution on Linux, macOS, and other POSIX-like systems, resolution looks
-   * for an executable binary matching the exact name in any directory in the {@code $PATH}
-   * environment variable.
+   * <h4>Valid object values</h4>
    *
-   * <p>Path resolution on Windows, the case-insensitive {@code %PATH%} environment variable is
-   * searched for an executable that matches the name, ignoring case and any file extension.
-   * The file extension is expected to match any extension in the {@code %PATHEXT%} environment
-   * variable.
+   * <p>Users who wish to have more control over this functionality can specify the exact
+   * coordinates and distribution type to resolve based upon their use case. To do this, the
+   * object must be given the {@code kind} attribute. For example:
+   *
+   * <pre><code>
+   *   &lt;protoc kind="binary-maven"&gt;
+   *     &lt;groupId&gt;com.google.protobuf&lt;/groupId&gt;
+   *     &lt;artifactId&gt;protoc&lt;/artifactId&gt;
+   *     &lt;version&gt;4.31.0&lt;/version&gt;
+   *     &lt!-- Classifier is inferred if unspecified --&gt;
+   *     &lt;type&gt;exe&lt;/type&gt;
+   *   &lt;/protoc&gt;
+   * </code></pre>
+   *
+   * <p>There are multiple supported kinds for this object. See the plugin developer guide for more
+   * details.
    *
    * @since 0.0.1
    */
@@ -581,7 +583,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       required = true,
       property = COMPILER_VERSION_PROPERTY
   )
-  String protoc;
+  ProtocDistribution protoc;
 
   /**
    * Generate Python sources from the protobuf sources.
@@ -840,6 +842,26 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter
   @Nullable List<JvmMavenProtocPluginBean> jvmMavenPlugins;
 
+  /**
+   * Optional digest to verify {@code protoc} against.
+   *
+   * <p>Generally, users should not need to provide this, as the Maven Central
+   * {@code protoc} binaries will already be digest-verified as part of distribution.
+   * Users may wish to specify this if using a {@code PATH}-based binary, or using a URL for
+   * {@code protoc}. <strong>For all other cases, and cases where the {@code protoc} distribution
+   * is already specified, this will be ignored</strong>.
+   *
+   * <p>This is a string in the format {@code sha512:1a2b3c...}, using any
+   * message digest algorithm supported by the current JDK.
+   *
+   * @since 3.5.0
+   * @deprecated Users should now pass an object to {@link #protoc} instead, specifying the digest
+   *     there. This option will be removed in v5.
+   */
+  @Deprecated(forRemoval = true)
+  @Parameter(property = "protobuf.compiler.digest")
+  @Nullable Digest protocDigest;
+
   /*
    * Implementation-specific details.
    */
@@ -942,8 +964,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
         .protocDigest(protocDigest)
+        .protocDistribution(protocDistribution())
         .protocPlugins(protocPlugins())
-        .protocVersion(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sanctionedExecutablePath(sanctionedExecutablePath)
         .sourceDependencies(nonNullList(sourceDependencies))
@@ -986,13 +1008,16 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .orElseGet(this::defaultOutputDirectory);
   }
 
-  private String protoc() {
+  @Deprecated(forRemoval = true)
+  private ProtocDistribution protocDistribution() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
+    // Note that we will remove this functionality in v5.0.0 to restore the default Maven
+    // semantics, moving forwards.
     var overriddenVersion = System.getProperty(COMPILER_VERSION_PROPERTY);
     return overriddenVersion == null
         ? requireNonNull(protoc, "<protoc/> has not been set")
-        : overriddenVersion;
+        : protocDistributionConverter.fromString(overriddenVersion);
   }
 
   @Deprecated(forRemoval = true)

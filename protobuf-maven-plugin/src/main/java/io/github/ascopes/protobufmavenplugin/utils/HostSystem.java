@@ -126,10 +126,6 @@ public final class HostSystem {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("linux");
   }
 
-  public boolean isProbablyTermux() {
-    return javaVendor.equalsIgnoreCase("termux");
-  }
-
   public boolean isProbablyMacOs() {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("mac");
   }
