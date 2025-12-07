@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * OS-specific shell script and argline file.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.1
  */
 @Description("Converts Java applications into native executable formats.")
 @MojoExecutionScoped

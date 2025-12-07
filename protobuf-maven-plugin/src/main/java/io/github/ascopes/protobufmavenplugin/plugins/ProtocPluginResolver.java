@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * different places.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.1
  */
 @Description("Resolves and packages protoc plugins from various remote and local locations")
 @MojoExecutionScoped

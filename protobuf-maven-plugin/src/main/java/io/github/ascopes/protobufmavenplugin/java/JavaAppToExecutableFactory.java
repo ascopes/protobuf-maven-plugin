@@ -23,7 +23,7 @@ import java.nio.file.Path;
  * format.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.1
  */
 public interface JavaAppToExecutableFactory {
 

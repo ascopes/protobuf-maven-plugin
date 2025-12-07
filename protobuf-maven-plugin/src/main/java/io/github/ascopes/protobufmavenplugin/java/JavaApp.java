@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * Descriptor for a Java application.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 4.1.1
  */
 @Immutable
 public interface JavaApp {
