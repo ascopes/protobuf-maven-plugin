@@ -15,21 +15,28 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
+import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.java.ImmutableJavaApp;
+import io.github.ascopes.protobufmavenplugin.java.JavaAppToExecutableFactory;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.BinaryMavenProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.BinaryMavenProtocDistributionBean;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.JvmMavenProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.PathProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.ProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.dists.UriProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.urls.UriResourceFetcher;
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -48,108 +55,138 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class ProtocResolver {
 
-  private static final String EXECUTABLE_NAME = "protoc";
-  private static final String GROUP_ID = "com.google.protobuf";
-  private static final String ARTIFACT_ID = "protoc";
-  private static final String TYPE = "exe";
-
   private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
-  private final HostSystem hostSystem;
   private final MavenArtifactPathResolver artifactPathResolver;
+  private final JavaAppToExecutableFactory javaAppToExecutableFactory;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UriResourceFetcher urlResourceFetcher;
 
   @Inject
   public ProtocResolver(
-      HostSystem hostSystem,
       MavenArtifactPathResolver artifactPathResolver,
+      JavaAppToExecutableFactory javaAppToExecutableFactory,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UriResourceFetcher urlResourceFetcher
   ) {
-    this.hostSystem = hostSystem;
     this.artifactPathResolver = artifactPathResolver;
+    this.javaAppToExecutableFactory = javaAppToExecutableFactory;
     this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Optional<Path> resolve(
-      String version,
-      @Nullable Digest digest
+  public Path resolveProtoc(
+      ProtocDistribution distribution,
+      @Nullable Digest deprecatedGlobalDigest
   ) throws ResolutionException {
-    if (version.equalsIgnoreCase("LATEST")) {
-      log.warn(
-          "You have set the protoc version to 'latest'. This will likely not behave as you "
-              + "would expect, since Google have released incorrect version numbers of protoc "
-              + "in the past. To remove this warning, please use a pinned version instead."
-      );
-    }
-
-    Optional<Path> path;
-
-    if (version.equalsIgnoreCase("PATH")) {
-      path = systemPathResolver.resolve(EXECUTABLE_NAME);
-    } else if (version.contains(":")) {
-      path = resolveFromUri(version);
+    if (distribution instanceof BinaryMavenProtocDistribution distributionImpl) {
+      return resolveBinaryMavenProtoc(distributionImpl);
+    } else if (distribution instanceof PathProtocDistribution distributionImpl) {
+      return resolvePathProtoc(distributionImpl, deprecatedGlobalDigest);
+    } else if (distribution instanceof UriProtocDistribution distributionImpl) {
+      return resolveUriProtoc(distributionImpl, deprecatedGlobalDigest);
+    } else if (distribution instanceof JvmMavenProtocDistribution distributionImpl) {
+      return resolveJvmMavenProtoc(distributionImpl);
     } else {
-      path = resolveFromMavenRepositories(version);
+      // Unreachable, but needed until we use a Java version with pattern matching
+      // for types.
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private Path resolveBinaryMavenProtoc(
+      BinaryMavenProtocDistribution distribution
+  ) throws ResolutionException {
+    if (distribution.getClassifier() == null) {
+      var newDistribution = new BinaryMavenProtocDistributionBean()
+          .from(distribution);
+      newDistribution.setClassifier(platformClassifierFactory.getClassifier("protoc"));
+      distribution = newDistribution;
     }
 
-    if (path.isEmpty()) {
-      return Optional.empty();
-    }
+    return artifactPathResolver.resolveExecutable(distribution);
+  }
 
-    var resolvedPath = path.get();
+  private Path resolvePathProtoc(
+      PathProtocDistribution distribution,
+      @Nullable Digest deprecatedGlobalDigest
+  ) throws ResolutionException {
+    var path = systemPathResolver.resolve(distribution.getName())
+        .orElseThrow(() -> new ResolutionException(
+            "No protoc binary named '" + distribution.getName() + "' found on the system path"
+        ));
+    verifyDigest(path, distribution.getDigest(), deprecatedGlobalDigest);
+    return path;
+  }
+
+  private Path resolveUriProtoc(
+      UriProtocDistribution distribution,
+      @Nullable Digest deprecatedGlobalDigest
+  ) throws ResolutionException {
+    var path = urlResourceFetcher
+        .fetchFileFromUri(distribution.getUrl(), "exe", true)
+        .orElseThrow(() -> new ResolutionException(
+            "No protoc binary found at '" + distribution.getUrl() + "'"
+        ));
+    verifyDigest(path, distribution.getDigest(), deprecatedGlobalDigest);
+    return path;
+  }
+
+  private Path resolveJvmMavenProtoc(
+      JvmMavenProtocDistribution distribution
+  ) throws ResolutionException {
+    log.debug(
+        "Resolving JVM-based Maven protoc plugin \"{}\" and generating bootstrap scripts",
+        distribution
+    );
+
+    try {
+      var dependencies = artifactPathResolver
+          .resolveDependencies(
+              List.of(distribution),
+              DependencyResolutionDepth.TRANSITIVE,
+              Set.of("compile", "runtime", "system"),
+              false
+          )
+          .stream()
+          .toList();
+
+      var app = ImmutableJavaApp.builder()
+          .addAllDependencies(dependencies)
+          .jvmArgs(distribution.getJvmArgs())
+          .jvmConfigArgs(distribution.getJvmConfigArgs())
+          .mainClass(distribution.getMainClass())
+          .uniqueName("protoc")
+          .build();
+
+      return javaAppToExecutableFactory.toExecutable(app);
+    } catch (ResolutionException ex) {
+      throw new ResolutionException("Failed to resolve protoc " + distribution + ": " + ex, ex);
+    }
+  }
+
+  private void verifyDigest(
+      Path path,
+      @Nullable Digest distributionDigest,
+      @Nullable Digest deprecatedGlobalDigest
+  ) throws ResolutionException {
+    // XXX: remove handling for digest parameter outside PathProtocDistribution object in v5.0.0
+    var digest = Optional.ofNullable(distributionDigest)
+        .orElse(deprecatedGlobalDigest);
 
     if (digest != null) {
-      log.debug("Verifying digest of \"{}\" against \"{}\"", resolvedPath, digest);
-      try (var is = new BufferedInputStream(Files.newInputStream(resolvedPath))) {
+      log.debug("Verifying digest of \"{}\" against \"{}\"", path, digest);
+      try (var is = new BufferedInputStream(Files.newInputStream(path))) {
         digest.verify(is);
       } catch (IOException ex) {
         throw new ResolutionException(
-            "Failed to compute digest of \"" + resolvedPath + "\": " + ex,
+            "Failed to compute digest of \"" + path + "\": " + ex,
             ex
         );
       }
     }
-
-    return path;
-  }
-
-  private Optional<Path> resolveFromUri(String uriString) throws ResolutionException {
-    try {
-      var uri = new URI(uriString);
-      return urlResourceFetcher.fetchFileFromUri(uri, ".exe", true);
-    } catch (URISyntaxException ex) {
-      throw new ResolutionException("Failed to parse URI \"" + uriString + "\"", ex);
-    }
-  }
-
-  private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
-    if (hostSystem.isProbablyTermux()) {
-      log.warn(
-          "It looks like you are using Termux! If you are using an environment such as Termux, "
-              + "then you may find that the Maven-distributed versions of protoc fail to run. "
-              + "This is due to Android's kernel restricting the types of system calls that can "
-              + "be made. You may wish to run 'pkg in protobuf' to install a modified version of "
-              + "protoc, and reinvoke Maven with '-Dprotobuf.compiler.version=PATH' to force "
-              + "this Maven plugin to use a compatible version. Also ensure you have the latest "
-              + "JDK installed in this case. If you do not encounter any issues, then great! You "
-              + "can safely ignore this warning."
-      );
-    }
-
-    var artifact = ImmutableMavenDependency.builder()
-        .groupId(GROUP_ID)
-        .artifactId(ARTIFACT_ID)
-        .version(version)
-        .type(TYPE)
-        .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
-        .build();
-
-    return Optional.of(artifactPathResolver.resolveExecutable(artifact));
   }
 }
