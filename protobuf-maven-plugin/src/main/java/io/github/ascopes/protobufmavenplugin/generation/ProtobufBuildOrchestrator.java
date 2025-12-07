@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.generation;
 import static java.util.function.Function.identity;
 
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
-import io.github.ascopes.protobufmavenplugin.plugins.ProjectPluginResolver;
+import io.github.ascopes.protobufmavenplugin.plugins.ProtocPluginResolver;
 import io.github.ascopes.protobufmavenplugin.plugins.ResolvedProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.ImmutableProtocInvocation;
 import io.github.ascopes.protobufmavenplugin.protoc.ProtocExecutor;
@@ -70,7 +70,7 @@ public final class ProtobufBuildOrchestrator {
   private final MavenSession mavenSession;
   private final ProtocResolver protocResolver;
   private final ProjectInputResolver projectInputResolver;
-  private final ProjectPluginResolver projectPluginResolver;
+  private final ProtocPluginResolver protocPluginResolver;
   private final IncrementalCacheManager incrementalCacheManager;
   private final ProtocExecutor protocExecutor;
 
@@ -79,14 +79,14 @@ public final class ProtobufBuildOrchestrator {
       MavenSession mavenSession,
       ProtocResolver protocResolver,
       ProjectInputResolver projectInputResolver,
-      ProjectPluginResolver projectPluginResolver,
+      ProtocPluginResolver protocPluginResolver,
       IncrementalCacheManager incrementalCacheManager,
       ProtocExecutor protocExecutor
   ) {
     this.mavenSession = mavenSession;
     this.protocResolver = protocResolver;
     this.projectInputResolver = projectInputResolver;
-    this.projectPluginResolver = projectPluginResolver;
+    this.protocPluginResolver = protocPluginResolver;
     this.incrementalCacheManager = incrementalCacheManager;
     this.protocExecutor = protocExecutor;
   }
@@ -108,7 +108,7 @@ public final class ProtobufBuildOrchestrator {
 
     final var incrementalCompilation = shouldIncrementallyCompile(request);
     final var protocPath = discoverProtocPath(request);
-    final var resolvedPlugins = projectPluginResolver.resolveProjectPlugins(request);
+    final var resolvedPlugins = protocPluginResolver.resolvePlugins(request);
     final var projectInputs = projectInputResolver.resolveProjectInputs(request);
 
     if (projectInputs.getCompilableProtoSources().isEmpty()
