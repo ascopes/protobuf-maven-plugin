@@ -114,7 +114,6 @@ old behaviour will be removed in v5.0.0.**
 | Property                    | Type           | Default           | Description             |
 |:----------------------------|:---------------|:------------------|:------------------------|
 | `name`                      | `String`       |                   | The name of the executable on the system path. On Windows, this must not include the file extension. |
-| `digest`                    | `String`       | unspecified       | If specified, the contents of the plugin binary will be validated against the digest. E.g. `sha1:9478159bef3d3c6fe5c2fe084a74ce5e92b6c070` |
 | `optional`                  | `boolean`      | `false`           | If `true`, then any failure to fetch the resource will not halt the build. Use this if some platforms lack support for the plugin. |
 | `options`                   | `String`       | unspecified       | Options to pass to the plugin via `protoc`'s options API. |
 | `order`                     | `int`          | `0`               | Relative order to run the plugin. |
