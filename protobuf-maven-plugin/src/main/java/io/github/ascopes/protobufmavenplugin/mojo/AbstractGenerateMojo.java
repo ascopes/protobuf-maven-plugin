@@ -749,7 +749,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(alias = "sourcePaths")
+  @Parameter
   @Nullable List<Path> sourceDirectories;
 
   /**
