@@ -33,6 +33,8 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Description(
     "Converter for protoc distribution parsing to enable backwards support of old "
@@ -43,6 +45,9 @@ import org.jspecify.annotations.Nullable;
 public class ProtocDistributionPlexusConverter
     extends AbstractBasicConverter
     implements PlexusConverter {
+
+  private static final Logger log = LoggerFactory
+      .getLogger(ProtocDistributionPlexusConverter.class);
 
   private final SealedTypePlexusConverter sealedTypePlexusConverter;
   private final PlatformClassifierFactory platformClassifierFactory;
@@ -78,9 +83,11 @@ public class ProtocDistributionPlexusConverter
   ) throws ComponentConfigurationException {
     var value = configuration.getValue();
     if (value != null) {
+      log.trace("Delegating conversion of protoc distribution to string converter");
       return fromString(value);
     }
 
+    log.trace("Delegating conversion of protoc distribution to sealed converter");
     return sealedTypePlexusConverter.fromConfiguration(
         lookup,
         configuration,
@@ -94,6 +101,8 @@ public class ProtocDistributionPlexusConverter
 
   @Override
   public ProtocDistribution fromString(String str) {
+    log.trace("Parsing string \"{}\" as protoc distribution", str);
+
     if (str.equals("PATH")) {
       var bean = new PathProtocDistributionBean();
       bean.setName("protoc");
