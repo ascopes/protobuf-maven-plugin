@@ -46,7 +46,12 @@ import org.eclipse.sisu.Description;
 @Description("A polyfill for Maven <3.9.8 to support parsing URI objects")
 @Named
 @Singleton
-final class UriPlexusConverter extends AbstractBasicConverter {
+final class UriPlexusConverter extends AbstractBasicConverter implements PlexusConverter {
+
+  @Override
+  public int getOrder() {
+    return 0;
+  }
 
   @Override
   public boolean canConvert(Class<?> type) {

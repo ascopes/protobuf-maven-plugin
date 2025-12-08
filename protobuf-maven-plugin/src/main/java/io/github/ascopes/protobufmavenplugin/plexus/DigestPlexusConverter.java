@@ -40,7 +40,7 @@ import org.eclipse.sisu.Description;
 @Description("Plexus converter for parsing Digest objects")
 @Named
 @Singleton
-final class DigestPlexusConverter extends AbstractBasicConverter {
+final class DigestPlexusConverter extends AbstractBasicConverter implements PlexusConverter {
 
   private static final Pattern PATTERN = Pattern.compile(
       "^(?<algorithm>[-a-z0-9]+):(?<digest>[0-9a-f]+)$",
@@ -66,6 +66,11 @@ final class DigestPlexusConverter extends AbstractBasicConverter {
           ),
           Collections::unmodifiableMap
       ));
+
+  @Override
+  public int getOrder() {
+    return 0;
+  }
 
   @Override
   public boolean canConvert(Class<?> type) {

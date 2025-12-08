@@ -15,12 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.plexus;
 
+import static java.util.Comparator.comparingInt;
+
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
-import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
 import org.eclipse.sisu.Description;
 
 /**
@@ -38,7 +39,9 @@ public class PluginConfigurator extends BasicComponentConfigurator {
   public static final String NAME = "protobuf-maven-plugin-configurator";
 
   @Inject
-  public PluginConfigurator(List<ConfigurationConverter> configurationConverters) {
-    configurationConverters.forEach(converterLookup::registerConverter);
+  public PluginConfigurator(List<PlexusConverter> converters) {
+    converters.stream()
+        .sorted(comparingInt(PlexusConverter::getOrder))
+        .forEach(converterLookup::registerConverter);
   }
 }

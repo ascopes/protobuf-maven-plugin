@@ -28,7 +28,7 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plexus.ProtocDistributionConverter;
+import io.github.ascopes.protobufmavenplugin.plexus.ProtocDistributionPlexusConverter;
 import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
@@ -100,7 +100,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * Converter for {@link ProtocDistribution} types.
    */
   @Inject
-  ProtocDistributionConverter protocDistributionConverter;
+  ProtocDistributionPlexusConverter protocDistributionPlexusConverter;
 
   /**
    * Provide additional arguments to pass to the {@code protoc} executable.
@@ -1017,7 +1017,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     var overriddenVersion = System.getProperty(COMPILER_VERSION_PROPERTY);
     return overriddenVersion == null
         ? requireNonNull(protoc, "<protoc/> has not been set")
-        : protocDistributionConverter.fromString(overriddenVersion);
+        : protocDistributionPlexusConverter.fromString(overriddenVersion);
   }
 
   @Deprecated(forRemoval = true)

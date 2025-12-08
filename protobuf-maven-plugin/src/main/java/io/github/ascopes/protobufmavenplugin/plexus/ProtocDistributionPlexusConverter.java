@@ -40,18 +40,25 @@ import org.jspecify.annotations.Nullable;
 )
 @Singleton
 @Named
-public class ProtocDistributionConverter extends AbstractBasicConverter {
+public class ProtocDistributionPlexusConverter
+    extends AbstractBasicConverter
+    implements PlexusConverter {
 
   private final SealedTypePlexusConverter sealedTypePlexusConverter;
   private final PlatformClassifierFactory platformClassifierFactory;
 
   @Inject
-  ProtocDistributionConverter(
+  ProtocDistributionPlexusConverter(
       SealedTypePlexusConverter sealedTypePlexusConverter,
       PlatformClassifierFactory platformClassifierFactory
   ) {
     this.sealedTypePlexusConverter = sealedTypePlexusConverter;
     this.platformClassifierFactory = platformClassifierFactory;
+  }
+
+  @Override
+  public int getOrder() {
+    return 0;
   }
 
   @Override

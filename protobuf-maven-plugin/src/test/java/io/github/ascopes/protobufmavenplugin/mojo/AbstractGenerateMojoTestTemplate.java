@@ -114,7 +114,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
         .thenReturn(tempDir.toFile());
 
     mojo = newInstance();
-    mojo.protocDistributionConverter = mock();
+    mojo.protocDistributionPlexusConverter = mock();
     mojo.sourceCodeGenerator = sourceCodeGenerator;
     mojo.mavenProject = mavenProject;
     mojo.protoc = mock(BinaryMavenProtocDistribution.class);
@@ -832,7 +832,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   void whenProtocDistributionVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
     // Given
     var expectedDistribution = mock(BinaryMavenProtocDistribution.class);
-    when(mojo.protocDistributionConverter.fromString(any()))
+    when(mojo.protocDistributionPlexusConverter.fromString(any()))
         .thenReturn(expectedDistribution);
 
     mojo.protoc = mock(BinaryMavenProtocDistribution.class);
@@ -848,8 +848,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     assertThat(actualRequest.getProtocDistribution())
         .isSameAs(expectedDistribution);
 
-    verify(mojo.protocDistributionConverter).fromString("4.5.6");
-    verifyNoMoreInteractions(mojo.protocDistributionConverter);
+    verify(mojo.protocDistributionPlexusConverter).fromString("4.5.6");
+    verifyNoMoreInteractions(mojo.protocDistributionPlexusConverter);
   }
 
   @DisplayName("when protobuf.compiler.version is not set, expect the parameter to be used")
