@@ -107,6 +107,8 @@ public final class ProtocResolver {
       distribution = newDistribution;
     }
 
+    log.info("Building using binary protoc distribution from Maven (\"{}\")", distribution);
+
     return artifactPathResolver.resolveExecutable(distribution);
   }
 
@@ -119,6 +121,9 @@ public final class ProtocResolver {
             "No protoc binary named '" + distribution.getName() + "' found on the system path"
         ));
     verifyDigest(path, distribution.getDigest(), deprecatedGlobalDigest);
+
+    log.info("Building using binary protoc distribution from system path (\"{}\")", path);
+
     return path;
   }
 
@@ -132,16 +137,16 @@ public final class ProtocResolver {
             "No protoc binary found at '" + distribution.getUrl() + "'"
         ));
     verifyDigest(path, distribution.getDigest(), deprecatedGlobalDigest);
+
+    log.info("Building using binary protoc distribution from URL (\"{}\")", distribution.getUrl());
+
     return path;
   }
 
   private Path resolveJvmMavenProtoc(
       JvmMavenProtocDistribution distribution
   ) throws ResolutionException {
-    log.debug(
-        "Resolving JVM-based Maven protoc plugin \"{}\" and generating bootstrap scripts",
-        distribution
-    );
+    log.info("Building using pure Java protoc distribution from Maven (\"{}\")", distribution);
 
     try {
       var dependencies = artifactPathResolver
