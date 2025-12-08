@@ -81,9 +81,20 @@ public class ProtocDistributionPlexusConverter
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
-    var value = configuration.getValue();
-    if (value != null) {
+    var children = configuration.getChildren();
+
+    // Maven defaults to merging both the string in a parent pom and the children
+    // in the child pom. Users should add the 'combine.self="override"' attribute
+    // to change this behaviour. We purposely check the children if present, falling
+    // back to the string mechanism if no child is present. This is a little confusing otherwise.
+    if (children.length == 0) {
       log.trace("Delegating conversion of protoc distribution to string converter");
+      var value = configuration.getValue();
+
+      if (value == null) {
+        throw new ComponentConfigurationException(configuration, "a value is required");
+      }
+
       return fromString(value);
     }
 
