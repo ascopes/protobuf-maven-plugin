@@ -576,6 +576,20 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>There are multiple supported kinds for this object. See the plugin developer guide for more
    * details.
    *
+   * <h4>Quirks</h4>
+   *
+   * <p>Due to quirks with how Maven merges values, if you are wishing to override the
+   * configuration for this parameter from a parent POM with one using a different
+   * implementation in your child POM, you will need to tell Maven to not merge values.
+   *
+   * <p>To do this, specify the following additional attribute within your child POM:
+   *
+   * <pre><code>
+   *   &lt;protoc combine.self="override" kind="..."&gt;
+   *     ...
+   *   &lt;/protoc&gt;
+   * </code></pre>
+   *
    * @since 0.0.1
    */
   @Parameter(
