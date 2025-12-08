@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 @Named
 @Singleton
-final class SealedTypePlexusConverter extends AbstractBasicConverter {
+final class SealedTypePlexusConverter extends AbstractBasicConverter implements PlexusConverter {
 
   private static final Logger log = LoggerFactory.getLogger(SealedTypePlexusConverter.class);
 
@@ -74,6 +74,13 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   SealedTypePlexusConverter() {
     kindMappings = Collections.synchronizedMap(new WeakHashMap<>());
+  }
+
+  @Override
+  public int getOrder() {
+    // Always consider after any other converters that may specialize
+    // behaviour further.
+    return Integer.MAX_VALUE;
   }
 
   @Override

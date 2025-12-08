@@ -42,7 +42,12 @@ import org.jspecify.annotations.Nullable;
 @Description("A polyfill for Maven <3.9.8 to support parsing NIO Path objects")
 @Named
 @Singleton
-final class PathPlexusConverter extends FileConverter {
+final class PathPlexusConverter extends FileConverter implements PlexusConverter {
+
+  @Override
+  public int getOrder() {
+    return 0;
+  }
 
   @Override
   public boolean canConvert(Class<?> type) {
