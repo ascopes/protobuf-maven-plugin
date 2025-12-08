@@ -103,6 +103,8 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter implements 
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
+    log.trace("Converting configuration {} into sealed type {}", configuration, type.getName());
+
     var kind = Optional
         .ofNullable(configuration.getAttribute("kind"))
         .filter(not(String::isEmpty))
