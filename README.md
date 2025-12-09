@@ -175,6 +175,8 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
         <version>${reactor-grpc.version}</version>
       </plugin>
     </plugins>
+
+    <protoc>${protobuf-java.version}</protoc>
   </configuration>
 
   <executions>
