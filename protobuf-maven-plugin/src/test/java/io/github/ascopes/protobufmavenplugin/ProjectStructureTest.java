@@ -30,12 +30,8 @@ class ProjectStructureTest {
   @DisplayName("Each package has a package-info.java")
   @Test
   void eachPackageHasPackageInfo() throws IOException {
-    var baseDir = Path.of(".")
-        .resolve("src")
-        .resolve("main")
-        .resolve("java");
 
-    try (var files = Files.walk(baseDir)) {
+    try (var files = Files.walk(baseDir())) {
       assertSoftly(softly -> {
         files.filter(Files::isDirectory)
             .filter(this::hasChildFiles)
@@ -47,6 +43,28 @@ class ProjectStructureTest {
     }
   }
 
+  @DisplayName("all injectable beans are annotated with a description")
+  @Test
+  void allInjectableBeansAreAnnotatedWithDescription() throws IOException {
+    try (var files = Files.walk(baseDir())) {
+      assertSoftly(softly -> {
+        files.filter(Files::isRegularFile)
+            .filter(f -> f.toString().endsWith(".java"))
+            .map(f -> toClass(baseDir(), f))
+            .filter(cls -> cls.isAnnotationPresent(javax.inject.Named.class))
+            .forEach(cls -> {
+              var isOk = cls.isAnnotationPresent(org.eclipse.sisu.Description.class);
+              softly.assertThat(isOk)
+                  .withFailMessage(
+                      "Expected %s to be annotated with org.eclipse.sisu.Description",
+                      cls.getName()
+                  )
+                  .isTrue();
+            });
+      });
+    }
+  }
+
   private boolean hasChildFiles(Path baseDir) {
     try (var files = Files.walk(baseDir, 1)) {
       return files
@@ -54,5 +72,26 @@ class ProjectStructureTest {
     } catch (IOException ex) {
       throw new UncheckedIOException(ex);
     }
+  }
+
+  private Class<?> toClass(Path baseDir, Path source) {
+    var frags = baseDir.relativize(source).iterator();
+    var clsName = new StringBuilder(frags.next().toString());
+    while (frags.hasNext()) {
+      clsName.append(".").append(frags.next());
+    }
+
+    try {
+      return Class.forName(clsName.toString().replaceAll("\\.java$", ""));
+    } catch (ClassNotFoundException ex) {
+      throw new RuntimeException("Failed to load class", ex);
+    }
+  }
+
+  private Path baseDir() {
+    return Path.of(".")
+        .resolve("src")
+        .resolve("main")
+        .resolve("java");
   }
 }

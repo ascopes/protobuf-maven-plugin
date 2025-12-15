@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.inject.Named;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -33,6 +35,8 @@ import org.json.JSONTokener;
  * @author Ashley Scopes
  * @since 2.10.5
  */
+@Description("Serializes and deserializes incremental cache files")
+@MojoExecutionScoped
 @Named
 final class IncrementalCacheSerializer {
   private static final String PROTO_DEPENDENCIES = "proto_dependencies";

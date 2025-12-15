@@ -31,6 +31,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -45,6 +46,7 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 3.10.0
  */
+@Description("Factory that creates URLs using custom protocol implementations from URIs")
 @MojoExecutionScoped
 @Named
 public final class UrlFactory {
