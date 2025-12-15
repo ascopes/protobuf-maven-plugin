@@ -103,7 +103,7 @@
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.25</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.2</memoryfilesystem.version>
-    <mockito.version>5.20.0</mockito.version>
+    <mockito.version>5.21.0</mockito.version>
     <nullaway.version>0.12.14</nullaway.version>
     <protobuf.version>4.33.2</protobuf.version>
     <slf4j.version>2.0.17</slf4j.version>
