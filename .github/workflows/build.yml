@@ -152,7 +152,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build logs as artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: jdk-${{ matrix.java-version }}-${{ matrix.os-name }}-${{ matrix.maven-version }}
@@ -195,7 +195,7 @@ jobs:
             -Dlicense.skip
 
       - name: Upload generated site as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: site
           path: protobuf-maven-plugin/target/site/**
