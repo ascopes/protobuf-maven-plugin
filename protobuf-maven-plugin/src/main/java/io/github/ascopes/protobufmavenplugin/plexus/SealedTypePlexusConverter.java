@@ -33,6 +33,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,7 @@ import org.slf4j.LoggerFactory;
  * @author Ashley Scopes
  * @since 4.1.0
  */
+@Description("Plexus converter that finds the most appropriate implementation of a sealed type")
 @Named
 @Singleton
 final class SealedTypePlexusConverter extends AbstractBasicConverter {
