@@ -65,6 +65,30 @@ class ProjectStructureTest {
     }
   }
 
+  @DisplayName("all injectable beans are annotated as a singleton")
+  @Test
+  void allInjectableBeansAreAnnotatedAsSingleton() throws IOException {
+    try (var files = Files.walk(baseDir())) {
+      assertSoftly(softly -> {
+        files.filter(Files::isRegularFile)
+            .filter(f -> f.toString().endsWith(".java"))
+            .map(f -> toClass(baseDir(), f))
+            .filter(cls -> cls.isAnnotationPresent(javax.inject.Named.class))
+            .forEach(cls -> {
+              var isOk = cls.isAnnotationPresent(javax.inject.Singleton.class)
+                  ^ cls.isAnnotationPresent(
+                      org.apache.maven.execution.scope.MojoExecutionScoped.class);
+              softly.assertThat(isOk)
+                  .withFailMessage(
+                      "Expected %s to be annotated with either Singleton or MojoExecutionScoped",
+                      cls.getName()
+                  )
+                  .isTrue();
+            });
+      });
+    }
+  }
+
   private boolean hasChildFiles(Path baseDir) {
     try (var files = Files.walk(baseDir, 1)) {
       return files
