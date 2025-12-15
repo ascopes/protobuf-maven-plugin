@@ -23,7 +23,6 @@ package io.github.ascopes.protobufmavenplugin.protoc.dists;
  */
 public sealed interface ProtocDistribution
     permits BinaryMavenProtocDistribution,
-            JvmMavenProtocDistribution,
             PathProtocDistribution,
             UriProtocDistribution {
 

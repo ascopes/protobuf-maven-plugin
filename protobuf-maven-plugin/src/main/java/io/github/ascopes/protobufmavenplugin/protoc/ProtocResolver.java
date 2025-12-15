@@ -19,11 +19,8 @@ import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDe
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
-import io.github.ascopes.protobufmavenplugin.java.ImmutableJavaApp;
-import io.github.ascopes.protobufmavenplugin.java.JavaAppToExecutableFactory;
 import io.github.ascopes.protobufmavenplugin.protoc.dists.BinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.dists.BinaryMavenProtocDistributionBean;
-import io.github.ascopes.protobufmavenplugin.protoc.dists.JvmMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.dists.PathProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.dists.ProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.dists.UriProtocDistribution;
@@ -58,7 +55,6 @@ public final class ProtocResolver {
   private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
   private final MavenArtifactPathResolver artifactPathResolver;
-  private final JavaAppToExecutableFactory javaAppToExecutableFactory;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UriResourceFetcher urlResourceFetcher;
@@ -66,13 +62,11 @@ public final class ProtocResolver {
   @Inject
   public ProtocResolver(
       MavenArtifactPathResolver artifactPathResolver,
-      JavaAppToExecutableFactory javaAppToExecutableFactory,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UriResourceFetcher urlResourceFetcher
   ) {
     this.artifactPathResolver = artifactPathResolver;
-    this.javaAppToExecutableFactory = javaAppToExecutableFactory;
     this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
@@ -88,8 +82,6 @@ public final class ProtocResolver {
       return resolvePathProtoc(distributionImpl, deprecatedGlobalDigest);
     } else if (distribution instanceof UriProtocDistribution distributionImpl) {
       return resolveUriProtoc(distributionImpl, deprecatedGlobalDigest);
-    } else if (distribution instanceof JvmMavenProtocDistribution distributionImpl) {
-      return resolveJvmMavenProtoc(distributionImpl);
     } else {
       // Unreachable, but needed until we use a Java version with pattern matching
       // for types.
@@ -141,36 +133,6 @@ public final class ProtocResolver {
     log.info("Building using binary protoc distribution from URL (\"{}\")", distribution.getUrl());
 
     return path;
-  }
-
-  private Path resolveJvmMavenProtoc(
-      JvmMavenProtocDistribution distribution
-  ) throws ResolutionException {
-    log.info("Building using pure Java protoc distribution from Maven (\"{}\")", distribution);
-
-    try {
-      var dependencies = artifactPathResolver
-          .resolveDependencies(
-              List.of(distribution),
-              DependencyResolutionDepth.TRANSITIVE,
-              Set.of("compile", "runtime", "system"),
-              false
-          )
-          .stream()
-          .toList();
-
-      var app = ImmutableJavaApp.builder()
-          .addAllDependencies(dependencies)
-          .jvmArgs(distribution.getJvmArgs())
-          .jvmConfigArgs(distribution.getJvmConfigArgs())
-          .mainClass(distribution.getMainClass())
-          .uniqueName("protoc")
-          .build();
-
-      return javaAppToExecutableFactory.toExecutable(app);
-    } catch (ResolutionException ex) {
-      throw new ResolutionException("Failed to resolve protoc " + distribution + ": " + ex, ex);
-    }
   }
 
   private void verifyDigest(
