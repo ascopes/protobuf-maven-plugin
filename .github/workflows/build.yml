@@ -114,7 +114,7 @@ jobs:
           - title: lnx/x86/mvn4.0.0/jdk17
             os-name: ubuntu-24.04
             java-version: 17
-            maven-version: 4.0.0-rc-4
+            maven-version: 4.0.0-rc-5
 
     steps:
       - name: Checkout repository
