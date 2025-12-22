@@ -99,7 +99,7 @@
     <junit.version>6.0.0</junit.version>
     <maven-core.version>3.9.12</maven-core.version>
     <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
-    <maven-plugin-api.version>3.9.11</maven-plugin-api.version>
+    <maven-plugin-api.version>3.9.12</maven-plugin-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.25</maven-resolver-api.version>
     <memoryfilesystem.version>2.8.2</memoryfilesystem.version>
