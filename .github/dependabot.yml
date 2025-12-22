@@ -7,7 +7,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: "06:00"
+      time: "04:00"
       timezone: Europe/London
     target-branch: main
     assignees:
@@ -22,7 +22,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: "06:00"
+      time: "04:00"
       timezone: Europe/London
     open-pull-requests-limit: 999
     target-branch: main
