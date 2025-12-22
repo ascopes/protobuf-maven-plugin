@@ -34,7 +34,7 @@
 
   <properties>
     <grpc.version>1.77.0</grpc.version>
-    <kotlin.version>2.2.21</kotlin.version>
+    <kotlin.version>2.3.0</kotlin.version>
     <proto-google-common-protos.version>2.63.2</proto-google-common-protos.version>
     <scala.version>3.7.4</scala.version>
     <scalapb.digest>SHA1:01b4b553fb25598244a7f22f2e63fb2f81c52551</scalapb.digest>
