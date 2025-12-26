@@ -58,9 +58,11 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
 
   private static final List<String> DEFAULT_ARGS = List.of();
   private static final List<String> DEFAULT_JVM_ARGS = List.of(
-      "-Xshare:auto",
+      "-XX:TieredStopAtLevel=1",
+      "-XX:+CrashOnOutOfMemoryError",
       "-XX:+TieredCompilation",
-      "-XX:TieredStopAtLevel=1"
+      "-XX:+UseParallelGC",
+      "-Xshare:auto"
   );
   private static final Logger log = LoggerFactory.getLogger(JavaAppToExecutableScriptFactory.class);
 
