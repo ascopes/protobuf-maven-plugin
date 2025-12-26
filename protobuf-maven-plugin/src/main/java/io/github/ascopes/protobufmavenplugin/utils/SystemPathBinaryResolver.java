@@ -80,21 +80,19 @@ public final class SystemPathBinaryResolver {
   }
 
   private Predicate<Path> isWindowsMatch(String name) {
+    var pathExtensions = hostSystem.getSystemPathExtensions();
+    
     return path -> {
-      var matchesName = FileUtils.getFileNameWithoutExtension(path)
-          .equalsIgnoreCase(name);
-      var matchesExtension = FileUtils.getFileExtension(path)
-          .filter(hostSystem.getSystemPathExtensions()::contains)
-          .isPresent();
-      return matchesName && matchesExtension;
+      var fileName = FileUtils.getFileNameWithoutExtension(path);
+      var fileExtention = FileUtils.getFileExtension(path);
+
+      return fileName.equalsIgnoreCase(name)
+          && fileExtension.filter(pathExtensions::contains).isPresent();
     };
   }
 
   private Predicate<Path> isPosixMatch(String name) {
-    return path -> {
-      var matchesName = path.getFileName().toString().equals(name);
-      var matchesExecutableFlag = Files.isExecutable(path);
-      return matchesName && matchesExecutableFlag;
-    };
+    return path -> path.getFileName().toString().equals(name)
+        && Files.isExecutable(path);
   }
 }
