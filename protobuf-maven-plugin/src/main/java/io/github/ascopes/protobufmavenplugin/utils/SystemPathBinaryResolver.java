@@ -78,21 +78,21 @@ public final class SystemPathBinaryResolver {
     log.debug("No match found for \"{}\" on PATH", name);
     return Optional.empty();
   }
+  
+  private Predicate<Path> isPosixMatch(String name) {
+    return path -> path.getFileName().toString().equals(name)
+        && Files.isExecutable(path);
+  }
 
   private Predicate<Path> isWindowsMatch(String name) {
     var pathExtensions = hostSystem.getSystemPathExtensions();
     
     return path -> {
       var fileName = FileUtils.getFileNameWithoutExtension(path);
-      var fileExtention = FileUtils.getFileExtension(path);
+      var fileExtension = FileUtils.getFileExtension(path);
 
       return fileName.equalsIgnoreCase(name)
           && fileExtension.filter(pathExtensions::contains).isPresent();
     };
-  }
-
-  private Predicate<Path> isPosixMatch(String name) {
-    return path -> path.getFileName().toString().equals(name)
-        && Files.isExecutable(path);
   }
 }
