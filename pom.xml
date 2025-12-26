@@ -147,15 +147,16 @@
           itself at runtime which now are raised as of Java 22.
     -->
     <argLine>
-      -XX:+CrashOnOutOfMemoryError
-      -XX:+TieredCompilation
-      -XX:TieredStopAtLevel=1
-      -Xshare:off
       -Dnet.bytebuddy.experimental=true
-      -Dorg.slf4j.simpleLogger.log.io.github.ascopes=DEBUG
+      -Dorg.slf4j.simpleLogger.log.io.github.ascopes=INFO
+      -XX:TieredStopAtLevel=1
+      -XX:+CrashOnOutOfMemoryError
       -XX:+EnableDynamicAgentLoading
-      -Xms64m
+      -XX:+TieredCompilation
+      -XX:+UseParallelGC
+      -Xms128m
       -Xmx512m
+      -Xshare:auto
     </argLine>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
