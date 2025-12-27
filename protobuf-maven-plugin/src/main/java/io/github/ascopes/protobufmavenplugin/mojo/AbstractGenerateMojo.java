@@ -566,11 +566,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(
-      alias = "protocVersion",
-      required = true,
-      property = "protobuf.compiler.version"
-  )
+  @Parameter(required = true, property = "protobuf.compiler.version")
   String protoc;
 
   /**
