@@ -61,13 +61,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
-  private static final String DEFAULT_FALSE = "false";
-  private static final String DEFAULT_TRUE = "true";
-  private static final String DEFAULT_TRANSITIVE = "TRANSITIVE";
-
-  private static final String COMPILER_VERSION_PROPERTY = "protobuf.compiler.version";
-
-  private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
 
   public AbstractGenerateMojo() {
     // Nothing to do here.
@@ -129,7 +122,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 3.6.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean cleanOutputDirectories;
 
   /**
@@ -145,7 +138,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.2.0
    */
-  @Parameter(defaultValue = DEFAULT_TRANSITIVE)
+  @Parameter(defaultValue = "TRANSITIVE")
   DependencyResolutionDepth dependencyResolutionDepth;
 
   /**
@@ -176,7 +169,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.1.0
    */
-  @Parameter(defaultValue = DEFAULT_TRUE)
+  @Parameter(defaultValue = "true")
   boolean embedSourcesInClassOutputs;
 
   /**
@@ -241,7 +234,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.5.0
    */
-  @Parameter(defaultValue = DEFAULT_TRUE)
+  @Parameter(defaultValue = "true")
   boolean failOnMissingSources;
 
   /**
@@ -254,7 +247,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.0.0
    */
-  @Parameter(defaultValue = DEFAULT_TRUE)
+  @Parameter(defaultValue = "true")
   boolean failOnMissingTargets;
 
   /**
@@ -265,7 +258,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean fatalWarnings;
 
   /**
@@ -277,7 +270,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.2.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean ignoreProjectDependencies;
 
   /**
@@ -379,7 +372,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.7.0
    */
-  @Parameter(defaultValue = DEFAULT_TRUE, property = "protobuf.compiler.incremental")
+  @Parameter(defaultValue = "true", property = "protobuf.compiler.incremental")
   boolean incrementalCompilation;
 
   /**
@@ -390,7 +383,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.1.1
    */
-  @Parameter(defaultValue = DEFAULT_TRUE)
+  @Parameter(defaultValue = "true")
   boolean javaEnabled;
 
   /**
@@ -401,7 +394,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.1.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean kotlinEnabled;
 
   /**
@@ -414,7 +407,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean liteOnly;
 
   /**
@@ -441,7 +434,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @see #outputDescriptorFile
    * @since 2.11.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean outputDescriptorAttached;
 
   /**
@@ -478,7 +471,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @see #outputDescriptorFile
    * @since 2.10.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean outputDescriptorIncludeImports;
 
   /**
@@ -490,7 +483,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @see #outputDescriptorFile
    * @since 2.10.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean outputDescriptorIncludeSourceInfo;
 
   /**
@@ -501,7 +494,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @see #outputDescriptorFile
    * @since 2.10.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean outputDescriptorRetainOptions;
 
   /**
@@ -579,7 +572,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Parameter(
       alias = "protocVersion",
       required = true,
-      property = COMPILER_VERSION_PROPERTY
+      property = "protobuf.compiler.version"
   )
   String protoc;
 
@@ -591,7 +584,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean pythonEnabled;
 
   /**
@@ -603,7 +596,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean pythonStubsEnabled;
 
   /**
@@ -617,7 +610,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.5.0
    */
-  @Parameter(defaultValue = DEFAULT_TRUE)
+  @Parameter(defaultValue = "true")
   boolean registerAsCompilationRoot;
 
   /**
@@ -625,7 +618,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 1.1.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE)
+  @Parameter(defaultValue = "false")
   boolean rubyEnabled;
 
   /**
@@ -653,7 +646,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 2.0.0
    */
-  @Parameter(defaultValue = DEFAULT_FALSE, property = "protobuf.skip")
+  @Parameter(defaultValue = "false", property = "protobuf.skip")
   boolean skip;
 
   /**
