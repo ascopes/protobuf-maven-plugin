@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractGenerateMojo extends AbstractMojo {
 
+  private static final Logger log = LoggerFactory.getLogger(AbstractGenerateMojo.class);
 
   public AbstractGenerateMojo() {
     // Nothing to do here.
@@ -982,7 +983,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   private String protoc() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
-    var overriddenVersion = System.getProperty(COMPILER_VERSION_PROPERTY);
+    var overriddenVersion = System.getProperty("protobuf.compiler.version");
     return overriddenVersion == null
         ? requireNonNull(protoc, "<protoc/> has not been set")
         : overriddenVersion;
