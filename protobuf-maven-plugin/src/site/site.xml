@@ -25,65 +25,78 @@
   </bannerLeft>
 
   <body>
-    <head>
-      <![CDATA[
-        <link rel="icon" type="image/png" href="images/favicon.png"/>
+    <head><![CDATA[
+      <meta name="coverage" content="global"/>
+      <meta name="description" content="Modern Protobuf integrations for Apache Maven"/>
+      <meta name="keywords" content="protobuf, protoc, maven, apache, plugin, java, kotlin, grpc"/>
+      <meta name="language" content="EN"/>
+      <meta name="robots" content="follow, index, max-image-preview:none, max-snippet:-1"/>
+      <meta name="subject" content="Protobuf Maven Plugin Documentation"/>
+      <meta http-equiv="Cache-Control" content="max-age=30, public"/>
 
-        <!-- Highlight.js -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/base16/unikitty-light.min.css"/>
-        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
-        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/java.min.js"></script>
-        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/plaintext.min.js"></script>
-        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/protobuf.min.js"></script>
-        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/scala.min.js"></script>
-        <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/xml.min.js"></script>
+      <link rel="icon" type="image/png" href="images/favicon.png"/>
 
-        <!-- Highlight.js copy code button -->
-        <link rel="stylesheet" href="//unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css"/>
-        <script src="//unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
+      <!-- Highlight.js -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/styles/base16/unikitty-light.min.css"/>
+      <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
+      <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/java.min.js"></script>
+      <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/plaintext.min.js"></script>
+      <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/protobuf.min.js"></script>
+      <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/scala.min.js"></script>
+      <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/languages/xml.min.js"></script>
 
-        <!-- Anchor injection -->
-        <script src="//cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
+      <!-- Highlight.js copy code button -->
+      <link rel="stylesheet" href="//unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.css"/>
+      <script src="//unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js"></script>
 
-        <!-- Table of contents generation -->
-        <script src="js/fluido-toc-generator.js"></script>
+      <!-- Anchor injection -->
+      <script src="//cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
 
-        <!-- Configure integrations on page load -->
-        <script src="js/configure.js"></script>
-      ]]>
-    </head>
+      <!-- Table of contents generation -->
+      <script src="js/fluido-toc-generator.js"></script>
+
+      <!-- Configure integrations on page load -->
+      <script src="js/configure.js"></script>
+    ]]></head>
 
     <menu name="Documentation">
       <item name="Introduction" href="index.html"/>
       <item name="Goals" href="plugin-info.html"/>
+      <item name="Known Issues" href="known-issues.html"/>
+      <item name="Requirements" href="requirements.html"/>
     </menu>
-    <menu name="Guides">
+
+    <menu name="Getting Started">
       <item name="Basic Usage" href="basic-usage.html"/>
       <item name="Changing Protoc Versions" href="changing-protoc-versions.html"/>
-      <item name="Corporate Environments" href="corporate-environments.html"/>
       <item name="Dependencies" href="dependencies.html"/>
       <item name="Descriptor Files" href="descriptor-files.html"/>
-      <item name="Examples" href="examples.html"/>
-      <item name="Faster Builds" href="faster-builds.html"/>
-      <item name="Known Issues" href="known-issues.html"/>
-      <item name="Other Language Support" href="other-language-support.html"/>
-      <item name="Requirements" href="requirements.html"/>
-      <item name="URL Support" href="url-support.html"/>
       <item name="Using Protoc Plugins" href="using-protoc-plugins.html"/>
+      <item name="Examples" href="examples.html"/>
     </menu>
+
+    <menu name="Advanced Usage">
+      <item name="Corporate Environments" href="corporate-environments.html"/>
+      <item name="Faster Builds" href="faster-builds.html"/>
+      <item name="Other Language Support" href="other-language-support.html"/>
+      <item name="URL Support" href="url-support.html"/>
+    </menu>
+
     <menu name="Releases">
       <item name="GitHub" href="https://github.com/ascopes/protobuf-maven-plugin/releases"/>
       <item name="Maven Central" href="https://central.sonatype.com/artifact/io.github.ascopes/protobuf-maven-plugin"/>
     </menu>
+
     <menu name="Development">
-      <item name="Contributing Guide" href="gh-contributing.html"/>
-      <item name="Security Policy" href="gh-security.html"/>
-      <item name="Issues and Bugs" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
-      <item name="Discussions" href="https://github.com/ascopes/protobuf-maven-plugin/discussions"/>
-      <item name="Source Code" href="https://github.com/ascopes/protobuf-maven-plugin"/>
+      <item name="Bug and Feature Tracker" href="https://github.com/ascopes/protobuf-maven-plugin/issues"/>
       <item name="Code Test Coverage" href="https://app.codecov.io/gh/ascopes/protobuf-maven-plugin"/>
+      <item name="Contributing Guide" href="gh-contributing.html"/>
+      <item name="Discussions" href="https://github.com/ascopes/protobuf-maven-plugin/discussions"/>
+      <item name="Security Policy" href="gh-security.html"/>
+      <item name="Source Code" href="https://github.com/ascopes/protobuf-maven-plugin"/>
     </menu>
-    <menu ref="reports"/>
+
+    <menu name="Generated Maven Reports" ref="reports"/>
   </body>
 
   <custom>

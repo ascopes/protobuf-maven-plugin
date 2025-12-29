@@ -97,17 +97,17 @@ function buildHeadingLevel(element) {
 }
 
 function buildTocHtml(roots, level) {
-  const ol = document.createElement("ol");
+  const ol = createElement("ol");
   ol.setAttribute("style", `list-style-type: ${listStyle(level)}`);
 
   for (const root of roots) {
-    const a = document.createElement("a");
+    const a = createElement("a");
     a.setAttribute("href", `#${root.id}`);
     a.innerText = root.name;
 
     const nestedList = buildTocHtml(root.children, level + 1);
 
-    const li = document.createElement("li");
+    const li = createElement("li");
     li.appendChild(a);
     li.appendChild(nestedList);
 
@@ -119,4 +119,12 @@ function buildTocHtml(roots, level) {
 
 function listStyle(level) {
   return ["decimal", "lower-latin", "lower-roman"][level % 3];
+}
+
+function createElement(tag) {
+  const element = document.createElement(tag);
+  // Instruct Google to avoid including generated data in snippet previews from
+  // various services when crawling the site.
+  element.setAttribute("data-nosnippet", "true");
+  return element;
 }
