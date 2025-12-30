@@ -189,14 +189,14 @@ Deploy to package registry:
     # Do whatever you need to in order to set up your settings.xml
     - ...
   script:
-    - curl --fail --silent "https://github.com/scalapb/ScalaPB/releases/download/v${/protoc-gen-scala-${CI_COMMIT_TAG}-${MAVEN_CLASSIFIER}.zip"
+    - curl --fail --silent "https://github.com/scalapb/ScalaPB/releases/download/v${CI_COMMIT_TAG}/protoc-gen-scala-${CI_COMMIT_TAG}-${MAVEN_CLASSIFIER}.zip"
     - 'unzip *.zip'
     - >-
       mvn deploy:deploy-file
         -DgroupId=io.github.scalapb
         -DartifactId=protoc-gen-scalapb
         -Dversion="${CI_COMMIT_TAG}"
-        -Dclassifier=${MAVEN_CLASSIFIER}
+        -Dclassifier="${MAVEN_CLASSIFIER}"
         -Dpackaging=exe
         -Dfile=protoc-gen-scala
 ```
