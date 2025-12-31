@@ -23,17 +23,12 @@
     create = "new",
     defaults = @Immutable(copy = false),
     defaultAsDefault = true,
-    deferCollectionAllocation = true,
     get = {"get*", "is*"},
-    headerComments = true,
-    jacksonIntegration = false,
-    // Eventually may be true when Maven upgrades.
-    jakarta = false,
     jdkOnly = true,
     jdk9Collections = true,
     nullableAnnotation = "org.jspecify.annotations.Nullable",
-    passAnnotations = Nullable.class,
     optionalAcceptNullable = true,
+    passAnnotations = Nullable.class,
     typeModifiable = "*Bean",
     validationMethod = ValidationMethod.MANDATORY_ONLY
 )
