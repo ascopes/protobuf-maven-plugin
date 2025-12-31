@@ -279,12 +279,14 @@ attribute.
 
 ```xml
 <plugin kind="jvm-maven">
-  <groupId>${project.parent.groupId}</groupId>
+  <groupId>org.example</groupId>
   <artifactId>my-super-awesome-plugin</artifactId>
-  <version>${project.parent.version}</version>
+  <version>${my-super-awesone-plugin.version}</version>
   <mainClass>org.example.protocplugin.MySuperAwesomePluginMainClass</mainClass>
 </plugin>
 ```
+
+This can be useful in a small set of cases, such as when developing a Java-based plugin.
 
 ### Command line arguments
 
@@ -327,6 +329,62 @@ An example of providing custom arguments would be:
   </jvmConfigArgs>
 </plugin>
 ```
+
+### Developing JVM-based plugins
+
+JVM-based plugins are fairly simple to create. This section will not cover the details of the
+standard plugin API itself, but a few considerations are needed to ensure that it works with this
+Maven Plugin correctly.
+
+At a minimum:
+
+- You must depend on `com.google.protobuf:protobuf-java`.
+- You must read a `com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest` from `stdin`
+  (i.e. `System.in`).
+
+  ```java
+  CodeGeneratorRequest request = CodeGeneratorRequest.parseFrom(System.in);
+  ```
+
+- You must write out a `com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse` to
+  `stdout` (i.e. `System.out`).
+
+  ```java
+  CodeGeneratorResponse response = CodeGeneratorResponse.newBuilder()
+      ...
+      .build();
+
+  response.writeTo(System.out);
+  ```
+- If logging, any logs must be written to `stderr` (i.e. `System.err`) rather than `stdout` to
+  prevent corrupting the response that `protoc` will read.
+
+  - If using `java.logging`, logs will stream to `stderr` by default.
+  - If using the SLF4J simple logger backend, logs will write to `stderr` by default.
+  - If using Log4J2 or Logback, ensure your console appender writes to `stderr` explicitly.
+  - Avoid the use of libraries that abuse writing to `System.out` where possible.
+    You may be able to reassign `System.out` via `System#setOut` and write to a
+    `FileOutputStream` wrapping a [`FileDescriptor`](https://github.com/openjdk/jdk/blob/36d2c277c47767ba22208e2e49c46001642bd4f5/src/java.base/share/classes/java/io/FileDescriptor.java#L49)
+    with value `0` if this proves to be problematic.
+- Your JAR should have a `Main-Class` manifest entry pointing to your `main` method.
+
+  ```xml
+  <!-- pom.xml plugins section -->
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <configuration>
+      <archive>
+        <manifest>
+          <mainClass>org.example.protocplugin.ProtocPlugin</mainClass>
+        </manifest>
+      </archive>
+    </configuration>
+  </plugin>
+  ```
+
+Note that this Maven plugin will resolve any dependencies for you, so there is no need to shade
+your dependencies.
 
 ---
 
