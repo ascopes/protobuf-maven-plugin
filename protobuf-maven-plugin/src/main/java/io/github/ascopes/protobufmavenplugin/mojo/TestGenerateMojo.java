@@ -51,7 +51,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     requiresDependencyCollection = ResolutionScope.TEST,
     requiresDependencyResolution = ResolutionScope.TEST,
-    requiresOnline = false,
     threadSafe = true
 )
 public final class TestGenerateMojo extends AbstractGenerateMojo {
