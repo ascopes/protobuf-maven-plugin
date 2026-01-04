@@ -87,7 +87,6 @@ The following will generate Java classes and corresponding Kotlin wrappers:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <javaEnabled>true</javaEnabled>
     <kotlinEnabled>true</kotlinEnabled>
     <protoc>${protobuf-java.version}</protoc>
   </configuration>
@@ -175,8 +174,6 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
         <version>${reactor-grpc.version}</version>
       </plugin>
     </plugins>
-
-    <protoc>${protobuf-java.version}</protoc>
   </configuration>
 
   <executions>
