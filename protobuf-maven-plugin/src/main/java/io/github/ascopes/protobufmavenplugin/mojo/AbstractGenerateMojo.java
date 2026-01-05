@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
@@ -28,11 +28,11 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -306,7 +306,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> importDependencies;
+  @Nullable List<MavenDependency> importDependencies;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -695,7 +695,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> sourceDependencies;
+  @Nullable List<MavenDependency> sourceDependencies;
 
   /**
    * Protobuf Descriptor files to compile.
@@ -729,7 +729,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 3.1.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> sourceDescriptorDependencies;
+  @Nullable List<MavenDependency> sourceDescriptorDependencies;
 
   /**
    * The source directories to compile protobuf sources from.
@@ -781,7 +781,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Deprecated(forRemoval = true)
   @Parameter
-  @Nullable List<BinaryMavenProtocPluginBean> binaryMavenPlugins;
+  @Nullable List<BinaryMavenProtocPlugin> binaryMavenPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
@@ -798,7 +798,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Deprecated(forRemoval = true)
   @Parameter
-  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
+  @Nullable List<PathProtocPlugin> binaryPathPlugins;
 
   /**
    * Binary plugins to use with the protobuf compiler, specified as a valid URL.
@@ -815,7 +815,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Deprecated(forRemoval = true)
   @Parameter
-  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
+  @Nullable List<UriProtocPlugin> binaryUrlPlugins;
 
   /**
    * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
@@ -832,7 +832,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Deprecated(forRemoval = true)
   @Parameter
-  @Nullable List<JvmMavenProtocPluginBean> jvmMavenPlugins;
+  @Nullable List<JvmMavenProtocPlugin> jvmMavenPlugins;
 
   /*
    * Implementation-specific details.
