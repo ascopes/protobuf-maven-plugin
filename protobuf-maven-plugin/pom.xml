@@ -429,6 +429,8 @@
                   <!-- See https://github.com/uber/NullAway/issues/1319 -->
                   -XepOpt:NullAway:ExcludedFieldAnnotations=org.apache.maven.plugins.annotations.Parameter,org.junit.jupiter.*,org.mockito.*
                 </compilerArg>
+                <!-- Needed for ErrorProne to be able to run -->
+                <compilerArg>-XDaddTypeAnnotationsToSymbol=true</compilerArg>
                 <compilerArg>-XDcompilePolicy=simple</compilerArg>
               </compilerArgs>
             </configuration>
