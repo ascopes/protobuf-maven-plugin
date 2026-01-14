@@ -45,11 +45,7 @@ final class IncrementalCacheSerializer {
 
   void serialize(IncrementalCache cache, Writer writer) throws IOException {
     try {
-      new JSONObject()
-          .put(PROTO_DEPENDENCIES, pathMappingToJson(cache.getProtoDependencies()))
-          .put(PROTO_SOURCES, pathMappingToJson(cache.getProtoSources()))
-          .put(DESCRIPTOR_FILES, pathMappingToJson(cache.getDescriptorFiles()))
-          .write(writer, 2, 2);
+      cacheToJson(cache).write(writer, 2, 2);
     } catch (Exception ex) {
       throw new IOException("Failed to write JSON file", ex);
     }
@@ -58,28 +54,51 @@ final class IncrementalCacheSerializer {
   IncrementalCache deserialize(Reader reader) throws IOException {
     try {
       var object = new JSONObject(new JSONTokener(reader));
-      return ImmutableIncrementalCache.builder()
-          .protoDependencies(jsonToPathMapping(object.getJSONObject(PROTO_DEPENDENCIES)))
-          .protoSources(jsonToPathMapping(object.getJSONObject(PROTO_SOURCES)))
-          .descriptorFiles(jsonToPathMapping(object.getJSONObject(DESCRIPTOR_FILES)))
-          .build();
+      return jsonToCache(object);
     } catch (Exception ex) {
       throw new IOException("Failed to read JSON file", ex);
     }
   }
 
+  private JSONObject cacheToJson(IncrementalCache cache) {
+    return new JSONObject()
+        .put(PROTO_DEPENDENCIES, pathMappingToJson(cache.getProtoDependencies()))
+        .put(PROTO_SOURCES, pathMappingToJson(cache.getProtoSources()))
+        .put(DESCRIPTOR_FILES, pathMappingToJson(cache.getDescriptorFiles()));
+  }
+
+  private IncrementalCache jsonToCache(JSONObject object) {
+    return ImmutableIncrementalCache.builder()
+        .protoDependencies(jsonToPathMapping(object.getJSONObject(PROTO_DEPENDENCIES)))
+        .protoSources(jsonToPathMapping(object.getJSONObject(PROTO_SOURCES)))
+        .descriptorFiles(jsonToPathMapping(object.getJSONObject(DESCRIPTOR_FILES)))
+        .build();
+  }
+
   private JSONObject pathMappingToJson(Map<Path, String> mapping) {
     var object = new JSONObject();
-    mapping.forEach((path, hash) -> object.put(path.toUri().toASCIIString(), hash));
+    mapping.forEach((path, hash) -> {
+      var key = pathToJson(path);
+      object.put(key, hash);
+    });
     return object;
   }
 
   private Map<Path, String> jsonToPathMapping(JSONObject object) {
     var mapping = new LinkedHashMap<Path, String>();
-    object.keys().forEachRemaining(path -> {
-      var hash = object.getString(path);
-      mapping.put(Path.of(URI.create(path)), hash);
+    object.keys().forEachRemaining(key -> {
+      var path = jsonToPath(key);
+      var hash = object.getString(key);
+      mapping.put(path, hash);
     });
     return Collections.unmodifiableMap(mapping);
+  }
+
+  private String pathToJson(Path path) {
+    return path.toUri().toString();
+  }
+
+  private Path jsonToPath(String value) {
+    return Path.of(URI.create(value));
   }
 }
