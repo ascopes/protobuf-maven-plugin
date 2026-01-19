@@ -171,11 +171,21 @@ jobs:
         shell: bash
         run: time ./mvnw -B -e -Dcheckstyle.skip -Dlicense.skip clean verify
 
-      - name: Publish code coverage
+      - name: Publish code coverage to Codecov
         uses: codecov/codecov-action@v5
         continue-on-error: true
-        if: always()
+        if: ${{ ! cancelled() }}
         with:
+          flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version}}-${{ matrix.os-name }}
+          report_type: coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Publish test results to Codecov
+        uses: codecov/codecov-action@v5
+        if: ${{ ! cancelled() }}
+        with:
+          flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version}}-${{ matrix.os-name }}
+          report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build logs as artifacts
