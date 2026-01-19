@@ -150,6 +150,15 @@ jobs:
           generateReleaseNotes: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish code coverage
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        if: ${{ ! failure() && ! inputs.skip-tests }}
+        with:
+          # Bind coverage to the published tag.
+          override_branch: ${{ needs.prepare.outputs.release_version }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   github-pages:
     name: GitHub Pages Release
     runs-on: ubuntu-latest
