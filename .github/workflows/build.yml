@@ -25,28 +25,55 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Initialize Java
-        uses: actions/setup-java@v5
-        with:
-          cache: maven
-          distribution: zulu
-          java-version: 25
+      ###
+      ### Lint scripts and configuration files.
+      ###
 
       - name: Validate shell scripts
         uses: ludeeus/action-shellcheck@master
-        if: always()
+        if: ${{ ! cancelled() }}
         with:
           check_together: 'yes'
           scandir: ./scripts
 
       - name: Validate codecov.yml
         shell: bash
-        if: always()
+        if: ${{ ! cancelled() }}
         run: curl -si --fail-with-body --data-binary @codecov.yml https://codecov.io/validate
+
+      ###
+      ### Lint GitHub Actions for issues.
+      ###
+
+      - name: Lint GitHub Actions
+        shell: bash
+        if: ${{ ! cancelled() }}
+        run: >-
+          docker run
+          --rm
+          --user "$(id -u "${USER}"):$(id -g "${USER}")"
+          --volume "$(pwd):/repo"
+          --workdir /repo
+          rhysd/actionlint:latest
+          -color
+          -verbose
+
+      ###
+      ### Lint Java, export information about current environment for
+      ### the next jobs to utilise.
+      ###
+
+      - name: Initialize Java
+        uses: actions/setup-java@v5
+        if: always()
+        with:
+          cache: maven
+          distribution: zulu
+          java-version: 25
 
       - name: Validate license headers and code style
         shell: bash
-        if: always()
+        if: ${{ ! cancelled() }}
         # Purposely compile here so errorprone can run
         run: ./mvnw -B validate compile test-compile -DskipTests
 
