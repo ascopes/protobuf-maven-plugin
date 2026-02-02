@@ -3,12 +3,6 @@ coverage:
   precision: 2
 
 codecov:
-  notify:
-    # Notify via a separate pipeline step in CI once all builds have completed. This way, we don't
-    # report coverage after each parallel build completes, which results in spammy and incorrect
-    # email notifications and prematurely marking the build as having failed.
-    # https://github.com/codecov/codecov-action/issues/1436#issuecomment-2614065472
-    manual_trigger: true
   require_ci_to_pass: true
   strict_yaml_branch: main
 
