@@ -900,6 +900,11 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       return;
     }
 
+    reportDeprecatedProtocPluginsArgument(binaryMavenPlugins, "binaryMavenPlugin", "binary-maven");
+    reportDeprecatedProtocPluginsArgument(binaryPathPlugins, "binaryPathPlugin", "binary-path");
+    reportDeprecatedProtocPluginsArgument(binaryUrlPlugins, "binaryUrlPlugin", "binary-url");
+    reportDeprecatedProtocPluginsArgument(jvmMavenPlugins, "jvmMavenPlugin", "jvm-maven");
+
     var enabledLanguages = Language.setBuilder()
         .addIf(javaEnabled, Language.JAVA)
         .addIf(kotlinEnabled, Language.KOTLIN)
@@ -1025,5 +1030,41 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private <K, V> Map<K, V> nonNullMap(@Nullable Map<K, V> map) {
     return requireNonNullElseGet(map, Map::of);
+  }
+
+  private void reportDeprecatedProtocPluginsArgument(
+      @Nullable Collection<?> arg,
+      String singularName,
+      String replacementKind
+  ) {
+    if (arg == null || arg.isEmpty()) {
+      return;
+    }
+
+    var before = String.join(
+        "\n",
+        "  <" + singularName + "s>",
+        "    <" + singularName + ">",
+        "      ...",
+        "    </" + singularName + ">",
+        "  </" + singularName + "s>"
+    );
+
+    var after = String.join(
+        "\n",
+        "  <protocPlugins>",
+        "    <protocPlugin kind=\"" + replacementKind + "\">",
+        "      ...",
+        "    </protocPlugin>",
+        "  </protocPlugins>"
+    );
+
+    log.warn(
+        "[DEPRECATED] The \"{}s\" attribute is deprecated for removal in v5.0.0. Please "
+            + "replace\n{}\n...with...\n{}\n moving forwards.",
+        singularName,
+        before,
+        after
+    );
   }
 }
