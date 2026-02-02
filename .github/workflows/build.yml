@@ -176,7 +176,7 @@ jobs:
         continue-on-error: true
         if: ${{ ! cancelled() }}
         with:
-          flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version}}-${{ matrix.os-name }}
+          flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version }}-${{ matrix.os-name }}
           report_type: coverage
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -184,7 +184,7 @@ jobs:
         uses: codecov/codecov-action@v5
         if: ${{ ! cancelled() }}
         with:
-          flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version}}-${{ matrix.os-name }}
+          flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version }}-${{ matrix.os-name }}
           report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
 
