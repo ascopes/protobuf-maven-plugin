@@ -22,7 +22,7 @@
   <parent>
     <groupId>io.github.ascopes</groupId>
     <artifactId>protobuf-maven-plugin-parent</artifactId>
-    <version>4.1.3</version>
+    <version>4.1.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>protobuf-maven-plugin</artifactId>
