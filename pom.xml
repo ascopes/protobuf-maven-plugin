@@ -235,7 +235,7 @@
             on this in any project, but we reference it in our
             site.xml that is consumed by Maven Site Plugin. Usually
             we'd declare the version in there directly, but by doing
-            it here with a property, we cal allow dependabot to
+            it here with a property, we can allow dependabot to
             start to manage this automatically for us. The property
             is then filtered into the site.xml automatically.
         -->
