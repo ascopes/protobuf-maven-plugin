@@ -901,8 +901,8 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
     }
 
     reportDeprecatedProtocPluginsArgument(binaryMavenPlugins, "binaryMavenPlugin", "binary-maven");
-    reportDeprecatedProtocPluginsArgument(binaryPathPlugins, "binaryPathPlugin", "binary-path");
-    reportDeprecatedProtocPluginsArgument(binaryUrlPlugins, "binaryUrlPlugin", "binary-url");
+    reportDeprecatedProtocPluginsArgument(binaryPathPlugins, "binaryPathPlugin", "path");
+    reportDeprecatedProtocPluginsArgument(binaryUrlPlugins, "binaryUrlPlugin", "url");
     reportDeprecatedProtocPluginsArgument(jvmMavenPlugins, "jvmMavenPlugin", "jvm-maven");
 
     var enabledLanguages = Language.setBuilder()
