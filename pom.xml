@@ -797,6 +797,12 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven-javadoc-plugin.version}</version>
+            <configuration>
+              <!-- Ignore missing Javadoc comments. We don't care about this as the
+                   internals are not a public API. -->
+              <doclint>all,-missing</doclint>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
