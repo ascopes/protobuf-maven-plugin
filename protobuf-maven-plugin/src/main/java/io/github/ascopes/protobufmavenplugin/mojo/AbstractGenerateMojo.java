@@ -28,11 +28,7 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.BinaryMavenProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
-import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPluginBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -570,11 +566,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(
-      alias = "protocVersion",
-      required = true,
-      property = "protobuf.compiler.version"
-  )
+  @Parameter(required = true, property = "protobuf.compiler.version")
   String protoc;
 
   /**
@@ -754,7 +746,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * @since 0.0.1
    */
-  @Parameter(alias = "sourcePaths")
+  @Parameter
   @Nullable List<Path> sourceDirectories;
 
   /**
@@ -764,79 +756,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable List<Path> sourceDescriptorPaths;
-
-  /*
-   * Deprecated parameters to remove in v5.
-   */
-
-  /**
-   * Binary plugins to use with the protobuf compiler, sourced from a Maven repository.
-   *
-   * <p>See the
-   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
-   * for more details on the parameters that this block can take.
-   *
-   * @since 0.3.0
-   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
-   */
-  @Deprecated(forRemoval = true)
-  @Parameter
-  @Nullable List<BinaryMavenProtocPluginBean> binaryMavenPlugins;
-
-  /**
-   * Binary plugins to use with the protobuf compiler, sourced from the system {@code PATH}.
-   *
-   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
-   * with {@code protoc} out of the box.
-   *
-   * <p>See the
-   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
-   * for more details on the parameters that this block can take.
-   *
-   * @since 2.0.0
-   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
-   */
-  @Deprecated(forRemoval = true)
-  @Parameter
-  @Nullable List<PathProtocPluginBean> binaryPathPlugins;
-
-  /**
-   * Binary plugins to use with the protobuf compiler, specified as a valid URL.
-   *
-   * <p>Binary plugins are {@code protoc} plugins that are regular executables, and thus can work
-   * with {@code protoc} out of the box.
-   *
-   * <p>See the
-   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
-   * for more details on the parameters that this block can take.
-   *
-   * @since 2.0.0
-   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
-   */
-  @Deprecated(forRemoval = true)
-  @Parameter
-  @Nullable List<UriProtocPluginBean> binaryUrlPlugins;
-
-  /**
-   * Additional <strong>pure-Java</strong> plugins to use with the protobuf compiler.
-   *
-   * <p>Unlike artifact-based plugins, these are pure Java JAR applications that abide by the
-   * protoc compiler API, and will be provided to the compiler via generated scripts.
-   *
-   * <p>See the
-   * <a href="https://ascopes.github.io/protobuf-maven-plugin/using-protoc-plugins.html">"Using Protoc Plugins" page</a>
-   * for more details on the parameters that this block can take.
-   *
-   * @since 0.3.0
-   * @deprecated Users should now use {@link #plugins} instead. This option will be removed in v5.
-   */
-  @Deprecated(forRemoval = true)
-  @Parameter
-  @Nullable List<JvmMavenProtocPluginBean> jvmMavenPlugins;
-
-  /*
-   * Implementation-specific details.
-   */
 
   /**
    * Provides the default source directory to read protobuf sources from.
@@ -900,11 +819,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
       return;
     }
 
-    reportDeprecatedProtocPluginsArgument(binaryMavenPlugins, "binaryMavenPlugin", "binary-maven");
-    reportDeprecatedProtocPluginsArgument(binaryPathPlugins, "binaryPathPlugin", "path");
-    reportDeprecatedProtocPluginsArgument(binaryUrlPlugins, "binaryUrlPlugin", "url");
-    reportDeprecatedProtocPluginsArgument(jvmMavenPlugins, "jvmMavenPlugin", "jvm-maven");
-
     var enabledLanguages = Language.setBuilder()
         .addIf(javaEnabled, Language.JAVA)
         .addIf(kotlinEnabled, Language.KOTLIN)
@@ -941,7 +855,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
         .protocDigest(protocDigest)
-        .protocPlugins(protocPlugins())
+        .protocPlugins(nonNullList(plugins))
         .protocVersion(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sanctionedExecutablePath(sanctionedExecutablePath)
@@ -994,17 +908,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         : overriddenVersion;
   }
 
-  @Deprecated(forRemoval = true)
-  private Collection<ProtocPlugin> protocPlugins() {
-    var allPlugins = new ArrayList<ProtocPlugin>();
-    allPlugins.addAll(nonNullList(plugins));
-    allPlugins.addAll(nonNullList(binaryMavenPlugins));
-    allPlugins.addAll(nonNullList(binaryPathPlugins));
-    allPlugins.addAll(nonNullList(binaryUrlPlugins));
-    allPlugins.addAll(nonNullList(jvmMavenPlugins));
-    return Collections.unmodifiableList(allPlugins);
-  }
-
   private Collection<Path> determinePaths(
       @Nullable Collection<Path> inputPaths,
       Supplier<Collection<Path>> defaultIfMissing
@@ -1030,41 +933,5 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
 
   private <K, V> Map<K, V> nonNullMap(@Nullable Map<K, V> map) {
     return requireNonNullElseGet(map, Map::of);
-  }
-
-  private void reportDeprecatedProtocPluginsArgument(
-      @Nullable Collection<?> arg,
-      String singularName,
-      String replacementKind
-  ) {
-    if (arg == null || arg.isEmpty()) {
-      return;
-    }
-
-    var before = String.join(
-        "\n",
-        "  <" + singularName + "s>",
-        "    <" + singularName + ">",
-        "      ...",
-        "    </" + singularName + ">",
-        "  </" + singularName + "s>"
-    );
-
-    var after = String.join(
-        "\n",
-        "  <protocPlugins>",
-        "    <protocPlugin kind=\"" + replacementKind + "\">",
-        "      ...",
-        "    </protocPlugin>",
-        "  </protocPlugins>"
-    );
-
-    log.warn(
-        "[DEPRECATED] The \"{}s\" attribute is deprecated for removal in v5.0.0. Please "
-            + "replace\n{}\n...with...\n{}\n moving forwards.",
-        singularName,
-        before,
-        after
-    );
   }
 }

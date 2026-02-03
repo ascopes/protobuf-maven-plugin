@@ -44,9 +44,6 @@ that plugin directly via the group ID, artifact ID, and version (like any other 
 
 Binary Maven plugins should have the `kind` attribute set to `binary-maven`.
 
-**Note that this is equivalent to passing a list of `<binaryMavenPlugins>` in previous versions. 
-This old behaviour will be removed in v5.0.0.**
- 
 ```xml
 <plugin>
   <groupId>io.github.ascopes</groupId>
@@ -87,10 +84,6 @@ If you instead wish to read the executable from the system `$PATH`, then you can
 executable name to find instead.
 
 Path plugins should have the `kind` attribute set to `path`.
-
-
-**Note that this is equivalent to passing a list of `<binaryPathPlugins>` in previous versions. This
-old behaviour will be removed in v5.0.0.**
 
 ```xml
 <plugin>
@@ -147,9 +140,6 @@ In some situations, you may wish to download plugins directly from a URL or run 
 specific file system path. URL plugins help you achieve this goal.
 
 URL Maven plugins should have the `kind` attribute set to `url`.
-
-**Note that this is equivalent to passing a list of `<binaryUrlPlugins>` in previous versions. This
-old behaviour will be removed in v5.0.0.**
 
 ```xml
 <plugin>
@@ -220,9 +210,6 @@ do this, simply specify the `jvmMavenPlugins` configuration property, passing in
 dependencies to execute.
 
 JVM Maven plugins should have the `kind` attribute set to `jvm-maven`.
-
-**Note that this is equivalent to passing a list of `<jvmMavenPlugins>` in previous versions. This
-old behaviour will be removed in v5.0.0.**
 
 ```xml
 <plugin>
