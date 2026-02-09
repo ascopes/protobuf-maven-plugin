@@ -133,7 +133,7 @@
     <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <!-- Must be on v9 or newer to correctly generate indexes for Java 17 builds -->
-    <sisu-maven-plugin.version>0.9.0.M4</sisu-maven-plugin.version>
+    <sisu-maven-plugin.version>1.0.0</sisu-maven-plugin.version>
 
     <!-- Plugin dependencies -->
     <checkstyle.version>12.0.1</checkstyle.version>
