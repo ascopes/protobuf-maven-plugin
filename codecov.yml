@@ -9,3 +9,6 @@ codecov:
 comment:
   layout: "reach, diff, flags, files"
   behavior: default
+
+notify:
+  notify_error: true
