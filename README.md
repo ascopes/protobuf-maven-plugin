@@ -34,8 +34,6 @@ A scratch-built, modern Maven plugin for seamless `protoc` integration. Features
 Full documentation with usage examples can be found [within the plugin documentation](https://ascopes.github.io/protobuf-maven-plugin),
 and examples are present [in the integration tests](https://github.com/ascopes/protobuf-maven-plugin/tree/main/protobuf-maven-plugin/src/it).
 
-> [!NOTE]
-> The v4 release of this plugin requires a minimum of Java 17 and Maven 3.9 to operate.
 
 ## Quick start
 
