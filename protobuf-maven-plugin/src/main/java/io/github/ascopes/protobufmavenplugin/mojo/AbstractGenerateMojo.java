@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNullElseGet;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
@@ -302,7 +302,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> importDependencies;
+  @Nullable List<MavenDependency> importDependencies;
 
   /**
    * Specify additional paths to import protobuf sources from on the local file system.
@@ -687,7 +687,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 1.2.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> sourceDependencies;
+  @Nullable List<MavenDependency> sourceDependencies;
 
   /**
    * Protobuf Descriptor files to compile.
@@ -721,7 +721,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * @since 3.1.0
    */
   @Parameter
-  @Nullable List<MavenDependencyBean> sourceDescriptorDependencies;
+  @Nullable List<MavenDependency> sourceDescriptorDependencies;
 
   /**
    * The source directories to compile protobuf sources from.
@@ -756,6 +756,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    */
   @Parameter
   @Nullable List<Path> sourceDescriptorPaths;
+
+  /*
+   * Implementation-specific details.
+   */
 
   /**
    * Provides the default source directory to read protobuf sources from.
