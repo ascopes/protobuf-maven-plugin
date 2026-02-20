@@ -16,8 +16,9 @@
 package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Default;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value.Immutable;
 
 
 /**
@@ -30,8 +31,9 @@ import org.immutables.value.Value.Modifiable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
-@Modifiable
-@KindHint(kind = "path", implementation = PathProtocPluginBean.class)
+@Data
+@Immutable
+@KindHint("path")
 public abstract non-sealed class PathProtocPlugin implements ProtocPlugin {
 
   public abstract String getName();
