@@ -31,9 +31,7 @@ import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -619,14 +617,15 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>Most users <strong>SHOULD NOT</strong> specify this.
    *
-   * <p>If users operate in an overly locked-down corporate environment that disallows running
+   * <p>Some users operate in an overly locked-down corporate environment that disallows running
    * shell/batch scripts or native executables outside sanctioned locations on their local
-   * file system, they can specify the path here either via this configuration parameter
-   * or via a property such that any executables are first moved to a directory within this
-   * location. This is designed to be able to be used within a Maven profile if desired.
+   * file system. In this case, they can specify the path here either via this configuration
+   * parameter or via a property. This will result in any executables first being moved to a
+   * directory within this location. This is designed to be able to be used within a Maven profile
+   * if desired.
    *
    * <p>When specified, any executables will be copied to this directory prior to invoking them.
-   * These executables will be located in a nested sub-directory to allow this setting to be
+   * These executables will be located in a nested subdirectory to allow this setting to be
    * shared across plugin invocations whilst retaining build reproducibility.
    *
    * @since 3.9.0
