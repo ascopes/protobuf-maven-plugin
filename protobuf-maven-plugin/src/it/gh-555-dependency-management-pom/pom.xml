@@ -28,28 +28,26 @@
     <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
-  <groupId>gh-555-dependency-management</groupId>
-  <artifactId>gh-555-dependency-management</artifactId>
+  <groupId>gh-555-dependency-management-pom</groupId>
+  <artifactId>gh-555-dependency-management-pom</artifactId>
   <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <!--
+        No version provided, we should inherit it from the setup parent
+        dependency management.
+      -->
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>@project.artifactId@</artifactId>
-
-        <configuration>
-          <importDependencies>
-            <importDependency>
-              <groupId>com.google.protobuf</groupId>
-              <artifactId>protobuf-java</artifactId>
-              <!--
-                No version provided, we should inherit it from the setup parent
-                dependency management.
-              -->
-            </importDependency>
-          </importDependencies>
-        </configuration>
 
         <executions>
           <execution>

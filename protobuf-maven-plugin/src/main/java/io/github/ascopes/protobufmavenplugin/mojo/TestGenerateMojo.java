@@ -50,7 +50,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     configurator = PluginConfigurator.NAME,
     defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
     requiresDependencyCollection = ResolutionScope.TEST,
-    requiresDependencyResolution = ResolutionScope.TEST,
+    // Avoid dependency resolution on the Maven level so that projects can be built
+    // with partial reactor dependencies on sibling modules.
+    requiresDependencyResolution = ResolutionScope.NONE,
     threadSafe = true
 )
 public final class TestGenerateMojo extends AbstractGenerateMojo {

@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.eclipseArtifact;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.eclipseArtifactType;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.eclipseDependency;
-import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.mavenArtifact;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.mavenDependency;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.pmpDependency;
 import static io.github.ascopes.protobufmavenplugin.fixtures.DependencyFixtures.pmpExclusion;
@@ -66,7 +65,6 @@ class AetherArtifactMapperTest {
 
   @DisplayName(".mapEclipseArtifactToPath(Artifact) returns the artifact path")
   @Test
-  @SuppressWarnings("deprecation")
   void mapEclipseArtifactToPathReturnsTheArtifactPath(@TempDir Path dir) {
     // Given
     var file = dir.resolve(someBasicString() + ".xml");
@@ -709,41 +707,42 @@ class AetherArtifactMapperTest {
     }
   }
 
-  @DisplayName(".mapMavenArtifactToEclipseArtifact(Artifact) returns the expected result")
+  @DisplayName(".mapMavenDependencyToEclipseDependency(Dependency) returns the expected result")
   @Test
-  void mapMavenArtifactToEclipseArtifactReturnsTheExpectedResult() {
+  void mapMavenDependencyToEclipseDependencyReturnsTheExpectedResult() {
     try (var repositoryUtils = mockStatic(RepositoryUtils.class)) {
       // Given
-      var expectedArtifact = eclipseArtifact(
+      var expectedDependency = eclipseDependency(
           "org.example",
           "foo-bar",
           "1.2.3.4",
           "blah",
-          "png"
+          "ping",
+          "compile",
+          null
       );
-      repositoryUtils
-          .when(() -> RepositoryUtils.toArtifact(any(org.apache.maven.artifact.Artifact.class)))
-          .thenReturn(expectedArtifact);
-      var inputArtifact = mavenArtifact(
+      repositoryUtils.when(() -> RepositoryUtils.toDependency(any(), same(artifactTypeRegistry)))
+          .thenReturn(expectedDependency);
+      var inputDependency = mavenDependency(
           "org.example",
           "foo-bar",
           "1.2.3.4",
-          "blah",
-          "png"
+          "ping",
+          "blah"
       );
 
       // When
-      var actualArtifact = aetherArtifactMapper
-          .mapMavenArtifactToEclipseArtifact(inputArtifact);
+      var actualDependency = aetherArtifactMapper
+          .mapMavenDependencyToEclipseDependency(inputDependency);
 
       // Then
       repositoryUtils
-          .verify(() -> RepositoryUtils.toArtifact(inputArtifact));
+          .verify(() -> RepositoryUtils.toDependency(inputDependency, artifactTypeRegistry));
       repositoryUtils
           .verifyNoMoreInteractions();
 
-      assertThat(actualArtifact)
-          .isSameAs(expectedArtifact);
+      assertThat(actualDependency)
+          .isSameAs(expectedDependency);
     }
   }
 }
