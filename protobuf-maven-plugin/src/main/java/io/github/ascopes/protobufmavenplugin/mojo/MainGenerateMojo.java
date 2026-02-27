@@ -45,10 +45,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     name = "generate",
     configurator = PluginConfigurator.NAME,
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-    // We require resolving TEST scope here since the user can control the overall scope
-    // we use for dependencies. The TEST scope is documented to cover all other scopes.
     requiresDependencyCollection = ResolutionScope.TEST,
-    requiresDependencyResolution = ResolutionScope.TEST,
+    // Avoid dependency resolution on the Maven level so that projects can be built
+    // with partial reactor dependencies on sibling modules.
+    requiresDependencyResolution = ResolutionScope.NONE,
     threadSafe = true
 )
 public final class MainGenerateMojo extends AbstractGenerateMojo {

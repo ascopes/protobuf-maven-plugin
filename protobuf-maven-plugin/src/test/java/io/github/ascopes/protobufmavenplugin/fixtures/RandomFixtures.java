@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.fixtures;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -45,12 +44,6 @@ public final class RandomFixtures {
 
   public static int somePositiveInt() {
     return random().nextInt(Integer.MAX_VALUE);
-  }
-
-  public static <T> T oneOf(Iterable<T> items) {
-    var list = new ArrayList<T>();
-    items.forEach(list::add);
-    return list.get(random().nextInt(list.size()));
   }
 
   private static Random random() {
