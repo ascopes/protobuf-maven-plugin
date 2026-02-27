@@ -31,8 +31,6 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.apache.maven.model.DependencyManagement;
 import org.apache.maven.project.MavenProject;
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.graph.Dependency;
 import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
 
@@ -49,7 +47,7 @@ import org.jspecify.annotations.Nullable;
 @Named
 final class AetherDependencyManagement {
 
-  private final Map<String, Artifact> effectiveDependencyManagement;
+  private final Map<String, org.eclipse.aether.artifact.Artifact> effectiveDependencyManagement;
 
   @Inject
   AetherDependencyManagement(MavenSession mavenSession, AetherArtifactMapper artifactMapper) {
@@ -68,7 +66,9 @@ final class AetherDependencyManagement {
         .collect(deduplicateArtifacts());
   }
 
-  Dependency fillManagedAttributes(Dependency dependency) {
+  org.eclipse.aether.graph.Dependency fillManagedAttributes(
+      org.eclipse.aether.graph.Dependency dependency
+  ) {
     var artifact = dependency.getArtifact();
 
     if (isSpecified(artifact.getVersion())) {
@@ -84,7 +84,7 @@ final class AetherDependencyManagement {
       return dependency;
     }
 
-    return new Dependency(
+    return new org.eclipse.aether.graph.Dependency(
         managedArtifact,
         dependency.getScope(),
         dependency.getOptional(),
@@ -92,7 +92,10 @@ final class AetherDependencyManagement {
     );
   }
 
-  static Collector<Artifact, ?, Map<String, Artifact>> deduplicateArtifacts() {
+  static Collector<
+      org.eclipse.aether.artifact.Artifact,
+      ?,
+      Map<String, org.eclipse.aether.artifact.Artifact>> deduplicateArtifacts() {
     return Collectors.collectingAndThen(
         Collectors.toMap(
             AetherDependencyManagement::getDependencyManagementKey,
@@ -107,7 +110,7 @@ final class AetherDependencyManagement {
     );
   }
 
-  private static String getDependencyManagementKey(Artifact artifact) {
+  private static String getDependencyManagementKey(org.eclipse.aether.artifact.Artifact artifact) {
     // Inspired by the logic in Maven's Dependency class.
 
     var builder = new StringBuilder()
@@ -125,7 +128,10 @@ final class AetherDependencyManagement {
     return builder.toString();
   }
 
-  private static Artifact newestArtifact(Artifact a, Artifact b) {
+  private static org.eclipse.aether.artifact.Artifact newestArtifact(
+      org.eclipse.aether.artifact.Artifact a,
+      org.eclipse.aether.artifact.Artifact b
+  ) {
     var versionA = parseVersion(a.getVersion());
     var versionB = parseVersion(b.getVersion());
     return versionA.compareTo(versionB) < 0 ? b : a;

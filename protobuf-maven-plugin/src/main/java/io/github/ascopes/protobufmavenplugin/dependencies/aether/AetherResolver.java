@@ -127,7 +127,7 @@ final class AetherResolver {
   Collection<Artifact> resolveDependencies(
       List<Dependency> dependencies,
       Set<String> allowedDependencyScopes
-  ) throws ResolutionException {
+  ) {
     var collectRequest = new CollectRequest();
     collectRequest.setDependencies(dependencies);
     collectRequest.setRepositories(remoteRepositories);

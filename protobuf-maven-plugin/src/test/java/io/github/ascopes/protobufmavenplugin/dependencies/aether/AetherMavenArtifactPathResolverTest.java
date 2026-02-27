@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
-import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.oneOf;
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +36,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -63,6 +61,10 @@ import org.mockito.Mock.Strictness;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+
+// FIXME: this class is horrendously complicated. Can we somehow refactor this to be simpler
+//  or is it just an unfortunate issue around the number of integration points we have to make
+//  with Aether?
 @DisplayName("AetherMavenArtifactPathResolver tests")
 @ExtendWith(MockitoExtension.class)
 class AetherMavenArtifactPathResolverTest {
@@ -194,7 +196,7 @@ class AetherMavenArtifactPathResolverTest {
   void resolveDependenciesWithoutProjectArtifactsResolvesTheDependencies(
       DependencyResolutionDepth dependencyResolutionDepth,
       Set<String> dependencyScopes
-  ) throws ResolutionException {
+  ) {
     // Given
     try (var depMgmtStatic = mockStatic(AetherDependencyManagement.class)) {
       depMgmtStatic.when(AetherDependencyManagement::deduplicateArtifacts)
@@ -333,7 +335,7 @@ class AetherMavenArtifactPathResolverTest {
   void resolveDependenciesWithProjectArtifactsResolvesTheDependencies(
       DependencyResolutionDepth dependencyResolutionDepth,
       Set<String> dependencyScopes
-  ) throws ResolutionException {
+  ) {
     // Given
     try (var depMgmtStatic = mockStatic(AetherDependencyManagement.class)) {
       depMgmtStatic.when(AetherDependencyManagement::deduplicateArtifacts)
@@ -364,33 +366,48 @@ class AetherMavenArtifactPathResolverTest {
               entry(inputArtifact4, aetherUnfilledDependency4)
           ));
 
+      var mavenProjectDependency1 = mock(org.apache.maven.model.Dependency.class,
+          "mavenProjectDependency1");
+      var aetherInputProjectDependency1 = mock(org.eclipse.aether.graph.Dependency.class,
+          "aetherInputProjectDependency1");
+
+      var mavenProjectDependency2 = mock(org.apache.maven.model.Dependency.class,
+          "mavenProjectDependency2");
+      var aetherInputProjectDependency2 = mock(org.eclipse.aether.graph.Dependency.class,
+          "aetherInputProjectDependency2");
+
+      var mavenProjectDependency3 = mock(org.apache.maven.model.Dependency.class,
+          "mavenProjectDependency3");
+
+      var project = mock(MavenProject.class);
+      when(mavenSession.getCurrentProject())
+          .thenReturn(project);
+      when(project.getDependencies())
+          .thenReturn(List.of(mavenProjectDependency1, mavenProjectDependency2));
+
+      when(aetherArtifactMapper.mapMavenDependencyToEclipseDependency(any()))
+          .then(givenReturn(
+              entry(mavenProjectDependency1, aetherInputProjectDependency1),
+              entry(mavenProjectDependency2, aetherInputProjectDependency2),
+              entry(mavenProjectDependency3, mock("you shouldn't see this"))
+          ));
+
       var aetherFilledDependency1 = mock(Dependency.class, "aether filled dependency 1");
       var aetherFilledDependency2 = mock(Dependency.class, "aether filled dependency 2");
       var aetherFilledDependency3 = mock(Dependency.class, "aether filled dependency 3");
       var aetherFilledDependency4 = mock(Dependency.class, "aether filled dependency 4");
+      var aetherFilledDependency5 = mock(Dependency.class, "aether filled dependency 5");
+      var aetherFilledDependency6 = mock(Dependency.class, "aether filled dependency 6");
 
       when(aetherDependencyManagement.fillManagedAttributes(any()))
           .then(givenReturn(
               entry(aetherUnfilledDependency1, aetherFilledDependency1),
               entry(aetherUnfilledDependency2, aetherFilledDependency2),
               entry(aetherUnfilledDependency3, aetherFilledDependency3),
-              entry(aetherUnfilledDependency4, aetherFilledDependency4)
+              entry(aetherUnfilledDependency4, aetherFilledDependency4),
+              entry(aetherInputProjectDependency1, aetherFilledDependency5),
+              entry(aetherInputProjectDependency2, aetherFilledDependency6)
           ));
-
-      var mavenOutputArtifact1 = mock(org.apache.maven.artifact.Artifact.class);
-      when(mavenOutputArtifact1.getScope()).thenReturn(oneOf(dependencyScopes));
-
-      var mavenOutputArtifact2 = mock(org.apache.maven.artifact.Artifact.class);
-      when(mavenOutputArtifact2.getScope()).thenReturn(oneOf(dependencyScopes));
-
-      var mavenOutputArtifact3 = mock(org.apache.maven.artifact.Artifact.class);
-
-      var project = mock(MavenProject.class);
-      when(mavenSession.getCurrentProject())
-          .thenReturn(project);
-      when(project.getArtifacts())
-          // Order matters, so don't use Set.of here.
-          .thenReturn(new LinkedHashSet<>(List.of(mavenOutputArtifact1, mavenOutputArtifact2)));
 
       var aetherOutputArtifact1 = mock(Artifact.class, "output artifact 1");
       var aetherOutputArtifact2 = mock(Artifact.class, "output artifact 2");
@@ -408,14 +425,9 @@ class AetherMavenArtifactPathResolverTest {
               aetherOutputArtifact3,
               aetherOutputArtifact4,
               aetherOutputArtifact5,
-              aetherOutputArtifact6
-          ));
-
-      when(aetherArtifactMapper.mapMavenArtifactToEclipseArtifact(any()))
-          .then(givenReturn(
-              entry(mavenOutputArtifact1, aetherOutputArtifact7),
-              entry(mavenOutputArtifact2, aetherOutputArtifact8),
-              entry(mavenOutputArtifact3, mock("you shouldn't see this"))
+              aetherOutputArtifact6,
+              aetherOutputArtifact7,
+              aetherOutputArtifact8
           ));
 
       var path1 = mock(Path.class, "path 1");
@@ -440,7 +452,7 @@ class AetherMavenArtifactPathResolverTest {
           ));
 
       // When
-      var returnedPaths = resolver.resolveDependencies(
+      final var returnedPaths = resolver.resolveDependencies(
           List.of(inputArtifact1, inputArtifact2, inputArtifact3, inputArtifact4),
           dependencyResolutionDepth,
           dependencyScopes,
@@ -448,10 +460,6 @@ class AetherMavenArtifactPathResolverTest {
       );
 
       // Then
-      assertThat(returnedPaths)
-          // Project artifacts are first, as we then override them if we want
-          .containsExactly(path7, path8, path1, path2, path3, path4, path5, path6);
-
       Stream
           .of(inputArtifact1, inputArtifact2, inputArtifact3, inputArtifact4)
           .forEach(arg -> verify(aetherArtifactMapper).mapPmpArtifactToEclipseDependency(
@@ -460,15 +468,21 @@ class AetherMavenArtifactPathResolverTest {
 
       Stream
           .of(
+              // Always needed.
               aetherUnfilledDependency1,
               aetherUnfilledDependency2,
               aetherUnfilledDependency3,
-              aetherUnfilledDependency4
+              aetherUnfilledDependency4,
+              // Possibly optional, see comment in main code. Passing in to be safe.
+              aetherInputProjectDependency1,
+              aetherInputProjectDependency2
           )
           .forEach(arg -> verify(aetherDependencyManagement).fillManagedAttributes(arg));
 
       verify(aetherResolver).resolveDependencies(
           List.of(
+              aetherFilledDependency5,
+              aetherFilledDependency6,
               aetherFilledDependency1,
               aetherFilledDependency2,
               aetherFilledDependency3,
@@ -480,8 +494,8 @@ class AetherMavenArtifactPathResolverTest {
       depMgmtStatic.verify(AetherDependencyManagement::deduplicateArtifacts);
 
       Stream
-          .of(mavenOutputArtifact1, mavenOutputArtifact2)
-          .forEach(arg -> verify(aetherArtifactMapper).mapMavenArtifactToEclipseArtifact(arg));
+          .of(mavenProjectDependency1, mavenProjectDependency2)
+          .forEach(arg -> verify(aetherArtifactMapper).mapMavenDependencyToEclipseDependency(arg));
 
       Stream
           .of(
@@ -497,7 +511,7 @@ class AetherMavenArtifactPathResolverTest {
           .forEach(arg -> verify(aetherArtifactMapper).mapEclipseArtifactToPath(arg));
 
       verify(mavenSession).getCurrentProject();
-      verify(project).getArtifacts();
+      verify(project).getDependencies();
 
       verifyNoMoreInteractions(
           aetherArtifactMapper,
@@ -507,7 +521,11 @@ class AetherMavenArtifactPathResolverTest {
           project
       );
 
-      verifyNoInteractions(mavenOutputArtifact3);
+      verifyNoInteractions(mavenProjectDependency3);
+
+      assertThat(returnedPaths)
+          // Project artifacts are first, as we then override them if we want
+          .containsExactly(path1, path2, path3, path4, path5, path6, path7, path8);
     }
   }
 
@@ -536,7 +554,18 @@ class AetherMavenArtifactPathResolverTest {
   static <A, R> Answer<R> givenReturn(
       Entry<A, R>... entries
   ) {
-    return (ctx) -> {
+    // Hack to include the stubbing location in the call site to make debugging tests a bit
+    // less hellish.
+    class StubLocation extends RuntimeException {
+      @Override
+      public String getMessage() {
+        return "stub location was:";
+      }
+    }
+
+    var stubLocationMarker = new StubLocation().fillInStackTrace();
+
+    return ctx -> {
       @SuppressWarnings("unchecked")
       var arg = (A) ctx.getArgument(0);
       for (var entry : entries) {
@@ -544,7 +573,9 @@ class AetherMavenArtifactPathResolverTest {
           return entry.getValue();
         }
       }
-      throw new IllegalArgumentException("Invalid stub, got unexpected argument " + arg);
+      var ex = new IllegalArgumentException("Invalid stub, got unexpected argument " + arg);
+      ex.addSuppressed(stubLocationMarker);
+      throw ex;
     };
   }
 }
