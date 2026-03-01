@@ -43,23 +43,14 @@ import org.eclipse.sisu.Description;
 final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepositorySystemSession {
 
   private final RepositorySystemSession delegate;
+  private final DependencyTraverser dependencyTraverser;
+  private final ResolutionErrorPolicy resolutionErrorPolicy;
 
   @Inject
-  ProtobufMavenPluginRepositorySession(
-      MavenSession mavenSession
-  ) {
+  ProtobufMavenPluginRepositorySession(MavenSession mavenSession) {
     delegate = mavenSession.getRepositorySession();
-  }
 
-  @Override
-  protected RepositorySystemSession getSession() {
-    return delegate;
-  }
-
-  // TODO(ascopes): refactor to avoid making new instances on each call.
-  @Override
-  public DependencyTraverser getDependencyTraverser() {
-    return new AndDependencyTraverser(
+    dependencyTraverser = new AndDependencyTraverser(
         new WildcardAwareDependencyTraverser(),
         // Avoid OOME by not traversing things known to be fat archives of content.
         // Related to issues in GH-596 and GH-938.
@@ -67,13 +58,25 @@ final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepos
         // Always fall back to traversing JARs, etc.
         new StaticDependencyTraverser(true)
     );
+
+    // As of 2.13.0, we do not want to cache invalid dependencies between builds. This gets a bit
+    // confusing for users if it collides with logic that Maven itself is performing, so lets just
+    // totally avoid it.
+    resolutionErrorPolicy = new NoCacheResolutionErrorPolicy();
+  }
+
+  @Override
+  protected RepositorySystemSession getSession() {
+    return delegate;
+  }
+
+  @Override
+  public DependencyTraverser getDependencyTraverser() {
+    return dependencyTraverser;
   }
 
   @Override
   public ResolutionErrorPolicy getResolutionErrorPolicy() {
-    // As of 2.13.0, we do not want to cache invalid dependencies between builds. This gets a bit
-    // confusing for users if it collides with logic that Maven itself is performing, so lets just
-    // totally avoid it.
-    return new NoCacheResolutionErrorPolicy();
+    return resolutionErrorPolicy;
   }
 }

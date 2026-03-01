@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.collection.DependencyTraverser;
 import org.eclipse.aether.util.graph.traverser.AndDependencyTraverser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,14 +58,6 @@ class ProtobufMavenPluginRepositorySessionTest {
     // Then
     assertThat(repositorySession.getDependencyTraverser())
         .isInstanceOf(AndDependencyTraverser.class);
-  }
-
-  @DisplayName(".getDependencyTraverser() returns new instances on every call")
-  @Test
-  void getDependencyTraverserReturnsNewInstancesOnEveryCall() {
-    // Then
-    assertThat(repositorySession.getDependencyTraverser())
-        .isNotSameAs(repositorySession.getDependencyTraverser());
   }
 
   @DisplayName(".getResolutionErrorPolicy() returns the expected value")
