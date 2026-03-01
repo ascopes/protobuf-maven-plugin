@@ -20,14 +20,10 @@ import org.eclipse.aether.collection.DependencyCollectionContext;
 import org.eclipse.aether.collection.DependencyTraverser;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.Exclusion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Dependency traverser that can detect a wildcard exclusion that is used to flag an artifact with a
  * {@link DependencyResolutionDepth#DIRECT} dependency resolution depth.
- *
- * <p>For all other purposes, this delegates to the default implementation.
  *
  * @author Ashley Scopes
  * @since 2.0.3
@@ -36,35 +32,18 @@ final class WildcardAwareDependencyTraverser implements DependencyTraverser {
 
   static Exclusion WILDCARD_EXCLUSION = new Exclusion("*", "*", "*", "*");
 
-  private static final Logger log = LoggerFactory.getLogger(WildcardAwareDependencyTraverser.class);
-
-  private final DependencyTraverser delegate;
-
-  WildcardAwareDependencyTraverser(DependencyTraverser delegate) {
-    this.delegate = delegate;
-  }
-
-  // Visible for testing.
-  DependencyTraverser getDelegate() {
-    return delegate;
-  }
-
   @Override
   public boolean traverseDependency(Dependency dependency) {
     // If we internally have the special wildcard exclusion we define, then assume it is a
     // dependency with DependencyResolutionDepth.DIRECT, so don't traverse it any further.
-    var shouldTraverse = !dependency.getExclusions().contains(WILDCARD_EXCLUSION)
-        && delegate.traverseDependency(dependency);
-
-    log.trace("Decision to traverse {}: {}", dependency, shouldTraverse);
-    return shouldTraverse;
+    return !dependency.getExclusions().contains(WILDCARD_EXCLUSION);
   }
 
   @Override
   public WildcardAwareDependencyTraverser deriveChildTraverser(
       DependencyCollectionContext context
   ) {
-    log.trace("Deriving new dependency traverser for dependency {}", context.getDependency());
-    return new WildcardAwareDependencyTraverser(delegate.deriveChildTraverser(context));
+    // We are totally stateless so this is fine.
+    return this;
   }
 }

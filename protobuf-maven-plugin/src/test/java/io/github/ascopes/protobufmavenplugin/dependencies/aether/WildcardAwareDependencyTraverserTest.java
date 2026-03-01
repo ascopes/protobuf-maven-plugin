@@ -17,44 +17,30 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import static io.github.ascopes.protobufmavenplugin.dependencies.aether.WildcardAwareDependencyTraverser.WILDCARD_EXCLUSION;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.eclipse.aether.collection.DependencyCollectionContext;
 import org.eclipse.aether.collection.DependencyTraverser;
 import org.eclipse.aether.graph.Dependency;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Ashley Scopes
  */
 @DisplayName("WildcardAwareDependencyTraverser tests")
-@ExtendWith(MockitoExtension.class)
 class WildcardAwareDependencyTraverserTest {
 
-  @Mock
-  DependencyTraverser delegate;
-
-  @InjectMocks
   WildcardAwareDependencyTraverser underTest;
 
-  @DisplayName("the delegate is assigned correctly")
-  @Test
-  void delegateIsAssignedCorrectly() {
-    // Then
-    assertThat(underTest.getDelegate()).isSameAs(delegate);
+  @BeforeEach
+  void setUp() {
+    underTest = new WildcardAwareDependencyTraverser();
   }
 
   @DisplayName(".traverseDependency(Dependency) returns false if the dependency contains a "
@@ -71,54 +57,33 @@ class WildcardAwareDependencyTraverserTest {
 
     // Then
     assertThat(actual).isFalse();
-    verifyNoInteractions(delegate);
   }
 
-  @DisplayName(".traverseDependency(Dependency) returns the delegate result if no wildcard "
-      + "exclusions are present")
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest(name = "when delegate.tranverseDependency(Dependency) returns {0}")
-  void traverseDependencyReturnsDelegateResultIfNoWildcardExclusionsArePresent(boolean expected) {
+  @DisplayName(".traverseDependency(Dependency) returns true if no wildcard is present")
+  @Test
+  void traverseDependencyReturnsTrueIfNoWildcardExclusionsArePresent() {
     // Given
     var dependency = mock(Dependency.class);
     when(dependency.getExclusions())
         .thenReturn(List.of(mock(), mock(), mock()));
 
-    when(delegate.traverseDependency(any()))
-        .thenReturn(expected);
-
     // When
     var actual = underTest.traverseDependency(dependency);
 
     // Then
-    assertThat(actual).isEqualTo(expected);
-    verify(delegate).traverseDependency(dependency);
-    verifyNoMoreInteractions(delegate);
+    assertThat(actual).isTrue();
   }
 
-  @DisplayName(".deriveChildTraverser(DependencyCollectionContext) creates the expected child "
-      + "traverser")
+  @DisplayName(".deriveChildTraverser(DependencyCollectionContext) returns itself")
   @Test
-  void deriveChildTraverserCreatesTheExpectedChildTraverser() {
+  void deriveChildTraverserReturnsItself() {
     // Given
     var dependencyCollectionContext = mock(DependencyCollectionContext.class);
-    var expectedDelegateChildTraverser = mock(DependencyTraverser.class);
-    when(delegate.deriveChildTraverser(any()))
-        .thenReturn(expectedDelegateChildTraverser);
 
     // When
     var childTraverser = underTest.deriveChildTraverser(dependencyCollectionContext);
 
     // Then
-    assertThat(childTraverser)
-        .isInstanceOf(WildcardAwareDependencyTraverser.class)
-        .isNotSameAs(underTest);
-
-    var actualDelegateChildTraverser = childTraverser.getDelegate();
-    assertThat(actualDelegateChildTraverser)
-        .isSameAs(expectedDelegateChildTraverser);
-
-    verify(delegate).deriveChildTraverser(dependencyCollectionContext);
-    verifyNoMoreInteractions(delegate);
+    assertThat(childTraverser).isSameAs(underTest);
   }
 }

@@ -21,7 +21,11 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.collection.DependencyTraverser;
 import org.eclipse.aether.resolution.ResolutionErrorPolicy;
+import org.eclipse.aether.util.graph.traverser.AndDependencyTraverser;
+import org.eclipse.aether.util.graph.traverser.FatArtifactTraverser;
+import org.eclipse.aether.util.graph.traverser.StaticDependencyTraverser;
 import org.eclipse.sisu.Description;
 
 /**
@@ -52,9 +56,17 @@ final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepos
     return delegate;
   }
 
+  // TODO(ascopes): refactor to avoid making new instances on each call.
   @Override
-  public WildcardAwareDependencyTraverser getDependencyTraverser() {
-    return new WildcardAwareDependencyTraverser(delegate.getDependencyTraverser());
+  public DependencyTraverser getDependencyTraverser() {
+    return new AndDependencyTraverser(
+        new WildcardAwareDependencyTraverser(),
+        // Avoid OOME by not traversing things known to be fat archives of content.
+        // Related to issues in GH-596 and GH-938.
+        new FatArtifactTraverser(),
+        // Always fall back to traversing JARs, etc.
+        new StaticDependencyTraverser(true)
+    );
   }
 
   @Override
