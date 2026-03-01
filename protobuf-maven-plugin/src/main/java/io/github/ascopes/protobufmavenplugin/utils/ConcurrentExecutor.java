@@ -47,7 +47,7 @@ public final class ConcurrentExecutor {
 
   private static final int DEFAULT_MAXIMUM_CONCURRENCY = 80;
   private static final int DEFAULT_MINIMUM_CONCURRENCY = 4;
-  private static final int DEFAULT_CONCURRENCY_MULTIPLIER = 8;
+  private static final int DEFAULT_CONCURRENCY_MULTIPLIER = 4;
   private static final String CONCURRENCY_PROPERTY = "protobuf.executor.maxThreads";
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
