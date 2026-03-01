@@ -306,7 +306,32 @@
                 <parallelThreads>1</parallelThreads>
                 <!-- Disable object locking that we enabled elsewhere. -->
                 <properties />
+                <!-- Show logs -->
                 <streamLogs>true</streamLogs>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- Enabling this profile will enable collecting a flight recording of each Maven
+           invocation that can be analyzed in tools such as Java VisualVM.  -->
+      <id>invoker-jfr</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-invoker-plugin</artifactId>
+              <version>${maven-invoker-plugin.version}</version>
+              <configuration>
+                <invokerPropertiesFile>invoker-jfr.properties</invokerPropertiesFile>
+                <!-- Do not run in parallel, this can skew timings. -->
+                <parallelThreads>1</parallelThreads>
+                <!-- Disable object locking that we enabled elsewhere. -->
+                <properties />
               </configuration>
             </plugin>
           </plugins>

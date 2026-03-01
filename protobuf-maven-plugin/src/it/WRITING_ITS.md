@@ -101,6 +101,21 @@ individually.
 If you wish to enable verbose output from Maven, edit the `invoker-debug.properties` to set
 the `invoker.debug` property to `true`.
 
+## Profiling
+
+Enable the `invoker-jfr` Maven profile with `./mvnw -Pinvoker-jfr ...`. This will enable the
+use of the `invoker-jfr.properties` in this directory rather than `invoker.properties`.
+
+For example, to profile the Maven execution while running the `path-protoc` IT case, you could run
+
+```console
+$ ./mvnw verify -DskipTests -Dinvoker.test=setup,path-protoc -Pinvoker-jfr
+```
+
+You can then use a tool such as Java VisualVM, Java Mission Control, or similar to interrogate the
+output flight recording files. These will be located in 
+`protobuf-maven-plugin/target/it/{test_name}/profile.jfr`.
+
 ## Using `protoc` from the system $PATH
 
 Activate the `-Pinvoker-path-protoc` profile to force all tests to run using `protoc` on the system `$PATH`.
