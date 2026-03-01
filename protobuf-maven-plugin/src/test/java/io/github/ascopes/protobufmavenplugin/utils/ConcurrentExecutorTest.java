@@ -61,25 +61,36 @@ class ConcurrentExecutorTest {
   }
 
   @AfterEach
-  void tearDown() throws InterruptedException {
+  void tearDown() {
     executor.executorService.shutdownNow();
   }
 
   @DisplayName("concurrency respects the system processor count by default")
   @CsvSource({
       " 0,  4",
-      " 1,  8",
-      " 2, 16",
-      " 3, 24",
-      " 4, 32",
-      " 5, 40",
-      " 6, 48",
-      " 7, 56",
-      " 8, 64",
-      " 9, 72",
-      "10, 80",
-      "11, 80",
-      "12, 80",
+      " 1,  4",
+      " 2,  8",
+      " 3, 12",
+      " 4, 16",
+      " 5, 20",
+      " 6, 24",
+      " 7, 28",
+      " 8, 32",
+      " 9, 36",
+      "10, 40",
+      "11, 44",
+      "12, 48",
+      "13, 52",
+      "14, 56",
+      "15, 60",
+      "16, 64",
+      "17, 68",
+      "18, 72",
+      "19, 76",
+      "20, 80",
+      "21, 80",
+      "25, 80",
+      "30, 80",
       "99, 80",
   })
   @ParameterizedTest(name = "when CPU count is {0}, expect a concurrency of {1}")
