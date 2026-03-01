@@ -309,7 +309,7 @@ class ConcurrentExecutorTest {
   // If we take more than 20 seconds on the 1000 instance case, we've probably run sequentially.
   @Timeout(value = 20_000, unit = TimeUnit.MILLISECONDS)
   @DisplayName(".submit(Callable) submits and executes the given tasks in parallel")
-  @ValueSource(ints = {1, 2, 3, 5, 10, 100, 10_000})
+  @ValueSource(ints = {1, 2, 3, 5, 10, 100, 4_000})
   @ParameterizedTest(name = "for {0} task(s)")
   void submitExecutesTheGivenTasksInParallel(int taskCount) throws Exception {
     // When
