@@ -45,9 +45,9 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class ConcurrentExecutor {
 
-  private static int DEFAULT_MAXIMUM_CONCURRENCY = 80;
-  private static int DEFAULT_MINIMUM_CONCURRENCY = 4;
-  private static int DEFAULT_CONCURRENCY_MULTIPLIER = 8;
+  private static final int DEFAULT_MAXIMUM_CONCURRENCY = 80;
+  private static final int DEFAULT_MINIMUM_CONCURRENCY = 4;
+  private static final int DEFAULT_CONCURRENCY_MULTIPLIER = 8;
   private static final String CONCURRENCY_PROPERTY = "protobuf.executor.maxThreads";
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
@@ -96,14 +96,6 @@ public final class ConcurrentExecutor {
   // Awaits each task, in the order it was scheduled. Any interrupt is caught and terminates
   // the entire batch.
   private <R> List<R> await(List<FutureTask<R>> scheduledTasks) {
-    // FIXME(ascopes): this is a somewhat rubbish implementation since it cannot
-    // safely handle early termination if a single future is cancelled or interrupted
-    // which risks a very small chance of deadlocking if we interrupt at specific
-    // times. We probably need to listen for this somehow. The assumption right now
-    // is that we receive interrupts in all futures or cancellations in all futures.
-    // I really should have used CompletableFuture for this API but adapting future
-    // types is fairly verbose and annoying to work with.
-    // For now, it works, but I am not happy with this at all.
     try {
       var results = new ArrayList<R>();
       var exceptions = new ArrayList<Throwable>();
@@ -143,7 +135,7 @@ public final class ConcurrentExecutor {
         DEFAULT_MAXIMUM_CONCURRENCY
     );
 
-    var concurrency = Integer.getInteger(
+    int concurrency = Integer.getInteger(
         CONCURRENCY_PROPERTY,
         defaultConcurrency
     );
