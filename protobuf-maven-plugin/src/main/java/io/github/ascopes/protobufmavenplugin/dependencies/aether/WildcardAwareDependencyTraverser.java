@@ -25,8 +25,6 @@ import org.eclipse.aether.graph.Exclusion;
  * Dependency traverser that can detect a wildcard exclusion that is used to flag an artifact with a
  * {@link DependencyResolutionDepth#DIRECT} dependency resolution depth.
  *
- * <p>For all other purposes, this delegates to the default implementation.
- *
  * @author Ashley Scopes
  * @since 2.0.3
  */
@@ -34,29 +32,18 @@ final class WildcardAwareDependencyTraverser implements DependencyTraverser {
 
   static Exclusion WILDCARD_EXCLUSION = new Exclusion("*", "*", "*", "*");
 
-  private final DependencyTraverser delegate;
-
-  WildcardAwareDependencyTraverser(DependencyTraverser delegate) {
-    this.delegate = delegate;
-  }
-
-  // Visible for testing.
-  DependencyTraverser getDelegate() {
-    return delegate;
-  }
-
   @Override
   public boolean traverseDependency(Dependency dependency) {
     // If we internally have the special wildcard exclusion we define, then assume it is a
     // dependency with DependencyResolutionDepth.DIRECT, so don't traverse it any further.
-    return !dependency.getExclusions().contains(WILDCARD_EXCLUSION)
-        && delegate.traverseDependency(dependency);
+    return !dependency.getExclusions().contains(WILDCARD_EXCLUSION);
   }
 
   @Override
   public WildcardAwareDependencyTraverser deriveChildTraverser(
       DependencyCollectionContext context
   ) {
-    return new WildcardAwareDependencyTraverser(delegate.deriveChildTraverser(context));
+    // We are totally stateless so this is fine.
+    return this;
   }
 }

@@ -62,7 +62,6 @@ final class AetherArtifactMapper {
   Path mapEclipseArtifactToPath(org.eclipse.aether.artifact.Artifact eclipseArtifact) {
     // TODO(ascopes): when Maven moves to the v2.0.0 resolver API, replace
     //   this method with calls to Artifact.getPath() directly.
-    @SuppressWarnings("deprecation")
     var file = eclipseArtifact.getFile();
     return FileUtils.normalize(file.toPath());
   }
@@ -119,19 +118,18 @@ final class AetherArtifactMapper {
     );
   }
 
-  org.eclipse.aether.artifact.Artifact mapMavenArtifactToEclipseArtifact(
-      org.apache.maven.artifact.Artifact mavenArtifact
-  ) {
-    // maven-core recommended tool to perform these kind of conversions
-    return org.apache.maven.RepositoryUtils.toArtifact(mavenArtifact);
-  }
-
   org.eclipse.aether.artifact.Artifact mapMavenDependencyToEclipseArtifact(
       org.apache.maven.model.Dependency mavenDependency
   ) {
     // maven-core recommended tool to perform these kind of conversions
-    return org.apache.maven.RepositoryUtils.toDependency(mavenDependency, artifactTypeRegistry)
-        .getArtifact();
+    return mapMavenDependencyToEclipseDependency(mavenDependency).getArtifact();
+  }
+
+  org.eclipse.aether.graph.Dependency mapMavenDependencyToEclipseDependency(
+      org.apache.maven.model.Dependency mavenDependency
+  ) {
+    // maven-core recommended tool to perform these kind of conversions
+    return org.apache.maven.RepositoryUtils.toDependency(mavenDependency, artifactTypeRegistry);
   }
 
   private Set<org.eclipse.aether.graph.Exclusion> mapPmpExclusionsToEclipseExclusions(

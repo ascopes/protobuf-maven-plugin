@@ -102,6 +102,8 @@
     <maven-plugin-api.version>3.9.12</maven-plugin-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.25</maven-resolver-api.version>
+    <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
+    <maven-resolver-util.version>1.9.25</maven-resolver-util.version>
     <memoryfilesystem.version>2.8.2</memoryfilesystem.version>
     <mockito.version>5.21.0</mockito.version>
     <nullaway.version>0.13.1</nullaway.version>
@@ -227,6 +229,12 @@
         <groupId>org.apache.maven.resolver</groupId>
         <artifactId>maven-resolver-api</artifactId>
         <version>${maven-resolver-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.resolver</groupId>
+        <artifactId>maven-resolver-util</artifactId>
+        <version>${maven-resolver-util.version}</version>
       </dependency>
 
       <dependency>

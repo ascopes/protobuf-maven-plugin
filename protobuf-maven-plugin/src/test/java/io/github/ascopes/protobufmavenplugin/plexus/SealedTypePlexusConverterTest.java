@@ -21,7 +21,6 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 import java.io.StringReader;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;

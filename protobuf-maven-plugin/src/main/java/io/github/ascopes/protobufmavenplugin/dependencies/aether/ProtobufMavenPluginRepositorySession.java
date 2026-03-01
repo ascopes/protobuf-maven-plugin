@@ -21,7 +21,11 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.aether.AbstractForwardingRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.collection.DependencyTraverser;
 import org.eclipse.aether.resolution.ResolutionErrorPolicy;
+import org.eclipse.aether.util.graph.traverser.AndDependencyTraverser;
+import org.eclipse.aether.util.graph.traverser.FatArtifactTraverser;
+import org.eclipse.aether.util.graph.traverser.StaticDependencyTraverser;
 import org.eclipse.sisu.Description;
 
 /**
@@ -39,12 +43,26 @@ import org.eclipse.sisu.Description;
 final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepositorySystemSession {
 
   private final RepositorySystemSession delegate;
+  private final DependencyTraverser dependencyTraverser;
+  private final ResolutionErrorPolicy resolutionErrorPolicy;
 
   @Inject
-  ProtobufMavenPluginRepositorySession(
-      MavenSession mavenSession
-  ) {
+  ProtobufMavenPluginRepositorySession(MavenSession mavenSession) {
     delegate = mavenSession.getRepositorySession();
+
+    dependencyTraverser = new AndDependencyTraverser(
+        new WildcardAwareDependencyTraverser(),
+        // Avoid OOME by not traversing things known to be fat archives of content.
+        // Related to issues in GH-596 and GH-938.
+        new FatArtifactTraverser(),
+        // Always fall back to traversing JARs, etc.
+        new StaticDependencyTraverser(true)
+    );
+
+    // As of 2.13.0, we do not want to cache invalid dependencies between builds. This gets a bit
+    // confusing for users if it collides with logic that Maven itself is performing, so lets just
+    // totally avoid it.
+    resolutionErrorPolicy = new NoCacheResolutionErrorPolicy();
   }
 
   @Override
@@ -53,15 +71,12 @@ final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepos
   }
 
   @Override
-  public WildcardAwareDependencyTraverser getDependencyTraverser() {
-    return new WildcardAwareDependencyTraverser(delegate.getDependencyTraverser());
+  public DependencyTraverser getDependencyTraverser() {
+    return dependencyTraverser;
   }
 
   @Override
   public ResolutionErrorPolicy getResolutionErrorPolicy() {
-    // As of 2.13.0, we do not want to cache invalid dependencies between builds. This gets a bit
-    // confusing for users if it collides with logic that Maven itself is performing, so lets just
-    // totally avoid it.
-    return new NoCacheResolutionErrorPolicy();
+    return resolutionErrorPolicy;
   }
 }

@@ -30,12 +30,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
-import org.eclipse.aether.graph.Dependency;
 import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,8 +103,27 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       DependencyResolutionDepth depth,
       Set<String> dependencyScopes,
       boolean includeProjectArtifacts
-  ) throws ResolutionException {
-    var unresolvedDependencies = new ArrayList<Dependency>();
+  ) {
+    var unresolvedDependencies = new ArrayList<org.eclipse.aether.graph.Dependency>();
+
+    if (includeProjectArtifacts) {
+      log.debug("Querying project dependencies from Maven model, as requested.");
+
+      // GH-938: Between v2.13.0 and v5.0.0 (inclusive) we switched to instructing Maven to resolve
+      // project dependencies for us. I've reverted that for now as this can cause issues when
+      // running this plugin with an incomplete project reactor, as documented in the above issue.
+      mavenSession.getCurrentProject().getDependencies()
+          .stream()
+          .peek(dependency -> log.debug("Resolving project dependency: {}", dependency))
+          .map(aetherArtifactMapper::mapMavenDependencyToEclipseDependency)
+          // Not entirely sure if we need to do this or not, as it seems that dependency management
+          // is laced into the Maven Model holding the unresolved dependencies prior to us being
+          // invoked. I'm not sure if this is just a side effect of how I am testing this though,
+          // so I've added this in to be extra safe.
+          .map(aetherDependencyManagement::fillManagedAttributes)
+          .peek(dependency -> log.debug("Resolved dependency to: {}", dependency))
+          .forEach(unresolvedDependencies::add);
+    }
 
     artifacts.stream()
         .peek(artifact -> log.debug("Resolving artifact \"{}\" as dependency", artifact))
@@ -117,23 +134,6 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
     var resolvedArtifacts = aetherResolver
         .resolveDependencies(unresolvedDependencies, dependencyScopes)
         .stream();
-
-    if (includeProjectArtifacts) {
-      // As of 2.13.0, we enforce that dependencies are resolved by Maven
-      // first. This is less error-prone and a bit faster for regular builds
-      // as Maven can cache this stuff however it wants to. This also seems to
-      // help avoid GH-596 which can cause heap exhaustion from within Aether
-      // for some reason.
-      log.debug("Querying project dependencies from Maven model, as requested.");
-
-      var projectArtifacts = mavenSession.getCurrentProject().getArtifacts()
-          .stream()
-          .filter(artifact -> dependencyScopes.contains(artifact.getScope()))
-          .peek(artifact -> log.trace("Including project artifact \"{}\"", artifact))
-          .map(aetherArtifactMapper::mapMavenArtifactToEclipseArtifact);
-
-      resolvedArtifacts = Stream.concat(projectArtifacts, resolvedArtifacts);
-    }
 
     return resolvedArtifacts
         .collect(AetherDependencyManagement.deduplicateArtifacts())

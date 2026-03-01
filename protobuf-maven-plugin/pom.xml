@@ -76,6 +76,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.maven.resolver</groupId>
+      <artifactId>maven-resolver-util</artifactId>
+      <!-- Provided by Maven at runtime -->
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
       <!-- Provided by Maven at runtime -->

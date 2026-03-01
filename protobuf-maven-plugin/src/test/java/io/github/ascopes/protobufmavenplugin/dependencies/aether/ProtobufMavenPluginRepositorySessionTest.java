@@ -17,13 +17,11 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.apache.maven.execution.MavenSession;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.collection.DependencyTraverser;
+import org.eclipse.aether.util.graph.traverser.AndDependencyTraverser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,8 +38,8 @@ class ProtobufMavenPluginRepositorySessionTest {
 
   @BeforeEach
   void setUp() {
-    delegatedRepositorySession = mock();
     mavenSession = mock();
+    delegatedRepositorySession = mock();
     when(mavenSession.getRepositorySession()).thenReturn(delegatedRepositorySession);
     repositorySession = new ProtobufMavenPluginRepositorySession(mavenSession);
   }
@@ -54,30 +52,12 @@ class ProtobufMavenPluginRepositorySessionTest {
         .isSameAs(delegatedRepositorySession);
   }
 
-  @DisplayName(".getDependencyTraverser() wraps the RepositorySystemSession DependencyTraverser")
+  @DisplayName(".getDependencyTraverser() returns an AndDependencyTraverser")
   @Test
   void getDependencyTraverserWrapsRepositorySystemSessionDependencyTraverser() {
-    // Given
-    var delegateDependencyTraverser = mock(DependencyTraverser.class);
-    when(delegatedRepositorySession.getDependencyTraverser())
-        .thenReturn(delegateDependencyTraverser);
-
-    // When
-    var actualDependencyTraverser = repositorySession.getDependencyTraverser();
-
-    // Then
-    assertThat(actualDependencyTraverser.getDelegate())
-        .isSameAs(delegateDependencyTraverser);
-    verify(delegatedRepositorySession).getDependencyTraverser();
-    verifyNoMoreInteractions(delegatedRepositorySession);
-  }
-
-  @DisplayName(".getDependencyTraverser() returns new instances on every call")
-  @Test
-  void getDependencyTraverserReturnsNewInstancesOnEveryCall() {
     // Then
     assertThat(repositorySession.getDependencyTraverser())
-        .isNotSameAs(repositorySession.getDependencyTraverser());
+        .isInstanceOf(AndDependencyTraverser.class);
   }
 
   @DisplayName(".getResolutionErrorPolicy() returns the expected value")
