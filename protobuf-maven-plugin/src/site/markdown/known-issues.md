@@ -15,7 +15,7 @@ issue.
 
 ## OutOfMemoryException for very large projects
 
-![Status: Fixed in v5.0.1](https://img.shields.io/badge/Fixed--in--v5.0.1-green?style=flat&label=Status)
+![Status: Fixed in v5.0.1](https://img.shields.io/badge/Fixed%20in%20v5.0.1-green?style=flat&label=Status)
 
 Prior to v5.0.1, an issue was present as tracked by
 [GH-596](https://github.com/ascopes/protobuf-maven-plugin/issues/596) where some users could
@@ -37,7 +37,7 @@ to request the change.
 
 ## Reactor lifecycle interference
 
-![Status: Partially fixed in v5.0.1](https://img.shields.io/badge/Partially--fixed--in--v5.0.1-yellow?style=flat&label=Status)
+![Status: Partially fixed in v5.0.1](https://img.shields.io/badge/Partially%20fixed%20in%20v5.0.1-yellow?style=flat&label=Status)
 
 Between v2.13.0 and v5.0.0 (inclusive), resolution of project dependencies was handed off to
 Apache Maven to manage.
@@ -60,7 +60,7 @@ Please raise any further problems via a new discussion or new issue on GitHub.
 
 ## Windows path length issues
 
-![Status: JDK issue](https://img.shields.io/badge/JDK--issue-darkgray?style=flat&label=Status)
+![Status: JDK issue](https://img.shields.io/badge/JDK%20issue-darkgray?style=flat&label=Status)
 
 Microsoft Windows historically enforces that executables do not have an absolute path that is
 more than 260 characters in size. This has been lifted for Windows 11 but requires JDK changes
