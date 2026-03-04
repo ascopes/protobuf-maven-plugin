@@ -39,6 +39,60 @@ to avoid dependencies on `javax.annotation-api`.
 <options>@generated=omit</options>
 ```
 
+## gRPC with Kotlin
+
+To generate gRPC stubs for Kotlin in addition to Java, use the official gRPC Kotlin plugin alongside
+the gRPC Java plugin. The Kotlin plugin is a JVM-based plugin and generates Kotlin code that
+consumes the Java gRPC stubs. This approach is **highly recommended** for Kotlin projects, as the
+generated Kotlin stubs provide `suspend` methods that integrate natively with Kotlin coroutines.
+
+```xml
+<plugin>
+  <groupId>io.github.ascopes</groupId>
+  <artifactId>protobuf-maven-plugin</artifactId>
+
+  <configuration>
+    <protoc>${protobuf.version}</protoc>
+
+    <plugins>
+      <plugin kind="binary-maven">
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-java</artifactId>
+        <version>${grpc.version}</version>
+      </plugin>
+      <plugin kind="jvm-maven">
+        <groupId>io.grpc</groupId>
+        <artifactId>protoc-gen-grpc-kotlin</artifactId>
+        <version>${grpc-kotlin.version}</version>
+        <classifier>jdk8</classifier>
+      </plugin>
+    </plugins>
+  </configuration>
+
+  <executions>
+    <execution>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+```
+
+For the Kotlin stubs to be generated correctly, you must add the `grpc-kotlin-stub` dependency to
+your project:
+
+```xml
+<dependency>
+  <groupId>io.grpc</groupId>
+  <artifactId>grpc-kotlin-stub</artifactId>
+  <version>${grpc-kotlin.version}</version>
+</dependency>
+```
+
+In addition to `grpc-kotlin-stub`, add the required gRPC dependencies: `grpc-stub`,
+`grpc-protobuf`, and `protobuf-java`. For more details, see the [gRPC Kotlin documentation](https://github.com/grpc/grpc-kotlin).
+
 ## gRPC and Reactor
 
 Salesforce maintains a library to allow you to generate gRPC service stubs that use reactive
