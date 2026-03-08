@@ -148,7 +148,7 @@ public final class ProtocPluginResolver {
 
     log.debug("Resolving binary Maven protoc plugin \"{}\"", plugin);
 
-    var path = artifactPathResolver.resolveExecutable(plugin);
+    var path = artifactPathResolver.resolveArtifact(plugin);
 
     var id = computeId(path, index);
 

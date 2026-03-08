@@ -74,10 +74,10 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
   }
 
   @Override
-  public Path resolveExecutable(MavenArtifact artifact) throws ResolutionException {
+  public Path resolveArtifact(MavenArtifact artifact) throws ResolutionException {
     log.debug("Resolving artifact \"{}\"", artifact);
     var unresolvedArtifact = aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(artifact);
-    var resolvedArtifact = aetherResolver.resolveRequiredArtifact(unresolvedArtifact);
+    var resolvedArtifact = aetherResolver.resolveArtifact(unresolvedArtifact);
     var originalPath = aetherArtifactMapper.mapEclipseArtifactToPath(resolvedArtifact);
 
     // GH-792: make a copy and set that as executable rather than changing what is in the
@@ -103,7 +103,7 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       DependencyResolutionDepth depth,
       Set<String> dependencyScopes,
       boolean includeProjectArtifacts
-  ) {
+  ) throws ResolutionException {
     var unresolvedDependencies = new ArrayList<org.eclipse.aether.graph.Dependency>();
 
     if (includeProjectArtifacts) {

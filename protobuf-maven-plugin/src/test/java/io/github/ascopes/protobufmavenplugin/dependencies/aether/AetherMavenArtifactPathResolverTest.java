@@ -100,9 +100,9 @@ class AetherMavenArtifactPathResolverTest {
     Files.createDirectories(temporarySpacePath);
   }
 
-  @DisplayName(".resolveExecutable(...) resolves the artifact")
+  @DisplayName(".resolveArtifact(...) resolves the artifact")
   @Test
-  void resolveExecutableResolvesTheArtifact() throws ResolutionException, IOException {
+  void resolveArtifactResolvesTheArtifact() throws ResolutionException, IOException {
     // Given
     var artifactId = "someArtifactId-" + someBasicString();
     var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
@@ -117,7 +117,7 @@ class AetherMavenArtifactPathResolverTest {
         .thenReturn(artifactId);
     when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
         .thenReturn(unresolvedArtifact);
-    when(aetherResolver.resolveRequiredArtifact(any()))
+    when(aetherResolver.resolveArtifact(any()))
         .thenReturn(resolvedArtifact);
     when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
         .thenReturn(originalPath);
@@ -129,7 +129,7 @@ class AetherMavenArtifactPathResolverTest {
         + ".exe";
 
     // When
-    var resolvedPath = resolver.resolveExecutable(inputArtifact);
+    var resolvedPath = resolver.resolveArtifact(inputArtifact);
 
     // Then
     assertThat(resolvedPath)
@@ -138,15 +138,14 @@ class AetherMavenArtifactPathResolverTest {
         .isExecutable();
 
     verify(aetherArtifactMapper).mapPmpArtifactToEclipseArtifact(inputArtifact);
-    verify(aetherResolver).resolveRequiredArtifact(unresolvedArtifact);
+    verify(aetherResolver).resolveArtifact(unresolvedArtifact);
     verify(aetherArtifactMapper).mapEclipseArtifactToPath(resolvedArtifact);
     verifyNoMoreInteractions(aetherArtifactMapper, aetherResolver);
   }
 
-  @DisplayName(".resolveExecutable(...) resolves the artifact if already present")
+  @DisplayName(".resolveArtifact(...) resolves the artifact if already present")
   @Test
-  void resolveExecutableResolvesTheArtifactWhenAlreadyPresent()
-      throws ResolutionException, IOException {
+  void resolveArtifactResolvesTheArtifactWhenAlreadyPresent() throws Exception {
     // Given
     var artifactId = "someArtifactId-" + someBasicString();
     var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
@@ -161,7 +160,7 @@ class AetherMavenArtifactPathResolverTest {
         .thenReturn(artifactId);
     when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
         .thenReturn(unresolvedArtifact);
-    when(aetherResolver.resolveRequiredArtifact(any()))
+    when(aetherResolver.resolveArtifact(any()))
         .thenReturn(resolvedArtifact);
     when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
         .thenReturn(originalPath);
@@ -176,7 +175,7 @@ class AetherMavenArtifactPathResolverTest {
     Files.writeString(temporarySpacePath.resolve(expectedFileName), "some garbage I don't want");
 
     // When
-    var resolvedPath = resolver.resolveExecutable(inputArtifact);
+    var resolvedPath = resolver.resolveArtifact(inputArtifact);
 
     // Then
     assertThat(resolvedPath)
@@ -185,7 +184,7 @@ class AetherMavenArtifactPathResolverTest {
         .isExecutable();
 
     verify(aetherArtifactMapper).mapPmpArtifactToEclipseArtifact(inputArtifact);
-    verify(aetherResolver).resolveRequiredArtifact(unresolvedArtifact);
+    verify(aetherResolver).resolveArtifact(unresolvedArtifact);
     verify(aetherArtifactMapper).mapEclipseArtifactToPath(resolvedArtifact);
     verifyNoMoreInteractions(aetherArtifactMapper, aetherResolver);
   }
@@ -196,7 +195,7 @@ class AetherMavenArtifactPathResolverTest {
   void resolveDependenciesWithoutProjectArtifactsResolvesTheDependencies(
       DependencyResolutionDepth dependencyResolutionDepth,
       Set<String> dependencyScopes
-  ) {
+  ) throws Exception {
     // Given
     try (var depMgmtStatic = mockStatic(AetherDependencyManagement.class)) {
       depMgmtStatic.when(AetherDependencyManagement::deduplicateArtifacts)
@@ -335,7 +334,7 @@ class AetherMavenArtifactPathResolverTest {
   void resolveDependenciesWithProjectArtifactsResolvesTheDependencies(
       DependencyResolutionDepth dependencyResolutionDepth,
       Set<String> dependencyScopes
-  ) {
+  ) throws Exception {
     // Given
     try (var depMgmtStatic = mockStatic(AetherDependencyManagement.class)) {
       depMgmtStatic.when(AetherDependencyManagement::deduplicateArtifacts)

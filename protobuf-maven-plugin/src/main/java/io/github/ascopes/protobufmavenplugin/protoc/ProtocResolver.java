@@ -150,6 +150,6 @@ public final class ProtocResolver {
         .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
         .build();
 
-    return Optional.of(artifactPathResolver.resolveExecutable(artifact));
+    return Optional.of(artifactPathResolver.resolveArtifact(artifact));
   }
 }

@@ -15,20 +15,21 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
-import static java.util.Objects.requireNonNull;
+import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
@@ -39,7 +40,6 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
-import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.eclipse.sisu.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +53,8 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Warning: the code in this class is very fragile and changing it can easily result in the
  * introduction of regressions for users. If you need to alter it, be very sure that you know what
- * you are doing!
+ * you are doing and that <strong>all</strong> possible error cases are handled in a remotely
+ * sensible way to avoid bug reports due to ambiguous handling!
  *
  * @author Ashley Scopes
  * @since 2.4.4
@@ -66,79 +67,61 @@ final class AetherResolver {
   private static final Logger log = LoggerFactory.getLogger(AetherResolver.class);
 
   private final RepositorySystem repositorySystem;
-  private final ProtobufMavenPluginRepositorySession repositorySystemSession;
-  private final List<RemoteRepository> remoteRepositories;
+  private final RepositorySystemSession repositorySystemSession;
+  private final MavenProject mavenProject;
 
   @Inject
   AetherResolver(
       RepositorySystem repositorySystem,
-      MavenSession mavenSession,
-      ProtobufMavenPluginRepositorySession repositorySystemSession
+      RepositorySystemSession repositorySystemSession,
+      MavenProject mavenProject
   ) {
     this.repositorySystem = repositorySystem;
     this.repositorySystemSession = repositorySystemSession;
-
-    // Prior to v2.12.0, we used the ProjectBuildingRequest on the MavenSession
-    // and used RepositoryUtils.toRepos to create the repository list. GH-579
-    // was raised to report that the <repositories> block in the POM was being
-    // ignored. This appears to be due to the project building request only
-    // looking at what is in ~/.m2/settings.xml. The current project remote
-    // repositories seems to be what we need to use instead here.
-    remoteRepositories = mavenSession.getCurrentProject().getRemoteProjectRepositories();
+    this.mavenProject = mavenProject;
   }
 
-  Artifact resolveRequiredArtifact(Artifact artifact) throws ResolutionException {
-    log.info("Resolving artifact \"{}\"", artifact);
+  Artifact resolveArtifact(Artifact artifact) throws ResolutionException {
+    log.debug("Resolving artifact \"{}\"", artifact);
 
-    var request = new ArtifactRequest();
-    request.setArtifact(artifact);
-    request.setRepositories(remoteRepositories);
+    var request = new ArtifactRequest()
+        .setArtifact(artifact)
+        .setRepositories(computeRemoteRepositories());
 
-    ArtifactResult result;
+    ArtifactResult artifactResult;
+    Exception cause = null;
 
     try {
-      result = repositorySystem.resolveArtifact(repositorySystemSession, request);
+      artifactResult = repositorySystem.resolveArtifact(repositorySystemSession, request);
     } catch (ArtifactResolutionException ex) {
-      log.debug("Discarding internal exception while resolving \"{}\"", artifact, ex);
-      result = ex.getResult();
+      log.debug("Handling resolution exception", ex);
+      artifactResult = ex.getResult();
+      cause = ex;
     }
 
-    // Looks like we can get resolution exceptions even if things resolve correctly, as it appears
-    // to raise for the local repository first.
-    // If this happens, don't bother raising or reporting it as it is normal behaviour. If anything
-    // else goes wrong, then we can panic about it.
-    if (result.isMissing()) {
-      throw mapExceptions(
-          "Failed to resolve artifact \"" + artifact + "\"",
-          result.getExceptions()
+    if (cause != null || !artifactResult.isResolved()) {
+      var ex = new ResolutionException(
+          "Failed to resolve artifact "
+              + artifact
+              + ". Check the coordinates and connection, and try again. Cause was: "
+              + cause,
+          cause
       );
+
+      artifactResult.getExceptions().forEach(ex::addSuppressed);
+      throw ex;
     }
 
-    reportWarnings(result.getExceptions());
-
-    // This shouldn't happen, but I do not trust that Aether isn't hiding some wild edge cases
-    // for me here.
-    return requireNonNull(
-        result.getArtifact(),
-        () -> "No result was returned by Aether while resolving artifact \"" + artifact + "\""
-    );
+    return Objects.requireNonNull(artifactResult.getArtifact());
   }
 
   Collection<Artifact> resolveDependencies(
       List<Dependency> dependencies,
       Set<String> allowedDependencyScopes
-  ) {
-    var collectRequest = new CollectRequest();
-    collectRequest.setDependencies(dependencies);
-    collectRequest.setRepositories(remoteRepositories);
-
-    var dependencyRequest = new DependencyRequest();
-    dependencyRequest.setCollectRequest(collectRequest);
-    var filter = new ScopeDependencyFilter(
-        /* included: */ allowedDependencyScopes,
-        /* excluded */ List.of()
-    );
-    dependencyRequest.setFilter(filter);
+  ) throws ResolutionException {
+    if (dependencies.isEmpty()) {
+      return List.of();
+    }
 
     log.debug(
         "Resolving {} with {} {} - {}",
@@ -148,67 +131,78 @@ final class AetherResolver {
         dependencies
     );
 
+    var dependencyRequest = new DependencyRequest()
+        .setCollectRequest(new CollectRequest()
+            .setDependencies(dependencies)
+            .setRepositories(computeRemoteRepositories()))
+        .setFilter(new InclusiveScopeDependencyFilter(allowedDependencyScopes));
+
     DependencyResult dependencyResult;
+    Exception cause = null;
 
     try {
       dependencyResult = repositorySystem
           .resolveDependencies(repositorySystemSession, dependencyRequest);
     } catch (DependencyResolutionException ex) {
-      log.debug("Discarding internal exception while resolving {}", dependencies, ex);
+      log.debug("Handling resolution exception", ex);
       dependencyResult = ex.getResult();
+      cause = ex;
     }
 
-    var artifacts = new ArrayList<Artifact>();
-    var exceptions = new ArrayList<>(dependencyResult.getCollectExceptions());
+    // Handle the multiple cases where we might have failed.
+    if (cause != null || !dependencyResult.getCollectExceptions().isEmpty()) {
+      // TODO(ascopes): should we limit the number of things output here?
+      var failedGavs = dependencyResult.getArtifactResults().stream()
+          .filter(not(ArtifactResult::isResolved))
+          .map(ArtifactResult::getArtifact)
+          .map(Artifact::toString)
+          .collect(Collectors.joining(", "));
 
-    for (var artifactResult : dependencyResult.getArtifactResults()) {
-      var artifact = artifactResult.getArtifact();
-      if (artifactResult.isResolved() && artifact != null) {
-        log.debug("Resolution of dependencies returned artifact \"{}\"", artifact);
-        artifacts.add(artifact);
+      String errorMessage;
+
+      if (failedGavs.isEmpty()) {
+        errorMessage = "Failed to resolve dependencies. Cause was: " + cause;
+      } else {
+        errorMessage = "Failed to resolve dependencies: " + failedGavs
+            + ". Check the direct and transitive coordinates, and network connection, "
+            + "then try again. Cause was: "
+            + cause;
       }
 
-      if (artifactResult.isMissing()) {
-        log.debug("Could not find artifact \"{}\" during dependency resolution", artifact);
-      }
+      var ex = new ResolutionException(errorMessage, cause);
+      dependencyResult.getCollectExceptions().forEach(ex::addSuppressed);
+      dependencyResult.getArtifactResults().stream()
+          .map(ArtifactResult::getExceptions)
+          .flatMap(List::stream)
+          .forEach(ex::addSuppressed);
 
-      exceptions.addAll(artifactResult.getExceptions());
+      throw ex;
     }
 
-    reportWarnings(exceptions);
-
-    return Collections.unmodifiableList(artifacts);
+    return dependencyResult.getArtifactResults()
+        .stream()
+        .map(ArtifactResult::getArtifact)
+        .map(Objects::requireNonNull)
+        .toList();
   }
 
-  private ResolutionException mapExceptions(String message, Collection<Exception> causes) {
-    var causeIterator = causes.iterator();
-
-    // Assumption: this is always possible. If it isn't, we screwed up somewhere.
-    var cause = causeIterator.next();
-    var exception = new ResolutionException(
-        message
-            + " - resolution failed with "
-            + StringUtils.pluralize(causes.size(), "error: ", "errors - first was: ")
-            + cause.getMessage(),
-        cause
+  // Some historical context of why we do this in a very specific way:
+  //
+  // Prior to v2.12.0, we used the ProjectBuildingRequest on the MavenSession
+  // and used RepositoryUtils.toRepos to create the repository list. GH-579
+  // was raised to report that the <repositories> block in the POM was being
+  // ignored. This appears to be due to the project building request only
+  // looking at what is in ~/.m2/settings.xml. The current project remote
+  // repositories seems to be what we need to use instead here.
+  //
+  // As of 5.0.2, we use .newResolutionRepositories to do this as it ensures
+  // certain networking and authentication configurations are propagated
+  // correctly without relying on Maven exposing the final configuration to
+  // us immediately.
+  private List<RemoteRepository> computeRemoteRepositories() {
+    return repositorySystem.newResolutionRepositories(
+        repositorySystemSession,
+        mavenProject.getRemoteProjectRepositories()
     );
-    causeIterator.forEachRemaining(exception::addSuppressed);
-    return exception;
-  }
-
-  private void reportWarnings(Iterable<? extends Exception> exceptions) {
-    exceptions.forEach(exception -> {
-      // We purposely log the warning class and message twice, since exception tracebacks are
-      // hidden unless Maven was invoked with --errors.
-      //noinspection LoggingPlaceholderCountMatchesArgumentCount
-      log.debug(
-          "Dependency resolution warning was reported. "
-              + "This might be okay, or it could indicate a further issue - {}: {}",
-          exception.getClass().getName(),
-          exception.getMessage(),
-          exception
-      );
-    });
   }
 }
-
