@@ -42,7 +42,7 @@ public interface MavenArtifactPathResolver {
    * @return the path to the resolved artifact.
    * @throws ResolutionException if resolution fails in the backend.
    */
-  Path resolveExecutable(MavenArtifact artifact) throws ResolutionException;
+  Path resolveArtifact(MavenArtifact artifact) throws ResolutionException;
 
   /**
    * Resolve all given dependencies based on their resolution depth semantics.
