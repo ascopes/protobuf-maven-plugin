@@ -26,7 +26,7 @@ If you want to run specific tests only, pass the `-Dinvoker.test` flag with a co
 name of each project in this directory you want to run.
 
 ```shell
-$ ./mvnw integration-test -Dinvoker.test=setup,help,java-simple
+$ ./mvnw integration-test -Dinvoker.test=setup,help-goal,java-test
 ```
 
 This should always be called with `setup` as the first project to ensure that the aggregator
@@ -52,7 +52,7 @@ configuration.
 The project directory name should summarise what the test is for, starting with a GitHub issue
 number if relevant.
 
-The `groupId` of the project should be the directory name. This ensures that each test is isolated.
+The `artifactId` of the project should be the directory name. This ensures that each test is isolated.
 
 The local repository can be found in the `target/it-repo` directory.
 
