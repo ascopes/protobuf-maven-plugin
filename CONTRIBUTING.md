@@ -97,7 +97,7 @@ Where appropriate, please include valid unit tests. We are slowly aiming for 100
 
 ### Integration tests
 
-In `src/main/it` exists a number of integration tests that are full Maven projects. Where
+In `src/it` exists a number of integration tests that are full Maven projects. Where
 appropriate, please include integration tests per the guidelines outlined in `src/it/WRITING_ITS.md`.
 
 #### Making sure it builds
