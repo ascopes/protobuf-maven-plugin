@@ -194,7 +194,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * compilation candidate file, relative to the {@code sourceDirectory} or {@code sourceDependency}
    * that provides them.
    *
-   * <p>See <a href="https://docs.oracle.com/en%2Fjava%2Fjavase%2F11%2Fdocs%2Fapi%2F%2F/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)">
+   * <p>See <a href="https://docs.oracle.com/en/java/javase/25/docs/api//java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)">
    * {@code java.nio.file.FileSystem#getPathMatcher}</a> for full details of the supported syntax
    * within glob patterns.
    *
