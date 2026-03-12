@@ -61,7 +61,8 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
       "-XX:TieredStopAtLevel=1",
       "-XX:+CrashOnOutOfMemoryError",
       "-XX:+TieredCompilation",
-      "-XX:+UseParallelGC",
+      "-XX:+UseSerialGC",
+      "-Xmx32m",
       "-Xshare:auto"
   );
   private static final Logger log = LoggerFactory.getLogger(JavaAppToExecutableScriptFactory.class);
