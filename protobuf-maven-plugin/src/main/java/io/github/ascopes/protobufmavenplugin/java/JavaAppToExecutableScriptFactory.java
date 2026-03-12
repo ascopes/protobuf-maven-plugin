@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.java;
 
-import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
 
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -56,15 +57,6 @@ import org.slf4j.LoggerFactory;
 @Named
 final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFactory {
 
-  private static final List<String> DEFAULT_ARGS = List.of();
-  private static final List<String> DEFAULT_JVM_ARGS = List.of(
-      "-XX:TieredStopAtLevel=1",
-      "-XX:+CrashOnOutOfMemoryError",
-      "-XX:+TieredCompilation",
-      "-XX:+UseSerialGC",
-      "-Xms32m",
-      "-Xshare:auto"
-  );
   private static final Logger log = LoggerFactory.getLogger(JavaAppToExecutableScriptFactory.class);
 
   private final HostSystem hostSystem;
@@ -84,9 +76,9 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
 
   @Override
   public Path toExecutable(JavaApp app) throws ResolutionException {
-    var argLine = buildArgLine(app);
-    var javaPath = hostSystem.getJavaExecutablePath();
     var scratchDir = temporarySpace.createTemporarySpace("java-apps", app.getUniqueName());
+    var argLine = buildArgLine(app, scratchDir);
+    var javaPath = hostSystem.getJavaExecutablePath();
 
     log.debug("Arguments for JVM app \"{}\" are:\n{}", app, argLine);
 
@@ -95,7 +87,10 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
         : writePosixScripts(javaPath, scratchDir, argLine);
   }
 
-  private ArgumentFileBuilder buildArgLine(JavaApp app) throws ResolutionException {
+  private ArgumentFileBuilder buildArgLine(
+      JavaApp app,
+      Path scratchDir
+  ) throws ResolutionException {
     var args = new ArgumentFileBuilder();
 
     // Caveat: we currently ignore the Class-Path JAR manifest entry. Not sure why we would want
@@ -111,7 +106,7 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
       args.add(buildJavaPath(modules));
     }
 
-    requireNonNullElse(app.getJvmConfigArgs(), DEFAULT_JVM_ARGS)
+    requireNonNullElseGet(app.getJvmConfigArgs(), () -> getDefaultJvmArguments(scratchDir))
         .stream()
         .filter(checkValidJvmConfigArg(app))
         .forEach(args::add);
@@ -120,7 +115,7 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
     // dependencies internally.
     args.add(determineMainClass(app));
 
-    requireNonNullElse(app.getJvmArgs(), DEFAULT_ARGS)
+    requireNonNullElseGet(app.getJvmArgs(), List::of)
         .forEach(args::add);
 
     return args;
@@ -142,6 +137,26 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
       );
       return false;
     };
+  }
+
+  private List<String> getDefaultJvmArguments(Path scratchDir) {
+    var args = new ArrayList<>(List.of(
+        "-XX:+CrashOnOutOfMemoryError",
+        "-XX:TieredStopAtLevel=1",
+        "-XX:+TieredCompilation",
+        "-XX:+UseSerialGC",
+        "-Xms32m",
+        "-Xshare:auto"
+    ));
+
+    if (Runtime.version().feature() >= 19) {
+      // Use new automated class data sharing per app, speeding up subsequent runs.
+      var archivePath = scratchDir.resolve("java.jsa").toAbsolutePath();
+      args.add("-XX:ArchiveClassesAtExit=" + archivePath);
+      args.add("-XX:+AutoCreateSharedArchive");
+    }
+
+    return args;
   }
 
   private String determineMainClass(JavaApp app) throws ResolutionException {
