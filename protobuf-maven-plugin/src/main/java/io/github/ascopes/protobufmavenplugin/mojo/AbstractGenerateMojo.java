@@ -553,14 +553,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
    * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
    *
-   * <p>Path resolution on Linux, macOS, and other POSIX-like systems, resolution looks
-   * for an executable binary matching the exact name in any directory in the {@code $PATH}
-   * environment variable.
+   * <p><strong>Path resolution on Linux, macOS, and other POSIX-like systems</strong>:
+   * resolution looks ofr an executable binary matching the exact name in any directory in
+   * the {@code $PATH} environment variable.
    *
-   * <p>Path resolution on Windows, the case-insensitive {@code %PATH%} environment variable is
-   * searched for an executable that matches the name, ignoring case and any file extension.
-   * The file extension is expected to match any extension in the {@code %PATHEXT%} environment
-   * variable.
+   * <p><strong>Path resolution on Windows</strong>; the case-insensitive {@code %PATH%}
+   * environment variable is searched for an executable that matches the name, ignoring
+   * case and any file extension. The file extension is expected to match any extension
+   * in the {@code %PATHEXT%} environment variable.
    *
    * @since 0.0.1
    */
