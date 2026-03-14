@@ -16,8 +16,8 @@ The following documents some techniques and general guidance for these situation
 Corporate developers may be required to develop on workstations that only allown sanctioned
 executables to be executed outside a specific set of paths.
 
-While it may be tempting (and much easier for me) to suggest that developers work with their IT
-administrators to gain access to development environments with reasonable constraints, this Maven
+While it is usually advisable that developers work with their IT department
+administrators to gain access to development environments with reasonable and sensible constraints, this Maven
 plugin provides an additional potential workaround that is less invasive and can attempt to
 satisfy these requirements rather than directly avoid them.
 
