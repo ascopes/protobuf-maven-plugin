@@ -207,7 +207,7 @@ jobs:
       # action mishandles duplicates. The easiest way around this is to just purge the
       # artifact if we failed so that any rerun can succeed.
       - name: Remove GitHub Pages artifacts
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@v6
         if: ${{ failure() && ! inputs.dry-run }}
         with:
           name: github-pages
