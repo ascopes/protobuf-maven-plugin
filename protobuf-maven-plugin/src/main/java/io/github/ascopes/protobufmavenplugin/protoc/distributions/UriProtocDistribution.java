@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import org.immutables.value.Value.Immutable;
+import java.net.URI;
 import org.immutables.value.Value.Modifiable;
-import org.jspecify.annotations.NonNull;
-
 
 /**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
- * repository and corresponds to a native executable.
+ * Model base for a {@code protoc} distribution that is located at a URI.
  *
  * @author Ashley Scopes
- * @since 4.1.0
+ * @since TBC
  */
-@Immutable
+@KindHint(kind = "url", implementation = UriProtocDistributionBean.class)
 @Modifiable
-@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocPluginBean.class)
-public abstract non-sealed class BinaryMavenProtocPlugin
-    extends MavenArtifact
-    implements ProtocPlugin {
+public abstract non-sealed class UriProtocDistribution
+    implements ProtocDistribution {
 
+  /**
+   * Get the URI.
+   *
+   * @return the URI.
+   */
+  public abstract URI getUrl();
 }

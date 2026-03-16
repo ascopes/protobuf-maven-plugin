@@ -13,27 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Modifiable;
-import org.jspecify.annotations.NonNull;
-
 
 /**
- * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
- * repository and corresponds to a native executable.
+ * Model base for a {@code protoc} distribution that is located on the system {@code $PATH}.
  *
  * @author Ashley Scopes
- * @since 4.1.0
+ * @since TBC
  */
-@Immutable
+@KindHint(kind = "path", implementation = PathProtocDistributionBean.class)
 @Modifiable
-@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocPluginBean.class)
-public abstract non-sealed class BinaryMavenProtocPlugin
-    extends MavenArtifact
-    implements ProtocPlugin {
+public abstract non-sealed class PathProtocDistribution
+    implements ProtocDistribution {
 
+  /**
+   * Get the name.
+   *
+   * <p>Defaults to {@code protoc} if unset.
+   *
+   * @return the name.
+   */
+  @Default
+  public String getName() {
+    return "protoc";
+  }
 }

@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2023 Ashley Scopes
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.github.ascopes.protobufmavenplugin.protoc.distributions;
+
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
+import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.NonNull;
+
+/**
+ * Model base for a {@code protoc} distribution that is resolved from a Maven
+ * repository, and is in an OS-dependent executable binary format.
+ *
+ * <p>By default, if unspecified, the group ID and artifact ID will point to the
+ * Google release of {@code protoc}.
+ *
+ * @author Ashley Scopes
+ * @since TBC
+ */
+@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocDistributionBean.class)
+@Modifiable
+public abstract non-sealed class BinaryMavenProtocDistribution
+    extends MavenArtifact
+    implements ProtocDistribution {
+
+  @Default
+  @Override
+  public String getGroupId() {
+    return "com.google.protobuf";
+  }
+
+  @Default
+  @Override
+  public String getArtifactId() {
+    return "protoc";
+  }
+
+  // Version is never null here as we do not infer from dependency management.
+  @Override
+  public abstract @NonNull String getVersion();
+
+  // Must be provided to keep immutables happy.
+  @Override
+  public String toString() {
+    return super.toString();
+  }
+
+}
