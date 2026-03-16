@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 
 import static java.util.function.Predicate.not;
 
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
@@ -57,8 +59,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>If no matching kind is found, we raise an error back to the user.
  *
- * <p>All indexed types are stored in a weak-referenced mapping internally, such that
- * garbage collection of their classworld releases the underlying data for garbage collection.
+ * <p>If no kind is provided, and a {@link FromString} annotation is present on a method in the
+ * base type, this method will be invoked to convert a Plexus string value into an instance
+ * of the base type.
  *
  * <p>This is threadsafe.
  *
@@ -72,10 +75,10 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   private static final Logger log = LoggerFactory.getLogger(SealedTypePlexusConverter.class);
 
-  private final Map<Class<?>, Map<String, Class<?>>> kindMappings;
+  private final Map<Class<?>, KindMapping<?>> kindMappings;
 
   SealedTypePlexusConverter() {
-    kindMappings = Collections.synchronizedMap(new WeakHashMap<>());
+    kindMappings = new HashMap<>();
   }
 
   @Override
@@ -98,16 +101,24 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
-    var kind = Optional
+    var kindMapping = getKindMappingFor(type);
+
+    var maybeKind = Optional
         .ofNullable(configuration.getAttribute("kind"))
-        .filter(not(String::isEmpty))
+        .filter(not(String::isEmpty));
+
+    if (maybeKind.isEmpty()
+        && kindMapping.fromStringHandle() != null
+        && configuration.getValue() != null) {
+      return kindMapping.fromStringHandle().call(configuration.getValue());
+    }
+
+    var kind = maybeKind
         .orElseThrow(() -> new ComponentConfigurationException(
             configuration,
             "Missing \"kind\" attribute. Valid kinds are: " + getValidKindsFor(type)
         ));
-
-    var impl = Optional.of(getKindMappingFor(type))
-        .map(mapping -> mapping.get(kind))
+    var impl = Optional.ofNullable(kindMapping.kinds().get(kind))
         .orElseThrow(() -> new ComponentConfigurationException(
             configuration,
             "Invalid kind \"" + kind + "\" specified. Valid kinds are: " + getValidKindsFor(type)
@@ -126,6 +137,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   private String getValidKindsFor(Class<?> base) {
     return getKindMappingFor(base)
+        .kinds()
         .keySet()
         .stream()
         .map(kind -> "\"" + kind + "\"")
@@ -133,13 +145,21 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         .collect(Collectors.joining(", "));
   }
 
-  private Map<String, Class<?>> getKindMappingFor(Class<?> base) {
+  private synchronized KindMapping<?> getKindMappingFor(Class<?> base) {
     return kindMappings.computeIfAbsent(base, SealedTypePlexusConverter::computeKindMappingFor);
   }
 
-  private static Map<String, Class<?>> computeKindMappingFor(Class<?> base) {
-    var mapping = new HashMap<String, Class<?>>();
-    var queue = new ArrayDeque<Class<?>>();
+  private static <T> KindMapping<T> computeKindMappingFor(Class<T> base) {
+    return new KindMapping<>(
+        base,
+        discoverKindsFor(base),
+        discoverFromStringFor(base).orElse(null)
+    );
+  }
+
+  private static <T> Map<String, Class<? extends T>> discoverKindsFor(Class<T> base) {
+    var mapping = new HashMap<String, Class<? extends T>>();
+    var queue = new ArrayDeque<Class<? extends T>>();
     queue.push(base);
 
     while (!queue.isEmpty()) {
@@ -153,7 +173,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         );
 
         for (var permittedSubtype : next.getPermittedSubclasses()) {
-          queue.push(permittedSubtype);
+          queue.push(castClass(base, permittedSubtype));
         }
       } else {
         var kind = next.getAnnotation(KindHint.class);
@@ -166,7 +186,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
               kind.implementation().getName()
           );
 
-          mapping.put(kind.kind(), kind.implementation());
+          mapping.put(kind.kind(), castClass(next, kind.implementation()));
         }
       }
     }
@@ -174,4 +194,44 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     return Collections.unmodifiableMap(mapping);
   }
 
+  @SuppressWarnings("unchecked")
+  private static <T> Class<? extends T> castClass(Class<T> base, Class<?> target) {
+    if (base.isAssignableFrom(target)) {
+      return (Class<T>) target;
+    }
+    throw new ClassCastException(target.getName() + " is incompatible with " + base.getName());
+  }
+
+  private static <T> Optional<FromStringHandle<T>> discoverFromStringFor(Class<T> base) {
+    return Stream.of(base.getDeclaredMethods())
+        .filter(m -> m.isAnnotationPresent(FromString.class))
+        .map(m -> FromStringHandle.ofMethod(base, m))
+        .peek(m -> log.debug("found @FromString method {} on {}", m, base.getName()))
+        .findFirst();
+  }
+
+  private record KindMapping<T>(
+      Class<T> base,
+      Map<String, Class<? extends T>> kinds,
+      @Nullable FromStringHandle<T> fromStringHandle
+  ) {}
+
+  @FunctionalInterface
+  private interface FromStringHandle<T> {
+    T call(String value);
+
+    static <T> FromStringHandle<T> ofMethod(Class<T> base, Method method) {
+      try {
+        return value -> {
+          try {
+            return base.cast(method.invoke(null, value));
+          } catch (Exception ex) {
+            throw new IllegalArgumentException("Failed to parse string: " + ex, ex);
+          }
+        };
+      } catch (Exception ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+  }
 }
