@@ -42,6 +42,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.JvmMavenProtocPluginBean;
 import io.github.ascopes.protobufmavenplugin.plugins.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.UriProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.ImmutableBinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -110,7 +111,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     mojo = newInstance();
     mojo.sourceCodeGenerator = sourceCodeGenerator;
     mojo.mavenProject = mavenProject;
-    mojo.protoc = "4.26.0";
+    mojo.protoc = ImmutableBinaryMavenProtocDistribution.builder().version("4.26.0").build();
   }
 
   abstract A newInstance();
@@ -749,7 +750,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @UsesSystemProperties
   void whenProtocVersionSetInSystemPropertiesExpectThatToBeUsed() throws Throwable {
     // Given
-    mojo.protoc = "1.2.3";
+    mojo.protoc = ImmutableBinaryMavenProtocDistribution.builder().version("1.2.3").build();
     System.setProperty("protobuf.compiler.version", "4.5.6");
 
     // When
@@ -759,7 +760,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getProtocVersion()).isEqualTo("4.5.6");
+    assertThat(actualRequest.getProtoc())
+        .isEqualTo(ImmutableBinaryMavenProtocDistribution.builder().version("4.5.6").build());
   }
 
   @DisplayName("when protobuf.compiler.version is not set, expect the parameter to be used")
@@ -767,7 +769,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @UsesSystemProperties
   void whenProtocVersionNotSetInSystemPropertiesExpectParameterToBeUsed() throws Throwable {
     // Given
-    mojo.protoc = "1.2.3";
+    mojo.protoc = ImmutableBinaryMavenProtocDistribution.builder().version("1.2.3").build();
 
     // When
     mojo.execute();
@@ -776,7 +778,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     var captor = ArgumentCaptor.forClass(GenerationRequest.class);
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
-    assertThat(actualRequest.getProtocVersion()).isEqualTo("1.2.3");
+    assertThat(actualRequest.getProtoc())
+        .isEqualTo(ImmutableBinaryMavenProtocDistribution.builder().version("1.2.3").build());
   }
 
   @DisplayName("registerAsCompilationRoot is set to the specified value")
@@ -1165,7 +1168,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   }
 
   @SafeVarargs
-  @SuppressWarnings("vararg")
+  @SuppressWarnings({"SameParameterValue", "vararg"})
   static <T> Stream<Set<T>> combinations(T... items) {
     if (items.length >= Integer.SIZE) {
       throw new IllegalArgumentException("Too many items!");

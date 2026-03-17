@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
 
@@ -31,6 +32,7 @@ import org.jspecify.annotations.NonNull;
  * @author Ashley Scopes
  * @since TBC
  */
+@Immutable
 @KindHint(kind = "binary-maven", implementation = BinaryMavenProtocDistributionBean.class)
 @Modifiable
 public abstract non-sealed class BinaryMavenProtocDistribution
@@ -53,10 +55,15 @@ public abstract non-sealed class BinaryMavenProtocDistribution
   @Override
   public abstract @NonNull String getVersion();
 
+  @Default
+  @Override
+  public String getType() {
+    return "exe";
+  }
+
   // Must be provided to keep immutables happy.
   @Override
   public String toString() {
     return super.toString();
   }
-
 }

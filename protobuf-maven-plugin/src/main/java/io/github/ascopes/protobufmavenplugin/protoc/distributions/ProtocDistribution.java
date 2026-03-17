@@ -15,8 +15,11 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
+import io.github.ascopes.protobufmavenplugin.plexus.FromString;
+import java.net.URI;
+
 /**
- * Base interface for a {@code protoc} distribution>
+ * Base interface for a {@code protoc} distribution.
  *
  * @author Ashley Scopes
  * @since TBC
@@ -25,4 +28,21 @@ public sealed interface ProtocDistribution
     permits BinaryMavenProtocDistribution,
             PathProtocDistribution,
             UriProtocDistribution {
+
+  @FromString
+  static ProtocDistribution fromString(String value) {
+    if (value.contains(":")) {
+      return ImmutableUriProtocDistribution.builder()
+          .url(URI.create(value))
+          .build();
+    }
+
+    if (value.equalsIgnoreCase("PATH")) {
+      return ImmutablePathProtocDistribution.builder().build();
+    }
+
+    return ImmutableBinaryMavenProtocDistribution.builder()
+         .version(value)
+         .build();
+  }
 }

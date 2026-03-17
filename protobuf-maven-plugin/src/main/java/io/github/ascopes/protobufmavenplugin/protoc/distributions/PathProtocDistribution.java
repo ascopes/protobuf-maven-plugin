@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 
 /**
@@ -25,6 +26,7 @@ import org.immutables.value.Value.Modifiable;
  * @author Ashley Scopes
  * @since TBC
  */
+@Immutable
 @KindHint(kind = "path", implementation = PathProtocDistributionBean.class)
 @Modifiable
 public abstract non-sealed class PathProtocDistribution
@@ -33,7 +35,7 @@ public abstract non-sealed class PathProtocDistribution
   /**
    * Get the name.
    *
-   * <p>Defaults to {@code protoc} if unset.
+   * <p>Defaults to {@code "protoc"} if unset.
    *
    * @return the name.
    */

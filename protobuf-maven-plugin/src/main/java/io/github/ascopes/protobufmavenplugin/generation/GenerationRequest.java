@@ -19,6 +19,7 @@ import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDe
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -156,21 +157,11 @@ public interface GenerationRequest {
   List<ProtocPlugin> getProtocPlugins();
 
   /**
-   * The version of {@code protoc} to use.
+   * The distribution of {@code protoc} to run.
    *
-   * <p>This will be one of:
-   *
-   * <ul>
-   *   <li>A Maven version string (such as {@code 4.29.3}), to indicate to
-   *       pull from the Maven repositories;
-   *   <li>The literal string {@code PATH}, to indicate to invoke the
-   *       {@code protoc} binary on the system {@code $PATH};
-   *   <li>A URL to a binary to execute.
-   * </ul>
-   *
-   * @return the version indicator.
+   * @return the {@code protoc} distribution.
    */
-  String getProtocVersion();
+  ProtocDistribution getProtoc();
 
   /**
    * Sanctioned path to place executables in.

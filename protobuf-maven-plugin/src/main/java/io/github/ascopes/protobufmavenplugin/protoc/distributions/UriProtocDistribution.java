@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.net.URI;
+import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 
 /**
@@ -25,6 +26,7 @@ import org.immutables.value.Value.Modifiable;
  * @author Ashley Scopes
  * @since TBC
  */
+@Immutable
 @KindHint(kind = "url", implementation = UriProtocDistributionBean.class)
 @Modifiable
 public abstract non-sealed class UriProtocDistribution

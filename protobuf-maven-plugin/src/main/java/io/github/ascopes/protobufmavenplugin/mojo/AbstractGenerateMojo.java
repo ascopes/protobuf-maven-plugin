@@ -29,6 +29,7 @@ import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachme
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -535,37 +536,82 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Digest protocDigest;
 
   /**
-   * Where to find {@code protoc} or which version to download.
+   * The distribution of {@code protoc} to use.
    *
-   * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
-   * is in use.
+   * <p>This supports both string values and objects with attributes.
    *
-   * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
-   * being downloaded. This is useful if users need to use an unsupported architecture/OS, or a
-   * development version of {@code protoc}.
+   * <p>If using an object with attributes for the value, then the {@code kind} XML attribute
+   * must be specified to describe exactly which kind of {@code protoc} distribution is to be used.
+   * That is, {@literal <protoc kind="...">...</kind>}. If a string is provided, then this
+   * XML attribute must be omitted.
    *
-   * <p>Users may also specify a URL. See the user guide for a list of supported protocols.
+   * <h4>Valid values</h4>
    *
-   * <p>Note that specifying {@code -Dprotobuf.compiler.version} in the {@code MAVEN_OPTS} or on
-   * the command line overrides the version specified in the POM. This enables users to easily
-   * override the version of {@code protoc} in use if their system is unable to support the
-   * version specified in the POM. Termux users in particular will find
-   * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
-   * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
+   * <table>
+   *   <thead>
+   *     <tr>
+   *       <th>Type</th>
+   *       <th>Description</th>
+   *       <th><code>kind</code> attribute</th>
+   *       <th>Attributes</th>
+   *       <th>String format</th>
+   *       <th>Notes</th>
+   *     </tr>
+   *   </thead>
+   *   <tbody>
+   *     <tr>
+   *       <th>Maven Binaries<th>
+   *       <td>Binaries published to Maven Central<td>
+   *       <td><code>binary-maven</code><td>
+   *       <td>
+   *         <ul>
+   *           <li><code>groupId</code> - defaults to <code>com.google.protobuf</code></li>
+   *           <li><code>artifactId</code> - defaults to <code>protoc</code></li>
+   *           <li><code>version</code> - must be specified</li>7
+   *           <li><code>classifier</code> - computed based on the current platform by default</li>
+   *           <li><code>type</code> - defaults to <code>exe</code></li>
+   *         </ul>
+   *       <td>
+   *       <td>A semantic versioned string, such as <code>4.30.0</code></td>
+   *       <td>The string representation only supports taking a version number.</td>
+   *     </tr>
+   *     <tr>
+   *       <th>Path Binaries<th>
+   *       <td>Binaries located on the system <code>PATH</code></td>
+   *       <td><code>path</code><td>
+   *       <td>
+   *         <ul>
+   *           <li><code>name</code> - the binary name, defaults to <code>protoc</code></li>
+   *         </ul>
+   *       <td>
+   *       <td>The literal string <code>PATH</code></td>
+   *       <td>The path name cannot be overridden in the string format. On Windows, the name
+   *         should <strong>not</strong> include the file extension, and is case-insensitive.</td>
+   *     </tr>
+   *     <tr>
+   *       <th>URL binaries<th>
+   *       <td>Binaries located at a given URL</td>
+   *       <td><code>url</code><td>
+   *       <td>
+   *         <ul>
+   *           <li><code>url</code> - the URL to fetch.</li>
+   *         </ul>
+   *       <td>
+   *       <td>A well-formed URL</td>
+   *       <td>Local paths can be referenced using the <code>file</code> scheme. Proxy
+   *         authentication is not supported.</td>
+   *     </tr>
+   *   </tbody>
+   * </table>
    *
-   * <p><strong>Path resolution on Linux, macOS, and other POSIX-like systems</strong>:
-   * resolution looks ofr an executable binary matching the exact name in any directory in
-   * the {@code $PATH} environment variable.
-   *
-   * <p><strong>Path resolution on Windows</strong>: the case-insensitive {@code %PATH%}
-   * environment variable is searched for an executable that matches the name, ignoring
-   * case and any file extension. The file extension is expected to match any extension
-   * in the {@code %PATHEXT%} environment variable.
+   * <p>See
+   * <a href="https://ascopes.github.io/protobuf-maven-plugin/changing-protoc-versions.html">
+   * "changing protoc versions"</a> for usage examples and documentation.
    *
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protobuf.compiler.version")
-  String protoc;
+  ProtocDistribution protoc;
 
   /**
    * Generate Python sources from the protobuf sources.
@@ -855,7 +901,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDirectory(outputDirectory())
         .protocDigest(protocDigest)
         .protocPlugins(nonNullList(plugins))
-        .protocVersion(protoc())
+        .protoc(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sanctionedExecutablePath(sanctionedExecutablePath)
         .sourceDependencies(nonNullList(sourceDependencies))
@@ -898,13 +944,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .orElseGet(this::defaultOutputDirectory);
   }
 
-  private String protoc() {
+  private ProtocDistribution protoc() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty("protobuf.compiler.version");
     return overriddenVersion == null
         ? requireNonNull(protoc, "<protoc/> has not been set")
-        : overriddenVersion;
+        : ProtocDistribution.fromString(overriddenVersion);
   }
 
   private Collection<Path> determinePaths(

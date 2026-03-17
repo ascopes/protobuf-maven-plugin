@@ -19,7 +19,6 @@ import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
-import org.jspecify.annotations.NonNull;
 
 
 /**
