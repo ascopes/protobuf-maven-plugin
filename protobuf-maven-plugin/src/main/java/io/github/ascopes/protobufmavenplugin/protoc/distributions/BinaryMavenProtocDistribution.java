@@ -30,7 +30,7 @@ import org.jspecify.annotations.NonNull;
  * Google release of {@code protoc}.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 5.1.0
  */
 @Immutable
 @KindHint(kind = "binary-maven", implementation = BinaryMavenProtocDistributionBean.class)

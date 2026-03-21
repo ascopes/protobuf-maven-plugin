@@ -24,7 +24,7 @@ import org.immutables.value.Value.Modifiable;
  * Model base for a {@code protoc} distribution that is located on the system {@code $PATH}.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 5.1.0
  */
 @Immutable
 @KindHint(kind = "path", implementation = PathProtocDistributionBean.class)

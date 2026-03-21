@@ -22,7 +22,7 @@ import java.net.URI;
  * Base interface for a {@code protoc} distribution.
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 5.1.0
  */
 public sealed interface ProtocDistribution
     permits BinaryMavenProtocDistribution,

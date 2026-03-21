@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * @author Ashley Scopes
  * @see KindHint
  * @see SealedTypePlexusConverter
- * @since TBC
+ * @since 5.1.0
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
