@@ -15,7 +15,6 @@
  */
 package io.github.ascopes.protobufmavenplugin.plexus;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
@@ -104,33 +103,61 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
   ) throws ComponentConfigurationException {
     var kindMapping = getKindMappingFor(type);
 
-    var maybeKind = Optional
+    var kind = Optional
         .ofNullable(configuration.getAttribute("kind"))
-        .filter(not(String::isEmpty));
+        .filter(not(String::isEmpty))
+        .orElse(null);
 
-    if (configuration.getValue() != null) {
-      if (maybeKind.isPresent()) {
-        throw new ComponentConfigurationException(
-            configuration,
-            "Cannot set a string value with a kind attribute"
-        );
-      }
+    // getChildCount is 0 if we have no nested attributes. Otherwise, "getValue" could return the
+    // XML structure directly.
+    if (configuration.getChildCount() == 0) {
+      return fromString(configuration, evaluator, kind, kindMapping.fromStringHandle());
+    } else {
+      return fromAttributes(lookup, configuration, type, evaluator, listener, kind, kindMapping);
+    }
+  }
 
-      if (kindMapping.fromStringHandle() == null) {
-        throw new ComponentConfigurationException(
-            configuration,
-            "Cannot set a string value on this type of attribute"
-        );
-      }
-
-      return kindMapping.fromStringHandle().call(configuration);
+  private Object fromString(
+      PlexusConfiguration configuration,
+      ExpressionEvaluator evaluator,
+      @Nullable String kind,
+      @Nullable FromStringHandle<?> fromStringHandle
+  ) throws ComponentConfigurationException {
+    if (kind != null) {
+      throw new ComponentConfigurationException(
+          configuration,
+          "Cannot set a string value with a kind attribute"
+      );
     }
 
-    var kind = maybeKind
-        .orElseThrow(() -> new ComponentConfigurationException(
-            configuration,
-            "Missing \"kind\" attribute. Valid kinds are: " + getValidKindsFor(type)
-        ));
+    if (fromStringHandle == null) {
+      throw new ComponentConfigurationException(
+          configuration,
+          "Cannot set a string value on this type of attribute"
+      );
+    }
+
+    // Expand any interpolated values, then emit the string.
+    var interpolatedValue = (String) fromExpression(configuration, evaluator, String.class);
+    return fromStringHandle.call(configuration, interpolatedValue);
+  }
+
+  private Object fromAttributes(
+      ConverterLookup lookup,
+      PlexusConfiguration configuration,
+      Class<?> type,
+      ExpressionEvaluator evaluator,
+      @Nullable ConfigurationListener listener,
+      @Nullable String kind,
+      KindMapping<?> kindMapping
+  ) throws ComponentConfigurationException {
+    if (kind == null) {
+      throw new ComponentConfigurationException(
+          configuration,
+          "Missing \"kind\" attribute. Valid kinds are: " + getValidKindsFor(type)
+      );
+    }
+
     var impl = Optional.ofNullable(kindMapping.kinds().get(kind))
         .orElseThrow(() -> new ComponentConfigurationException(
             configuration,
@@ -210,9 +237,23 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
   private static <T> Optional<FromStringHandle<T>> discoverFromStringFor(Class<T> base) {
     return Stream.of(base.getDeclaredMethods())
         .filter(m -> m.isAnnotationPresent(FromString.class))
-        .map(m -> FromStringHandle.ofMethod(base, m))
+        .map(m -> handleFromMethod(base, m))
         .peek(m -> log.debug("found @FromString method {} on {}", m, base.getName()))
         .findFirst();
+  }
+
+  static <T> FromStringHandle<T> handleFromMethod(Class<T> base, Method method) {
+    return (configuration, value) -> {
+      try {
+        return base.cast(method.invoke(null, value));
+      } catch (ReflectiveOperationException ex) {
+        throw new ComponentConfigurationException(
+            configuration,
+            "Failed to parse attribute string value: " + requireNonNullElse(ex.getCause(), ex),
+            ex
+        );
+      }
+    };
   }
 
   private record KindMapping<T>(
@@ -223,20 +264,6 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   @FunctionalInterface
   private interface FromStringHandle<T> {
-    T call(PlexusConfiguration configuration) throws ComponentConfigurationException;
-
-    static <T> FromStringHandle<T> ofMethod(Class<T> base, Method method) {
-      return configuration -> {
-        try {
-          return base.cast(method.invoke(null, requireNonNull(configuration.getValue())));
-        } catch (ReflectiveOperationException ex) {
-          throw new ComponentConfigurationException(
-              configuration,
-              "Failed to parse attribute string value: " + requireNonNullElse(ex.getCause(), ex),
-              ex
-          );
-        }
-      };
-    }
+    T call(PlexusConfiguration configuration, String value) throws ComponentConfigurationException;
   }
 }
