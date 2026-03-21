@@ -15,18 +15,19 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc;
 
-import io.github.ascopes.protobufmavenplugin.dependencies.ImmutableMavenDependency;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.BinaryMavenProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.ImmutableBinaryMavenProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.PathProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.UriProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.urls.UriResourceFetcher;
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -35,8 +36,6 @@ import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Resolver for the {@code protoc} executable.
@@ -48,14 +47,6 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class ProtocResolver {
 
-  private static final String EXECUTABLE_NAME = "protoc";
-  private static final String GROUP_ID = "com.google.protobuf";
-  private static final String ARTIFACT_ID = "protoc";
-  private static final String TYPE = "exe";
-
-  private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
-
-  private final HostSystem hostSystem;
   private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
   private final SystemPathBinaryResolver systemPathResolver;
@@ -63,13 +54,11 @@ public final class ProtocResolver {
 
   @Inject
   public ProtocResolver(
-      HostSystem hostSystem,
       MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
       SystemPathBinaryResolver systemPathResolver,
       UriResourceFetcher urlResourceFetcher
   ) {
-    this.hostSystem = hostSystem;
     this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
     this.systemPathResolver = systemPathResolver;
@@ -77,25 +66,19 @@ public final class ProtocResolver {
   }
 
   public Optional<Path> resolve(
-      String version,
+      ProtocDistribution distribution,
       @Nullable Digest digest
   ) throws ResolutionException {
-    if (version.equalsIgnoreCase("LATEST")) {
-      log.warn(
-          "You have set the protoc version to 'latest'. This will likely not behave as you "
-              + "would expect, since Google have released incorrect version numbers of protoc "
-              + "in the past. To remove this warning, please use a pinned version instead."
-      );
-    }
-
     Optional<Path> path;
 
-    if (version.equalsIgnoreCase("PATH")) {
-      path = systemPathResolver.resolve(EXECUTABLE_NAME);
-    } else if (version.contains(":")) {
-      path = resolveFromUri(version);
+    if (distribution instanceof BinaryMavenProtocDistribution bmpd) {
+      path = resolveBinaryMavenDistribution(bmpd);
+    } else if (distribution instanceof PathProtocDistribution ppd) {
+      path = resolvePathDistribution(ppd);
+    } else if (distribution instanceof UriProtocDistribution upd) {
+      path = resolveUriDistribution(upd);
     } else {
-      path = resolveFromMavenRepositories(version);
+      throw new UnsupportedOperationException("unsupported distribution " + distribution);
     }
 
     if (path.isEmpty()) {
@@ -105,7 +88,6 @@ public final class ProtocResolver {
     var resolvedPath = path.get();
 
     if (digest != null) {
-      log.debug("Verifying digest of \"{}\" against \"{}\"", resolvedPath, digest);
       try (var is = new BufferedInputStream(Files.newInputStream(resolvedPath))) {
         digest.verify(is);
       } catch (IOException ex) {
@@ -119,37 +101,29 @@ public final class ProtocResolver {
     return path;
   }
 
-  private Optional<Path> resolveFromUri(String uriString) throws ResolutionException {
-    try {
-      var uri = new URI(uriString);
-      return urlResourceFetcher.fetchFileFromUri(uri, ".exe", true);
-    } catch (URISyntaxException ex) {
-      throw new ResolutionException("Failed to parse URI \"" + uriString + "\"", ex);
+  private Optional<Path> resolveBinaryMavenDistribution(
+      BinaryMavenProtocDistribution distribution
+  ) throws ResolutionException {
+    if (distribution.getClassifier() == null) {
+      var classifier = platformClassifierFactory.getClassifier(distribution.getArtifactId());
+      distribution = ImmutableBinaryMavenProtocDistribution.builder()
+          .from(distribution)
+          .classifier(classifier)
+          .build();
     }
+
+    return Optional.of(artifactPathResolver.resolveArtifact(distribution));
   }
 
-  private Optional<Path> resolveFromMavenRepositories(String version) throws ResolutionException {
-    if (hostSystem.isProbablyTermux()) {
-      log.warn(
-          "It looks like you are using Termux! If you are using an environment such as Termux, "
-              + "then you may find that the Maven-distributed versions of protoc fail to run. "
-              + "This is due to Android's kernel restricting the types of system calls that can "
-              + "be made. You may wish to run 'pkg in protobuf' to install a modified version of "
-              + "protoc, and reinvoke Maven with '-Dprotobuf.compiler.version=PATH' to force "
-              + "this Maven plugin to use a compatible version. Also ensure you have the latest "
-              + "JDK installed in this case. If you do not encounter any issues, then great! You "
-              + "can safely ignore this warning."
-      );
-    }
+  private Optional<Path> resolveUriDistribution(
+      UriProtocDistribution distribution
+  ) throws ResolutionException {
+    return urlResourceFetcher.fetchFileFromUri(distribution.getUrl(), ".exe", true);
+  }
 
-    var artifact = ImmutableMavenDependency.builder()
-        .groupId(GROUP_ID)
-        .artifactId(ARTIFACT_ID)
-        .version(version)
-        .type(TYPE)
-        .classifier(platformClassifierFactory.getClassifier(ARTIFACT_ID))
-        .build();
-
-    return Optional.of(artifactPathResolver.resolveArtifact(artifact));
+  private Optional<Path> resolvePathDistribution(
+      PathProtocDistribution distribution
+  ) throws ResolutionException {
+    return systemPathResolver.resolve(distribution.getName());
   }
 }

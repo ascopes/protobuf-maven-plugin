@@ -13,15 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import java.nio.file.Files
-import java.nio.file.Path
-
-Path protobufDir = basedir.toPath()
-    .resolve("target")
-    .resolve("generated-sources")
-    .resolve("protobuf")
-Files.createDirectories(protobufDir)
-Files.writeString(protobufDir.resolve("Invalid.java"), "this will make compilation fail")
-
-return true
+/**
+ * Distribution models for the {@literal <protoc/>} plugin parameter
+ */
+package io.github.ascopes.protobufmavenplugin.protoc.distributions;

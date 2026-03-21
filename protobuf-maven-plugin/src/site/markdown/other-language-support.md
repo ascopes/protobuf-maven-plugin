@@ -65,7 +65,10 @@ in the plugin configuration. For example:
   <arguments>
     <argument>--cpp_out=target/generated-sources/cxx</argument>
   </arguments>
-  <protoc>...</protoc>
+
+  <protoc kind="binary-maven">
+    <version>${protobuf.version}</version>
+  </protoc>
 </configuration>
 ```
 

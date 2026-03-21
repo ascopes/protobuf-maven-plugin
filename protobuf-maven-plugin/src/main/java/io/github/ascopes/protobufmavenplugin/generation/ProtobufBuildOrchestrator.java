@@ -214,7 +214,7 @@ public final class ProtobufBuildOrchestrator {
   }
 
   private Path discoverProtocPath(GenerationRequest request) throws ResolutionException {
-    return protocResolver.resolve(request.getProtocVersion(), request.getProtocDigest())
+    return protocResolver.resolve(request.getProtoc(), request.getProtocDigest())
         .orElseThrow(() -> new ResolutionException("Protoc binary was not found"));
   }
 

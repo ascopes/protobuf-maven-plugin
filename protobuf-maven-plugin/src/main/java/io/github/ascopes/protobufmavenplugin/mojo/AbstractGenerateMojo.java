@@ -29,6 +29,7 @@ import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachme
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -535,37 +536,93 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable Digest protocDigest;
 
   /**
-   * Where to find {@code protoc} or which version to download.
+   * The distribution of {@code protoc} to use.
    *
-   * <p>This usually should correspond to the version of {@code protobuf-java} or similar that
-   * is in use.
+   * <h4>String values</h4>
    *
-   * <p>If set to "{@code PATH}", then {@code protoc} is resolved from the system path rather than
-   * being downloaded. This is useful if users need to use an unsupported architecture/OS, or a
-   * development version of {@code protoc}.
+   * <p>The following string values are supported:
    *
-   * <p>Users may also specify a URL. See the user guide for a list of supported protocols.
+   * <ul>
+   *   <li>A version number, such as <code>4.29.0</code> - this will be treated as the version
+   *      of <code>protoc</code> to pull from Maven Central. The classifier will be derived from
+   *      the current platform.</li>
+   *   <li>The literal string "<code>PATH</code>" - this will instruct the plugin to find
+   *      an executable named <code>protoc</code> from the system <code>$PATH</code>. On Windows,
+   *      the file extension is not included in the name, and case sensitivity is ignored.</li>
+   *   <li>A URL - the binary located at the given URL will be downloaded. This can also be
+   *      a <code>file:/</code> URI if a local file should be used at the given relative or
+   *      absolute path.</li>
+   * </ul>
    *
-   * <p>Note that specifying {@code -Dprotobuf.compiler.version} in the {@code MAVEN_OPTS} or on
-   * the command line overrides the version specified in the POM. This enables users to easily
-   * override the version of {@code protoc} in use if their system is unable to support the
-   * version specified in the POM. Termux users in particular will find
-   * {@code -Dprotobuf.compiler.version=PATH} to be useful, due to platform limitations with
-   * {@code libpthread} that can result in {@code SIGSYS} (Bad System Call) being raised.
+   * <h4>Object values</h4>
    *
-   * <p><strong>Path resolution on Linux, macOS, and other POSIX-like systems</strong>:
-   * resolution looks ofr an executable binary matching the exact name in any directory in
-   * the {@code $PATH} environment variable.
+   * <p>Object values must include a {@code kind} attribute to tell this plugin which "kind" of
+   * object you are specifying.
    *
-   * <p><strong>Path resolution on Windows</strong>: the case-insensitive {@code %PATH%}
-   * environment variable is searched for an executable that matches the name, ignoring
-   * case and any file extension. The file extension is expected to match any extension
-   * in the {@code %PATHEXT%} environment variable.
+   * <p>For example:
+   *
+   * <pre><code>&lt;protoc kind="binary-maven"&gt;
+   *   &lt;version&gt;4.29.0&lt;/version&gt;
+   * &lt;/protoc&gt;
+   * </code></pre>
+   *
+   * <p>The following object values are supported:
+   *
+   * <table>
+   *   <thead>
+   *     <tr>
+   *       <th>Kind</th>
+   *       <th>Attributes</th>
+   *       <th>Description</th>
+   *     </tr>
+   *   </thead>
+   *   <tbody>
+   *     <tr>
+   *       <td><code>binary-maven</code></td>
+   *       <td>
+   *         <ul>
+   *           <li><code>groupId</code> - defaults to "com.google.protobuf"</li>
+   *           <li><code>artifactId</code> - defaults to "protoc"</li>
+   *           <li><code>version</code></li>
+   *           <li><code>classifier</code> - defaults to a platform-dependent string</li>
+   *           <li><code>exe</code> - defaults to "exe"</li>
+   *         </ul>
+   *       </td>
+   *       <td>Points to a Maven Central release holding a platform-dependent binary build of
+   *          <code>protoc</code>.</td>
+   *     </tr>
+   *     <tr>
+   *       <td><code>path</code></td>
+   *       <td>
+   *         <ul>
+   *           <li><code>name</code> - defaults to "protoc"</li>
+   *         </ul>
+   *       </td>
+   *       <td>Points to an executable binary on the system <code>$PATH</code>. On Windows,
+   *          the file extension is not included in the name, and case sensitivity is ignored.</td>
+   *     </tr>
+   *     <tr>
+   *       <td><code>url</code></td>
+   *       <td>
+   *         <ul>
+   *           <li><code>url</code></li>
+   *         </ul>
+   *       </td>
+   *       <td>Points to a URL holding a binary build of <code>protoc</code>, which will be
+   *          downloaded. This can be a <code>file:/</code> URI to allow referencing a binary
+   *          on the local system from a relative or absolute path.</td>
+   *     </tr>
+   *   </tbody>
+   * </table>
+   *
+   * <p>See
+   * <a href="https://ascopes.github.io/protobuf-maven-plugin/changing-protoc-versions.html">
+   * "changing protoc versions"</a> for usage examples and documentation.
    *
    * @since 0.0.1
    */
   @Parameter(required = true, property = "protobuf.compiler.version")
-  String protoc;
+  ProtocDistribution protoc;
 
   /**
    * Generate Python sources from the protobuf sources.
@@ -596,7 +653,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This allows {@code maven-compiler-plugin} to detect and compile generated code.
    *
    * <p>Generally, users want to do this, but there may be edge cases where one
-   * wishes to control this behaviour manually instead. In this case, they should set this
+   * wishes to control this behavior manually instead. In this case, they should set this
    * parameter to be {@code false}.
    *
    * @since 0.5.0
@@ -855,7 +912,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDirectory(outputDirectory())
         .protocDigest(protocDigest)
         .protocPlugins(nonNullList(plugins))
-        .protocVersion(protoc())
+        .protoc(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)
         .sanctionedExecutablePath(sanctionedExecutablePath)
         .sourceDependencies(nonNullList(sourceDependencies))
@@ -898,13 +955,13 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .orElseGet(this::defaultOutputDirectory);
   }
 
-  private String protoc() {
+  private ProtocDistribution protoc() {
     // Give precedence to overriding the protobuf.compiler.version via the command line
     // in case the Maven binaries are incompatible with the current system.
     var overriddenVersion = System.getProperty("protobuf.compiler.version");
     return overriddenVersion == null
         ? requireNonNull(protoc, "<protoc/> has not been set")
-        : overriddenVersion;
+        : ProtocDistribution.fromString(overriddenVersion);
   }
 
   private Collection<Path> determinePaths(

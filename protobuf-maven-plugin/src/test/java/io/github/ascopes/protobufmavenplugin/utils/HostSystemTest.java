@@ -194,29 +194,6 @@ class HostSystemTest {
     assertThat(actualResult).isEqualTo(expectedResult);
   }
 
-  @DisplayName(".isProbablyTermux() returns the expected results")
-  @CsvSource({
-      "oracle, false",
-      "termux,  true",
-  })
-  @ParameterizedTest(name = "when java.vendor is {0}, expect the result to be {1}")
-  void isProbablyTermuxReturnsTheExpectedResults(
-      String javaVendor,
-      boolean expectedResult
-  ) {
-    // Given
-    var properties = new Properties();
-    var env = Map.<String, String>of();
-    properties.put("java.vendor", javaVendor);
-    var hostSystemBean = newInstance(properties, env);
-
-    // When
-    var actualResult = hostSystemBean.isProbablyTermux();
-
-    // Then
-    assertThat(actualResult).isEqualTo(expectedResult);
-  }
-
   @DisplayName(".getJavaExecutablePath() returns the Java executable")
   @CsvSource({
       " Windows, java.exe",

@@ -20,7 +20,10 @@ For generating gRPC stubs for Java, you can use the official gRPC Java plugin:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protoc>${protobuf.version}</protoc>
+    <protoc kind="binary-maven">
+      <version>${protobuf.version}</version>
+    </protoc>
+    
     <plugins>
       <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
@@ -52,8 +55,10 @@ generated Kotlin stubs provide `suspend` methods that integrate natively with Ko
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protoc>${protobuf.version}</protoc>
-
+    <protoc kind="binary-maven">
+      <version>${protobuf.version}</version>
+    </protoc>
+    
     <plugins>
       <plugin kind="binary-maven">
         <groupId>io.grpc</groupId>
@@ -107,7 +112,9 @@ To configure protobuf-maven-plugin to use this `protoc` plugin, use the followin
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protoc>${protobuf.version}</protoc>
+    <protoc kind="binary-maven">
+      <version>${protobuf.version}</version>
+    </protoc>
 
     <plugins>
       <plugin kind="binary-maven">
@@ -136,7 +143,10 @@ For integrating with Vert.x, you can use the official Vert.x gRPC plugin:
   <artifactId>protobuf-maven-plugin</artifactId>
 
   <configuration>
-    <protoc>${protobuf.version}</protoc>
+    <protoc kind="binary-maven">
+      <version>${protobuf.version}</version>
+    </protoc>
+    
     <plugins>
       <plugin kind="jvm-maven">
         <groupId>io.vertx</groupId>
@@ -179,6 +189,10 @@ A suitable Maven plugin for providing Scala compilation is also required.
           <options>flat_package,grpc,scala3_sources</options>
         </plugin>
       </plugins>
+
+      <protoc kind="binary-maven">
+        <version>${protobuf.version}</version>
+      </protoc>
     </configuration>
 
     <executions>
@@ -256,7 +270,10 @@ This example shows how to generate JavaScript/TypeScript client code for a gRPC 
       <artifactId>protobuf-maven-plugin</artifactId>
 
       <configuration>
-        <protoc>${protobuf.version}</protoc>
+        <protoc kind="binary-maven">
+          <version>${protobuf.version}</version>
+        </protoc>
+        
         <javaEnabled>false</javaEnabled>
 
         <plugins>
@@ -371,8 +388,11 @@ If you need to generate code to different directories based on the target langua
         <goal>generate</goal>
       </goals>
       <configuration>
-        <protoc>${protobuf.version}</protoc>
         <outputDirectory>${project.basedir}/target/java</outputDirectory>
+
+        <protoc kind="binary-maven">
+          <version>${protobuf.version}</version>
+        </protoc>
       </configuration>
     </execution>
     
@@ -385,8 +405,11 @@ If you need to generate code to different directories based on the target langua
       <configuration>
         <javaEnabled>false</javaEnabled>
         <outputDirectory>${project.basedir}/target/python</outputDirectory>
-        <protoc>${protobuf.version}</protoc>
         <pythonEnabled>true</pythonEnabled>
+
+        <protoc kind="binary-maven">
+          <version>${protobuf.version}</version>
+        </protoc>
       </configuration>
     </execution>
   </executions>

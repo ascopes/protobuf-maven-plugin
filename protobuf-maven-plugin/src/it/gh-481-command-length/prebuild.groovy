@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import groovy.transform.Field
 
 import java.nio.charset.StandardCharsets
@@ -21,7 +22,6 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 static final @Field String ALPHA = "abcdefghijklmnopqrstuvwxyz"
 static final @Field String ALPHA_NUMERIC = ALPHA + "0123456789"

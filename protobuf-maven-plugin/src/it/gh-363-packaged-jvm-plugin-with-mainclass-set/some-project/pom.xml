@@ -47,7 +47,6 @@
           </plugins>
 
           <javaEnabled>false</javaEnabled>
-          <protoc>${protobuf.version}</protoc>
         </configuration>
 
         <executions>

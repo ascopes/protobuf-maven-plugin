@@ -56,7 +56,6 @@ public final class HostSystem {
   private final String cpuArchitecture;
   private final String pathSeparator;
   private final Path javaHome;
-  private final String javaVendor;
   private final List<Path> path;
   private final NavigableSet<String> pathExt;
 
@@ -92,10 +91,6 @@ public final class HostSystem {
         .orElseGet(() -> FileUtils.normalize(Path.of("")));
     log.debug("Reported java.home: \"{}\"", javaHome);
 
-    javaVendor = propertyProvider.apply("java.vendor")
-        .orElse("");
-    log.debug("Reported java.vendor: \"{}\"", javaVendor);
-
     path = envProvider.apply("PATH")
         .map(value -> parsePath(value, pathSeparator))
         .orElseGet(Collections::emptyList);
@@ -124,10 +119,6 @@ public final class HostSystem {
 
   public boolean isProbablyLinux() {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("linux");
-  }
-
-  public boolean isProbablyTermux() {
-    return javaVendor.equalsIgnoreCase("termux");
   }
 
   public boolean isProbablyMacOs() {

@@ -13,15 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
-import java.nio.file.Files
-import java.nio.file.Path
+import static org.assertj.core.api.Assertions.assertThat;
 
-Path protobufDir = basedir.toPath()
-    .resolve("target")
-    .resolve("generated-sources")
-    .resolve("protobuf")
-Files.createDirectories(protobufDir)
-Files.writeString(protobufDir.resolve("Invalid.java"), "this will make compilation fail")
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-return true
+@DisplayName("PathProtocDistribution tests")
+class PathProtocDistributionTest {
+
+  @DisplayName("default name is set to the expected value")
+  @Test
+  void defaultClassifierIsSetToExpectedValue() {
+    // When
+    var actual = ImmutablePathProtocDistribution.builder().build();
+
+    // Then
+    assertThat(actual.getName()).isEqualTo("protoc");
+  }
+}

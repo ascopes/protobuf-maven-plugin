@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 import java.io.File;
 import java.nio.file.Path;
 import javax.inject.Named;
-import javax.inject.Singleton;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.basic.FileConverter;
@@ -40,8 +40,8 @@ import org.jspecify.annotations.Nullable;
  * @since 3.1.3
  */
 @Description("A polyfill for Maven <3.9.8 to support parsing NIO Path objects")
+@MojoExecutionScoped
 @Named
-@Singleton
 final class PathPlexusConverter extends FileConverter {
 
   @Override

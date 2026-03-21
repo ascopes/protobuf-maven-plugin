@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Named;
-import javax.inject.Singleton;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
 import org.eclipse.sisu.Description;
@@ -38,8 +38,8 @@ import org.eclipse.sisu.Description;
  * @since 3.5.0
  */
 @Description("Plexus converter for parsing Digest objects")
+@MojoExecutionScoped
 @Named
-@Singleton
 final class DigestPlexusConverter extends AbstractBasicConverter {
 
   private static final Pattern PATTERN = Pattern.compile(
