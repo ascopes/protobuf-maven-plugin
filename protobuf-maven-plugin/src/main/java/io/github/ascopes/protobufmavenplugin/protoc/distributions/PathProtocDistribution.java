@@ -29,8 +29,7 @@ import org.immutables.value.Value.Modifiable;
 @Immutable
 @KindHint(kind = "path", implementation = PathProtocDistributionBean.class)
 @Modifiable
-public abstract non-sealed class PathProtocDistribution
-    implements ProtocDistribution {
+public abstract non-sealed class PathProtocDistribution implements ProtocDistribution {
 
   /**
    * Get the name.

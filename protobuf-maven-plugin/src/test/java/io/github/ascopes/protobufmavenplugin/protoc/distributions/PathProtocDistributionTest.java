@@ -15,26 +15,21 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
-import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
-import java.net.URI;
-import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Model base for a {@code protoc} distribution that is located at a URI.
- *
- * @author Ashley Scopes
- * @since TBC
- */
-@Immutable
-@KindHint(kind = "url", implementation = UriProtocDistributionBean.class)
-@Modifiable
-public abstract non-sealed class UriProtocDistribution implements ProtocDistribution {
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-  /**
-   * Get the URI.
-   *
-   * @return the URI.
-   */
-  public abstract URI getUrl();
+@DisplayName("PathProtocDistribution tests")
+class PathProtocDistributionTest {
+
+  @DisplayName("default name is set to the expected value")
+  @Test
+  void defaultClassifierIsSetToExpectedValue() {
+    // When
+    var actual = ImmutablePathProtocDistribution.builder().build();
+
+    // Then
+    assertThat(actual.getName()).isEqualTo("protoc");
+  }
 }
