@@ -150,13 +150,22 @@ jobs:
           generateReleaseNotes: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish code coverage
+      - name: Publish coverage to Codecov
         uses: codecov/codecov-action@v5
         continue-on-error: true
         if: ${{ ! failure() && ! inputs.skip-tests }}
         with:
-          # Bind coverage to the published tag.
           override_branch: ${{ needs.prepare.outputs.release_version }}
+          report_type: coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Publish test results to Codecov
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        if: ${{ ! failure() && ! inputs.skip-tests }}
+        with:
+          override_branch: ${{ needs.prepare.outputs.release_version }}
+          report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
 
   github-pages:

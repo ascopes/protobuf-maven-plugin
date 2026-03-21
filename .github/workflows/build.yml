@@ -97,6 +97,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          ###
+          ### Note, if adding or removing from this matrix, make sure to update the
+          ### `after_n_builds` attribute in codecov.yml to reflect the cardinality of this
+          ### matrix. Otherwise, coverage reporting may fail.
+          ###
+
           - title: lnx/x86/mvn3.9.6/jdk17
             os-name: ubuntu-24.04
             java-version: 17
@@ -171,7 +177,7 @@ jobs:
         shell: bash
         run: time ./mvnw -B -e -Dcheckstyle.skip -Dlicense.skip clean verify
 
-      - name: Publish code coverage to Codecov
+      - name: Publish coverage to Codecov
         uses: codecov/codecov-action@v5
         continue-on-error: true
         if: ${{ ! cancelled() }}
@@ -182,6 +188,7 @@ jobs:
 
       - name: Publish test results to Codecov
         uses: codecov/codecov-action@v5
+        continue-on-error: true
         if: ${{ ! cancelled() }}
         with:
           flags: maven-${{ matrix.maven-version }}-java-${{ matrix.java-version }}-${{ matrix.os-name }}

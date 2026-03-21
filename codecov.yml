@@ -1,11 +1,24 @@
-coverage:
-  round: up
-  precision: 2
-
 codecov:
-  require_ci_to_pass: true
+  notify:
+    after_n_builds: 9
   strict_yaml_branch: main
+  require_ci_to_pass: true
+
+coverage:
+  precision: 2
+  round: up
+  status:
+    project:
+      default:
+        # Prevent the CI from failing if coverage drops by a tiny fraction
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 0%
 
 comment:
-  layout: "reach, diff, flags, files"
   behavior: default
+  layout: "reach, diff, flags, files"
+  # Instruct Codecov to update the existing comment rather than ignoring it
+  require_changes: false
