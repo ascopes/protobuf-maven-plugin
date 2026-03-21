@@ -538,68 +538,79 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * The distribution of {@code protoc} to use.
    *
-   * <p>This supports both string values and objects with attributes.
+   * <h4>String values</h4>
    *
-   * <p>If using an object with attributes for the value, then the {@code kind} XML attribute
-   * must be specified to describe exactly which kind of {@code protoc} distribution is to be used.
-   * That is, {@literal <protoc kind="...">...</kind>}. If a string is provided, then this
-   * XML attribute must be omitted.
+   * <p>The following string values are supported:
    *
-   * <h4>Valid values</h4>
+   * <ul>
+   *   <li>A version number, such as <code>4.29.0</code> - this will be treated as the version
+   *      of <code>protoc</code> to pull from Maven Central. The classifier will be derived from
+   *      the current platform.</li>
+   *   <li>The literal string "<code>PATH</code>" - this will instruct the plugin to find
+   *      an executable named <code>protoc</code> from the system <code>$PATH</code>. On Windows,
+   *      the file extension is not included in the name, and case sensitivity is ignored.</li>
+   *   <li>A URL - the binary located at the given URL will be downloaded. This can also be
+   *      a <code>file:/</code> URI if a local file should be used at the given relative or
+   *      absolute path.</li>
+   * </ul>
+   *
+   * <h4>Object values</h4>
+   *
+   * <p>Object values must include a {@code kind} attribute to tell this plugin which "kind" of
+   * object you are specifying.
+   *
+   * <p>For example:
+   *
+   * <pre><code>&lt;protoc kind="binary-maven"&gt;
+   *   &lt;version&gt;4.29.0&lt;/version&gt;
+   * &lt;/protoc&gt;
+   * </code></pre>
+   *
+   * <p>The following object values are supported:
    *
    * <table>
    *   <thead>
    *     <tr>
-   *       <th>Type</th>
-   *       <th>Description</th>
-   *       <th><code>kind</code> attribute</th>
+   *       <th>Kind</th>
    *       <th>Attributes</th>
-   *       <th>String format</th>
-   *       <th>Notes</th>
+   *       <th>Description</th>
    *     </tr>
    *   </thead>
    *   <tbody>
    *     <tr>
-   *       <th>Maven Binaries<th>
-   *       <td>Binaries published to Maven Central<td>
-   *       <td><code>binary-maven</code><td>
+   *       <td><code>binary-maven</code></td>
    *       <td>
    *         <ul>
-   *           <li><code>groupId</code> - defaults to <code>com.google.protobuf</code></li>
-   *           <li><code>artifactId</code> - defaults to <code>protoc</code></li>
-   *           <li><code>version</code> - must be specified</li>7
-   *           <li><code>classifier</code> - computed based on the current platform by default</li>
-   *           <li><code>type</code> - defaults to <code>exe</code></li>
+   *           <li><code>groupId</code> - defaults to "com.google.protobuf"</li>
+   *           <li><code>artifactId</code> - defaults to "protoc"</li>
+   *           <li><code>version</code></li>
+   *           <li><code>classifier</code> - defaults to a platform-dependent string</li>
+   *           <li><code>exe</code> - defaults to "exe"</li>
    *         </ul>
-   *       <td>
-   *       <td>A semantic versioned string, such as <code>4.30.0</code></td>
-   *       <td>The string representation only supports taking a version number.</td>
+   *       </td>
+   *       <td>Points to a Maven Central release holding a platform-dependent binary build of
+   *          <code>protoc</code>.</td>
    *     </tr>
    *     <tr>
-   *       <th>Path Binaries<th>
-   *       <td>Binaries located on the system <code>PATH</code></td>
-   *       <td><code>path</code><td>
+   *       <td><code>path</code></td>
    *       <td>
    *         <ul>
-   *           <li><code>name</code> - the binary name, defaults to <code>protoc</code></li>
+   *           <li><code>name</code> - defaults to "protoc"</li>
    *         </ul>
-   *       <td>
-   *       <td>The literal string <code>PATH</code></td>
-   *       <td>The path name cannot be overridden in the string format. On Windows, the name
-   *         should <strong>not</strong> include the file extension, and is case-insensitive.</td>
+   *       </td>
+   *       <td>Points to an executable binary on the system <code>$PATH</code>. On Windows,
+   *          the file extension is not included in the name, and case sensitivity is ignored.</td>
    *     </tr>
    *     <tr>
-   *       <th>URL binaries<th>
-   *       <td>Binaries located at a given URL</td>
-   *       <td><code>url</code><td>
+   *       <td><code>url</code></td>
    *       <td>
    *         <ul>
-   *           <li><code>url</code> - the URL to fetch.</li>
+   *           <li><code>url</code></li>
    *         </ul>
-   *       <td>
-   *       <td>A well-formed URL</td>
-   *       <td>Local paths can be referenced using the <code>file</code> scheme. Proxy
-   *         authentication is not supported.</td>
+   *       </td>
+   *       <td>Points to a URL holding a binary build of <code>protoc</code>, which will be
+   *          downloaded. This can be a <code>file:/</code> URI to allow referencing a binary
+   *          on the local system from a relative or absolute path.</td>
    *     </tr>
    *   </tbody>
    * </table>
@@ -642,7 +653,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * <p>This allows {@code maven-compiler-plugin} to detect and compile generated code.
    *
    * <p>Generally, users want to do this, but there may be edge cases where one
-   * wishes to control this behaviour manually instead. In this case, they should set this
+   * wishes to control this behavior manually instead. In this case, they should set this
    * parameter to be {@code false}.
    *
    * @since 0.5.0
