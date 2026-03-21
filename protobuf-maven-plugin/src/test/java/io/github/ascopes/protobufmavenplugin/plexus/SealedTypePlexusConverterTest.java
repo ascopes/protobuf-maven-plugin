@@ -64,27 +64,144 @@ class SealedTypePlexusConverterTest {
     assertThat(result).isEqualTo(expectedResult);
   }
 
-  @DisplayName(".fromConfiguration(...) returns the expected value")
+  @DisplayName(".fromConfiguration(...) fails if an attribute has a kind and is a string")
   @Test
-  void fromConfigurationReturnsTheExpectedValue() throws Exception {
+  void fromConfigurationFailsIfAnAttributeHasKindAndIsString() {
     // Given
     var configuration = xml2PlexusConfiguration(
         """
-        <database>
-          <users>
-            <user kind="person">
-              <name>Bob</name>
-            </user>
-            <user kind="bot">
-              <id>12345</id>
-            </user>
-            <user kind="admin">
-              <name>Ashley</name>
-              <employeeId>54321</employeeId>
-            </user>
-          </users>
-        </database>
-        """.stripIndent());
+            <database>
+              <users>
+                <user kind="admin">steve</user>
+              </users>
+            </database>
+            """
+    );
+
+    // Then
+    assertThatExceptionOfType(ComponentConfigurationException.class)
+        .isThrownBy(() -> converterLookup.lookupConverterForType(Database.class).fromConfiguration(
+            converterLookup,
+            configuration,
+            Database.class,
+            null,
+            Database.class.getClassLoader(),
+            expressionEvaluator,
+            null
+        ))
+        .withMessage("Cannot set a string value with a kind attribute")
+        .extracting(ComponentConfigurationException::getFailedConfiguration)
+        .as("exception#getFailedConfiguration()")
+        .isEqualTo(configuration.getChild(0).getChild(0));
+  }
+
+  @DisplayName(".fromConfiguration(...) for types with @FromString handles strings correctly")
+  @Test
+  void fromConfigurationWithFromStringHandlesStringsCorrectly() throws Exception {
+    // Given
+    var configuration = xml2PlexusConfiguration(
+        """
+            <animal>steve</animal>
+            """
+    );
+
+    // When
+    var result = (Animal) converterLookup.lookupConverterForType(Animal.class)
+        .fromConfiguration(
+            converterLookup,
+            configuration,
+            Animal.class,
+            null,
+            Animal.class.getClassLoader(),
+            expressionEvaluator,
+            null
+        );
+
+    // Then
+    assertThat(result)
+        .isInstanceOfSatisfying(Giraffe.class, g -> assertThat(g.name).isEqualTo("steve"));
+  }
+
+  @DisplayName(".fromConfiguration(...) wraps any exception raised by parsing a string")
+  @Test
+  void fromConfigurationWrapsAnyExceptionRaisedByParsingString() {
+    // Given
+    var configuration = xml2PlexusConfiguration(
+        """
+            <broken>this wont work</broken>
+            """
+    );
+
+    // Then
+    assertThatExceptionOfType(ComponentConfigurationException.class)
+        .isThrownBy(() -> converterLookup.lookupConverterForType(BrokenFromString.class)
+            .fromConfiguration(
+                converterLookup,
+                configuration,
+                BrokenFromString.class,
+            null,
+                Database.class.getClassLoader(),
+                expressionEvaluator,
+                null
+            ))
+        .withMessage("Failed to parse attribute string value: java.lang.RuntimeException: bang")
+        .extracting(ComponentConfigurationException::getFailedConfiguration)
+        .as("exception#getFailedConfiguration()")
+        .isEqualTo(configuration);
+  }
+
+  @DisplayName(".fromConfiguration(...) for types without @FromString rejects strings")
+  @Test
+  void fromConfigurationWithoutFromStringRejectsStrings() {
+    // Given
+    var configuration = xml2PlexusConfiguration(
+        """
+            <database>
+              <users>
+                <user>steve</user>
+              </users>
+            </database>
+            """
+    );
+
+    // Then
+    assertThatExceptionOfType(ComponentConfigurationException.class)
+        .isThrownBy(() -> converterLookup.lookupConverterForType(Database.class).fromConfiguration(
+            converterLookup,
+            configuration,
+            Database.class,
+            null,
+            Database.class.getClassLoader(),
+            expressionEvaluator,
+            null
+        ))
+        .withMessage("Cannot set a string value on this type of attribute")
+        .extracting(ComponentConfigurationException::getFailedConfiguration)
+        .as("exception#getFailedConfiguration()")
+        .isEqualTo(configuration.getChild(0).getChild(0));
+  }
+
+  @DisplayName(".fromConfiguration(...) returns the expected value given a kind")
+  @Test
+  void fromConfigurationReturnsTheExpectedValueGivenKind() throws Exception {
+    // Given
+    var configuration = xml2PlexusConfiguration(
+        """
+            <database>
+              <users>
+                <user kind="person">
+                  <name>Bob</name>
+                </user>
+                <user kind="bot">
+                  <id>12345</id>
+                </user>
+                <user kind="admin">
+                  <name>Ashley</name>
+                  <employeeId>54321</employeeId>
+                </user>
+              </users>
+            </database>
+            """.stripIndent());
 
     // When
     var result = (Database) converterLookup.lookupConverterForType(Database.class)
@@ -142,25 +259,25 @@ class SealedTypePlexusConverterTest {
 
   @DisplayName(".fromConfiguration(...) raises an exception for missing kind attributes")
   @Test
-  void fromConfigurationRaisesExceptionForMissingKindAttributes() throws Exception {
+  void fromConfigurationRaisesExceptionForMissingKindAttributes() {
     // Given
     var configuration = xml2PlexusConfiguration(
         """
-        <database>
-          <users>
-            <user>
-              <name>Bob</name>
-            </user>
-            <user kind="bot">
-              <id>12345</id>
-            </user>
-            <user kind="admin">
-              <name>Ashley</name>
-              <employeeId>54321</employeeId>
-            </user>
-          </users>
-        </database>
-        """.stripIndent());
+            <database>
+              <users>
+                <user>
+                  <name>Bob</name>
+                </user>
+                <user kind="bot">
+                  <id>12345</id>
+                </user>
+                <user kind="admin">
+                  <name>Ashley</name>
+                  <employeeId>54321</employeeId>
+                </user>
+              </users>
+            </database>
+            """.stripIndent());
 
     // Then
     assertThatExceptionOfType(ComponentConfigurationException.class)
@@ -183,25 +300,25 @@ class SealedTypePlexusConverterTest {
 
   @DisplayName(".fromConfiguration(...) raises an exception for unknown kind attribute values")
   @Test
-  void fromConfigurationRaisesExceptionForUnknownKindAttributeValues() throws Exception {
+  void fromConfigurationRaisesExceptionForUnknownKindAttributeValues() {
     // Given
     var configuration = xml2PlexusConfiguration(
         """
-        <database>
-          <users>
-            <user kind="smurf">
-              <name>Bob</name>
-            </user>
-            <user kind="bot">
-              <id>12345</id>
-            </user>
-            <user kind="admin">
-              <name>Ashley</name>
-              <employeeId>54321</employeeId>
-            </user>
-          </users>
-        </database>
-        """.stripIndent());
+            <database>
+              <users>
+                <user kind="smurf">
+                  <name>Bob</name>
+                </user>
+                <user kind="bot">
+                  <id>12345</id>
+                </user>
+                <user kind="admin">
+                  <name>Ashley</name>
+                  <employeeId>54321</employeeId>
+                </user>
+              </users>
+            </database>
+            """.stripIndent());
 
     // Then
     assertThatExceptionOfType(ComponentConfigurationException.class)
@@ -241,32 +358,48 @@ class SealedTypePlexusConverterTest {
     );
   }
 
-  sealed interface SealedInterface permits NonSealedClass {}
+  sealed interface SealedInterface permits NonSealedClass {
 
-  abstract static sealed class SealedClass permits NonSealedClass {}
+  }
 
-  abstract static non-sealed class NonSealedClass extends SealedClass implements SealedInterface {}
+  abstract static sealed class SealedClass permits NonSealedClass {
 
-  interface RegularInterface {}
+  }
 
-  static class RegularClass {}
+  abstract static non-sealed class NonSealedClass extends SealedClass implements SealedInterface {
 
-  record SomeRecord() {}
+  }
+
+  interface RegularInterface {
+
+  }
+
+  static class RegularClass {
+
+  }
+
+  record SomeRecord() {
+
+  }
 
   enum SomeEnum {
     FOO, BAR
   }
 
-  @interface SomeAnnotation {}
+  @interface SomeAnnotation {
+
+  }
 
   /*
    * fromConfiguration test data
    */
 
   public static class Database {
+
     List<User> users = List.of();
 
-    public Database() {}
+    public Database() {
+    }
 
     public List<User> getUsers() {
       return users;
@@ -278,11 +411,13 @@ class SealedTypePlexusConverterTest {
   }
 
   public sealed interface User permits Person, Bot, Admin, InvalidLeafType {
+
     String getName();
   }
 
   @KindHint(kind = "person", implementation = Person.class)
   public static final class Person implements User {
+
     String name = "";
 
     @Override
@@ -297,6 +432,7 @@ class SealedTypePlexusConverterTest {
 
   @KindHint(kind = "bot", implementation = Bot.class)
   public static final class Bot implements User {
+
     String id = "";
 
     @Override
@@ -311,6 +447,7 @@ class SealedTypePlexusConverterTest {
 
   @KindHint(kind = "admin", implementation = Owner.class)
   public abstract static non-sealed class Admin implements User {
+
     String name = "";
     String employeeId = "";
 
@@ -332,14 +469,58 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  public static final class Owner extends Admin {}
+  public static final class Owner extends Admin {
+
+  }
 
   // Missing annotation
   public static final class InvalidLeafType implements User {
+
     @Override
     public String getName() {
       return "";
     }
+  }
+
+  public sealed interface Animal permits Cat, Dog, Giraffe {
+
+    @FromString
+    static Animal fromString(String value) {
+      return new Giraffe(value);
+    }
+  }
+
+  @KindHint(kind = "cat", implementation = Cat.class)
+  public static final class Cat implements Animal {
+
+  }
+
+  @KindHint(kind = "dog", implementation = Dog.class)
+  public static final class Dog implements Animal {
+
+  }
+
+  public static final class Giraffe implements Animal {
+
+    private final String name;
+
+    public Giraffe(String name) {
+      this.name = name;
+    }
+  }
+
+  public sealed interface BrokenFromString permits BrokenFromStringImpl {
+
+    @FromString
+    @SuppressWarnings("DoNotCallSuggester")
+    static BrokenFromString foo(String arg) {
+      throw new RuntimeException("bang");
+    }
+  }
+
+  @KindHint(kind = "broken", implementation = BrokenFromStringImpl.class)
+  public static final class BrokenFromStringImpl implements BrokenFromString {
+
   }
 
   /*

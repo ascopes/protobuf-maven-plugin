@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.plexus;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import java.lang.reflect.Method;
@@ -106,10 +108,22 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         .ofNullable(configuration.getAttribute("kind"))
         .filter(not(String::isEmpty));
 
-    if (maybeKind.isEmpty()
-        && kindMapping.fromStringHandle() != null
-        && configuration.getValue() != null) {
-      return kindMapping.fromStringHandle().call(configuration.getValue());
+    if (configuration.getValue() != null) {
+      if (maybeKind.isPresent()) {
+        throw new ComponentConfigurationException(
+            configuration,
+            "Cannot set a string value with a kind attribute"
+        );
+      }
+
+      if (kindMapping.fromStringHandle() == null) {
+        throw new ComponentConfigurationException(
+            configuration,
+            "Cannot set a string value on this type of attribute"
+        );
+      }
+
+      return kindMapping.fromStringHandle().call(configuration);
     }
 
     var kind = maybeKind
@@ -172,7 +186,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         );
 
         for (var permittedSubtype : next.getPermittedSubclasses()) {
-          queue.push(castClass(base, permittedSubtype));
+          queue.push(permittedSubtype.asSubclass(base));
         }
       } else {
         var kind = next.getAnnotation(KindHint.class);
@@ -185,20 +199,12 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
               kind.implementation().getName()
           );
 
-          mapping.put(kind.kind(), castClass(next, kind.implementation()));
+          mapping.put(kind.kind(), kind.implementation().asSubclass(base));
         }
       }
     }
 
     return Collections.unmodifiableMap(mapping);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> Class<? extends T> castClass(Class<T> base, Class<?> target) {
-    if (base.isAssignableFrom(target)) {
-      return (Class<T>) target;
-    }
-    throw new ClassCastException(target.getName() + " is incompatible with " + base.getName());
   }
 
   private static <T> Optional<FromStringHandle<T>> discoverFromStringFor(Class<T> base) {
@@ -217,20 +223,20 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   @FunctionalInterface
   private interface FromStringHandle<T> {
-    T call(String value);
+    T call(PlexusConfiguration configuration) throws ComponentConfigurationException;
 
     static <T> FromStringHandle<T> ofMethod(Class<T> base, Method method) {
-      try {
-        return value -> {
-          try {
-            return base.cast(method.invoke(null, value));
-          } catch (Exception ex) {
-            throw new IllegalArgumentException("Failed to parse string: " + ex, ex);
-          }
-        };
-      } catch (Exception ex) {
-        throw new IllegalStateException(ex);
-      }
+      return configuration -> {
+        try {
+          return base.cast(method.invoke(null, requireNonNull(configuration.getValue())));
+        } catch (ReflectiveOperationException ex) {
+          throw new ComponentConfigurationException(
+              configuration,
+              "Failed to parse attribute string value: " + requireNonNullElse(ex.getCause(), ex),
+              ex
+          );
+        }
+      };
     }
   }
 }
