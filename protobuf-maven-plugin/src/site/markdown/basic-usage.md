@@ -42,7 +42,9 @@ header of this page.
         <version>%VERSION%</version>
 
         <configuration>
-          <protoc>${protobuf.version}</protoc>
+          <protoc kind="binary-maven">
+            <version>${protobuf.version}</version>
+          </protoc>
         </configuration>
       </plugin>
     </plugins>

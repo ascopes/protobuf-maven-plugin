@@ -109,7 +109,7 @@ and I will get onto it as soon as possible.
 
 ## What about this WASM thing I've heard about?
 
-Some projects like Quarkus have began to experiment with transpiling
+Some projects like Quarkus have begun to experiment with transpiling
 `protoc` to web assembly, enabling them to be run in a WASM interpreter
 within the JVM, or within Graal's polyglot runtime.
 
