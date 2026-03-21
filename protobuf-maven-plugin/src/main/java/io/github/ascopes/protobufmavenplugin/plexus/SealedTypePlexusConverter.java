@@ -60,8 +60,8 @@ import org.slf4j.LoggerFactory;
  * <p>If no matching kind is found, we raise an error back to the user.
  *
  * <p>If no kind is provided, and a {@link FromString} annotation is present on a method in the
- * base type, this method will be invoked to convert a Plexus string value into an instance
- * of the base type.
+ * base type, this method will be invoked to convert a Plexus string value into an instance of the
+ * base type.
  *
  * <p>This is threadsafe.
  *
@@ -113,6 +113,25 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     if (configuration.getChildCount() == 0) {
       return fromString(configuration, evaluator, kind, kindMapping.fromStringHandle());
     } else {
+      // If we also merged in a value somewhere, discard it. Don't allow things like
+      //
+      // <protoc kind="binary-maven">
+      //   1.2.3
+      //   <version>4.5.6</version>
+      // </protoc>
+      //
+      // as this just produces total nonsense errors that make zero sense.
+      //
+      // This can occur if the parent sets one format (e.g. a raw string value) but then a child
+      // tries to set an object instead. Plexus messes up the formatting and defaults to treating
+      // an object as a string rather than an object with attributes by default. This causes a
+      // failure as injecting a string value directly into an object instance leads to it trying
+      // to call a non-existent `public static T set(String value)`. Remember Maven will MERGE
+      // parent and child POM configurations recursively by default, not override them.
+      //
+      // This was 30 minutes of my life I may never get back...
+      configuration.setValue(null);
+
       return fromAttributes(lookup, configuration, type, evaluator, listener, kind, kindMapping);
     }
   }
@@ -260,10 +279,13 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
       Class<T> base,
       Map<String, Class<? extends T>> kinds,
       @Nullable FromStringHandle<T> fromStringHandle
-  ) {}
+  ) {
+
+  }
 
   @FunctionalInterface
   private interface FromStringHandle<T> {
+
     T call(PlexusConfiguration configuration, String value) throws ComponentConfigurationException;
   }
 }
