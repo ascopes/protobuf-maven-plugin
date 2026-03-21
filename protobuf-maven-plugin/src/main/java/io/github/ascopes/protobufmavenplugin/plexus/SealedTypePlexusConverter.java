@@ -241,11 +241,11 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
           log.trace(
               "Found concrete kind for base \"{}\": \"{}\" will map to \"{}\"",
               base.getName(),
-              kind.kind(),
-              kind.implementation().getName()
+              kind.value(),
+              next.getName()
           );
 
-          mapping.put(kind.kind(), kind.implementation().asSubclass(base));
+          mapping.put(kind.value(), next);
         }
       }
     }

@@ -246,14 +246,14 @@ class SealedTypePlexusConverterTest {
     assertThat(result.users.get(2))
         .as("result.users.2 %s", result.users.get(2))
         .isNotNull()
-        .isExactlyInstanceOf(Owner.class)
-        .extracting(Owner.class::cast)
+        .isExactlyInstanceOf(Admin.class)
+        .extracting(Admin.class::cast)
         .satisfies(
             owner -> assertThat(owner.name)
-                .as("owner.name")
+                .as("admin.name")
                 .isEqualTo("Ashley"),
             owner -> assertThat(owner.employeeId)
-                .as("owner.employeeId")
+                .as("admin.employeeId")
                 .isEqualTo("54321"));
   }
 
@@ -415,7 +415,7 @@ class SealedTypePlexusConverterTest {
     String getName();
   }
 
-  @KindHint(kind = "person", implementation = Person.class)
+  @KindHint("person")
   public static final class Person implements User {
 
     String name = "";
@@ -430,7 +430,7 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  @KindHint(kind = "bot", implementation = Bot.class)
+  @KindHint("bot")
   public static final class Bot implements User {
 
     String id = "";
@@ -445,9 +445,8 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  @KindHint(kind = "admin", implementation = Owner.class)
-  public abstract static non-sealed class Admin implements User {
-
+  @KindHint("admin")
+  public static final class Admin implements User {
     String name = "";
     String employeeId = "";
 
@@ -469,10 +468,6 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  public static final class Owner extends Admin {
-
-  }
-
   // Missing annotation
   public static final class InvalidLeafType implements User {
 
@@ -490,12 +485,12 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  @KindHint(kind = "cat", implementation = Cat.class)
+  @KindHint("cat")
   public static final class Cat implements Animal {
 
   }
 
-  @KindHint(kind = "dog", implementation = Dog.class)
+  @KindHint("dog")
   public static final class Dog implements Animal {
 
   }
@@ -518,7 +513,7 @@ class SealedTypePlexusConverterTest {
     }
   }
 
-  @KindHint(kind = "broken", implementation = BrokenFromStringImpl.class)
+  @KindHint("broken")
   public static final class BrokenFromStringImpl implements BrokenFromString {
 
   }

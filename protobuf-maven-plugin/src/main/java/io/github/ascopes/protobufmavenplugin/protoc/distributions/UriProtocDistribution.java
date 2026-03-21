@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.net.URI;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 
 /**
  * Model base for a {@code protoc} distribution that is located at a URI.
@@ -27,8 +26,7 @@ import org.immutables.value.Value.Modifiable;
  * @since 5.1.0
  */
 @Immutable
-@KindHint(kind = "url", implementation = UriProtocDistributionBean.class)
-@Modifiable
+@KindHint("url")
 public abstract non-sealed class UriProtocDistribution implements ProtocDistribution {
 
   /**
