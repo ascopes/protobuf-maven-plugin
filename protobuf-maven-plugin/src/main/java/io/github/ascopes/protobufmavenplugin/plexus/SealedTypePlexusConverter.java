@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Named;
-import javax.inject.Singleton;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
@@ -69,8 +69,8 @@ import org.slf4j.LoggerFactory;
  * @since 4.1.0
  */
 @Description("Plexus converter that finds the most appropriate implementation of a sealed type")
+@MojoExecutionScoped
 @Named
-@Singleton
 final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   private static final Logger log = LoggerFactory.getLogger(SealedTypePlexusConverter.class);

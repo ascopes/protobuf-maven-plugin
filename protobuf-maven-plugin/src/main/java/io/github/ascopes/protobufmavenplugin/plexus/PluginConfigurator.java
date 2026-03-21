@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
+import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
 import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
 import org.eclipse.sisu.Description;
@@ -27,12 +27,16 @@ import org.eclipse.sisu.Description;
  * Custom configurator for this Maven plugin which allows us to inject additional converter types
  * to handle parsing parameters, as well as other future bootstrapping concerns.
  *
+ * <p>This is initialized per Mojo execution as some converter components will be associated
+ * with classes in the current classloader realm. Doing this avoids the need for managing class
+ * references via weak references to allow garbage collection of the current classloader.
+ *
  * @author Ashley Scopes
  * @since 3.1.3
  */
 @Description("Configures Plexus to work with this Maven Plugin")
+@MojoExecutionScoped
 @Named(PluginConfigurator.NAME)
-@Singleton
 public class PluginConfigurator extends BasicComponentConfigurator {
 
   public static final String NAME = "protobuf-maven-plugin-configurator";
