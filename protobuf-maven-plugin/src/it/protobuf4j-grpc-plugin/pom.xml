@@ -28,13 +28,31 @@
     <relativePath>../setup/pom.xml</relativePath>
   </parent>
 
-  <groupId>protobuf4j-java-main</groupId>
-  <artifactId>protobuf4j-java-main</artifactId>
+  <groupId>protobuf4j-grpc-plugin</groupId>
+  <artifactId>protobuf4j-grpc-plugin</artifactId>
 
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-protobuf</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-netty</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-stub</artifactId>
       <scope>compile</scope>
     </dependency>
 
@@ -62,6 +80,14 @@
         <artifactId>@project.artifactId@</artifactId>
 
         <configuration>
+          <plugins>
+            <plugin kind="binary-maven">
+              <groupId>io.grpc</groupId>
+              <artifactId>protoc-gen-grpc-java</artifactId>
+              <version>${grpc.version}</version>
+            </plugin>
+          </plugins>
+
           <protoc kind="jvm-maven">
             <groupId>io.roastedroot</groupId>
             <artifactId>protobuf4j-v4</artifactId>
