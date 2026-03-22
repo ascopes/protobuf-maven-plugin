@@ -26,6 +26,7 @@ import java.net.URI;
  */
 public sealed interface ProtocDistribution
     permits BinaryMavenProtocDistribution,
+            JvmMavenProtocDistribution,
             PathProtocDistribution,
             UriProtocDistribution {
 

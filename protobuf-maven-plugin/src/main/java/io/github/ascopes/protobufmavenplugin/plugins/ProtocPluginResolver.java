@@ -236,7 +236,7 @@ public final class ProtocPluginResolver {
       var id = computeId(dependencies.get(0), index);
 
       var app = ImmutableJavaApp.builder()
-          .addAllDependencies(dependencies)
+          .dependencies(dependencies)
           .jvmArgs(plugin.getJvmArgs())
           .jvmConfigArgs(plugin.getJvmConfigArgs())
           .mainClass(plugin.getMainClass())

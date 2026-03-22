@@ -25,6 +25,7 @@ import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.module.FindException;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
 import java.nio.charset.Charset;
@@ -232,16 +233,27 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
     // discard this and use some other method (e.g. reading the manifest
     // for Automatic-Module-Name, and checking for the presence of a
     // module-info.class in the root and in META-INF/versions child directories).
-    return ModuleFinder.of(paths.toArray(Path[]::new))
-        .findAll()
-        .stream()
-        .map(ModuleReference::location)
-        .flatMap(Optional::stream)
-        .map(Path::of)
-        .map(FileUtils::normalize)
-        // Sort as the order of output is arbitrary, and this ensures reproducible builds.
-        .sorted(Comparator.comparing(Path::toString))
-        .toList();
+
+    try {
+      return ModuleFinder.of(paths.toArray(Path[]::new))
+          .findAll()
+          .stream()
+          .map(ModuleReference::location)
+          .flatMap(Optional::stream)
+          .map(Path::of)
+          .map(FileUtils::normalize)
+          // Sort as the order of output is arbitrary, and this ensures reproducible builds.
+          .sorted(Comparator.comparing(Path::toString))
+          .toList();
+    } catch (FindException ex) {
+      // Do not choke on an invalid module path.
+      log.debug(
+          "Failed to compute module path for {}. Classpath resolution will be used instead.",
+          paths,
+          ex
+      );
+      return List.of();
+    }
   }
 
   private Path writePosixScripts(

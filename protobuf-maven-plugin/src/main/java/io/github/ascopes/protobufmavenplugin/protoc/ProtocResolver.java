@@ -15,11 +15,15 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc;
 
+import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.java.ImmutableJavaApp;
+import io.github.ascopes.protobufmavenplugin.java.JavaAppToExecutableFactory;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.BinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ImmutableBinaryMavenProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.protoc.distributions.JvmMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.PathProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.UriProtocDistribution;
@@ -30,7 +34,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -49,6 +55,7 @@ public final class ProtocResolver {
 
   private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
+  private final JavaAppToExecutableFactory javaAppToExecutableFactory;
   private final SystemPathBinaryResolver systemPathResolver;
   private final UriResourceFetcher urlResourceFetcher;
 
@@ -56,11 +63,13 @@ public final class ProtocResolver {
   public ProtocResolver(
       MavenArtifactPathResolver artifactPathResolver,
       PlatformClassifierFactory platformClassifierFactory,
+      JavaAppToExecutableFactory javaAppToExecutableFactory,
       SystemPathBinaryResolver systemPathResolver,
       UriResourceFetcher urlResourceFetcher
   ) {
     this.artifactPathResolver = artifactPathResolver;
     this.platformClassifierFactory = platformClassifierFactory;
+    this.javaAppToExecutableFactory = javaAppToExecutableFactory;
     this.systemPathResolver = systemPathResolver;
     this.urlResourceFetcher = urlResourceFetcher;
   }
@@ -71,12 +80,14 @@ public final class ProtocResolver {
   ) throws ResolutionException {
     Optional<Path> path;
 
-    if (distribution instanceof BinaryMavenProtocDistribution bmpd) {
-      path = resolveBinaryMavenDistribution(bmpd);
-    } else if (distribution instanceof PathProtocDistribution ppd) {
-      path = resolvePathDistribution(ppd);
-    } else if (distribution instanceof UriProtocDistribution upd) {
-      path = resolveUriDistribution(upd);
+    if (distribution instanceof BinaryMavenProtocDistribution impl) {
+      path = resolveBinaryMavenDistribution(impl);
+    } else if (distribution instanceof JvmMavenProtocDistribution impl) {
+      path = resolveJvmMavenProtocDistribution(impl);
+    } else if (distribution instanceof PathProtocDistribution impl) {
+      path = resolvePathDistribution(impl);
+    } else if (distribution instanceof UriProtocDistribution impl) {
+      path = resolveUriDistribution(impl);
     } else {
       throw new UnsupportedOperationException("unsupported distribution " + distribution);
     }
@@ -113,6 +124,30 @@ public final class ProtocResolver {
     }
 
     return Optional.of(artifactPathResolver.resolveArtifact(distribution));
+  }
+
+  private Optional<Path> resolveJvmMavenProtocDistribution(
+      JvmMavenProtocDistribution distribution
+  ) throws ResolutionException {
+    var dependencies = artifactPathResolver
+        .resolveDependencies(
+            List.of(distribution),
+            DependencyResolutionDepth.TRANSITIVE,
+            Set.of("compile", "runtime", "system"),
+            false
+        )
+        .stream()
+        .toList();
+
+    var javaApp = ImmutableJavaApp.builder()
+        .dependencies(dependencies)
+        .mainClass(distribution.getMainClass())
+        .jvmArgs(distribution.getJvmArgs())
+        .jvmConfigArgs(distribution.getJvmConfigArgs())
+        .uniqueName("protoc")
+        .build();
+
+    return Optional.of(javaAppToExecutableFactory.toExecutable(javaApp));
   }
 
   private Optional<Path> resolveUriDistribution(
