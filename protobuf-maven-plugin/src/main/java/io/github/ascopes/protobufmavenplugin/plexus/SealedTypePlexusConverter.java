@@ -25,7 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors; 
 import java.util.stream.Stream;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -78,7 +79,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
   private final Map<Class<?>, KindMapping<?>> kindMappings;
 
   SealedTypePlexusConverter() {
-    kindMappings = new HashMap<>();
+    kindMappings = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -204,7 +205,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         .collect(Collectors.joining(", "));
   }
 
-  private synchronized KindMapping<?> getKindMappingFor(Class<?> base) {
+  private KindMapping<?> getKindMappingFor(Class<?> base) {
     return kindMappings.computeIfAbsent(base, SealedTypePlexusConverter::computeKindMappingFor);
   }
 
@@ -279,9 +280,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
       Class<T> base,
       Map<String, Class<? extends T>> kinds,
       @Nullable FromStringHandle<T> fromStringHandle
-  ) {
-
-  }
+  ) {}
 
   @FunctionalInterface
   private interface FromStringHandle<T> {
