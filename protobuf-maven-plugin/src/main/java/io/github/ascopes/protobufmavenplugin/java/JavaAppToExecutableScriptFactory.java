@@ -273,7 +273,8 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
       quoteShellArg(writer, javaExecutable.toString());
       writer.append(' ');
       quoteShellArg(writer, "@" + argumentFile);
-      writer.append('\n');
+      // Include any passed commandline arguments.
+      writer.append(" \"$@\"\n");
     });
 
     return script;
@@ -292,7 +293,9 @@ final class JavaAppToExecutableScriptFactory implements JavaAppToExecutableFacto
       quoteBatchArg(writer, javaExecutable.toString());
       writer.append(" ");
       quoteBatchArg(writer, "@" + argumentFile);
-      writer.append("\r\n");
+      // Include any passed commandline arguments.
+      // We apparently should not quote this string in batch scripts.
+      writer.append(" %*\r\n");
     });
 
     return script;
