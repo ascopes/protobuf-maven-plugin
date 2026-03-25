@@ -142,12 +142,16 @@ directly:
     <protoc kind="url">
       <url>ftp://company-server.internal/protoc/protoc.exe</url>
     </protoc>
+
     <!-- or -->
-    <protoc>
+
+    <protoc kind="url">
       <url>http://company-server.internal/protoc/protoc.exe</url>
     </protoc>
+
     <!-- or -->
-    <protoc>
+
+    <protoc kind="url">
       <url>https://company-server.internal/protoc/protoc.exe</url>
     </protoc>
   </configuration>
