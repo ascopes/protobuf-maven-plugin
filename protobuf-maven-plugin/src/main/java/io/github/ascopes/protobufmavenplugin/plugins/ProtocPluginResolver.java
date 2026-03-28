@@ -111,6 +111,9 @@ public final class ProtocPluginResolver {
       int index
   ) {
     return concurrentExecutor.submit(() -> {
+      if (plugin.isSkip()) {
+        return Optional.empty();
+      }
       if (plugin instanceof BinaryMavenProtocPlugin pluginImpl) {
         return resolveBinaryMavenPlugin(pluginImpl, defaultOutputDirectory, index);
       } else if (plugin instanceof PathProtocPlugin pluginImpl) {
