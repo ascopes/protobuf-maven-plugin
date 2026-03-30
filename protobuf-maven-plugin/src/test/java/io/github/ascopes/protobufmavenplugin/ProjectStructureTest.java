@@ -77,7 +77,9 @@ class ProjectStructureTest {
             .forEach(cls -> {
               var isOk = cls.isAnnotationPresent(javax.inject.Singleton.class)
                   ^ cls.isAnnotationPresent(
-                      org.apache.maven.execution.scope.MojoExecutionScoped.class);
+                      org.apache.maven.execution.scope.MojoExecutionScoped.class)
+                  ^ cls.isAnnotationPresent(
+                    org.apache.maven.SessionScoped.class);
               softly.assertThat(isOk)
                   .withFailMessage(
                       "Expected %s to be annotated with either Singleton or MojoExecutionScoped",
