@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.maven.execution.scope.MojoExecutionScoped;
+import org.apache.maven.SessionScoped;
 import org.codehaus.plexus.component.configurator.BasicComponentConfigurator;
 import org.codehaus.plexus.component.configurator.converters.ConfigurationConverter;
 import org.eclipse.sisu.Description;
@@ -35,7 +35,7 @@ import org.eclipse.sisu.Description;
  * @since 3.1.3
  */
 @Description("Configures Plexus to work with this Maven Plugin")
-@MojoExecutionScoped
+@SessionScoped
 @Named(PluginConfigurator.NAME)
 public class PluginConfigurator extends BasicComponentConfigurator {
 
