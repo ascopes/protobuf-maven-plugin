@@ -86,13 +86,18 @@ public final class ProtocPluginResolver {
 
   public Collection<ResolvedProtocPlugin> resolvePlugins(
       GenerationRequest request
-  ) throws ResolutionException {
+  ) {
     var requestedPlugins = request.getProtocPlugins();
 
     var futures = Stream.<FutureTask<Optional<ResolvedProtocPlugin>>>builder();
     for (var index = 0; index < requestedPlugins.size(); ++index) {
+      ProtocPlugin requestedPlugin = requestedPlugins.get(index);
+      if (requestedPlugin.isSkip()) {
+        continue;
+      }
+
       futures.accept(resolvePluginSoon(
-          requestedPlugins.get(index),
+          requestedPlugin,
           request.getOutputDirectory(),
           index
       ));
@@ -111,9 +116,6 @@ public final class ProtocPluginResolver {
       int index
   ) {
     return concurrentExecutor.submit(() -> {
-      if (plugin.isSkip()) {
-        return Optional.empty();
-      }
       if (plugin instanceof BinaryMavenProtocPlugin pluginImpl) {
         return resolveBinaryMavenPlugin(pluginImpl, defaultOutputDirectory, index);
       } else if (plugin instanceof PathProtocPlugin pluginImpl) {
