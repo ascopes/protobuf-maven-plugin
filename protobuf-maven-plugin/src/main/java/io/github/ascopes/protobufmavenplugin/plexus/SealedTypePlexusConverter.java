@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
+import io.github.ascopes.protobufmavenplugin.utils.AnnotationProxy;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors; 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
@@ -236,18 +237,16 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
           queue.push(permittedSubtype.asSubclass(base));
         }
       } else {
-        var kind = next.getAnnotation(KindHint.class);
-
-        if (kind != null) {
-          log.trace(
-              "Found concrete kind for base \"{}\": \"{}\" will map to \"{}\"",
-              base.getName(),
-              kind.kind(),
-              kind.implementation().getName()
-          );
-
-          mapping.put(kind.kind(), kind.implementation().asSubclass(base));
-        }
+        AnnotationProxy.findAnnotation(KindHint.class, next)
+            .ifPresent(kind -> {
+              log.trace(
+                  "Found concrete kind for base \"{}\": \"{}\" will map to \"{}\"",
+                  base.getName(),
+                  kind.kind(),
+                  kind.implementation().getName()
+              );
+              mapping.put(kind.kind(), kind.implementation().asSubclass(base));
+            });
       }
     }
 
@@ -256,7 +255,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   private static <T> Optional<FromStringHandle<T>> discoverFromStringFor(Class<T> base) {
     return Stream.of(base.getDeclaredMethods())
-        .filter(m -> m.isAnnotationPresent(FromString.class))
+        .filter(m -> AnnotationProxy.findAnnotation(FromString.class, m).isPresent())
         .map(m -> handleFromMethod(base, m))
         .peek(m -> log.debug("found @FromString method {} on {}", m, base.getName()))
         .findFirst();
