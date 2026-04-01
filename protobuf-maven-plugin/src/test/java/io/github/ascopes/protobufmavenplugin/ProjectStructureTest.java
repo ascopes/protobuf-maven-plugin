@@ -119,3 +119,4 @@ class ProjectStructureTest {
         .resolve("java");
   }
 }
+
