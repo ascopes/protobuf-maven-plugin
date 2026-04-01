@@ -26,11 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Named;
-import org.apache.maven.execution.scope.MojoExecutionScoped;
+import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.ConfigurationListener;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
@@ -52,8 +51,7 @@ import org.slf4j.LoggerFactory;
  * first look for a "kind" attribute on the Plexus XML configuration that provides us an instruction
  * for which type to consume. If this attribute is not present, an exception is raised back to the
  * user instructing them to provide a valid attribute. If found, we will then recursively find all
- * non-sealed implementations of the sealed type that use the {@link KindHint} annotation, storing
- * them in a mapping.
+ * non-sealed implementations of the sealed type that use the {@link KindHint} annotation.
  *
  * <p>If the user-provided kind matches a known kind from our indexing operation, we will use that
  * as the implementation class and look for a concrete converter from the ConverterLookup we have
@@ -65,23 +63,20 @@ import org.slf4j.LoggerFactory;
  * base type, this method will be invoked to convert a Plexus string value into an instance of the
  * base type.
  *
+ * <p>This does not cache any information, making it safe to life outside the scope of a single
+ * Mojo execution, and free from the effects of crossing-over classloaders.
+ *
  * <p>This is threadsafe.
  *
  * @author Ashley Scopes
  * @since 4.1.0
  */
 @Description("Plexus converter that finds the most appropriate implementation of a sealed type")
-@MojoExecutionScoped
 @Named
+@Singleton
 final class SealedTypePlexusConverter extends AbstractBasicConverter {
 
   private static final Logger log = LoggerFactory.getLogger(SealedTypePlexusConverter.class);
-
-  private final Map<Class<?>, KindMapping<?>> kindMappings;
-
-  SealedTypePlexusConverter() {
-    kindMappings = new ConcurrentHashMap<>();
-  }
 
   @Override
   public boolean canConvert(Class<?> type) {
@@ -130,11 +125,9 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
       // failure as injecting a string value directly into an object instance leads to it trying
       // to call a non-existent `public static T set(String value)`. Remember Maven will MERGE
       // parent and child POM configurations recursively by default, not override them.
-      //
-      // This was 30 minutes of my life I may never get back...
       configuration.setValue(null);
 
-      return fromAttributes(lookup, configuration, type, evaluator, listener, kind, kindMapping);
+      return fromAttributes(lookup, configuration, evaluator, listener, kind, kindMapping);
     }
   }
 
@@ -166,7 +159,6 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
   private Object fromAttributes(
       ConverterLookup lookup,
       PlexusConfiguration configuration,
-      Class<?> type,
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener,
       @Nullable String kind,
@@ -175,14 +167,15 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     if (kind == null) {
       throw new ComponentConfigurationException(
           configuration,
-          "Missing \"kind\" attribute. Valid kinds are: " + getValidKindsFor(type)
+          "Missing \"kind\" attribute. Valid kinds are: " + getValidKindsFor(kindMapping)
       );
     }
 
     var impl = Optional.ofNullable(kindMapping.kinds().get(kind))
         .orElseThrow(() -> new ComponentConfigurationException(
             configuration,
-            "Invalid kind \"" + kind + "\" specified. Valid kinds are: " + getValidKindsFor(type)
+            "Invalid kind \"" + kind + "\" specified. Valid kinds are: "
+                 + getValidKindsFor(kindMapping)
         ));
 
     return lookup.lookupConverterForType(impl).fromConfiguration(
@@ -196,9 +189,8 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     );
   }
 
-  private String getValidKindsFor(Class<?> base) {
-    return getKindMappingFor(base)
-        .kinds()
+  private String getValidKindsFor(KindMapping<?> mapping) {
+    return mapping.kinds()
         .keySet()
         .stream()
         .map(kind -> "\"" + kind + "\"")
@@ -206,11 +198,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         .collect(Collectors.joining(", "));
   }
 
-  private KindMapping<?> getKindMappingFor(Class<?> base) {
-    return kindMappings.computeIfAbsent(base, SealedTypePlexusConverter::computeKindMappingFor);
-  }
-
-  private static <T> KindMapping<T> computeKindMappingFor(Class<T> base) {
+  private <T> KindMapping<T> getKindMappingFor(Class<T> base) {
     return new KindMapping<>(
         base,
         discoverKindsFor(base),
