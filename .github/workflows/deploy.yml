@@ -190,7 +190,7 @@ jobs:
 
       - name: Deploy site to GitHub Pages
         if: ${{ ! inputs.dry-run }}
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       # If the deployment failed due to an internal error (e.g. an outage on GitHub),
       # then we may get stuck in a state where we are unable to rerun this step. This
