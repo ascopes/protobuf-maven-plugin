@@ -17,11 +17,9 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.WeakHashMap;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
@@ -42,19 +40,15 @@ import org.jspecify.annotations.Nullable;
  * <strong>and</strong> {@link org.immutables.datatype.Data}, otherwise deserialization will fail at
  * runtime.
  *
+ * <p>This will not store any references to the datatypes, to allow for sharing across classloaders
+ * safely (see GH-974 and GH-976).
+ *
  * @author Ashley Scopes
  * @since TBC
  */
 @Named
 @Singleton
 final class ImmutablesDataPlexusConverter extends AbstractBasicConverter {
-  private final Map<Class<Object>, Datatype<Object>> knownDatatypes;
-
-  ImmutablesDataPlexusConverter() {
-    // Weak hashmap keys will be deregistered upon classloader destruction safely.
-    knownDatatypes = Collections.synchronizedMap(new WeakHashMap<>());
-  }
-
   @Override
   public boolean canConvert(Class<?> cls) {
     return datatypeFor(cls).isPresent();
@@ -79,6 +73,32 @@ final class ImmutablesDataPlexusConverter extends AbstractBasicConverter {
     }
 
     return builder.build();
+  }
+
+  private Optional<Datatype<Object>> datatypeFor(Class<?> cls) {
+    if (cls.isPrimitive() || cls.getClassLoader() == null) {
+      return Optional.empty();
+    }
+
+    var loader = cls.getClassLoader();
+    var outerClsName = cls.getPackageName() + ".Datatypes_" + cls.getSimpleName();
+
+    try {
+      var outerCls = loader.loadClass(outerClsName);
+      var method = outerCls.getMethod("_" + cls.getSimpleName());
+
+      @SuppressWarnings("unchecked")
+      var result = (Datatype<Object>) method.invoke(null);
+
+      return Optional.of(result);
+    } catch (ClassNotFoundException ex) {
+      return Optional.empty();
+    } catch (ReflectiveOperationException ex) {
+      throw new IllegalStateException(
+          "Failed to find datatype for " + cls.getName() + ": " + ex,
+          ex
+      );
+    }
   }
 
   private void consumeChild(
@@ -132,41 +152,6 @@ final class ImmutablesDataPlexusConverter extends AbstractBasicConverter {
           ex
       );
     }
-  }
-
-  private Optional<Datatype<Object>> datatypeFor(Class<?> cls) {
-    if (cls.isPrimitive() || cls.getClassLoader() == null) {
-      return Optional.empty();
-    }
-
-    // Horrible generic voodoo that probably is not safe, but the APIs have conflicting types
-    // and the compiler is not smart enough to help us.
-    @SuppressWarnings("unchecked")
-    var castCls = (Class<Object>) cls;
-
-    var datatype = knownDatatypes.computeIfAbsent(castCls, ignored -> {
-      var loader = cls.getClassLoader();
-      var outerClsName = cls.getPackageName() + ".Datatypes_" + cls.getSimpleName();
-
-      try {
-        var outerCls = loader.loadClass(outerClsName);
-        var method = outerCls.getMethod("_" + cls.getSimpleName());
-
-        @SuppressWarnings("unchecked")
-        var result = (Datatype<Object>) method.invoke(null);
-
-        return result;
-      } catch (ClassNotFoundException ex) {
-        return null;
-      } catch (ReflectiveOperationException ex) {
-        throw new IllegalStateException(
-            "Failed to find datatype for " + cls.getName() + ": " + ex,
-            ex
-        );
-      }
-    });
-
-    return Optional.ofNullable(datatype);
   }
 
   private static Class<?> rawTypeOf(Type type) {
