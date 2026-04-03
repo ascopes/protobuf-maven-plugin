@@ -35,7 +35,7 @@ public final class Unchecked {
       }
       throw new IllegalStateException(
           "Checked exception raised unexpectedly, this is a bug. "
-              + "Exception was: " + ex.toString(),
+              + "Exception was: " + ex,
           ex
       );
     }
