@@ -17,6 +17,8 @@ package io.github.ascopes.protobufmavenplugin.dependencies;
 
 import static java.util.Objects.requireNonNullElse;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 
 
@@ -44,23 +46,16 @@ public abstract class MavenArtifact {
 
   @Override
   public String toString() {
-    var sb = new StringBuilder("mvn");
-    appendFragment(sb, getGroupId());
-    appendFragment(sb, getArtifactId());
-    appendFragment(sb, getVersion());
-    appendFragment(sb, getType());
-    appendFragment(sb, getClassifier());
-
-    // Remove trailing colons with nothing after them.
-    int lastIndex;
-    while ((lastIndex = sb.lastIndexOf(":")) == sb.length() - 1) {
-      sb.deleteCharAt(lastIndex);
-    }
-
-    return sb.toString();
-  }
-
-  private static void appendFragment(StringBuilder sb, @Nullable String fragment) {
-    sb.append(":").append(requireNonNullElse(fragment, ""));
+    return Stream
+        .of(
+            getGroupId(),
+            getArtifactId(),
+            getVersion(),
+            getType(),
+            getClassifier()
+        )
+        .map(s -> requireNonNullElse(s, ""))
+        .collect(Collectors.joining(":", "mvn:", ""))
+        .replaceFirst(":+$", "");
   }
 }
