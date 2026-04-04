@@ -26,8 +26,10 @@ package io.github.ascopes.protobufmavenplugin.utils;
  * @since 5.0.3
  */
 public final class Unchecked {
+
+  @DeadCodeGenerated(reason = "static-only class")
   private Unchecked() {
-    throw new UnsupportedOperationException("static-only class");
+    throw new UnsupportedOperationException();
   }
 
   public static <R> R call(CheckedSupplier<R> supplier) {
