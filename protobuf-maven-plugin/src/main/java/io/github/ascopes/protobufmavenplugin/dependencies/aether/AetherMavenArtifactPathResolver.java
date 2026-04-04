@@ -91,7 +91,10 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       Files.copy(originalPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
       FileUtils.makeExecutable(finalPath);
     } catch (IOException ex) {
-      throw new ResolutionException("Failed to process downloaded artifact " + artifact, ex);
+      throw new ResolutionException(
+          "Failed to process downloaded artifact " + artifact + ": " + ex,
+          ex
+      );
     }
 
     return finalPath;

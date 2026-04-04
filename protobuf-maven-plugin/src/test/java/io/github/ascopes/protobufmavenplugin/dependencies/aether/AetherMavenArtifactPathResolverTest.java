@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -55,6 +56,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mock.Strictness;
@@ -187,6 +189,43 @@ class AetherMavenArtifactPathResolverTest {
     verify(aetherResolver).resolveArtifact(unresolvedArtifact);
     verify(aetherArtifactMapper).mapEclipseArtifactToPath(resolvedArtifact);
     verifyNoMoreInteractions(aetherArtifactMapper, aetherResolver);
+  }
+
+  @DisplayName(".resolveArtifact(...) raises a ResolutionException if an IOException is raised.")
+  @Test
+  void resolveArtifactRaisesResolutionExceptionIfIoExceptionRaised() throws Exception {
+    // Given
+    try (var staticMocked = mockStatic(Files.class, Answers.CALLS_REAL_METHODS)) {
+      var expectedCause = new IOException("bang");
+      staticMocked.when(() -> Files.copy(any(Path.class), any(Path.class), any()))
+          .thenThrow(expectedCause);
+
+      var artifactId = "someArtifactId-" + someBasicString();
+      var inputArtifact = mock(MavenArtifact.class, "SomeArtifact-" + someBasicString());
+      var unresolvedArtifact = mock(Artifact.class);
+      var resolvedArtifact = mock(Artifact.class);
+      var originalPath = Files.writeString(
+          tempDir.resolve("some-artifact.exe"),
+          "Some expected binary content here " + someBasicString()
+      );
+
+      when(inputArtifact.getArtifactId())
+          .thenReturn(artifactId);
+      when(aetherArtifactMapper.mapPmpArtifactToEclipseArtifact(any()))
+          .thenReturn(unresolvedArtifact);
+      when(aetherResolver.resolveArtifact(any()))
+          .thenReturn(resolvedArtifact);
+      when(aetherArtifactMapper.mapEclipseArtifactToPath(any()))
+          .thenReturn(originalPath);
+
+      // Then
+      assertThatExceptionOfType(ResolutionException.class)
+          .isThrownBy(() -> resolver.resolveArtifact(inputArtifact))
+          .withMessage(
+              "Failed to process downloaded artifact %s: %s", inputArtifact, expectedCause
+          )
+          .withCause(expectedCause);
+    }
   }
 
   @DisplayName("resolveDependencies(...) without project artifacts resolves the dependencies")
@@ -556,6 +595,7 @@ class AetherMavenArtifactPathResolverTest {
     // Hack to include the stubbing location in the call site to make debugging tests a bit
     // less hellish.
     class StubLocation extends RuntimeException {
+
       @Override
       public String getMessage() {
         return "stub location was:";
