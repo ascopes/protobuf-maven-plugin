@@ -43,8 +43,9 @@ import org.slf4j.LoggerFactory;
 public final class AnnotationProxy {
   private static final Logger log = LoggerFactory.getLogger(AnnotationProxy.class);
 
+  @DeadCodeGenerated(reason = "static-only class")
   private AnnotationProxy() {
-    throw new UnsupportedOperationException("static-only class");
+    throw new UnsupportedOperationException();
   }
 
   public static <A extends Annotation> Optional<? extends A> findAnnotation(
