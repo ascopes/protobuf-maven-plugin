@@ -30,9 +30,7 @@ import java.net.http.HttpClient.Version;
  * @author Ilja Kanstanczuk
  * @since 3.10.2
  */
-final class HttpUrlStreamHandlerFactory
-    extends AbstractUrlStreamHandlerFactory
-    implements AutoCloseable {
+final class HttpUrlStreamHandlerFactory extends AbstractUrlStreamHandlerFactory {
 
   private final HttpClient client;
 
@@ -43,11 +41,6 @@ final class HttpUrlStreamHandlerFactory
         .followRedirects(Redirect.ALWAYS)
         .version(Version.HTTP_2)
         .build();
-  }
-
-  @Override
-  public void close() {
-    client.close();
   }
 
   @Override
