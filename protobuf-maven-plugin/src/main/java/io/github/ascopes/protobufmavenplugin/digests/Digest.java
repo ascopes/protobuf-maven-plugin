@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.digests;
 
+import io.github.ascopes.protobufmavenplugin.utils.VisibleForTestingOnly;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ public final class Digest {
   private final String algorithm;
   private final byte[] digest;
 
-  // Visible for testing only.
+  @VisibleForTestingOnly
   Digest(String algorithm, byte[] digest) {
     this.algorithm = algorithm;
     this.digest = digest;

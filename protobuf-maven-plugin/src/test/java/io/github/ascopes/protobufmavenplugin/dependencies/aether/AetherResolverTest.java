@@ -242,7 +242,7 @@ class AetherResolverTest {
             request -> assertThat(request.getFilter())
                 .isInstanceOfSatisfying(
                     InclusiveScopeDependencyFilter.class,
-                    f -> assertThat(f.allowedScopes())
+                    f -> assertThat(f.getAllowedScopes())
                         .containsExactlyInAnyOrderElementsOf(scopes)));
   }
 

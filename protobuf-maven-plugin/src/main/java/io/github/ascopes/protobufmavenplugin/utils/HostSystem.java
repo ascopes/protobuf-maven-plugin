@@ -68,7 +68,7 @@ public final class HostSystem {
     );
   }
 
-  // Visible for testing only.
+  @VisibleForTestingOnly
   HostSystem(
       Function<String, Optional<String>> propertyProvider,
       Function<String, Optional<String>> envProvider

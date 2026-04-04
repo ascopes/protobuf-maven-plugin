@@ -52,7 +52,7 @@ public final class ConcurrentExecutor {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentExecutor.class);
 
-  // Visible for testing only.
+  @VisibleForTestingOnly
   final ExecutorService executorService;
 
   @Inject
@@ -125,7 +125,7 @@ public final class ConcurrentExecutor {
     }
   }
 
-  // Visible for testing only.
+  @VisibleForTestingOnly
   static int determineConcurrency(int cpuCount) {
     var defaultConcurrency = Math.min(
         Math.max(
