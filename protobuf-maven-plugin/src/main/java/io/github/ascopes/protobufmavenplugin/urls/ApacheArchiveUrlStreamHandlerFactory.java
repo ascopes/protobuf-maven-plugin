@@ -60,7 +60,7 @@ final class ApacheArchiveUrlStreamHandlerFactory extends AbstractUrlStreamHandle
       );
     }
 
-    // +2 since prefix "!/" is 2 chars long; we don't want to include the first forwardslash.
+    // +2 since prefix "!/" is 2 chars long; we don't want to include the first forward slash.
     var file = rawInnerUri.substring(pathIndex + 2);
     rawInnerUri = rawInnerUri.substring(0, pathIndex);
     var innerUrl = urlFactory.create(URI.create(rawInnerUri));

@@ -203,6 +203,7 @@ public final class ProtobufBuildOrchestrator {
   // or logs a warning and returns a value corresponding to a warning.
   // Used to handle behavior like failing on missing sources, where the user can opt out of the
   // functionality in cases where they expect this.
+  @SuppressWarnings("SameParameterValue")
   private <T> T handleMissingEntity(boolean failOnMissing, String message, T ifFail, T ifWarn) {
     if (failOnMissing) {
       log.error("{}", message);

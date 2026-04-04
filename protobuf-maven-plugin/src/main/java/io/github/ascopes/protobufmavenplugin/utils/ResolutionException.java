@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 public final class ResolutionException extends Exception {
 
   public ResolutionException(String message) {
-    // Do not pass null to this(String, Throwable), as it initialises the exception
+    // Do not pass null to this(String, Throwable), as it initializes the exception
     // cause such that it can no longer be overridden.
     super(message);
   }

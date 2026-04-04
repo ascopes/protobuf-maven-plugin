@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Test;
 
 @DisplayName("DigestException tests")
 class DigestExceptionTest {
-  @DisplayName("the single-arg constructor initialises the exception")
+  @DisplayName("the single-arg constructor initializes the exception")
   @Test
-  void testSingleArgConstructorInitialisesException() {
+  void testSingleArgConstructorinitializesException() {
     // When
     var ex = new DigestException("uh-oh");
 
@@ -34,9 +34,9 @@ class DigestExceptionTest {
         .hasNoCause();
   }
 
-  @DisplayName("the dual-arg constructor initialises the exception")
+  @DisplayName("the dual-arg constructor initializes the exception")
   @Test
-  void testDualArgConstructorInitialisesException() {
+  void testDualArgConstructorinitializesException() {
     // Given
     var cause = new IllegalArgumentException("bang");
 

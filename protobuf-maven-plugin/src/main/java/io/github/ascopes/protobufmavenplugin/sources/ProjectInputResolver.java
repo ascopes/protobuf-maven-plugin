@@ -130,7 +130,7 @@ public final class ProjectInputResolver {
       FileFilter filter
   ) throws ResolutionException {
     // We explicitly do not filter by being a valid proto file for descriptors as we do not use
-    // a physical file system to perform our checks, just string paths, and extensions do not
+    // a physical file system to perform our checks, just string paths. Extensions do not
     // have to be present in the descriptor file names.
 
     var artifactPaths = artifactPathResolver.resolveDependencies(

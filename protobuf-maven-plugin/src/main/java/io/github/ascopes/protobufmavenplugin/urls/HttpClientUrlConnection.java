@@ -46,7 +46,7 @@ final class HttpClientUrlConnection extends URLConnection {
   HttpClientUrlConnection(URL url, HttpClient client) throws URISyntaxException {
     super(url);
     this.client = client;
-    this.request = HttpRequest
+    request = HttpRequest
         .newBuilder()
         .uri(url.toURI())
         .GET()

@@ -30,6 +30,8 @@ import org.jspecify.annotations.Nullable;
  */
 final class HttpRequestException extends IOException {
 
+  private static final int MAX_BODY_LENGTH_IN_ERROR = 500;
+
   private final URI uri;
   private final int statusCode;
   private final @Nullable String correlationId;
@@ -97,7 +99,7 @@ final class HttpRequestException extends IOException {
   }
 
   static HttpRequestException fromHttpResponse(HttpResponse<InputStream> response) {
-    var body = asText(response.body(), 500);
+    var body = asText(response.body());
     var correlationId = extractHeader(response, "Correlation-Id", "X-Correlation-Id");
     var requestId = extractHeader(response, "Request-Id", "X-Request-Id");
 
@@ -112,15 +114,15 @@ final class HttpRequestException extends IOException {
     );
   }
 
-  private static @Nullable String asText(InputStream stream, int maxLength) {
+  private static @Nullable String asText(InputStream stream) {
     if (stream == null) {
       return null;
     }
     try (stream) {
-      var body = stream.readNBytes(maxLength + 1);
+      var body = stream.readNBytes(MAX_BODY_LENGTH_IN_ERROR + 1);
       var text = new String(body, StandardCharsets.UTF_8);
-      if (text.length() > maxLength) {
-        return text.substring(0, maxLength) + "... [truncated]";
+      if (text.length() > MAX_BODY_LENGTH_IN_ERROR) {
+        return text.substring(0, MAX_BODY_LENGTH_IN_ERROR) + "... [truncated]";
       }
       return text;
     } catch (Exception e) {
