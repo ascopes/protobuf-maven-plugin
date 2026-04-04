@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -84,6 +85,16 @@ public final class UrlFactory {
         ),
         new HttpUrlStreamHandlerFactory()
     );
+  }
+
+  @PreDestroy
+  void destroy() throws Exception {
+    // Tidy up any resources in factories that are applicable.
+    for (var factory : requireNonNull(urlStreamHandlerFactories)) {
+      if (factory instanceof AutoCloseable closable) {
+        closable.close();
+      }
+    }
   }
 
   public URL create(URI uri) throws IOException {
