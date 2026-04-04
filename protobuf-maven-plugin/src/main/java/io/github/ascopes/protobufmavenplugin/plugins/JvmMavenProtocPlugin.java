@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import java.util.List;
 import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
@@ -47,7 +48,7 @@ public abstract non-sealed class JvmMavenProtocPlugin
   // Null if unset or inferred from MANIFEST.MF.
   public abstract @Nullable String getMainClass();
 
-  // Must be provided to keep immutables happy.
+  @DeadCodeGenerated(reason = "Must be provided to keep immutables happy.")
   @Override
   public String toString() {
     return super.toString();

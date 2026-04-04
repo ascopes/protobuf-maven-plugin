@@ -26,9 +26,6 @@ import org.eclipse.aether.artifact.ArtifactType;
  */
 final class FallbackEclipseArtifactType implements ArtifactType {
 
-  private static final Map<String, String> NO_PROPERTIES = Map.of();
-  private static final String NO_CLASSIFIER = "";
-
   private final String dependencyExtension;
 
   FallbackEclipseArtifactType(String dependencyExtension) {
@@ -47,11 +44,11 @@ final class FallbackEclipseArtifactType implements ArtifactType {
 
   @Override
   public String getClassifier() {
-    return NO_CLASSIFIER;
+    return "";
   }
 
   @Override
   public Map<String, String> getProperties() {
-    return NO_PROPERTIES;
+    return Map.of();
   }
 }

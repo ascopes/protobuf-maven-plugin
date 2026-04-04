@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -52,8 +53,9 @@ public final class FileUtils {
 
   private static final Logger log = LoggerFactory.getLogger(FileUtils.class);
 
+  @DeadCodeGenerated(reason = "static-only class.")
   private FileUtils() {
-    // Static-only class
+    throw new UnsupportedOperationException();
   }
 
   public static Path normalize(Path path) {
@@ -177,7 +179,7 @@ public final class FileUtils {
     // Compared to checking if (!Files.exists(path)) first, this reduces the
     // risk of other file-system based race conditions.
     try {
-      Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+      Files.walkFileTree(path, new SimpleFileVisitor<>() {
         @Override
         public FileVisitResult visitFile(
             Path file,

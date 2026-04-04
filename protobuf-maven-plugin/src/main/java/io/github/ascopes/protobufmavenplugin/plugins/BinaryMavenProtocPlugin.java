@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
 
@@ -35,4 +36,9 @@ public abstract non-sealed class BinaryMavenProtocPlugin
     extends MavenArtifact
     implements ProtocPlugin {
 
+  @DeadCodeGenerated(reason = "Must be provided to keep immutables happy.")
+  @Override
+  public String toString() {
+    return super.toString();
+  }
 }

@@ -102,7 +102,7 @@ these sources will not be compiled alongside your project, only imported. The ex
 that any dependencies being used in this way will also have the corresponding class files bundled
 (like how `protobuf-java` is packaged).
 
-The idea here is that the behaviour for imports should almost exactly mimic how Java dependencies
+The idea here is that the behavior for imports should almost exactly mimic how Java dependencies
 work and how they are resolved on the classpath.
 
 It is important to note that by default, only dependencies with the `compile`, `provided`, `system`

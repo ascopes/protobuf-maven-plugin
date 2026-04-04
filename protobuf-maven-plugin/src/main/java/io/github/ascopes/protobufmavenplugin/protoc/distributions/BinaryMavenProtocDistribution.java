@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
@@ -62,6 +63,7 @@ public abstract non-sealed class BinaryMavenProtocDistribution
   }
 
   // Must be provided to keep immutables happy.
+  @DeadCodeGenerated(reason = "Must be provided to keep immutables happy.")
   @Override
   public String toString() {
     return super.toString();

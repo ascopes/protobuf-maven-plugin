@@ -19,39 +19,21 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.graph.DependencyNode;
-import org.jspecify.annotations.Nullable;
+import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 
 /**
- * Implementation of a subset of functionality within
- * {@link org.eclipse.aether.util.filter.ScopeDependencyFilter} that is easier to unit test.
+ * Implementation of a subset of functionality within {@link ScopeDependencyFilter} that is easier
+ * to unit test.
  *
+ * @param allowedScopes Visible for testing only.
  * @author Ashley Scopes
  * @since 5.0.2
  */
-final class InclusiveScopeDependencyFilter implements DependencyFilter {
-
-  // Visible for testing only.
-  private final Set<String> allowedScopes;
-
-  InclusiveScopeDependencyFilter(Set<String> allowedScopes) {
-    this.allowedScopes = allowedScopes;
-  }
+record InclusiveScopeDependencyFilter(Set<String> allowedScopes) implements DependencyFilter {
 
   @Override
   public boolean accept(DependencyNode node, List<DependencyNode> parents) {
     var dependency = node.getDependency();
     return dependency != null && allowedScopes.contains(dependency.getScope());
-  }
-
-  // For testing only.
-  @Override
-  public boolean equals(@Nullable Object obj) {
-    return obj instanceof InclusiveScopeDependencyFilter self
-        && self.allowedScopes.equals(allowedScopes);
-  }
-
-  @Override
-  public int hashCode() {
-    return allowedScopes.hashCode();
   }
 }

@@ -21,8 +21,10 @@ package io.github.ascopes.protobufmavenplugin.utils;
  * @author Ashley Scopes
  */
 public final class StringUtils {
+
+  @DeadCodeGenerated(reason = "static-only class")
   private StringUtils() {
-    // Static-only class.
+    throw new UnsupportedOperationException();
   }
 
   public static String pluralize(long quantity, String singular) {

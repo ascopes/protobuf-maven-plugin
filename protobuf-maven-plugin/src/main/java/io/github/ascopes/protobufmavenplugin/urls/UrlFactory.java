@@ -51,7 +51,7 @@ import org.jspecify.annotations.Nullable;
 @Named
 public final class UrlFactory {
 
-  // late-initialised to avoid circular dependency problems.
+  // late-initialized to avoid circular dependency problems.
   private @Nullable List<URLStreamHandlerFactory> urlStreamHandlerFactories;
 
   @PostConstruct

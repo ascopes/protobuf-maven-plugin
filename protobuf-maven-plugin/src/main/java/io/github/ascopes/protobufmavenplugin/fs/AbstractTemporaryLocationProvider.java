@@ -15,10 +15,11 @@
  */
 package io.github.ascopes.protobufmavenplugin.fs;
 
+import static java.util.Objects.requireNonNullElse;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import org.apache.maven.plugin.MojoExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,20 +45,11 @@ public abstract class AbstractTemporaryLocationProvider {
   protected Path resolveAndCreateDirectory(Path basePath, String... bits) throws IOException {
     // GH-488: Execution ID and goal can potentially be null, e.g. in Quarkus dev mode, so
     // default to a semi-sensible value to prevent a NullPointerException.
-    var goal = Objects.requireNonNullElse(
-        mojoExecution.getGoal(),
-        "unknown-goal"
-    );
-    var executionId = Objects.requireNonNullElse(
-        mojoExecution.getExecutionId(),
-        "unknown-execution-id"
-    );
-
     var dir = basePath.resolve(FRAG)
         // GH-421: Include the execution ID and goal to keep file paths unique
         // between invocations in multiple goals.
-        .resolve(goal)
-        .resolve(executionId);
+        .resolve(requireNonNullElse(mojoExecution.getGoal(), "unknown-goal"))
+        .resolve(requireNonNullElse(mojoExecution.getExecutionId(), "unknown-execution-id"));
 
     for (var bit : bits) {
       dir = dir.resolve(bit);

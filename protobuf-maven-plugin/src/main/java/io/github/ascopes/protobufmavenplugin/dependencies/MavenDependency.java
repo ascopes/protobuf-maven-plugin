@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import java.util.Set;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
@@ -35,7 +36,7 @@ public abstract class MavenDependency extends MavenArtifact {
 
   public abstract Set<MavenExclusionBean> getExclusions();
 
-  // Must be overridden to keep immutables happy.
+  @DeadCodeGenerated(reason = "Must be overridden to keep immutables happy.")
   @Override
   public String toString() {
     return super.toString();

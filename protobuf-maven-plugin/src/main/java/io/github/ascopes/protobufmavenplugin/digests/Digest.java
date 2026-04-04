@@ -41,10 +41,6 @@ public final class Digest {
     this.digest = digest;
   }
 
-  public String getAlgorithm() {
-    return algorithm;
-  }
-
   public byte[] getDigest() {
     return digest;
   }
@@ -86,7 +82,7 @@ public final class Digest {
 
   public static Digest from(String algorithm, String hex) {
     // Validate the algorithm exists in this JVM, and
-    // de-alias it. We could possibly optimise this in the future
+    // de-alias it. We could possibly optimize this in the future
     // to check the length/2 before decoding.
     var messageDigest = getMessageDigest(algorithm);
     var data = decodeHex(hex);

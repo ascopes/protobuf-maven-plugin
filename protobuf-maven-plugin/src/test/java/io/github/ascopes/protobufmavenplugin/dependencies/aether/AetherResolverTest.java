@@ -240,8 +240,10 @@ class AetherResolverTest {
             request -> assertThat(request.getCollectRequest().getRepositories())
                 .isEqualTo(expectedRemoteRepositories),
             request -> assertThat(request.getFilter())
-                .isEqualTo(new InclusiveScopeDependencyFilter(scopes))
-        );
+                .isInstanceOfSatisfying(
+                    InclusiveScopeDependencyFilter.class,
+                    f -> assertThat(f.allowedScopes())
+                        .containsExactlyInAnyOrderElementsOf(scopes)));
   }
 
   @DisplayName(

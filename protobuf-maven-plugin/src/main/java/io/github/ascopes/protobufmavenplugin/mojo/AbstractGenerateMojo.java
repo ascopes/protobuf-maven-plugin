@@ -91,7 +91,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    * covered by other configuration parameters in this goal.
    *
    * <p>Configuring arguments that are covered by other parameters in this goal is undefined
-   * behaviour and should be avoided.
+   * behavior and should be avoided.
    *
    * <p>Example:
    * <pre>{@code
@@ -171,7 +171,7 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Additional environment variables to pass to the {@code protoc} subprocess.
    *
-   * <p>This can be used to override some internal behaviours within {@code protoc} or any
+   * <p>This can be used to override some internal behaviors within {@code protoc} or any
    * associated {@code protoc} plugins during execution.
    *
    * <p>By default, any environment variables made visible to Maven will be passed to

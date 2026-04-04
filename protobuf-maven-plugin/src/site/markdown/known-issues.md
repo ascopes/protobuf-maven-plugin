@@ -22,7 +22,7 @@ Prior to v5.0.1, an issue was present as tracked by
 observe the JVM exhausting heap memory during dependency resolution.
 
 This issue was previously closed due to being unable to reproduce the conditions that trigger
-this behaviour. Changes introduced after this issue was raised appeared to make the issue go away.
+this behavior. Changes introduced after this issue was raised appeared to make the issue go away.
 
 As a side effect of certain changes to the artifact resolution lifecycle in
 [GH-938](https://github.com/ascopes/protobuf-maven-plugin/issues/938), this issue was re-identified,

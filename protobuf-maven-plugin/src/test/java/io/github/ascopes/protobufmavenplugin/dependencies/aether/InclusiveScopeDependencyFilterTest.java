@@ -82,34 +82,4 @@ class InclusiveScopeDependencyFilterTest {
     // Then
     assertThat(result).isFalse();
   }
-
-  @SuppressWarnings("EqualsWithItself")
-  @DisplayName(".equals(Object) returns the expected results")
-  @Test
-  void equalsObjectReturnsExpectedResults() {
-    // Given
-    var filter1 = new InclusiveScopeDependencyFilter(Set.of("foo", "bar"));
-    var filter2 = new InclusiveScopeDependencyFilter(Set.of());
-    var filter3 = new InclusiveScopeDependencyFilter(Set.of("foo", "bar"));
-
-    // Then
-    assertThat(filter1.equals(filter1)).isTrue();
-    assertThat(filter2).isNotEqualTo(filter1);
-    assertThat(filter3).isEqualTo(filter1);
-    assertThat(filter1).isNotEqualTo(null);
-  }
-
-  @DisplayName(".hashCode() returns the expected results")
-  @Test
-  void hashCodeReturnsExpectedResults() {
-    // Given
-    var filter1 = new InclusiveScopeDependencyFilter(Set.of("foo", "bar"));
-    var filter2 = new InclusiveScopeDependencyFilter(Set.of());
-    var filter3 = new InclusiveScopeDependencyFilter(Set.of("foo", "bar"));
-
-    // Then
-    assertThat(filter1).hasSameHashCodeAs(filter1);
-    assertThat(filter2).doesNotHaveSameHashCodeAs(filter1);
-    assertThat(filter3).hasSameHashCodeAs(filter1);
-  }
 }

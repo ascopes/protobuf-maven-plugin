@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.dependencies.aether;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenExclusion;
 import org.eclipse.aether.collection.DependencyCollectionContext;
 import org.eclipse.aether.collection.DependencyTraverser;
 import org.eclipse.aether.graph.Dependency;
@@ -30,7 +31,12 @@ import org.eclipse.aether.graph.Exclusion;
  */
 final class WildcardAwareDependencyTraverser implements DependencyTraverser {
 
-  static Exclusion WILDCARD_EXCLUSION = new Exclusion("*", "*", "*", "*");
+  static Exclusion WILDCARD_EXCLUSION = new Exclusion(
+      MavenExclusion.WILDCARD,
+      MavenExclusion.WILDCARD,
+      MavenExclusion.WILDCARD,
+      MavenExclusion.WILDCARD
+  );
 
   @Override
   public boolean traverseDependency(Dependency dependency) {

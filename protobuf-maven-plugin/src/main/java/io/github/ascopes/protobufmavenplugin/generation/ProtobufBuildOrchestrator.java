@@ -201,7 +201,7 @@ public final class ProtobufBuildOrchestrator {
 
   // Helper that either logs an error and returns some value corresponding to an error,
   // or logs a warning and returns a value corresponding to a warning.
-  // Used to handle behaviour like failing on missing sources, where the user can opt out of the
+  // Used to handle behavior like failing on missing sources, where the user can opt out of the
   // functionality in cases where they expect this.
   private <T> T handleMissingEntity(boolean failOnMissing, String message, T ifFail, T ifWarn) {
     if (failOnMissing) {
@@ -264,7 +264,7 @@ public final class ProtobufBuildOrchestrator {
                 .filter(dir -> request.isRegisterAsCompilationRoot()),
 
             // Custom output directories for plugins, if we explicitly allow them to be used as
-            // compilation roots, or if we do not override the behaviour and the project default is
+            // compilation roots, or if we do not override the behavior and the project default is
             // to use them as compilation roots anyway.
             resolvedProtocPlugins.stream()
                 .filter(plugin -> plugin.getRegisterAsCompilationRoot()
@@ -322,7 +322,7 @@ public final class ProtobufBuildOrchestrator {
 
     if (request.getOutputDescriptorFile() != null) {
       // Protoc does not selectively update an existing descriptor with differentiated
-      // changes. Using incremental compilation will result in behaviour that is
+      // changes. Using incremental compilation will result in behavior that is
       // inconsistent, so do not allow it here.
       log.warn("Incremental compilation will be disabled since descriptors will be generated");
       return false;
