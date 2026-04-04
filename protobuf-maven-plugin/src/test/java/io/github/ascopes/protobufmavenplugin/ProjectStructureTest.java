@@ -19,8 +19,11 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -75,20 +78,38 @@ class ProjectStructureTest {
             .map(f -> toClass(baseDir(), f))
             .filter(cls -> cls.isAnnotationPresent(javax.inject.Named.class))
             .forEach(cls -> {
-              var isOk = cls.isAnnotationPresent(javax.inject.Singleton.class)
-                  ^ cls.isAnnotationPresent(
-                      org.apache.maven.execution.scope.MojoExecutionScoped.class)
-                  ^ cls.isAnnotationPresent(
-                    org.apache.maven.SessionScoped.class);
-              softly.assertThat(isOk)
-                  .withFailMessage(
-                      "Expected %s to be annotated with either Singleton or MojoExecutionScoped",
-                      cls.getName()
-                  )
-                  .isTrue();
+              if (cls.getPackageName().endsWith(".plexus")) {
+                // Stuff in the Plexus package is sensitive as Plexus will pool objects
+                // outside the lifecycle of the Mojo execution even if we ask it to use
+                // MojoExecutionScoped. This can lead to subtle bugs, especially if we
+                // store any state that references classes.
+                assertAnnotationPresent(
+                    softly,
+                    cls,
+                    javax.inject.Singleton.class
+                );
+                return;
+              }
+
+              assertAnnotationPresent(
+                  softly,
+                  cls,
+                  org.apache.maven.execution.scope.MojoExecutionScoped.class
+              );
             });
       });
     }
+  }
+
+  private void assertAnnotationPresent(
+      SoftAssertions assertions,
+      AnnotatedElement element,
+      Class<? extends Annotation> annotationCls
+  ) {
+    assertions.assertThat(element.isAnnotationPresent(annotationCls))
+        .as("%s", element)
+        .withFailMessage("expected @%s to be present", annotationCls.getName())
+        .isTrue();
   }
 
   private boolean hasChildFiles(Path baseDir) {
@@ -121,3 +142,4 @@ class ProjectStructureTest {
         .resolve("java");
   }
 }
+
