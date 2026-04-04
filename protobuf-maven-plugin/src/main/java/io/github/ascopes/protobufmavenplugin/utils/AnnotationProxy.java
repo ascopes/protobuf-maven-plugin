@@ -44,7 +44,7 @@ public final class AnnotationProxy {
   private static final Logger log = LoggerFactory.getLogger(AnnotationProxy.class);
 
   private AnnotationProxy() {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("static-only class");
   }
 
   public static <A extends Annotation> Optional<? extends A> findAnnotation(
