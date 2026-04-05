@@ -705,7 +705,7 @@
           <!-- Keep everything that is required for publishing to Maven Central
                successfully. This includes the required POM metadata we should be keeping
                for validation to succeed. -->
-          <flattenMode>ossrh</flattenMode>
+          <flattenMode>bom</flattenMode>
         </configuration>
 
         <executions>
