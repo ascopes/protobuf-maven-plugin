@@ -11,6 +11,9 @@ target/
 # JVM agent descriptors
 .attach*
 
+# Flattened POMs
+.flattened-pom.xml
+
 # Version backups after running ./mvnw versions:set
 pom.xml.versionsBackup
 
