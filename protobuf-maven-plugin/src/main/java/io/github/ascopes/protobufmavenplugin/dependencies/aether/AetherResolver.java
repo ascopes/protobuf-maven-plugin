@@ -22,6 +22,7 @@ import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -154,7 +155,7 @@ final class AetherResolver {
       // TODO(ascopes): should we limit the number of things output here?
       var failedGavs = dependencyResult.getArtifactResults().stream()
           .filter(not(ArtifactResult::isResolved))
-          .map(ArtifactResult::getArtifact)
+          .map(result -> Optional.ofNullable(result.getArtifact()).orElseGet(() -> result.getRequest().getArtifact()))
           .map(Artifact::toString)
           .collect(Collectors.joining(", "));
 

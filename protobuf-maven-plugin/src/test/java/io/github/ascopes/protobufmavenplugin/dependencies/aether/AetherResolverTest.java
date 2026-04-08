@@ -334,12 +334,16 @@ class AetherResolverTest {
     var artifactResult3 = mock(ArtifactResult.class);
     var artifactResult4 = mock(ArtifactResult.class);
 
+    var artifactRequest1 = mock(ArtifactRequest.class);
+    
     when(artifactResult1.isResolved()).thenReturn(true);
     when(artifactResult2.isResolved()).thenReturn(false);
     when(artifactResult2.getArtifact()).thenReturn(mock(Artifact.class, "do:ray:me"));
     when(artifactResult3.isResolved()).thenReturn(true);
     when(artifactResult4.isResolved()).thenReturn(false);
-    when(artifactResult4.getArtifact()).thenReturn(mock(Artifact.class, "aaa:bbb:ccc"));
+    when(artifactResult4.getRequest()).thenReturn(artifactRequest1);
+    
+    when(artifactRequest1.getArtifact()).thenReturn(mock(Artifact.class, "aaa:bbb:ccc"));
 
     var expectedOutputArtifactResults = List.of(
         artifactResult1,
