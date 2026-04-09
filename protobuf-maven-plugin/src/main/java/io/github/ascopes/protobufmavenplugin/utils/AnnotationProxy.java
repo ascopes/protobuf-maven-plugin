@@ -81,14 +81,13 @@ public final class AnnotationProxy {
         targetCls.getClassLoader()
     );
 
-    @SuppressWarnings("unchecked")
-    var proxyAnnotation = (A) Unchecked.call(() -> Proxy.newProxyInstance(
+    var proxyAnnotation = Unchecked.call(() -> Proxy.newProxyInstance(
         targetCls.getClassLoader(),
         new Class<?>[]{ targetCls },
         (self, method, args) -> sourceCls.getMethod(method.getName())
             .invoke(annotation, args)
     ));
 
-    return proxyAnnotation;
+    return targetCls.cast(proxyAnnotation);
   }
 }
