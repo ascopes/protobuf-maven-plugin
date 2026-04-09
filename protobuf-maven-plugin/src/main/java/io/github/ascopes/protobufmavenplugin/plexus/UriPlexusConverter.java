@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.inject.Named;
-import org.apache.maven.execution.scope.MojoExecutionScoped;
+import javax.inject.Singleton;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasicConverter;
 import org.eclipse.sisu.Description;
@@ -44,8 +44,8 @@ import org.eclipse.sisu.Description;
  * @since 3.1.3
  */
 @Description("A polyfill for Maven <3.9.8 to support parsing URI objects")
-@MojoExecutionScoped
 @Named
+@Singleton
 final class UriPlexusConverter extends AbstractBasicConverter {
 
   @Override
