@@ -19,6 +19,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Proxy;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,24 +53,15 @@ public final class AnnotationProxy {
       Class<A> annotationCls,
       AnnotatedElement element
   ) {
-    return Optional.ofNullable(element.getAnnotation(annotationCls))
-        .or(() -> findAndProxyAnnotation(annotationCls, element));
+    return Optional
+        .ofNullable(element.getAnnotation(annotationCls))
+        .or(() -> Stream.of(element.getAnnotations())
+            .filter(hasSameClassNameAs(annotationCls))
+            .findFirst()
+            .map(annotation -> proxy(annotationCls, annotation)));
   }
 
-  private static <A extends Annotation> Optional<? extends A> findAndProxyAnnotation(
-      Class<A> annotationCls,
-      AnnotatedElement element
-  ) {
-    return Stream.of(element.getAnnotations())
-        .filter(annotation -> annotation.annotationType().getName().equals(annotationCls.getName()))
-        .findFirst()
-        .map(annotation -> proxy(annotationCls, annotation));
-  }
-
-  private static <A extends Annotation> A proxy(
-      Class<A> targetCls,
-      Annotation annotation
-  ) {
+  private static <A extends Annotation> A proxy(Class<A> targetCls, Annotation annotation) {
     var sourceCls = annotation.annotationType();
 
     log.debug(
@@ -89,5 +81,12 @@ public final class AnnotationProxy {
     ));
 
     return targetCls.cast(proxyAnnotation);
+  }
+
+  private static Predicate<? super Annotation> hasSameClassNameAs(
+      Class<? extends Annotation> annotationCls
+  ) {
+    return annotation -> annotation.annotationType().getName()
+        .equals(annotationCls.getName());
   }
 }
