@@ -101,24 +101,33 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         return parseFromString(configuration, type, evaluator);
       }
 
-      throw new ComponentConfigurationException(
-          configuration,
-          "Cannot set a string value with a kind attribute."
-      );
-    }
+      if (configuration.getChildCount() > 0) {
+        // If we also merged in a value somewhere, discard it. Don't allow things like
+        //
+        // <protoc kind="binary-maven">
+        //   1.2.3
+        //   <version>4.5.6</version>
+        // </protoc>
+        //
+        // This avoids spewing weird errors because we overrode a string value in the parent
+        // POM with an object in the child POM. Plexus will default to merging these together
+        // directly without discarding one or the other. Right now we cannot easily work out
+        // which takes precedence to do this in a more intelligent way.
+        log.warn(
+            "Both a string value and a nested object value were merged by Maven. To avoid "
+                + "confusing behaviour, the former will be dropped. Fix this by setting "
+                + "the combine.self=\"override\" attribute on the configuration. The merged "
+                + "configuration is:\n{}", configuration
+        );
 
-    // If we also merged in a value somewhere, discard it. Don't allow things like
-    //
-    // <protoc kind="binary-maven">
-    //   1.2.3
-    //   <version>4.5.6</version>
-    // </protoc>
-    //
-    // This avoids spewing weird errors because we overrode a string value in the parent
-    // POM with an object in the child POM. Plexus will default to merging these together
-    // directly without discarding one or the other. Right now we cannot easily work out
-    // which takes precedence to do this in a more intelligent way.
-    configuration.setValue(null);
+        configuration.setValue(null);
+      } else {
+        throw new ComponentConfigurationException(
+            configuration,
+            "Cannot set a string value with a kind attribute."
+        );
+      }
+    }
 
     return parseFromObject(kind, lookup, configuration, type, evaluator, listener);
   }
