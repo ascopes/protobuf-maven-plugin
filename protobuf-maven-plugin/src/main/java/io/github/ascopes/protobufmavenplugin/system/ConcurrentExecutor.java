@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.utils;
+package io.github.ascopes.protobufmavenplugin.system;
 
+import io.github.ascopes.protobufmavenplugin.utils.VisibleForTestingOnly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,9 +58,9 @@ public final class ConcurrentExecutor {
 
   @Inject
   public ConcurrentExecutor() {
-    // Prior to 2.13.0, we used unbounded thread pools, utilising virtual threads when
+    // Prior to 2.13.0, we used unbounded thread pools, utilizing virtual threads when
     // available. This was somewhat risky in hindsight as we could easily load a large
-    // number of things into memory when analysing dependencies and then run
+    // number of things into memory when analyzing dependencies and then run
     // out of heap space to consume.
     //
     // As of 2.13.0, I have removed all of this and reverted to a basic work stealing pool

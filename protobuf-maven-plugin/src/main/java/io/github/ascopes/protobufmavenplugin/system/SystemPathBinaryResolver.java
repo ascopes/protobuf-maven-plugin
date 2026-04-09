@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.utils;
+package io.github.ascopes.protobufmavenplugin.system;
 
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;

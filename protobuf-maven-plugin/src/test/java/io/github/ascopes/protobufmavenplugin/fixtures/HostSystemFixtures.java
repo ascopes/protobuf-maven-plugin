@@ -19,7 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;

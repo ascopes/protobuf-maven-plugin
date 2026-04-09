@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.utils;
+package io.github.ascopes.protobufmavenplugin.system;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -52,7 +52,7 @@ class HostSystemTest {
     var hostSystemBean = newInstance(properties, env);
 
     // Then
-    assertThat(hostSystemBean.getOperatingSystem()).isEqualTo(osName);
+    Assertions.assertThat(hostSystemBean.getOperatingSystem()).isEqualTo(osName);
   }
 
   @DisplayName(".getCpuArchitecture() returns the CPU architecture")
@@ -68,7 +68,7 @@ class HostSystemTest {
     var hostSystemBean = newInstance(properties, env);
 
     // Then
-    assertThat(hostSystemBean.getCpuArchitecture()).isEqualTo(cpuArch);
+    Assertions.assertThat(hostSystemBean.getCpuArchitecture()).isEqualTo(cpuArch);
   }
 
   @DisplayName(".isProbablyLinux() returns true if the OS is probably Linux")
@@ -109,7 +109,7 @@ class HostSystemTest {
     var actualResult = hostSystemBean.isProbablyLinux();
 
     // Then
-    assertThat(actualResult).isEqualTo(expectedResult);
+    Assertions.assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @DisplayName(".isProbablyMacOs() returns true if the OS is probably Mac OS")
@@ -150,7 +150,7 @@ class HostSystemTest {
     var actualResult = hostSystemBean.isProbablyMacOs();
 
     // Then
-    assertThat(actualResult).isEqualTo(expectedResult);
+    Assertions.assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @DisplayName(".isProbablyWindows() returns true if the OS is probably Windows")
@@ -191,7 +191,7 @@ class HostSystemTest {
     var actualResult = hostSystemBean.isProbablyWindows();
 
     // Then
-    assertThat(actualResult).isEqualTo(expectedResult);
+    Assertions.assertThat(actualResult).isEqualTo(expectedResult);
   }
 
   @DisplayName(".getJavaExecutablePath() returns the Java executable")
@@ -220,7 +220,7 @@ class HostSystemTest {
         .toAbsolutePath()
         .normalize();
 
-    assertThat(actualExecutablePath)
+    Assertions.assertThat(actualExecutablePath)
         .isNormalized()
         .isAbsolute()
         .isEqualTo(expectedExecutablePath);
@@ -258,7 +258,7 @@ class HostSystemTest {
 
     // Then
     // Expect only the existing directories, and only in the exact order they were specified.
-    assertThat(actualPath).containsExactly(existingDir1, existingDir2, existingDir3);
+    Assertions.assertThat(actualPath).containsExactly(existingDir1, existingDir2, existingDir3);
   }
 
   // GH-557, if the user has junk in their $PATH, we do not want to crash the plugin.
@@ -289,7 +289,7 @@ class HostSystemTest {
     var actualPath = hostSystemBean.getSystemPath();
 
     // Then
-    assertThat(actualPath).containsExactly(fooDir, barDir, borkDir);
+    Assertions.assertThat(actualPath).containsExactly(fooDir, barDir, borkDir);
   }
 
   @DisplayName(".getPathSeparator() returns the expected platform-specific separator")
@@ -302,7 +302,7 @@ class HostSystemTest {
     var hostSystemBean = newInstance(properties, env);
 
     // Then
-    assertThat(hostSystemBean.getPathSeparator())
+    Assertions.assertThat(hostSystemBean.getPathSeparator())
         .isEqualTo("$!");
   }
 
@@ -318,7 +318,7 @@ class HostSystemTest {
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
 
     // Then
-    assertThat(actualPathExt).isEmpty();
+    Assertions.assertThat(actualPathExt).isEmpty();
   }
 
   @DisplayName(".getSystemPathExtensions() returns the extensions (case insensitive) when set")
@@ -340,7 +340,7 @@ class HostSystemTest {
     var actualPathExt = hostSystemBean.getSystemPathExtensions();
 
     // Then
-    assertThat(actualPathExt)
+    Assertions.assertThat(actualPathExt)
         .hasSize(4)
         .contains(".foo", ".bar", ".baz", ".bork", ".BORK");
   }

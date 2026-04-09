@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.utils;
+package io.github.ascopes.protobufmavenplugin.system;
 
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.linux;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.macOs;
@@ -26,6 +26,7 @@ import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
 import io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures;
 import io.github.ascopes.protobufmavenplugin.fixtures.TestFileSystem;
+import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;

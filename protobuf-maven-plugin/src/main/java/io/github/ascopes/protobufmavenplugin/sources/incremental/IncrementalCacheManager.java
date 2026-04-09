@@ -22,7 +22,7 @@ import io.github.ascopes.protobufmavenplugin.sources.DescriptorListing;
 import io.github.ascopes.protobufmavenplugin.sources.FilesToCompile;
 import io.github.ascopes.protobufmavenplugin.sources.ProjectInputListing;
 import io.github.ascopes.protobufmavenplugin.sources.SourceListing;
-import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
+import io.github.ascopes.protobufmavenplugin.system.ConcurrentExecutor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;

@@ -23,7 +23,7 @@ import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.sources.filter.FileFilter;
-import io.github.ascopes.protobufmavenplugin.utils.ConcurrentExecutor;
+import io.github.ascopes.protobufmavenplugin.system.ConcurrentExecutor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

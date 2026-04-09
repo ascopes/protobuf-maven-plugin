@@ -19,10 +19,10 @@ import static java.util.Objects.requireNonNullElse;
 
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
-import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.ArgumentFileBuilder;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.module.ModuleFinder;

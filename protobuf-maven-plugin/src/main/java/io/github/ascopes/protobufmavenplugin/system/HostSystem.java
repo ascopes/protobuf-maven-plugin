@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.utils;
+package io.github.ascopes.protobufmavenplugin.system;
 
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
+import io.github.ascopes.protobufmavenplugin.utils.VisibleForTestingOnly;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;

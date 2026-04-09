@@ -15,7 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.dependencies;
 
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
 import java.util.Properties;

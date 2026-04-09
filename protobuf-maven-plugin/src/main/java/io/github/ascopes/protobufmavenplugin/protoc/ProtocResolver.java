@@ -23,9 +23,9 @@ import io.github.ascopes.protobufmavenplugin.protoc.distributions.ImmutableBinar
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.PathProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.UriProtocDistribution;
+import io.github.ascopes.protobufmavenplugin.system.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.urls.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import io.github.ascopes.protobufmavenplugin.utils.SystemPathBinaryResolver;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;

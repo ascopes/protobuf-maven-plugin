@@ -21,8 +21,8 @@ import io.github.ascopes.protobufmavenplugin.protoc.targets.LanguageProtocTarget
 import io.github.ascopes.protobufmavenplugin.protoc.targets.PluginProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.ProtocTarget;
 import io.github.ascopes.protobufmavenplugin.protoc.targets.SanctionedExecutableTransformer;
-import io.github.ascopes.protobufmavenplugin.utils.ArgumentFileBuilder;
-import io.github.ascopes.protobufmavenplugin.utils.HostSystem;
+import io.github.ascopes.protobufmavenplugin.system.ArgumentFileBuilder;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.TeeWriter;
 import java.io.IOException;
 import java.io.InterruptedIOException;
