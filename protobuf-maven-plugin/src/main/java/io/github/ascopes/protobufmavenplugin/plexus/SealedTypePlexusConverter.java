@@ -162,8 +162,8 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     var implementation = findRequestedImplementation(type, kind)
         .orElseThrow(() -> new ComponentConfigurationException(
             configuration,
-            "Invalid kind " + StringUtils.quoted(kind)
-                + " specified. Valid kinds are: " + nameValidKinds(type)
+            "Invalid kind \"" + kind
+                + "\" specified. Valid kinds are: " + nameValidKinds(type)
                 + "."
         ));
 
@@ -190,7 +190,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
     return listKindedImplementations(type)
         .map(KindHint::kind)
         .sorted()
-        .map(StringUtils::quoted)
+        .map(s -> "\"" + s + "\"")
         .collect(Collectors.joining(", "));
   }
 

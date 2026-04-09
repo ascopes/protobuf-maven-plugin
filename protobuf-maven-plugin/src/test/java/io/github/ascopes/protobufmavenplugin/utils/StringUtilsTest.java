@@ -16,18 +16,14 @@
 package io.github.ascopes.protobufmavenplugin.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.params.provider.Arguments.argumentSet;
 
-import java.util.stream.Stream;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
 @DisplayName("StringUtils tests")
 class StringUtilsTest {
+
   @DisplayName(".pluralise(int, String) returns the expected results")
   @CsvSource({
       "0, cat, 0 cats",
@@ -67,25 +63,5 @@ class StringUtilsTest {
     // Then
     assertThat(StringUtils.pluralize(quantity, singular, plural))
         .isEqualTo(expected);
-  }
-
-  @DisplayName(".quoted(String) returns the expected value")
-  @MethodSource("quotedCases")
-  @ParameterizedTest(name = "for {argumentSetName}")
-  void quotedReturnsExpectedValue(@Nullable String input, String expectedOutput) {
-    // When
-    var actualOutput = StringUtils.quoted(input);
-
-    // Then
-    assertThat(actualOutput).isEqualTo(expectedOutput);
-  }
-
-  static Stream<Arguments> quotedCases() {
-    return Stream.of(
-        argumentSet("null input", null, "null"),
-        argumentSet("empty input", "", "\"\""),
-        argumentSet("blank input", "  \t\r\n ", "\"  \t\r\n \""),
-        argumentSet("filled input", "flamboogins", "\"flamboogins\"")
-    );
   }
 }
