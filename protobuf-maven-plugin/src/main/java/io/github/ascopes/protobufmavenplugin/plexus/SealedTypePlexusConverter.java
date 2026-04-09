@@ -19,12 +19,8 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.utils.AnnotationProxy;
-import java.lang.reflect.Method;
-import java.util.ArrayDeque;
-import java.util.Collections;
-import java.util.HashMap;
+import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -98,180 +94,126 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
       ExpressionEvaluator evaluator,
       @Nullable ConfigurationListener listener
   ) throws ComponentConfigurationException {
-    var kindMapping = getKindMappingFor(type);
+    var kind = configuration.getAttribute("kind");
 
-    var kind = Optional
-        .ofNullable(configuration.getAttribute("kind"))
-        .filter(not(String::isEmpty))
-        .orElse(null);
+    if (configuration.getValue() != null) {
+      if (kind == null) {
+        return parseFromString(configuration, type, evaluator);
+      }
 
-    // getChildCount is 0 if we have no nested attributes. Otherwise, "getValue" could return the
-    // XML structure directly.
-    if (configuration.getChildCount() == 0) {
-      return fromString(configuration, evaluator, kind, kindMapping.fromStringHandle());
-    } else {
-      // If we also merged in a value somewhere, discard it. Don't allow things like
-      //
-      // <protoc kind="binary-maven">
-      //   1.2.3
-      //   <version>4.5.6</version>
-      // </protoc>
-      //
-      // as this just produces total nonsense errors that make zero sense.
-      //
-      // This can occur if the parent sets one format (e.g. a raw string value) but then a child
-      // tries to set an object instead. Plexus messes up the formatting and defaults to treating
-      // an object as a string rather than an object with attributes by default. This causes a
-      // failure as injecting a string value directly into an object instance leads to it trying
-      // to call a non-existent `public static T set(String value)`. Remember Maven will MERGE
-      // parent and child POM configurations recursively by default, not override them.
-      configuration.setValue(null);
-
-      return fromAttributes(lookup, configuration, evaluator, listener, kind, kindMapping);
+      throw new ComponentConfigurationException(
+          configuration,
+          "Cannot set a string value with a kind attribute."
+      );
     }
+
+    // If we also merged in a value somewhere, discard it. Don't allow things like
+    //
+    // <protoc kind="binary-maven">
+    //   1.2.3
+    //   <version>4.5.6</version>
+    // </protoc>
+    //
+    // This avoids spewing weird errors because we overrode a string value in the parent
+    // POM with an object in the child POM. Plexus will default to merging these together
+    // directly without discarding one or the other. Right now we cannot easily work out
+    // which takes precedence to do this in a more intelligent way.
+    configuration.setValue(null);
+
+    return parseFromObject(kind, lookup, configuration, type, evaluator, listener);
   }
 
-  private Object fromString(
+  private Object parseFromString(
       PlexusConfiguration configuration,
-      ExpressionEvaluator evaluator,
-      @Nullable String kind,
-      @Nullable FromStringHandle<?> fromStringHandle
+      Class<?> type,
+      ExpressionEvaluator evaluator
   ) throws ComponentConfigurationException {
-    if (kind != null) {
-      throw new ComponentConfigurationException(
-          configuration,
-          "Cannot set a string value with a kind attribute"
-      );
-    }
-
-    if (fromStringHandle == null) {
-      throw new ComponentConfigurationException(
-          configuration,
-          "Cannot set a string value on this type of attribute"
-      );
-    }
+    var fromStringMethod = Stream.of(type.getDeclaredMethods())
+        .filter(m -> AnnotationProxy.findAnnotation(FromString.class, m).isPresent())
+        .peek(m -> log.debug("found @FromString method {} on {}", m, type.getName()))
+        .findFirst()
+        .orElseThrow(() -> missingKindAttribute(configuration, type));
 
     // Expand any interpolated values, then emit the string.
     var interpolatedValue = (String) fromExpression(configuration, evaluator, String.class);
-    return fromStringHandle.call(configuration, interpolatedValue);
-  }
-
-  private Object fromAttributes(
-      ConverterLookup lookup,
-      PlexusConfiguration configuration,
-      ExpressionEvaluator evaluator,
-      @Nullable ConfigurationListener listener,
-      @Nullable String kind,
-      KindMapping<?> kindMapping
-  ) throws ComponentConfigurationException {
-    if (kind == null) {
+    try {
+      return fromStringMethod.invoke(null, interpolatedValue);
+    } catch (ReflectiveOperationException ex) {
       throw new ComponentConfigurationException(
           configuration,
-          "Missing \"kind\" attribute. Valid kinds are: " + getValidKindsFor(kindMapping)
+          "Failed to parse attribute string value: " + requireNonNullElse(ex.getCause(), ex),
+          ex
       );
     }
-
-    var impl = Optional.ofNullable(kindMapping.kinds().get(kind))
-        .orElseThrow(() -> new ComponentConfigurationException(
-            configuration,
-            "Invalid kind \"" + kind + "\" specified. Valid kinds are: "
-                 + getValidKindsFor(kindMapping)
-        ));
-
-    return lookup.lookupConverterForType(impl).fromConfiguration(
-        lookup,
-        configuration,
-        impl,
-        impl.getEnclosingClass(),
-        impl.getClassLoader(),
-        evaluator,
-        listener
-    );
   }
 
-  private String getValidKindsFor(KindMapping<?> mapping) {
-    return mapping.kinds()
-        .keySet()
-        .stream()
-        .map(kind -> "\"" + kind + "\"")
-        .sorted()
-        .collect(Collectors.joining(", "));
-  }
-
-  private <T> KindMapping<T> getKindMappingFor(Class<T> base) {
-    return new KindMapping<>(
-        base,
-        discoverKindsFor(base),
-        discoverFromStringFor(base).orElse(null)
-    );
-  }
-
-  private static <T> Map<String, Class<? extends T>> discoverKindsFor(Class<T> base) {
-    var mapping = new HashMap<String, Class<? extends T>>();
-    var queue = new ArrayDeque<Class<? extends T>>();
-    queue.push(base);
-
-    while (!queue.isEmpty()) {
-      var next = queue.removeFirst();
-
-      if (next.isSealed()) {
-        log.trace(
-            "Found sealed type \"{}\" (base is \"{}\"), adding children to queue",
-            base.getName(),
-            next.getName()
-        );
-
-        for (var permittedSubtype : next.getPermittedSubclasses()) {
-          queue.push(permittedSubtype.asSubclass(base));
-        }
-      } else {
-        AnnotationProxy.findAnnotation(KindHint.class, next)
-            .ifPresent(kind -> {
-              log.trace(
-                  "Found concrete kind for base \"{}\": \"{}\" will map to \"{}\"",
-                  base.getName(),
-                  kind.kind(),
-                  kind.implementation().getName()
-              );
-              mapping.put(kind.kind(), kind.implementation().asSubclass(base));
-            });
-      }
+  private Object parseFromObject(
+      @Nullable String kind,
+      ConverterLookup lookup,
+      PlexusConfiguration configuration,
+      Class<?> type,
+      ExpressionEvaluator evaluator,
+      @Nullable ConfigurationListener listener
+  ) throws ComponentConfigurationException {
+    if (kind == null) {
+      throw missingKindAttribute(configuration, type);
     }
 
-    return Collections.unmodifiableMap(mapping);
+    var implementation = findRequestedImplementation(type, kind)
+        .orElseThrow(() -> new ComponentConfigurationException(
+            configuration,
+            "Invalid kind " + StringUtils.quoted(kind)
+                + " specified. Valid kinds are: " + nameValidKinds(type)
+                + "."
+        ));
+
+    return lookup.lookupConverterForType(implementation)
+        .fromConfiguration(
+            lookup,
+            configuration,
+            implementation,
+            implementation.getEnclosingClass(),
+            implementation.getClassLoader(),
+            evaluator,
+            listener
+        );
   }
 
-  private static <T> Optional<FromStringHandle<T>> discoverFromStringFor(Class<T> base) {
-    return Stream.of(base.getDeclaredMethods())
-        .filter(m -> AnnotationProxy.findAnnotation(FromString.class, m).isPresent())
-        .map(m -> handleFromMethod(base, m))
-        .peek(m -> log.debug("found @FromString method {} on {}", m, base.getName()))
+  private Optional<? extends Class<?>> findRequestedImplementation(Class<?> type, String kind) {
+    return listKindedImplementations(type)
+        .filter(kindPair -> kindPair.kind().equals(kind))
+        .map(KindHint::implementation)
         .findFirst();
   }
 
-  static <T> FromStringHandle<T> handleFromMethod(Class<T> base, Method method) {
-    return (configuration, value) -> {
-      try {
-        return base.cast(method.invoke(null, value));
-      } catch (ReflectiveOperationException ex) {
-        throw new ComponentConfigurationException(
-            configuration,
-            "Failed to parse attribute string value: " + requireNonNullElse(ex.getCause(), ex),
-            ex
-        );
-      }
-    };
+  private String nameValidKinds(Class<?> type) {
+    return listKindedImplementations(type)
+        .map(KindHint::kind)
+        .sorted()
+        .map(StringUtils::quoted)
+        .collect(Collectors.joining(", "));
   }
 
-  private record KindMapping<T>(
-      Class<T> base,
-      Map<String, Class<? extends T>> kinds,
-      @Nullable FromStringHandle<T> fromStringHandle
-  ) {}
+  private Stream<KindHint> listKindedImplementations(Class<?> type) {
+    var thisKindHint = AnnotationProxy.findAnnotation(KindHint.class, type)
+        .stream();
 
-  @FunctionalInterface
-  private interface FromStringHandle<T> {
+    var kindedSubtypes = Optional.ofNullable(type.getPermittedSubclasses())
+        .stream()
+        .flatMap(Stream::of)
+        .flatMap(this::listKindedImplementations);
 
-    T call(PlexusConfiguration configuration, String value) throws ComponentConfigurationException;
+    return Stream.concat(thisKindHint, kindedSubtypes);
+  }
+
+  private ComponentConfigurationException missingKindAttribute(
+      PlexusConfiguration configuration,
+      Class<?> type
+  ) {
+    return new ComponentConfigurationException(
+        configuration,
+        "Missing required 'kind' annotation. Other values are not valid here. Valid kinds are "
+            + nameValidKinds(type) + "."
+    );
   }
 }

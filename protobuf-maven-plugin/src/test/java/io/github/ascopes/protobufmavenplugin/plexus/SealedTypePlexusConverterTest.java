@@ -89,7 +89,7 @@ class SealedTypePlexusConverterTest {
             expressionEvaluator,
             null
         ))
-        .withMessage("Cannot set a string value with a kind attribute")
+        .withMessage("Cannot set a string value with a kind attribute.")
         .extracting(ComponentConfigurationException::getFailedConfiguration)
         .as("exception#getFailedConfiguration()")
         .isEqualTo(configuration.getChild(0).getChild(0));
@@ -139,7 +139,7 @@ class SealedTypePlexusConverterTest {
                 converterLookup,
                 configuration,
                 BrokenFromString.class,
-            null,
+                null,
                 Database.class.getClassLoader(),
                 expressionEvaluator,
                 null
@@ -175,7 +175,8 @@ class SealedTypePlexusConverterTest {
             expressionEvaluator,
             null
         ))
-        .withMessage("Cannot set a string value on this type of attribute")
+        .withMessage("Missing required 'kind' annotation. Other values are not valid here. "
+            + "Valid kinds are \"admin\", \"bot\", \"person\".")
         .extracting(ComponentConfigurationException::getFailedConfiguration)
         .as("exception#getFailedConfiguration()")
         .isEqualTo(configuration.getChild(0).getChild(0));
@@ -291,8 +292,8 @@ class SealedTypePlexusConverterTest {
                 expressionEvaluator,
                 null
             ))
-        .withMessage("Missing \"kind\" attribute. Valid kinds are: "
-            + "\"admin\", \"bot\", \"person\"")
+        .withMessage("Missing required 'kind' annotation. Other values are not valid here. "
+            + "Valid kinds are \"admin\", \"bot\", \"person\".")
         .extracting(ComponentConfigurationException::getFailedConfiguration)
         .as("exception#getFailedConfiguration()")
         .isEqualTo(configuration.getChild(0).getChild(0));
@@ -333,7 +334,7 @@ class SealedTypePlexusConverterTest {
                 null
             ))
         .withMessage("Invalid kind \"smurf\" specified. Valid kinds are: "
-            + "\"admin\", \"bot\", \"person\"")
+            + "\"admin\", \"bot\", \"person\".")
         .extracting(ComponentConfigurationException::getFailedConfiguration)
         .as("exception#getFailedConfiguration()")
         .isEqualTo(configuration.getChild(0).getChild(0));

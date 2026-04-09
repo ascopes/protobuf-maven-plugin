@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.utils;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Various common string helpers.
  *
@@ -35,5 +37,9 @@ public final class StringUtils {
     return quantity == 1
         ? quantity + " " + singular
         : quantity + " " + plural;
+  }
+
+  public static String quoted(@Nullable String value) {
+    return value == null ? "null" : "\"" + value + "\"";
   }
 }
