@@ -47,9 +47,9 @@ import org.slf4j.LoggerFactory;
  * first look for a "kind" attribute on the Plexus XML configuration that provides us an instruction
  * for which type to consume. If this attribute is not present, an exception is raised back to the
  * user instructing them to provide a valid attribute. If found, we will then recursively find all
- * non-sealed implementations of the sealed type that use the {@link KindHint} annotation.
+ * implementations of the sealed type that use the {@link KindHint} annotation.
  *
- * <p>If the user-provided kind matches a known kind from our indexing operation, we will use that
+ * <p>If the user-provided kind matches a known kind from our search operation, we will use that
  * as the implementation class and look for a concrete converter from the ConverterLookup we have
  * been passed.
  *
