@@ -228,7 +228,7 @@ class AetherMavenArtifactPathResolverTest {
     }
   }
 
-  @DisplayName("resolveDependencies(...) without project artifacts resolves the dependencies")
+  @DisplayName(".resolveDependencies(...) without project artifacts resolves the dependencies")
   @MethodSource("resolveDependenciesParams")
   @ParameterizedTest(name = "{argumentSetName}")
   void resolveDependenciesWithoutProjectArtifactsResolvesTheDependencies(
@@ -367,7 +367,7 @@ class AetherMavenArtifactPathResolverTest {
     }
   }
 
-  @DisplayName("resolveDependencies(...) with project artifacts resolves the dependencies")
+  @DisplayName(".resolveDependencies(...) with project artifacts resolves the dependencies")
   @MethodSource("resolveDependenciesParams")
   @ParameterizedTest(name = "{argumentSetName}")
   void resolveDependenciesWithProjectArtifactsResolvesTheDependencies(
