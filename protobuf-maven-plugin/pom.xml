@@ -159,7 +159,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!--suppress VulnerableLibrariesLocal -->
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock</artifactId>
@@ -179,45 +178,6 @@
         <!-- Runs integration tests. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
-
-        <configuration>
-          <addTestClassPath>true</addTestClassPath>
-          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-          <failIfNoProjects>true</failIfNoProjects>
-          <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
-          <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
-          <!--<parallelThreads>2C</parallelThreads>-->
-          <!-- Parallel disabled due to spurious Aether issues -->
-          <parallelThreads>1</parallelThreads>
-          <postBuildHookScript>test</postBuildHookScript>
-          <properties>
-            <!-- Acquire locks whereever we run Maven to avoid parallel tests trampling across eachother. -->
-            <aether.syncContext.named.factory>file-lock</aether.syncContext.named.factory>
-            <aether.syncContext.named.nameMapper>file-gav</aether.syncContext.named.nameMapper>
-            <!-- Avoid https://bugs.openjdk.org/browse/JDK-8252883 on Windows -->
-            <aether.named.file-lock.attempts>10</aether.named.file-lock.attempts>
-            <aether.named.file-lock.sleepMillis>500</aether.named.file-lock.sleepMillis>
-          </properties>
-          <setupIncludes>
-            <setupInclude>setup</setupInclude>
-          </setupIncludes>
-          <settingsFile>${project.basedir}/src/it/settings.xml</settingsFile>
-          <showErrors>true</showErrors>
-          <streamLogs>false</streamLogs>
-          <streamLogsOnFailures>true</streamLogsOnFailures>
-          <writeJunitReport>true</writeJunitReport>
-        </configuration>
-
-        <executions>
-          <execution>
-            <id>integration-test</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>install</goal>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -241,21 +201,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
 
-        <executions>
-          <execution>
-            <!-- We already generate the main descriptor by default.
-                The help mojo is then generated for us by this
-                custom execution. -->
-            <id>generate-help-mojo</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>helpmojo</goal>
-            </goals>
-            <configuration>
-              <helpPackageName>io.github.ascopes.protobufmavenplugin.mojo</helpPackageName>
-            </configuration>
-          </execution>
-        </executions>
+        <configuration>
+          <helpPackageName>io.github.ascopes.protobufmavenplugin.mojo</helpPackageName>
+        </configuration>
       </plugin>
 
       <plugin>
@@ -276,10 +224,8 @@
         <artifactId>maven-surefire-plugin</artifactId>
 
         <configuration>
-          <!-- 
-              Needed in Java 24 as the dynamic agent attachment mechanism
-              is deprecated, so we have to attach Mockito expliciyly.
-          -->
+          <!--  Needed in Java 24 as the dynamic agent attachment mechanism
+              is deprecated. We have to attach Mockito explicitly. -->
           <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
         </configuration>
       </plugin>
@@ -304,6 +250,8 @@
       </plugin>
     </plugins>
   </build>
+
+  <!-- Build overrides and environment-specific goals. -->
 
   <profiles>
     <profile>
@@ -388,7 +336,7 @@
       <properties>
         <invoker-project-path-override>${java.io.tmpdir}/pmp-it</invoker-project-path-override>
       </properties>
-      
+
       <build>
         <plugins>
           <plugin>

@@ -463,6 +463,53 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-invoker-plugin</artifactId>
           <version>${maven-invoker-plugin.version}</version>
+
+          <configuration>
+            <addTestClassPath>true</addTestClassPath>
+            <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+            <failIfNoProjects>true</failIfNoProjects>
+            <!-- Warning: placing this inside the cloneProjectsTo path triggers a resolution bug in the plugin -->
+            <localRepositoryPath>${project.basedir}/target/it-repo</localRepositoryPath>
+            <!--<parallelThreads>2C</parallelThreads>-->
+            <!-- Parallel disabled due to spurious Aether issues -->
+            <parallelThreads>1</parallelThreads>
+            <postBuildHookScript>test</postBuildHookScript>
+            <properties>
+              <!-- Acquire locks whereever we run Maven to avoid parallel tests trampling across eachother. -->
+              <aether.syncContext.named.factory>file-lock</aether.syncContext.named.factory>
+              <aether.syncContext.named.nameMapper>file-gav</aether.syncContext.named.nameMapper>
+              <!-- Avoid https://bugs.openjdk.org/browse/JDK-8252883 on Windows -->
+              <aether.named.file-lock.attempts>10</aether.named.file-lock.attempts>
+              <aether.named.file-lock.sleepMillis>500</aether.named.file-lock.sleepMillis>
+            </properties>
+            <setupIncludes>
+              <setupInclude>setup</setupInclude>
+            </setupIncludes>
+            <settingsFile>${project.basedir}/src/it/settings.xml</settingsFile>
+            <showErrors>true</showErrors>
+            <streamLogs>false</streamLogs>
+            <streamLogsOnFailures>true</streamLogsOnFailures>
+            <writeJunitReport>true</writeJunitReport>
+          </configuration>
+
+          <executions>
+            <execution>
+              <id>integration-test</id>
+              <phase>integration-test</phase>
+              <goals>
+                <goal>install</goal>
+                <goal>integration-test</goal>
+              </goals>
+            </execution>
+
+            <execution>
+              <id>verify-integration-test-results</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
@@ -492,6 +539,23 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
           <version>${maven-plugin-plugin.version}</version>
+
+          <executions>
+            <execution>
+              <id>generate-plugin-help-descriptor</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>helpmojo</goal>
+              </goals>
+            </execution>
+
+            <execution>
+              <goals>
+                <goal>addPluginArtifactMetadata</goal>
+                <goal>descriptor</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>

@@ -19,19 +19,28 @@ the test cases.
 To run all integration tests, run:
 
 ```shell
-$ ./mvnw integration-test
+$ ./mvnw verify
 ```
 
 If you want to run specific tests only, pass the `-Dinvoker.test` flag with a comma-separated
 name of each project in this directory you want to run.
 
 ```shell
-$ ./mvnw integration-test -Dinvoker.test=setup,help-goal,java-test
+$ ./mvnw verify -Dinvoker.test=setup,help-goal,java-test
 ```
 
 This should always be called with `setup` as the first project to ensure that the aggregator
 test parent POM is installed into the test environment first. Failing to do this will result
 in test failures.
+
+It may also be useful to pass other flags to skip prior test stages from running. For example:
+
+```shell
+$ ./mvnw verify -Dcheckstyle.skip -Dmaven.test.skip
+```
+
+Remember to run **without** these flags specified before raising any pull request on GitHub. The
+entire pipeline must succeed locally.
 
 ## Configuration
 
@@ -49,18 +58,19 @@ configuration.
 
 ## Naming
 
-The project directory name should summarise what the test is for, starting with a GitHub issue
+The project directory name should summarize what the test is for, starting with a GitHub issue
 number if relevant.
 
-The `artifactId` of the project should be the directory name. This ensures that each test is isolated.
+The `artifactId` of the project should be the directory name. This ensures that each test is 
+isolated.
 
 The local repository can be found in the `target/it-repo` directory.
 
 ## Skipping tests conditionally
 
-If there are certain conditions where the test should not run, you can create a script within the test
-directory named `selector.groovy`. In this script, you can write logic and return `true` or `false`, where
-the former allows the test to run, and the latter results in it being skipped.
+If there are certain conditions where the test should not run, you can create a script within the 
+test directory named `selector.groovy`. In this script, you can write logic and return `true` or 
+`false`, where the former allows the test to run, and the latter results in it being skipped.
 
 Omitting this script will result in the test always being run.
 
@@ -98,8 +108,8 @@ debugger server. This can be done by using an IDE such as IntelliJ and setting u
 Any breakpoints in the project source code will then be able to be hit and stepped through
 individually.
 
-If you wish to enable verbose output from Maven, edit the `invoker-debug.properties` to set
-the `invoker.debug` property to `true`.
+If you wish to enable verbose output from Maven, edit the `invoker-debug.properties` to set the 
+`invoker.debug` property to `true`.
 
 ## Profiling
 
@@ -118,7 +128,9 @@ output flight recording files. These will be located in
 
 ## Using `protoc` from the system $PATH
 
-Activate the `-Pinvoker-path-protoc` profile to force all tests to run using `protoc` on the system `$PATH`.
+Activate the `-Pinvoker-path-protoc` profile to force all tests to run using `protoc` on the system
+`$PATH`.
 
-Note that this is incompatible with the debug profile, so you may need to add the debug flags to the properties
+Note that this is incompatible with the debug profile, so you may need to add the debug flags to the
+properties
 manually.
