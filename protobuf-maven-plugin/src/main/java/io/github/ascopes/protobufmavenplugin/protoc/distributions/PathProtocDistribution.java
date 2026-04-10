@@ -18,7 +18,6 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 
 /**
  * Model base for a {@code protoc} distribution that is located on the system {@code $PATH}.
@@ -27,8 +26,7 @@ import org.immutables.value.Value.Modifiable;
  * @since 5.1.0
  */
 @Immutable
-@KindHint(kind = "path", implementation = PathProtocDistributionBean.class)
-@Modifiable
+@KindHint("path")
 public abstract non-sealed class PathProtocDistribution implements ProtocDistribution {
 
   /**
