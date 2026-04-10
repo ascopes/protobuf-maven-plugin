@@ -124,6 +124,7 @@
     <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
     <maven-invoker-plugin.version>3.9.1</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     <maven-jxr-plugin.version>3.6.0</maven-jxr-plugin.version>
     <maven-plugin-plugin.version>3.15.2</maven-plugin-plugin.version>
     <maven-plugin-report-plugin.version>3.15.2</maven-plugin-report-plugin.version>
@@ -786,6 +787,24 @@
 
   <reporting>
     <plugins>
+      <plugin>
+        <!-- Generate source documentation listings. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <configuration>
+          <doclint>all,-missing</doclint>
+          <show>protected</show>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc-no-fork</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
       <plugin>
         <!-- Used to generate source code cross-references with other reporting plugins. -->
         <groupId>org.apache.maven.plugins</groupId>
