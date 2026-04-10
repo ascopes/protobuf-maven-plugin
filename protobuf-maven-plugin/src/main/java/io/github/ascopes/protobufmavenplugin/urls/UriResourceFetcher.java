@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
+import static java.util.Objects.requireNonNullElse;
+
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
@@ -30,12 +32,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.Maven;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,19 +54,29 @@ import org.slf4j.LoggerFactory;
 @Named
 public final class UriResourceFetcher {
 
+  private static final String GZIP = "gzip";
+  private static final String IDENTITY = "identity";
+
+  private static final String ACCEPT = "Accept";
+  private static final String ACCEPT_VALUE = "*/*";
+  private static final String ACCEPT_ENCODING = "Accept-Encoding";
+  private static final String ACCEPT_ENCODING_VALUE = String.join(", ", GZIP, IDENTITY);
+
   // Protocols that we allow in offline mode.
   private static final Pattern OFFLINE_PROTOCOLS = Pattern.compile("^([A-Za-z0-9-]+:)*file:.*");
 
+  private static final String USER_AGENT = "User-Agent";
+
   // Fetch our version from our JAR when it is available. For unit tests, etc., this will usually
-  // be null.
-  private static final String USER_AGENT = String.format(
+  // be null as no MANIFEST.MF will have been created yet.
+  private static final String USER_AGENT_VALUE = String.format(
       "protobuf-maven-plugin/%s (io.github.ascopes) Apache-Maven/%s Java/%s (%s, %s, %s)",
-      UriResourceFetcher.class.getPackage().getImplementationVersion(),
-      Maven.class.getPackage().getImplementationVersion(),
-      System.getProperty("java.version"),
-      System.getProperty("java.vm.name"),
-      System.getProperty("java.vm.version"),
-      System.getProperty("java.vm.vendor")
+      userAgentValue(UriResourceFetcher.class.getPackage().getImplementationVersion()),
+      userAgentValue(Maven.class.getPackage().getImplementationVersion()),
+      userAgentValue(System.getProperty("java.version")),
+      userAgentValue(System.getProperty("java.vm.name")),
+      userAgentValue(System.getProperty("java.vm.version")),
+      userAgentValue(System.getProperty("java.vm.vendor"))
   );
 
   private static final int TIMEOUT = 30_000;
@@ -144,7 +158,7 @@ public final class UriResourceFetcher {
 
       try (
           // This should always result in the underlying connections being closed.
-          var responseInputStream = new BufferedInputStream(conn.getInputStream());
+          var responseInputStream = getDecodedResponseBody(conn);
           var fileOutputStream = FileUtils.newBufferedOutputStream(targetFile)
       ) {
         responseInputStream.transferTo(fileOutputStream);
@@ -188,12 +202,14 @@ public final class UriResourceFetcher {
     // even crash JUnit because of this!
     // See https://github.com/junit-team/junit5/issues/4567.
     var conn = url.openConnection();
-    conn.addRequestProperty("User-Agent", USER_AGENT);
     conn.setAllowUserInteraction(false);
     conn.setConnectTimeout(TIMEOUT);
     conn.setDoInput(true);
     conn.setDoOutput(false);
     conn.setReadTimeout(TIMEOUT);
+    conn.addRequestProperty(ACCEPT, ACCEPT_VALUE);
+    conn.addRequestProperty(ACCEPT_ENCODING, ACCEPT_ENCODING_VALUE);
+    conn.addRequestProperty(USER_AGENT, USER_AGENT_VALUE);
     conn.setUseCaches(false);
     return conn;
   }
@@ -209,5 +225,19 @@ public final class UriResourceFetcher {
     return temporarySpace
         .createTemporarySpace("url", url.getProtocol())
         .resolve(fileName + extension);
+  }
+
+  private BufferedInputStream getDecodedResponseBody(URLConnection conn) throws IOException {
+    if (GZIP.equalsIgnoreCase(conn.getContentEncoding())) {
+      log.trace("decoding response as GZIP-encoded payload");
+      return new BufferedInputStream(new GZIPInputStream(conn.getInputStream()));
+    }
+
+    log.trace("treating response as an unencoded payload");
+    return new BufferedInputStream(conn.getInputStream());
+  }
+
+  private static String userAgentValue(@Nullable Object value) {
+    return requireNonNullElse(value, "unspecified").toString();
   }
 }

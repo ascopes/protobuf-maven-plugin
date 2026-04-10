@@ -36,6 +36,7 @@ import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 import org.apache.maven.execution.MavenSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -142,7 +144,7 @@ class UriResourceFetcherTest {
   @ParameterizedTest(name = "for URI {0}")
   void urisAreResolvedAndStoredInLocalFiles(URI uri) throws Exception {
     // Given
-    var url = someUrlWithResolvedContent(uri, "foobar");
+    var url = someUrlWithResolvedContent(uri, false, "foobar");
     when(urlFactory.create(any()))
         .thenReturn(url);
 
@@ -176,12 +178,54 @@ class UriResourceFetcherTest {
     verify(temporarySpace).createTemporarySpace("url", uri.getScheme());
   }
 
+  @DisplayName("URIs with GZIPped contents are resolved, decompressed, and stored in local files")
+  @MethodSource("remoteUris")
+  @ParameterizedTest(name = "for URI {0}")
+  void urisWithGzippedContentsAreResolvedDecompressedAndStoredInLocalFiles(URI uri)
+      throws Exception {
+
+    // Given
+    var url = someUrlWithResolvedContent(uri, true, "foobar");
+    when(urlFactory.create(any()))
+        .thenReturn(url);
+
+    Path expectedFile;
+    if (uri.getPath() == null) {
+      expectedFile = temporarySpaceDir
+          .resolve(
+              Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                  + ".ext"
+          );
+    } else {
+      expectedFile = temporarySpaceDir
+          .resolve(
+              uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                  + "-"
+                  + Digest.compute("SHA-1", url.toExternalForm()).toHexString()
+                  + ".ext"
+          );
+    }
+
+    // When
+    var result = uriResourceFetcher.fetchFileFromUri(uri, ".ext", false);
+
+    // Then
+    assertThat(result)
+        .get(PATH)
+        .isEqualTo(expectedFile)
+        .hasBinaryContent("foobar".getBytes(StandardCharsets.UTF_8));
+
+    verify(urlFactory).create(uri);
+    verify(temporarySpace).createTemporarySpace("url", uri.getScheme());
+  }
+
+
   @DisplayName("URLConnections are configured with the expected attributes")
   @Test
   void urlConnectionsAreConfiguredWithTheExpectedAttributes() throws Exception {
     // Given
     var uri = URI.create("some://google.com/foo/bar/baz.txt");
-    var url = someUrlWithResolvedContent(uri, "bazbork");
+    var url = someUrlWithResolvedContent(uri, false, "bazbork");
     when(urlFactory.create(any()))
         .thenReturn(url);
 
@@ -217,7 +261,7 @@ class UriResourceFetcherTest {
     try (var fileUtilsMock = mockStatic(FileUtils.class, Answers.CALLS_REAL_METHODS)) {
       // Given
       var uri = URI.create("some://google.com/foo/bar/baz.txt");
-      var url = someUrlWithResolvedContent(uri, "bazbork");
+      var url = someUrlWithResolvedContent(uri, false, "bazbork");
       when(urlFactory.create(any()))
           .thenReturn(url);
 
@@ -259,7 +303,7 @@ class UriResourceFetcherTest {
   void urlConnectFailuresResultInAnExceptionBeingRaised() throws Exception {
     // Given
     var uri = URI.create("some://google.com/foo/bar/baz.txt");
-    var url = someUrlWithResolvedContent(uri, "bazbork");
+    var url = someUrlWithResolvedContent(uri, false, "bazbork");
     when(urlFactory.create(any()))
         .thenReturn(url);
     var cause = new IOException("bang");
@@ -286,7 +330,7 @@ class UriResourceFetcherTest {
   void urlTransferFailuresResultInAnExceptionBeingRaised() throws Exception {
     // Given
     var uri = URI.create("some://google.com/foo/bar/baz.txt");
-    var url = someUrlWithResolvedContent(uri, "bazbork");
+    var url = someUrlWithResolvedContent(uri, false, "bazbork");
     when(urlFactory.create(any()))
         .thenReturn(url);
 
@@ -318,7 +362,7 @@ class UriResourceFetcherTest {
   void fileNotFoundExceptionsRaisedDuringUrlConnectReturnEmptyResult() throws Exception {
     // Given
     var uri = URI.create("some://google.com/foo/bar/baz.txt");
-    var url = someUrlWithResolvedContent(uri, "bazbork");
+    var url = someUrlWithResolvedContent(uri, false, "bazbork");
     when(urlFactory.create(any()))
         .thenReturn(url);
     var cause = new FileNotFoundException("bang");
@@ -338,7 +382,7 @@ class UriResourceFetcherTest {
   void fileNotFoundExceptionsRaisedDuringUrlTransferReturnEmptyResult() throws Exception {
     // Given
     var uri = URI.create("some://google.com/foo/bar/baz.txt");
-    var url = someUrlWithResolvedContent(uri, "bazbork");
+    var url = someUrlWithResolvedContent(uri, false, "bazbork");
     when(urlFactory.create(any()))
         .thenReturn(url);
 
@@ -385,12 +429,29 @@ class UriResourceFetcherTest {
         .map(URI::create);
   }
 
-  static URL someUrlWithResolvedContent(URI uri, String content) throws Exception {
-    return someUrlWithResolvedContent(uri, content.getBytes(StandardCharsets.UTF_8));
+  static URL someUrlWithResolvedContent(URI uri, boolean gzip, String content) throws Exception {
+    return someUrlWithResolvedContent(uri, gzip, content.getBytes(StandardCharsets.UTF_8));
   }
 
-  static URL someUrlWithResolvedContent(URI uri, byte[] content) throws Exception {
+  static URL someUrlWithResolvedContent(URI uri, boolean gzip, byte[] content) throws Exception {
     var connection = mock(URLConnection.class);
+
+    if (gzip) {
+      lenient().when(connection.getContentEncoding())
+          .thenReturn("gzip");
+
+      try (var baos = new ByteArrayOutputStream()) {
+        var gzos = new GZIPOutputStream(baos);
+        gzos.write(content);
+        // Needed to finish writing the zlib footer.
+        gzos.close();
+        content = baos.toByteArray();
+      }
+    } else {
+      lenient().when(connection.getContentEncoding())
+          .thenReturn(null);
+    }
+
     lenient().when(connection.getInputStream())
         .thenReturn(new ByteArrayInputStream(content));
 
