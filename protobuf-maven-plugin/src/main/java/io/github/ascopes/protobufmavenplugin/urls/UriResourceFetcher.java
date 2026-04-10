@@ -15,6 +15,8 @@
  */
 package io.github.ascopes.protobufmavenplugin.urls;
 
+import static java.util.Objects.requireNonNullElse;
+
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
@@ -36,6 +38,7 @@ import org.apache.maven.Maven;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,16 +56,18 @@ public final class UriResourceFetcher {
   // Protocols that we allow in offline mode.
   private static final Pattern OFFLINE_PROTOCOLS = Pattern.compile("^([A-Za-z0-9-]+:)*file:.*");
 
+  private static final String USER_AGENT = "User-Agent";
+
   // Fetch our version from our JAR when it is available. For unit tests, etc., this will usually
-  // be null.
-  private static final String USER_AGENT = String.format(
+  // be null as no MANIFEST.MF will have been created yet.
+  private static final String USER_AGENT_VALUE = String.format(
       "protobuf-maven-plugin/%s (io.github.ascopes) Apache-Maven/%s Java/%s (%s, %s, %s)",
-      UriResourceFetcher.class.getPackage().getImplementationVersion(),
-      Maven.class.getPackage().getImplementationVersion(),
-      System.getProperty("java.version"),
-      System.getProperty("java.vm.name"),
-      System.getProperty("java.vm.version"),
-      System.getProperty("java.vm.vendor")
+      userAgentValue(UriResourceFetcher.class.getPackage().getImplementationVersion()),
+      userAgentValue(Maven.class.getPackage().getImplementationVersion()),
+      userAgentValue(System.getProperty("java.version")),
+      userAgentValue(System.getProperty("java.vm.name")),
+      userAgentValue(System.getProperty("java.vm.version")),
+      userAgentValue(System.getProperty("java.vm.vendor"))
   );
 
   private static final int TIMEOUT = 30_000;
@@ -188,12 +193,12 @@ public final class UriResourceFetcher {
     // even crash JUnit because of this!
     // See https://github.com/junit-team/junit5/issues/4567.
     var conn = url.openConnection();
-    conn.addRequestProperty("User-Agent", USER_AGENT);
     conn.setAllowUserInteraction(false);
     conn.setConnectTimeout(TIMEOUT);
     conn.setDoInput(true);
     conn.setDoOutput(false);
     conn.setReadTimeout(TIMEOUT);
+    conn.addRequestProperty(USER_AGENT, USER_AGENT_VALUE);
     conn.setUseCaches(false);
     return conn;
   }
@@ -209,5 +214,9 @@ public final class UriResourceFetcher {
     return temporarySpace
         .createTemporarySpace("url", url.getProtocol())
         .resolve(fileName + extension);
+  }
+
+  private static String userAgentValue(@Nullable Object value) {
+    return requireNonNullElse(value, "unspecified").toString();
   }
 }
