@@ -184,16 +184,6 @@
         <!-- Add additional entries to the JAR's MANIFEST.MF. -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <!-- Also add JPMS forwards compatibility. We don't do this in the parent
-                   as we have to propagate the change to all integration tests if we do. -->
-              <Automatic-Module-Name>io.github.ascopes.protobufmavenplugin</Automatic-Module-Name>
-            </manifestEntries>
-          </archive>
-        </configuration>
       </plugin>
 
       <plugin>
