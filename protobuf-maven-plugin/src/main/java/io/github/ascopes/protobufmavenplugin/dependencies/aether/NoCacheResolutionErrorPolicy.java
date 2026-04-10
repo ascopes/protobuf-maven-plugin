@@ -25,7 +25,7 @@ import org.eclipse.aether.resolution.ResolutionErrorPolicyRequest;
  * Policy that disables resolution error caching.
  *
  * <p>In Maven 3.9.9 or newer, we should use {@code SimpleResolutionErrorPolicy} elsewhere instead
- * of this. For now, this is implemented to enable Maven 3.8 compatibility.
+ * of this. For now, this is implemented to enable earlier Maven 3.9 compatibility.
  *
  * @author Ashley Scopes
  * @since 2.13.0

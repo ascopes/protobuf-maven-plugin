@@ -51,6 +51,7 @@ final class ProtobufMavenPluginRepositorySession extends AbstractForwardingRepos
     delegate = mavenSession.getRepositorySession();
 
     dependencyTraverser = new AndDependencyTraverser(
+        // Handle wildcard exclusions.
         new WildcardAwareDependencyTraverser(),
         // Avoid OOME by not traversing things known to be fat archives of content.
         // Related to issues in GH-596 and GH-938.
