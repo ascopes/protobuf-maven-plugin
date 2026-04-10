@@ -867,6 +867,25 @@
           </plugin>
 
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven-javadoc-plugin.version}</version>
+            <configuration>
+              <!-- Ignore missing Javadoc comments. We don't care about this as the
+                   internals are not a public API. -->
+              <doclint>all,-missing</doclint>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          
+          <plugin>
             <!-- GPG signing of build artifacts, required by Maven
                 Central. We only enable this via a profile so that
                 forks do not have to register GPG keys to be able
