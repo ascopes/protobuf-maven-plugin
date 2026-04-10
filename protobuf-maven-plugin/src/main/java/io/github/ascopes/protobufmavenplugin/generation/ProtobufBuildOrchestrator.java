@@ -277,7 +277,6 @@ public final class ProtobufBuildOrchestrator {
         .forEach(outputDirectory -> registrar.registerSourceRoot(mavenSession, outputDirectory));
   }
 
-  // TODO: migrate this logic to a compilation strategy.
   private FilesToCompile computeFilesToCompile(
       ProjectInputListing projectInputs,
       boolean incrementalCompilation
