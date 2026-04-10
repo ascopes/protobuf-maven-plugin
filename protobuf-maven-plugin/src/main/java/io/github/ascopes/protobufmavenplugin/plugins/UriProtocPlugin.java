@@ -17,6 +17,7 @@ package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import java.net.URI;
 import java.util.Optional;
 import org.immutables.value.Value.Default;
@@ -44,6 +45,7 @@ public abstract non-sealed class UriProtocPlugin implements ProtocPlugin {
   @Default.Boolean(false)
   public abstract boolean isOptional();
 
+  @DeadCodeGenerated(reason = "Only printed during diagnostics and debugging")
   @Override
   public String toString() {
     var sb = new StringBuilder()

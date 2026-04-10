@@ -16,6 +16,7 @@
 package io.github.ascopes.protobufmavenplugin.plugins;
 
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Modifiable;
 
@@ -39,6 +40,7 @@ public abstract non-sealed class PathProtocPlugin implements ProtocPlugin {
   @Default.Boolean(false)
   public abstract boolean isOptional();
 
+  @DeadCodeGenerated(reason = "Only printed during diagnostics and debugging")
   @Override
   public String toString() {
     return "path:" + getName();
