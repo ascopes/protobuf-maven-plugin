@@ -166,8 +166,7 @@ class AetherResolverTest {
         .isThrownBy(() -> aetherResolver.resolveArtifact(inputArtifact))
         .withMessage(
             "Failed to resolve artifact com.example.foo:bar:1.3.5. Check the "
-                + "coordinates and connection, and try again. Cause was: %s",
-            (Object) null
+                + "coordinates and connection, and try again."
         )
         .withNoCause()
         .satisfies(ex -> assertThat(ex.getSuppressed())
@@ -272,10 +271,7 @@ class AetherResolverTest {
     // When/then
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> aetherResolver.resolveDependencies(inputDependencies, scopes))
-        .withMessage(
-            "Failed to resolve dependencies. Cause was: %s",
-            exception
-        )
+        .withMessage("Failed to resolve dependencies. Cause was: %s", exception)
         .withCause(exception);
   }
 
@@ -309,10 +305,7 @@ class AetherResolverTest {
     // When/then
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> aetherResolver.resolveDependencies(inputDependencies, scopes))
-        .withMessage(
-            "Failed to resolve dependencies. Cause was: %s",
-            (Object) null
-        )
+        .withMessage("Failed to resolve dependencies.")
         .satisfies(ex -> assertThat(ex.getSuppressed())
             .containsExactly(exceptions));
   }
@@ -364,9 +357,8 @@ class AetherResolverTest {
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> aetherResolver.resolveDependencies(inputDependencies, scopes))
         .withMessage(
-            "Failed to resolve dependencies: do:ray:me, aaa:bbb:ccc. Check the direct and "
-                + "transitive coordinates, and network connection, then try again. Cause was: null",
-            (Object) null
+            "Failed to resolve 2 dependencies including do:ray:me, aaa:bbb:ccc. Check the direct and "
+                + "transitive coordinates, and network connection, then try again."
         );
   }
 

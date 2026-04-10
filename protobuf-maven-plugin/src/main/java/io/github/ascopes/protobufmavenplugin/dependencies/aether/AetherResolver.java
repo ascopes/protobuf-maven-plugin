@@ -101,14 +101,15 @@ final class AetherResolver {
     }
 
     if (cause != null || !artifactResult.isResolved()) {
-      var ex = new ResolutionException(
-          "Failed to resolve artifact "
-              + artifact
-              + ". Check the coordinates and connection, and try again. Cause was: "
-              + cause,
-          cause
-      );
+      var message = "Failed to resolve artifact "
+          + artifact
+          + ". Check the coordinates and connection, and try again.";
 
+      if (cause != null) {
+        message += " Cause was: " + cause;
+      }
+
+      var ex = new ResolutionException(message, cause);
       artifactResult.getExceptions().forEach(ex::addSuppressed);
       throw ex;
     }
@@ -152,23 +153,31 @@ final class AetherResolver {
 
     // Handle the multiple cases where we might have failed.
     if (cause != null || !dependencyResult.getCollectExceptions().isEmpty()) {
-      // TODO(ascopes): should we limit the number of things output here?
       var failedGavs = dependencyResult.getArtifactResults().stream()
           .filter(not(ArtifactResult::isResolved))
           .map(result -> Optional.ofNullable(result.getArtifact())
               .orElseGet(() -> result.getRequest().getArtifact()))
           .map(Artifact::toString)
-          .collect(Collectors.joining(", "));
+          .toList();
 
       String errorMessage;
 
       if (failedGavs.isEmpty()) {
-        errorMessage = "Failed to resolve dependencies. Cause was: " + cause;
+        errorMessage = "Failed to resolve dependencies.";
       } else {
-        errorMessage = "Failed to resolve dependencies: " + failedGavs
+        var first10FailedGavs = failedGavs.stream()
+            .limit(10)
+            .collect(Collectors.joining(", "));
+
+        errorMessage = "Failed to resolve "
+            + StringUtils.pluralize(failedGavs.size(), "dependency", "dependencies")
+            + " including " + first10FailedGavs
             + ". Check the direct and transitive coordinates, and network connection, "
-            + "then try again. Cause was: "
-            + cause;
+            + "then try again.";
+      }
+
+      if (cause != null) {
+        errorMessage += " Cause was: " + cause;
       }
 
       var ex = new ResolutionException(errorMessage, cause);
