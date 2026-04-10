@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.Maven;
@@ -52,6 +53,14 @@ import org.slf4j.LoggerFactory;
 @MojoExecutionScoped
 @Named
 public final class UriResourceFetcher {
+
+  private static final String GZIP = "gzip";
+  private static final String IDENTITY = "identity";
+
+  private static final String ACCEPT = "Accept";
+  private static final String ACCEPT_VALUE = "*/*";
+  private static final String ACCEPT_ENCODING = "Accept-Encoding";
+  private static final String ACCEPT_ENCODING_VALUE = String.join(", ", GZIP, IDENTITY);
 
   // Protocols that we allow in offline mode.
   private static final Pattern OFFLINE_PROTOCOLS = Pattern.compile("^([A-Za-z0-9-]+:)*file:.*");
@@ -149,7 +158,7 @@ public final class UriResourceFetcher {
 
       try (
           // This should always result in the underlying connections being closed.
-          var responseInputStream = new BufferedInputStream(conn.getInputStream());
+          var responseInputStream = getDecodedResponseBody(conn);
           var fileOutputStream = FileUtils.newBufferedOutputStream(targetFile)
       ) {
         responseInputStream.transferTo(fileOutputStream);
@@ -198,6 +207,8 @@ public final class UriResourceFetcher {
     conn.setDoInput(true);
     conn.setDoOutput(false);
     conn.setReadTimeout(TIMEOUT);
+    conn.addRequestProperty(ACCEPT, ACCEPT_VALUE);
+    conn.addRequestProperty(ACCEPT_ENCODING, ACCEPT_ENCODING_VALUE);
     conn.addRequestProperty(USER_AGENT, USER_AGENT_VALUE);
     conn.setUseCaches(false);
     return conn;
@@ -214,6 +225,16 @@ public final class UriResourceFetcher {
     return temporarySpace
         .createTemporarySpace("url", url.getProtocol())
         .resolve(fileName + extension);
+  }
+
+  private BufferedInputStream getDecodedResponseBody(URLConnection conn) throws IOException {
+    if (GZIP.equalsIgnoreCase(conn.getContentEncoding())) {
+      log.trace("decoding response as GZIP-encoded payload");
+      return new BufferedInputStream(new GZIPInputStream(conn.getInputStream()));
+    }
+
+    log.trace("treating response as an unencoded payload");
+    return new BufferedInputStream(conn.getInputStream());
   }
 
   private static String userAgentValue(@Nullable Object value) {
