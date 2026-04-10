@@ -357,8 +357,8 @@ class AetherResolverTest {
     assertThatExceptionOfType(ResolutionException.class)
         .isThrownBy(() -> aetherResolver.resolveDependencies(inputDependencies, scopes))
         .withMessage(
-            "Failed to resolve 2 dependencies including do:ray:me, aaa:bbb:ccc. Check the direct and "
-                + "transitive coordinates, and network connection, then try again."
+            "Failed to resolve 2 dependencies including do:ray:me, aaa:bbb:ccc. Check the "
+                + "direct and transitive coordinates, and network connection, then try again."
         );
   }
 
