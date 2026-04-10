@@ -11,10 +11,20 @@ set -o nounset
 [[ -v DEBUG ]] && set -o xtrace
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+# Run Maven with a dummy invocation first to pre-install it. Doing this lets us
+# catch server-side errors serving the downloads for Maven prior to us calling it
+# with --quiet, which may hide errors in the build logs.
+
+echo "Ensuring Maven is installed..."
+./mvnw --version
+
 echo "Checking protobuf version from pom.xml..."
 # Use of sed+tail works around the fact Maven 4.x needs --raw-streams to not output
 # other noise at the start of the line, but Maven 3.8 does not support this at all.
-version=$(./mvnw help:evaluate -Dexpression=protobuf.version -DforceStdout=true --quiet | sed 's/ /\n/g' | tail -1)
+# Separate into two steps so we can catch any errors raised by Maven.
+version=$(./mvnw help:evaluate -Dexpression=protobuf.version -DforceStdout=true --quiet)
+version=$(echo "${version}" | sed 's/ /\n/g' | tail -1)
 
 echo "Checking OS and CPU..."
 
