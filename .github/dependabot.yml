@@ -5,7 +5,7 @@ updates:
     directory: /
     open-pull-requests-limit: 999
     schedule:
-      interval: monthly
+      interval: weekly
       timezone: Europe/London
     target-branch: main
     assignees:
@@ -17,8 +17,13 @@ updates:
     directories:
       - /
       - /protobuf-maven-plugin/src/it/setup
+    groups:
+      # Group all Maven updates into a single PR.
+      maven:
+        patterns:
+          - "*"
     schedule:
-      interval: monthly
+      interval: weekly
       timezone: Europe/London
     open-pull-requests-limit: 999
     target-branch: main
