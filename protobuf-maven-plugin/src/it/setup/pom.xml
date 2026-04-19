@@ -35,12 +35,12 @@
   <properties>
     <grpc.version>1.80.0</grpc.version>
     <kotlin.version>2.3.20</kotlin.version>
-    <proto-google-common-protos.version>2.68.0</proto-google-common-protos.version>
+    <proto-google-common-protos.version>2.70.0</proto-google-common-protos.version>
     <scala.version>3.8.3</scala.version>
     <scalapb.digest>SHA1:01b4b553fb25598244a7f22f2e63fb2f81c52551</scalapb.digest>
     <scalapb.version>1.0.0-alpha.3</scalapb.version>
     <scala-maven-plugin.version>4.9.10</scala-maven-plugin.version>
-    <reactor-core.version>3.8.4</reactor-core.version>
+    <reactor-core.version>3.8.5</reactor-core.version>
     <reactor-grpc.version>1.2.4</reactor-grpc.version>
   </properties>
 
