@@ -33,6 +33,11 @@ import org.jspecify.annotations.Nullable;
  * @since 3.5.0
  */
 public final class Digest {
+  private static final byte[] HEX_CHARS = new byte[] {
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+      'a', 'b', 'c', 'd', 'e', 'f'
+  };
+
   private final String algorithm;
   private final byte[] digest;
 
@@ -164,17 +169,13 @@ public final class Digest {
   }
 
   private static String encodeHex(byte[] data) {
-    var sb = new StringBuilder();
-    for (var b : data) {
-      // If the hex digit is less than 10 (base10) in value, it will not
-      // have a leading 0, so will be only one digit long and thus produce
-      // broken results.
-      var hexDigit = Integer.toHexString(Byte.toUnsignedInt(b));
-      if (hexDigit.length() == 1) {
-        sb.append('0');
-      }
-      sb.append(hexDigit);
+    var string = new byte[data.length * 2];
+    for (var i = 0; i < data.length; ++i) {
+      // Remove the sign (-1 -> 255)
+      var value = data[i] & 0xFF;
+      string[i << 1] = HEX_CHARS[value >> 4];
+      string[(i << 1) + 1] = HEX_CHARS[value & 0xF];
     }
-    return sb.toString();
+    return new String(string, StandardCharsets.US_ASCII);
   }
 }
