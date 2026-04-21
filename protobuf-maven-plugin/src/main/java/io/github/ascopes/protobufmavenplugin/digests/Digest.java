@@ -15,6 +15,7 @@
  */
 package io.github.ascopes.protobufmavenplugin.digests;
 
+import io.github.ascopes.protobufmavenplugin.utils.Unchecked;
 import io.github.ascopes.protobufmavenplugin.utils.VisibleForTestingOnly;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
@@ -33,10 +35,7 @@ import org.jspecify.annotations.Nullable;
  * @since 3.5.0
  */
 public final class Digest {
-  private static final byte[] HEX_CHARS = new byte[] {
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-      'a', 'b', 'c', 'd', 'e', 'f'
-  };
+  private static final HexFormat HEX = HexFormat.of();
 
   private final String algorithm;
   private final byte[] digest;
@@ -66,11 +65,11 @@ public final class Digest {
 
   @Override
   public String toString() {
-    return algorithm + ":" + encodeHex(digest);
+    return algorithm + ":" + HEX.formatHex(digest);
   }
 
   public String toHexString() {
-    return encodeHex(digest);
+    return HEX.formatHex(digest);
   }
 
   public void verify(InputStream inputStream) throws IOException {
@@ -91,18 +90,21 @@ public final class Digest {
     // de-alias it. We could possibly optimize this in the future
     // to check the length/2 before decoding.
     var messageDigest = getMessageDigest(algorithm);
-    var data = decodeHex(hex);
+
+    byte[] data;
+    try {
+      data = HEX.parseHex(hex);
+    } catch (IllegalArgumentException ex) {
+      throw invalidDigest(algorithm, hex, ex.getMessage(), ex);
+    }
 
     if (data.length != messageDigest.getDigestLength()) {
-      throw new DigestException(
-          "Illegal length "
-              + data.length
-              + " for decoded digest '"
-              + hex
-              + "' with algorithm '"
-              + messageDigest.getAlgorithm()
-              + "', expected "
-              + messageDigest.getDigestLength()
+      throw invalidDigest(
+          algorithm,
+          hex,
+          "illegal length " + data.length + ", expected " + messageDigest.getDigestLength()
+              + " bytes.",
+          null
       );
     }
 
@@ -114,16 +116,12 @@ public final class Digest {
   }
 
   public static Digest compute(String algorithm, byte[] data) {
-    try {
-      return compute(algorithm, new ByteArrayInputStream(data));
-    } catch (IOException ex) {
-      throw new IllegalStateException("unreachable", ex);
-    }
+    return Unchecked.call(() -> compute(algorithm, new ByteArrayInputStream(data)));
   }
 
   public static Digest compute(String algorithm, InputStream inputStream) throws IOException {
     var messageDigest = getMessageDigest(algorithm);
-    var buff = new byte[4_096];
+    var buff = new byte[8_192];
     int offset;
 
     while ((offset = inputStream.read(buff)) != -1) {
@@ -144,38 +142,16 @@ public final class Digest {
     }
   }
 
-  private static byte[] decodeHex(String hex) {
-    // Hex contains two digits per byte, and we disallow denoting
-    // sign here as it makes little sense. If we have an invalid length
-    // string, then let it raise an IndexOutOfBoundsException to simplify
-    // error handling.
-    var decoded = new byte[hex.length() / 2];
-    for (var i = 0; i < hex.length(); i += 2) {
-      try {
-        var hexByte = hex.substring(i, i + 2);
-        decoded[i / 2] = (byte) Integer.parseUnsignedInt(hexByte, 16);
-      } catch (NumberFormatException | IndexOutOfBoundsException ex) {
-        throw new DigestException(
-            "Invalid hex byte at position "
-                + (i + 1)
-                + " in hexadecimal string '"
-                + hex
-                + "'",
-            ex
-        );
-      }
-    }
-    return decoded;
-  }
-
-  private static String encodeHex(byte[] data) {
-    var string = new byte[data.length * 2];
-    for (var i = 0; i < data.length; ++i) {
-      // Remove the sign (-1 -> 255)
-      var value = data[i] & 0xFF;
-      string[i << 1] = HEX_CHARS[value >> 4];
-      string[(i << 1) + 1] = HEX_CHARS[value & 0xF];
-    }
-    return new String(string, StandardCharsets.US_ASCII);
+  private static DigestException invalidDigest(
+      String inputAlgorithm,
+      String inputDigest,
+      @Nullable String message,
+      @Nullable Exception cause
+  ) {
+    var fullMessage = "Failed to parse digest \"" + inputAlgorithm + ":" + inputDigest + "\", " 
+        + message;
+    return cause == null
+        ? new DigestException(fullMessage)
+        : new DigestException(fullMessage, cause);
   }
 }

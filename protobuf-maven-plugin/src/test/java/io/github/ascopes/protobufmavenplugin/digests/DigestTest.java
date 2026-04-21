@@ -235,8 +235,8 @@ class DigestTest {
         // as a set of bytes represented as hex digits, since we need
         // two digits per byte.
         .isThrownBy(() -> Digest.from("MD5", "0123456"))
-        .withMessage("Invalid hex byte at position 7 in hexadecimal string '0123456'")
-        .withCauseInstanceOf(IndexOutOfBoundsException.class);
+        .withMessage("Failed to parse digest \"MD5:0123456\", string length not even: 7")
+        .withCauseInstanceOf(IllegalArgumentException.class);
   }
 
   @DisplayName(".from(String, String) raises if the hex string contains invalid digits")
@@ -245,7 +245,8 @@ class DigestTest {
     // Then
     assertThatExceptionOfType(DigestException.class)
         .isThrownBy(() -> Digest.from("MD5", "012345zz"))
-        .withMessage("Invalid hex byte at position 7 in hexadecimal string '012345zz'")
+        .withMessage("Failed to parse digest \"MD5:012345zz\", "
+            + "not a hexadecimal digit: \"z\" = 122")
         .withCauseInstanceOf(NumberFormatException.class);
   }
 
@@ -266,7 +267,7 @@ class DigestTest {
     assertThatExceptionOfType(DigestException.class)
         .isThrownBy(() -> Digest.from("MD5", "deadbeef"))
         .withMessage(
-            "Illegal length 4 for decoded digest 'deadbeef' with algorithm 'MD5', expected 16"
+            "Failed to parse digest \"MD5:deadbeef\", illegal length 4, expected 16 bytes."
         )
         .withNoCause();
   }
