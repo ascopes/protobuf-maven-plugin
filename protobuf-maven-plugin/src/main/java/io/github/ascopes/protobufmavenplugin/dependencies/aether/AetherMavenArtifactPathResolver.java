@@ -26,10 +26,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.MavenSession;
@@ -107,38 +107,21 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
       Set<String> dependencyScopes,
       boolean includeProjectArtifacts
   ) throws ResolutionException {
-    var unresolvedDependencies = new ArrayList<org.eclipse.aether.graph.Dependency>();
+    var pluginDependencies = artifacts.stream()
+        .peek(artifact -> log.debug("Resolving plugin artifact \"{}\" as dependency", artifact))
+        .map(artifact -> aetherArtifactMapper.mapPmpArtifactToEclipseDependency(artifact, depth));
 
-    if (includeProjectArtifacts) {
-      log.debug("Querying project dependencies from Maven model, as requested.");
+    var projectDependencies = includeProjectArtifacts
+        ? getProjectDependencies()
+        : Stream.<org.eclipse.aether.graph.Dependency>empty();
 
-      // GH-938: Between v2.13.0 and v5.0.0 (inclusive) we switched to instructing Maven to resolve
-      // project dependencies for us. I've reverted that for now as this can cause issues when
-      // running this plugin with an incomplete project reactor, as documented in the above issue.
-      mavenSession.getCurrentProject().getDependencies()
-          .stream()
-          .peek(dependency -> log.debug("Resolving project dependency: {}", dependency))
-          .map(aetherArtifactMapper::mapMavenDependencyToEclipseDependency)
-          // Not entirely sure if we need to do this or not, as it seems that dependency management
-          // is laced into the Maven Model holding the unresolved dependencies prior to us being
-          // invoked. I'm not sure if this is just a side effect of how I am testing this though,
-          // so I've added this in to be extra safe.
-          .map(aetherDependencyManagement::fillManagedAttributes)
-          .peek(dependency -> log.debug("Resolved dependency to: {}", dependency))
-          .forEach(unresolvedDependencies::add);
-    }
-
-    artifacts.stream()
-        .peek(artifact -> log.debug("Resolving artifact \"{}\" as dependency", artifact))
-        .map(artifact -> aetherArtifactMapper.mapPmpArtifactToEclipseDependency(artifact, depth))
+    var unresolvedDependencies = Stream.concat(projectDependencies, pluginDependencies)
         .map(aetherDependencyManagement::fillManagedAttributes)
-        .forEach(unresolvedDependencies::add);
+        .toList();
 
-    var resolvedArtifacts = aetherResolver
+    return aetherResolver
         .resolveDependencies(unresolvedDependencies, dependencyScopes)
-        .stream();
-
-    return resolvedArtifacts
+        .stream()
         .collect(AetherDependencyManagement.deduplicateArtifacts())
         .values()
         .stream()
@@ -146,5 +129,16 @@ final class AetherMavenArtifactPathResolver implements MavenArtifactPathResolver
         // Order matters here, so don't convert to an unordered container in the
         // future. We make assumptions on the order of this elsewhere.
         .toList();
+  }
+
+  private Stream<org.eclipse.aether.graph.Dependency> getProjectDependencies() {
+    log.debug("Querying project dependencies from Maven model, as requested.");
+    // GH-938: Between v2.13.0 and v5.0.0 (inclusive) we switched to instructing Maven to resolve
+    // project dependencies for us. I've reverted that for now as this can cause issues when
+    // running this plugin with an incomplete project reactor, as documented in the above issue.
+    return mavenSession.getCurrentProject().getDependencies()
+        .stream()
+        .peek(dependency -> log.debug("Resolving project dependency: {}", dependency))
+        .map(aetherArtifactMapper::mapMavenDependencyToEclipseDependency);
   }
 }
