@@ -116,13 +116,6 @@ public interface GenerationRequest {
   @Nullable Path getOutputDescriptorFile();
 
   /**
-   * Whether to attach output {@code protobin} descriptor file to Maven project.
-   *
-   * @return flag indicating if descriptor file should be attached.
-   */
-  boolean isOutputDescriptorAttached();
-
-  /**
    * The Maven artifact type to use when attaching the {@code protobin} descriptor file to the Maven
    * project.
    *
@@ -276,6 +269,13 @@ public interface GenerationRequest {
    * @return the boolean preference.
    */
   boolean isLiteEnabled();
+
+  /**
+   * Whether to attach output {@code protobin} descriptor file to Maven project.
+   *
+   * @return flag indicating if descriptor file should be attached.
+   */
+  boolean isOutputDescriptorAttached();
 
   /**
    * Whether to include imports in the output {@code protobin} descriptor.
