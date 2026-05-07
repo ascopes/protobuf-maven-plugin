@@ -15,10 +15,12 @@
  */
 package io.github.ascopes.protobufmavenplugin.plugins;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -36,6 +38,8 @@ import org.immutables.value.Value.Modifiable;
 public abstract non-sealed class PathProtocPlugin implements ProtocPlugin {
 
   public abstract String getName();
+
+  public abstract @Nullable Digest getDigest();
 
   @Default.Boolean(false)
   public abstract boolean isOptional();
