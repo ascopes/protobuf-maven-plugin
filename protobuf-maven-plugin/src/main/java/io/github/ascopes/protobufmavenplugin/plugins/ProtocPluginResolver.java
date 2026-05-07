@@ -42,6 +42,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,9 +155,7 @@ public final class ProtocPluginResolver {
     log.debug("Resolving binary Maven protoc plugin \"{}\"", plugin);
 
     var path = artifactPathResolver.resolveArtifact(plugin);
-
     var id = computeId(path, index);
-
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path, id));
   }
 
@@ -177,8 +176,8 @@ public final class ProtocPluginResolver {
         "No plugin named \"" + plugin.getName() + "\" was found on the system path"
     ));
 
+    verifyDigest(plugin.getName(), path, plugin.getDigest());
     var id = computeId(path, index);
-
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path, id));
   }
 
@@ -199,21 +198,8 @@ public final class ProtocPluginResolver {
         "Plugin at " + plugin.getUrl() + " does not exist"
     ));
 
-    if (plugin.getDigest() != null) {
-      log.debug("Verifying digest of \"{}\" against \"{}\"", plugin.getUrl(), plugin.getDigest());
-
-      try (var is = new BufferedInputStream(Files.newInputStream(path))) {
-        plugin.getDigest().verify(is);
-      } catch (IOException ex) {
-        throw new ResolutionException(
-            "Failed to compute digest of \"" + plugin.getUrl() + "\": " + ex,
-            ex
-        );
-      }
-    }
-
+    verifyDigest(plugin.getUrl().toString(), path, plugin.getDigest());
     var id = computeId(path, index);
-
     return Optional.of(createResolvedProtocPlugin(plugin, defaultOutputDirectory, path, id));
   }
 
@@ -274,5 +260,24 @@ public final class ProtocPluginResolver {
 
   private String computeId(Path path, int index) {
     return index + "_" + Digest.compute("SHA-1", path.toString()).toHexString();
+  }
+
+  private void verifyDigest(String name, Path file, @Nullable Digest digest)
+      throws ResolutionException {
+
+    if (digest == null) {
+      return;
+    }
+
+    log.debug("Verifying digest of \"{}\" against \"{}\"", name, digest);
+
+    try (var is = new BufferedInputStream(Files.newInputStream(file))) {
+      digest.verify(is);
+    } catch (IOException ex) {
+      throw new ResolutionException(
+          "Failed to compute digest of \"" + name + "\": " + ex,
+          ex
+      );
+    }
   }
 }
