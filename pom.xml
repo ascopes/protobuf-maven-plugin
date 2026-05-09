@@ -550,9 +550,13 @@
 
             <execution>
               <goals>
-                <goal>addPluginArtifactMetadata</goal>
                 <goal>descriptor</goal>
               </goals>
+              <configuration>
+                <extractors>
+                  <extractor>java-annotations</extractor>
+                </extractors>
+              </configuration>
             </execution>
           </executions>
         </plugin>
