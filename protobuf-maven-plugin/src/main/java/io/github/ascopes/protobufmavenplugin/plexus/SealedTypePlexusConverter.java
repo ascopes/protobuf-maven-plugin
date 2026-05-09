@@ -96,7 +96,7 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
   ) throws ComponentConfigurationException {
     var kind = configuration.getAttribute("kind");
 
-    if (configuration.getValue() != null) {
+    if (configuration.getValue() != null && !configuration.getValue().isBlank()) {
       if (kind == null) {
         return parseFromString(configuration, type, evaluator);
       }
@@ -113,13 +113,6 @@ final class SealedTypePlexusConverter extends AbstractBasicConverter {
         // POM with an object in the child POM. Plexus will default to merging these together
         // directly without discarding one or the other. Right now we cannot easily work out
         // which takes precedence to do this in a more intelligent way.
-        log.warn(
-            "Both a string value and a nested object value were merged by Maven. To avoid "
-                + "confusing behaviour, the former will be dropped. Fix this by setting "
-                + "the combine.self=\"override\" attribute on the configuration. The merged "
-                + "configuration is:\n{}", configuration
-        );
-
         configuration.setValue(null);
       } else {
         throw new ComponentConfigurationException(
