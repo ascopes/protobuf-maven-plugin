@@ -143,7 +143,7 @@ Note that paths are resolved relative to the directory that Maven is invoked fro
 Users can include a digest to verify the binary contents against if they require reproducible
 builds:
 
-```
+```xml
 <protoc kind="url">
   <url>file:///opt/protoc/protoc.exe</url>
   <digest>sha1:e4c905a33adcb9a589896d09f3604a7c5653b2c0</digest>
