@@ -672,6 +672,8 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullSource
   @ValueSource(strings = "non-null")
   @ParameterizedTest(name = "for {0} digest")
+  @Deprecated(forRemoval = true)
+  @SuppressWarnings("removal")
   void protocDigestIsSetInTheRequest(@Nullable String digestValue) throws Throwable {
     // Given
     var digest = Optional.ofNullable(digestValue)

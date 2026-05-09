@@ -522,15 +522,14 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   /**
    * Optional digest to verify {@code protoc} against.
    *
-   * <p>Generally, users should not need to provide this, as the Maven Central
-   * {@code protoc} binaries will already be digest-verified as part of distribution. Users may wish
-   * to specify this if using a {@code PATH}-based binary, or using a URL for {@code protoc}.
-   *
-   * <p>This is a string in the format {@code sha512:1a2b3c...}, using any
-   * message digest algorithm supported by the current JDK.
-   *
    * @since 3.5.0
+   * @deprecated this is deprecated for removal in a future version. Use
+   *     the {@code <digest/>} attribute on the path and URL protoc distribution
+   *     objects instead, moving forwards. See
+   *     <a href="https://ascopes.github.io/protobuf-maven-plugin/changing-protoc-versions.html">
+   *     "changing protoc versions"</a> for usage examples and documentation.
    */
+  @Deprecated(since = "5.1.4", forRemoval = true)
   @Parameter(property = "protobuf.compiler.digest")
   @Nullable Digest protocDigest;
 

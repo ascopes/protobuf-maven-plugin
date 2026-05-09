@@ -15,10 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.net.URI;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.Nullable;
+
 
 /**
  * Model base for a {@code protoc} distribution that is located at a URI.
@@ -37,4 +40,11 @@ public abstract non-sealed class UriProtocDistribution implements ProtocDistribu
    * @return the URI.
    */
   public abstract URI getUrl();
+
+  /**
+   * Get the digest.
+   *
+   * @return the digest or {@code null} if unset.
+   */
+  public abstract @Nullable Digest getDigest();
 }
