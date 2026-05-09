@@ -269,13 +269,13 @@ public final class ProtocPluginResolver {
       return;
     }
 
-    log.debug("Verifying digest of \"{}\" against \"{}\"", name, digest);
+    log.debug("Verifying digest of \"{}\" at \"{}\" against \"{}\"", name, file, digest);
 
     try (var is = new BufferedInputStream(Files.newInputStream(file))) {
       digest.verify(is);
     } catch (IOException ex) {
       throw new ResolutionException(
-          "Failed to compute digest of \"" + name + "\": " + ex,
+          "Failed to compute digest of \"" + name + "\" at \"" + file + "\": " + ex,
           ex
       );
     }

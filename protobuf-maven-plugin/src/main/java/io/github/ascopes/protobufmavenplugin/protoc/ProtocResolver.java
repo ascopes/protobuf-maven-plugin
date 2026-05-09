@@ -36,6 +36,8 @@ import javax.inject.Named;
 import org.apache.maven.execution.scope.MojoExecutionScoped;
 import org.eclipse.sisu.Description;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolver for the {@code protoc} executable.
@@ -46,6 +48,8 @@ import org.jspecify.annotations.Nullable;
 @MojoExecutionScoped
 @Named
 public final class ProtocResolver {
+
+  private static final Logger log = LoggerFactory.getLogger(ProtocResolver.class);
 
   private final MavenArtifactPathResolver artifactPathResolver;
   private final PlatformClassifierFactory platformClassifierFactory;
@@ -69,36 +73,22 @@ public final class ProtocResolver {
       ProtocDistribution distribution,
       @Nullable Digest digest
   ) throws ResolutionException {
-    Optional<Path> path;
+    Optional<Path> maybePath;
 
     if (distribution instanceof BinaryMavenProtocDistribution bmpd) {
-      path = resolveBinaryMavenDistribution(bmpd);
+      maybePath = resolveBinaryMavenDistribution(bmpd);
     } else if (distribution instanceof PathProtocDistribution ppd) {
-      path = resolvePathDistribution(ppd);
+      maybePath = resolvePathDistribution(ppd);
     } else if (distribution instanceof UriProtocDistribution upd) {
-      path = resolveUriDistribution(upd);
+      maybePath = resolveUriDistribution(upd);
     } else {
       throw new UnsupportedOperationException("unsupported distribution " + distribution);
     }
 
-    if (path.isEmpty()) {
-      return Optional.empty();
-    }
+    // Deprecated for removal.
+    verifyDigest(distribution.toString(), maybePath.orElse(null), digest);
 
-    var resolvedPath = path.get();
-
-    if (digest != null) {
-      try (var is = new BufferedInputStream(Files.newInputStream(resolvedPath))) {
-        digest.verify(is);
-      } catch (IOException ex) {
-        throw new ResolutionException(
-            "Failed to compute digest of \"" + resolvedPath + "\": " + ex,
-            ex
-        );
-      }
-    }
-
-    return path;
+    return maybePath;
   }
 
   private Optional<Path> resolveBinaryMavenDistribution(
@@ -118,12 +108,43 @@ public final class ProtocResolver {
   private Optional<Path> resolveUriDistribution(
       UriProtocDistribution distribution
   ) throws ResolutionException {
-    return urlResourceFetcher.fetchFileFromUri(distribution.getUrl(), ".exe", true);
+    var maybePath = urlResourceFetcher.fetchFileFromUri(distribution.getUrl(), ".exe", true);
+
+    verifyDigest(
+        distribution.getUrl().toString(),
+        maybePath.orElse(null),
+        distribution.getDigest()
+    );
+
+    return maybePath;
   }
 
   private Optional<Path> resolvePathDistribution(
       PathProtocDistribution distribution
   ) throws ResolutionException {
-    return systemPathResolver.resolve(distribution.getName());
+    var maybePath = systemPathResolver.resolve(distribution.getName());
+
+    verifyDigest(distribution.getName(), maybePath.orElse(null), distribution.getDigest());
+
+    return maybePath;
+  }
+
+  private void verifyDigest(String name, @Nullable Path file, @Nullable Digest digest)
+      throws ResolutionException {
+
+    if (file == null || digest == null) {
+      return;
+    }
+
+    log.debug("Verifying digest of \"{}\" at \"{}\" against \"{}\"", name, file, digest);
+
+    try (var is = new BufferedInputStream(Files.newInputStream(file))) {
+      digest.verify(is);
+    } catch (IOException ex) {
+      throw new ResolutionException(
+          "Failed to compute digest of \"" + name + "\" at \"" + file + "\": " + ex,
+          ex
+      );
+    }
   }
 }

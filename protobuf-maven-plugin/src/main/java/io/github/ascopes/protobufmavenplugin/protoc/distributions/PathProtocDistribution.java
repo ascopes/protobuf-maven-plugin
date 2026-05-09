@@ -15,10 +15,12 @@
  */
 package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
+import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Model base for a {@code protoc} distribution that is located on the system {@code $PATH}.
@@ -42,4 +44,11 @@ public abstract non-sealed class PathProtocDistribution implements ProtocDistrib
   public String getName() {
     return "protoc";
   }
+
+  /**
+   * Get the digest.
+   *
+   * @return the digest or {@code null} if unset.
+   */
+  public abstract @Nullable Digest getDigest();
 }

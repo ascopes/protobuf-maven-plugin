@@ -100,6 +100,19 @@ be searched for files where their name matches `protoc` case-insensitively, igno
 extension. The file extension must match one of the extensions specified in the `%PATHEXT%`
 environment variable. The above example would match `protoc.exe` on Windows, as an example.
 
+Users can include a digest to verify the binary contents against if they require reproducible
+builds:
+
+```xml
+<protoc kind="path">
+  <name>protoc</name>
+  <digest>sha1:e4c905a33adcb9a589896d09f3604a7c5653b2c0</digest>
+</protoc>
+```
+
+The digest algorithm can be any algorithm supported by your JDK, such as `md5`, `sha1`,
+`sha256`, `sha512`, etc.
+
 ## Using protoc from a specific path
 
 You may wish to run `protoc` from a specific path on your file system. If you need to do this,
@@ -126,6 +139,19 @@ The syntax for this is `file://$PATH`, where `$PATH` is a relative or absolute p
 forward-slashes for this syntax rather than backslashes.
 
 Note that paths are resolved relative to the directory that Maven is invoked from.
+
+Users can include a digest to verify the binary contents against if they require reproducible
+builds:
+
+```
+<protoc kind="url">
+  <url>file:///opt/protoc/protoc.exe</url>
+  <digest>sha1:e4c905a33adcb9a589896d09f3604a7c5653b2c0</digest>
+</protoc>
+```
+
+The digest algorithm can be any algorithm supported by your JDK, such as `md5`, `sha1`,
+`sha256`, `sha512`, etc.
 
 ## Using protoc from a remote server
 
@@ -162,3 +188,16 @@ This is not recommended outside specific use cases, and care should be taken to 
 legitimacy and security of any URLs being provided prior to adding them.
 
 Providing authentication details or proxy details is not supported at this time.
+
+Users can include a digest to verify the binary contents against if they require reproducible
+builds:
+
+```xml
+<protoc kind="url">
+  <url>https://company-server.internal/protoc/protoc.exe</url>
+  <digest>sha1:e4c905a33adcb9a589896d09f3604a7c5653b2c0</digest>
+</protoc>
+```
+
+The digest algorithm can be any algorithm supported by your JDK, such as `md5`, `sha1`,
+`sha256`, `sha512`, etc.
