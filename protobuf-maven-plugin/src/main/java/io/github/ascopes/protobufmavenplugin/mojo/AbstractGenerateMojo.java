@@ -28,7 +28,7 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.OutputDescriptorAttachmentRegistrar;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
-import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import java.nio.file.Files;

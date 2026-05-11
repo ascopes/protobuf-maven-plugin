@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.plugins.distributions;
 
 import java.nio.file.Path;
 import org.jspecify.annotations.Nullable;

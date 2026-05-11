@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Distribution models for the {@literal <protoc/>} plugin parameter.
+ * Distribution models for the {@literal <plugins/>} plugin parameter.
  */
-package io.github.ascopes.protobufmavenplugin.protoc.distributions;
+package io.github.ascopes.protobufmavenplugin.plugins.distributions;

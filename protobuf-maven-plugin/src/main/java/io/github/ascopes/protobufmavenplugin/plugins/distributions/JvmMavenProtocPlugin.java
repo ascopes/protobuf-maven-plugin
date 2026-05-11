@@ -13,28 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.ascopes.protobufmavenplugin.plugins;
+package io.github.ascopes.protobufmavenplugin.plugins.distributions;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
-import org.immutables.value.Value.Immutable;
+import java.util.List;
 import org.immutables.value.Value.Modifiable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 
 /**
  * Implementation independent descriptor for a protoc plugin that can be resolved from a Maven
- * repository and corresponds to a native executable.
+ * repository.
  *
  * @author Ashley Scopes
- * @since 4.1.0
+ * @since 2.0.0
  */
-@Immutable
 @Modifiable
-@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocPluginBean.class)
-public abstract non-sealed class BinaryMavenProtocPlugin
+@KindHint(kind = "jvm-maven", implementation = JvmMavenProtocPluginBean.class)
+public abstract non-sealed class JvmMavenProtocPlugin
     extends MavenArtifact
     implements ProtocPlugin {
+
+  // Version is never null here as we do not infer from dependency management.
+  @Override
+  public abstract @NonNull String getVersion();
+
+  public abstract @Nullable List<String> getJvmArgs();
+
+  public abstract @Nullable List<String> getJvmConfigArgs();
+
+  // Null if unset or inferred from MANIFEST.MF.
+  public abstract @Nullable String getMainClass();
 
   @DeadCodeGenerated(reason = "Must be provided to keep immutables happy.")
   @Override

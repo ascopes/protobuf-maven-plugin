@@ -18,7 +18,7 @@ package io.github.ascopes.protobufmavenplugin.generation;
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
-import io.github.ascopes.protobufmavenplugin.plugins.ProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ProtocDistribution;
 import java.nio.file.Path;
 import java.util.Collection;
