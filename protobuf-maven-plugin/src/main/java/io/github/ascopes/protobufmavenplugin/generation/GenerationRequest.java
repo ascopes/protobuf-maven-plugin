@@ -139,17 +139,6 @@ public interface GenerationRequest {
   @Nullable String getOutputDescriptorAttachmentClassifier();
 
   /**
-   * The digest of the {@code protoc} binary to verify, or {@code null} if no verification should
-   * take place.
-   *
-   * <p>This does not affect any verification performed by Aether.
-   *
-   * @return the digest.
-   * @since 3.5.0
-   */
-  @Nullable Digest getProtocDigest();
-
-  /**
    * The various {@code protoc} plugins to invoke.
    *
    * @return the list of plugins.

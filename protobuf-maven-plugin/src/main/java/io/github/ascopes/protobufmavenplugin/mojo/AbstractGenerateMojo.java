@@ -21,7 +21,6 @@ import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
-import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
 import io.github.ascopes.protobufmavenplugin.generation.ImmutableGenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.Language;
@@ -520,20 +519,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
   @Nullable List<ProtocPlugin> plugins;
 
   /**
-   * Optional digest to verify {@code protoc} against.
-   *
-   * @since 3.5.0
-   * @deprecated this is deprecated for removal in a future version. Use
-   *     the {@code <digest/>} attribute on the path and URL protoc distribution
-   *     objects instead, moving forwards. See
-   *     <a href="https://ascopes.github.io/protobuf-maven-plugin/changing-protoc-versions.html">
-   *     "changing protoc versions"</a> for usage examples and documentation.
-   */
-  @Deprecated(since = "5.1.4", forRemoval = true)
-  @Parameter(property = "protobuf.compiler.digest")
-  @Nullable Digest protocDigest;
-
-  /**
    * The distribution of {@code protoc} to use.
    *
    * <h4>String values</h4>
@@ -906,7 +891,6 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
         .outputDescriptorIncludeSourceInfo(outputDescriptorIncludeSourceInfo)
         .outputDescriptorRetainOptions(outputDescriptorRetainOptions)
         .outputDirectory(outputDirectory())
-        .protocDigest(protocDigest)
         .protocPlugins(nonNullList(plugins))
         .protoc(protoc())
         .registerAsCompilationRoot(registerAsCompilationRoot)

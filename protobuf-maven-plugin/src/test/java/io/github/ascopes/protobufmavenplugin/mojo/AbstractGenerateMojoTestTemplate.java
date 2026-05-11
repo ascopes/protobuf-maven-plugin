@@ -30,7 +30,6 @@ import static org.mockito.Mockito.withSettings;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
-import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationResult;
@@ -666,29 +665,6 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
     verify(mojo.sourceCodeGenerator).generate(captor.capture());
     var actualRequest = captor.getValue();
     assertThat(actualRequest.getOutputDirectory()).isEqualTo(expectedOutputDirectory);
-  }
-
-  @DisplayName("the protocDigest is set in the request")
-  @NullSource
-  @ValueSource(strings = "non-null")
-  @ParameterizedTest(name = "for {0} digest")
-  @Deprecated(forRemoval = true)
-  @SuppressWarnings("removal")
-  void protocDigestIsSetInTheRequest(@Nullable String digestValue) throws Throwable {
-    // Given
-    var digest = Optional.ofNullable(digestValue)
-        .map(v -> Digest.compute("SHA-1", v))
-        .orElse(null);
-    mojo.protocDigest = digest;
-
-    // When
-    mojo.execute();
-
-    // Then
-    var captor = ArgumentCaptor.forClass(GenerationRequest.class);
-    verify(mojo.sourceCodeGenerator).generate(captor.capture());
-    var actualRequest = captor.getValue();
-    assertThat(actualRequest.getProtocDigest()).isSameAs(digest);
   }
 
   @DisplayName("when plugins is null, expect an empty list in the request")

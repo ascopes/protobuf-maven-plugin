@@ -69,10 +69,7 @@ public final class ProtocResolver {
     this.urlResourceFetcher = urlResourceFetcher;
   }
 
-  public Optional<Path> resolve(
-      ProtocDistribution distribution,
-      @Nullable Digest digest
-  ) throws ResolutionException {
+  public Optional<Path> resolve(ProtocDistribution distribution) throws ResolutionException {
     Optional<Path> maybePath;
 
     if (distribution instanceof BinaryMavenProtocDistribution bmpd) {
@@ -84,9 +81,6 @@ public final class ProtocResolver {
     } else {
       throw new UnsupportedOperationException("unsupported distribution " + distribution);
     }
-
-    // Deprecated for removal.
-    verifyDigest(distribution.toString(), maybePath.orElse(null), digest);
 
     return maybePath;
   }
