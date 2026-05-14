@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.protoc;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifactPathResolver;
 import io.github.ascopes.protobufmavenplugin.dependencies.PlatformClassifierFactory;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
+import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.BinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ImmutableBinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.PathProtocDistribution;
@@ -26,9 +27,7 @@ import io.github.ascopes.protobufmavenplugin.protoc.distributions.UriProtocDistr
 import io.github.ascopes.protobufmavenplugin.system.SystemPathBinaryResolver;
 import io.github.ascopes.protobufmavenplugin.urls.UriResourceFetcher;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -138,7 +137,7 @@ public final class ProtocResolver {
 
     log.debug("Verifying digest of \"{}\" at \"{}\" against \"{}\"", name, file, digest);
 
-    try (var is = new BufferedInputStream(Files.newInputStream(file))) {
+    try (var is = FileUtils.newBufferedInputStream(file)) {
       digest.verify(is);
     } catch (IOException ex) {
       throw new ResolutionException(
