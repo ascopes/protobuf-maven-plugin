@@ -17,11 +17,11 @@ updates:
     directories:
       - /
       - /protobuf-maven-plugin/src/it/setup
-    groups:
-      # Group all Maven updates into a single PR.
-      maven:
-        patterns:
-          - "*"
+    #groups:
+    #  # Group all Maven updates into a single PR.
+    #  maven:
+    #    patterns:
+    #      - "*"
     schedule:
       interval: weekly
       timezone: Europe/London
