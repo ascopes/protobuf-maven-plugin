@@ -91,15 +91,15 @@
     <assertj.version>4.0.0-M1</assertj.version>
     <commons-compress.version>1.28.0</commons-compress.version>
     <errorprone.version>2.49.0</errorprone.version>
-    <immutables.version>2.12.1</immutables.version>
+    <immutables.version>2.12.2</immutables.version>
     <javax-annotation.version>1.3.2</javax-annotation.version>
     <jspecify.version>1.0.0</jspecify.version>
     <json.version>20251224</json.version>
     <jsonassert.version>2.0-rc1</jsonassert.version>
     <junit.version>6.0.0</junit.version>
-    <maven-core.version>3.9.15</maven-core.version>
+    <maven-core.version>3.9.16</maven-core.version>
     <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
-    <maven-plugin-api.version>3.9.15</maven-plugin-api.version>
+    <maven-plugin-api.version>3.9.16</maven-plugin-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.27</maven-resolver-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
@@ -108,7 +108,7 @@
     <mockito.version>5.23.0</mockito.version>
     <nullaway.version>0.13.4</nullaway.version>
     <protobuf.version>4.34.1</protobuf.version>
-    <slf4j.version>2.0.17</slf4j.version>
+    <slf4j.version>2.0.18</slf4j.version>
     <wiremock.version>3.13.2</wiremock.version>
 
     <!-- Plugins -->
