@@ -402,6 +402,10 @@ public abstract class AbstractGenerateMojo extends AbstractMojo {
    *
    * <p>See the protobuf documentation for the pros and cons of this.
    *
+   * <p>Note that lite sources will
+   * <a href="https://github.com/protocolbuffers/protobuf/commit/710de9f91e252e53a20bc7130481cac6fbe953f9">
+   * depend on <code>sun.misc.Unsafe</code> to operate</a>.
+   *
    * @since 0.0.1
    */
   @Parameter(defaultValue = "false")
