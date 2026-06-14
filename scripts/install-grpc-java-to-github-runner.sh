@@ -39,7 +39,7 @@ case "$(uname | lower)" in
     # Only support for aarch64 in new macOS versions.
     readonly os_name=osx
     case "$(uname -m | lower)" in
-      aarch64)
+      aarch64|*arm*)
         readonly os_arch=aarch_64
         ;;
       *)
