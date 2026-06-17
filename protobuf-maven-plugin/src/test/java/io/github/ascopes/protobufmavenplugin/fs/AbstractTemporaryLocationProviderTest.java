@@ -105,7 +105,7 @@ class AbstractTemporaryLocationProviderTest {
         .isDirectory();
   }
 
-  private final class SomeTemporaryLocationProvider extends AbstractTemporaryLocationProvider {
+  final class SomeTemporaryLocationProvider extends AbstractTemporaryLocationProvider {
 
     SomeTemporaryLocationProvider() {
       super(mojoExecution);
