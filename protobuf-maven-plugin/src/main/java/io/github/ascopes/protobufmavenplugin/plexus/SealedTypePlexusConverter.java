@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNullElse;
 import static java.util.function.Predicate.not;
 
 import io.github.ascopes.protobufmavenplugin.utils.AnnotationProxy;
-import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
