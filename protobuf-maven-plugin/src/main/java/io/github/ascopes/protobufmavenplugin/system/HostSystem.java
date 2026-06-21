@@ -126,6 +126,12 @@ public final class HostSystem {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("mac");
   }
 
+  public boolean isProbablySolaris() {
+    var osNameNormalized = operatingSystem.toLowerCase(Locale.ROOT);
+
+    return osNameNormalized.startsWith("sunos") || osNameNormalized.startsWith("solaris");
+  }
+
   public boolean isProbablyWindows() {
     return operatingSystem.toLowerCase(Locale.ROOT).startsWith("win");
   }

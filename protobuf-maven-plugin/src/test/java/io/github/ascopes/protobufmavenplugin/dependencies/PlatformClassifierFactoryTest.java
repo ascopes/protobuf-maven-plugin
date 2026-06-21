@@ -20,6 +20,7 @@ import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.linux;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.macOs;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.otherOs;
+import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.solaris;
 import static io.github.ascopes.protobufmavenplugin.fixtures.HostSystemFixtures.windows;
 import static io.github.ascopes.protobufmavenplugin.fixtures.RandomFixtures.someBasicString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -92,6 +93,8 @@ class PlatformClassifierFactoryTest {
         arguments(macOs().and(arch("amd64")), "osx-x86_64"),
         arguments(macOs().and(arch("x86_64")), "osx-x86_64"),
         arguments(macOs().and(arch("aarch64")), "osx-aarch_64"),
+        arguments(solaris().and(arch("amd64")), "sunos-x86_64"),
+        arguments(solaris().and(arch("x86_64")), "sunos-x86_64"),
         arguments(windows().and(arch("amd64")), "windows-x86_64"),
         arguments(windows().and(arch("x86_64")), "windows-x86_64"),
         arguments(windows().and(arch("x86")), "windows-x86_32"),
@@ -104,6 +107,7 @@ class PlatformClassifierFactoryTest {
     return Stream.of(
         linux().and(arch("some unknown CPU arch")),
         macOs().and(arch("some unknown CPU arch")),
+        solaris().and(arch("some unknown CPU arch")),
         windows().and(arch("some unknown CPU arch")),
         otherOs().and(arch("x86_32")),
         otherOs().and(arch("x86_64")),
