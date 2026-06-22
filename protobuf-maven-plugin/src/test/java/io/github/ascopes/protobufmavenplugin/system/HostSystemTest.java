@@ -194,6 +194,47 @@ class HostSystemTest {
     Assertions.assertThat(actualResult).isEqualTo(expectedResult);
   }
 
+  @DisplayName(".isProbablySolaris() returns true if the OS is probably Solaris")
+  @CsvSource({
+      "              LINUX, false",
+      "              Linux, false",
+      "              linux, false",
+      "            FreeBSD, false",
+      "            OpenBSD, false",
+      "               OS/2, false",
+      "            Solaris, true",
+      "              SunOS, true",
+      "               Irix, false",
+      "             OS/400, false",
+      "              HP-UX, false",
+      "                AIX, false",
+      "      Mac OS X 10.0, false",
+      "     Mac OS X 10.15, false",
+      "        Mac OS X 11, false",
+      "        Mac OS X 12, false",
+      "        Mac OS X 13, false",
+      "          Windows 7, false",
+      "          Windows 8, false",
+      "        Windows 8.1, false",
+      "         Windows 10, false",
+      "         Windows 11, false",
+      "Windows Server 2019, false",
+  })
+  @ParameterizedTest(name = "returns {1} on {0}")
+  void isProbablySolarisReturnsTrueIfTheOsIsProbablySolaris(String osName, boolean expectedResult) {
+    // Given
+    var properties = new Properties();
+    var env = Map.<String, String>of();
+    properties.put("os.name", osName);
+    var hostSystemBean = newInstance(properties, env);
+
+    // When
+    var actualResult = hostSystemBean.isProbablySolaris();
+
+    // Then
+    Assertions.assertThat(actualResult).isEqualTo(expectedResult);
+  }
+
   @DisplayName(".getJavaExecutablePath() returns the Java executable")
   @CsvSource({
       " Windows, java.exe",

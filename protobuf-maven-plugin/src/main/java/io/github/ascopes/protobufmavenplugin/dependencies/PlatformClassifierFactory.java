@@ -54,6 +54,8 @@ public final class PlatformClassifierFactory {
       osKey = "linux";
     } else if (hostSystem.isProbablyMacOs()) {
       osKey = "macos";
+    } else if (hostSystem.isProbablySolaris()) {
+      osKey = "sunos";
     } else if (hostSystem.isProbablyWindows()) {
       osKey = "windows";
     } else {

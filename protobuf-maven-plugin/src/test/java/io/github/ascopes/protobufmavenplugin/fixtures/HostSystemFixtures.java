@@ -48,6 +48,7 @@ public final class HostSystemFixtures {
     return namedConfigurer("Linux", hs -> {
       when(hs.isProbablyLinux()).thenReturn(true);
       when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablySolaris()).thenReturn(false);
       when(hs.isProbablyWindows()).thenReturn(false);
     });
   }
@@ -56,6 +57,16 @@ public final class HostSystemFixtures {
     return namedConfigurer("Mac OS", hs -> {
       when(hs.isProbablyLinux()).thenReturn(false);
       when(hs.isProbablyMacOs()).thenReturn(true);
+      when(hs.isProbablySolaris()).thenReturn(false);
+      when(hs.isProbablyWindows()).thenReturn(false);
+    });
+  }
+
+  public static HostSystemMockConfigurer solaris() {
+    return namedConfigurer("SunOS", hs -> {
+      when(hs.isProbablyLinux()).thenReturn(false);
+      when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablySolaris()).thenReturn(true);
       when(hs.isProbablyWindows()).thenReturn(false);
     });
   }
@@ -64,6 +75,7 @@ public final class HostSystemFixtures {
     return namedConfigurer("Windows", hs -> {
       when(hs.isProbablyLinux()).thenReturn(false);
       when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablySolaris()).thenReturn(false);
       when(hs.isProbablyWindows()).thenReturn(true);
     });
   }
@@ -72,6 +84,7 @@ public final class HostSystemFixtures {
     return namedConfigurer("an unknown OS", hs -> {
       when(hs.isProbablyLinux()).thenReturn(false);
       when(hs.isProbablyMacOs()).thenReturn(false);
+      when(hs.isProbablySolaris()).thenReturn(false);
       when(hs.isProbablyWindows()).thenReturn(false);
     });
   }
