@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNullElse;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import io.github.ascopes.protobufmavenplugin.utils.StringUtils;
 import java.io.BufferedInputStream;
@@ -30,6 +31,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -86,16 +88,19 @@ public final class UriResourceFetcher {
   private final MavenSession mavenSession;
   private final TemporarySpace temporarySpace;
   private final UrlFactory urlFactory;
+  private final HostSystem hostSystem;
 
   @Inject
   public UriResourceFetcher(
       MavenSession mavenSession,
       UrlFactory urlFactory,
-      TemporarySpace temporarySpace
+      TemporarySpace temporarySpace,
+      HostSystem hostSystem
   ) {
     this.mavenSession = mavenSession;
     this.temporarySpace = temporarySpace;
     this.urlFactory = urlFactory;
+    this.hostSystem = hostSystem;
   }
 
   /**
@@ -222,6 +227,14 @@ public final class UriResourceFetcher {
         ? digest
         : path.substring(lastSlash + 1) + "-" + digest;
 
+    // If the executable file ends with a known executable extension
+    // defined in PATHEXT env variable, keep it.
+    var lowerCasePath = path.toLowerCase(Locale.ROOT);
+    if (hostSystem.getSystemPathExtensions().stream()
+        .map(ext -> ext.toLowerCase(Locale.ROOT))
+        .anyMatch(lowerCasePath::endsWith)) {
+      extension = path.substring(path.lastIndexOf('.'));
+    }
     return temporarySpace
         .createTemporarySpace("url", url.getProtocol())
         .resolve(fileName + extension);

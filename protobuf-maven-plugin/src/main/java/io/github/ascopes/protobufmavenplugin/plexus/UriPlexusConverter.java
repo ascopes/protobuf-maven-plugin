@@ -48,6 +48,8 @@ import org.eclipse.sisu.Description;
 @Singleton
 final class UriPlexusConverter extends AbstractBasicConverter {
 
+  private static final String FILE_SCHEME = "file:";
+
   @Override
   public boolean canConvert(Class<?> type) {
     return URI.class.equals(type);
@@ -55,6 +57,10 @@ final class UriPlexusConverter extends AbstractBasicConverter {
 
   @Override
   protected Object fromString(String str) throws ComponentConfigurationException {
+    if (str.regionMatches(true, 0, FILE_SCHEME, 0, FILE_SCHEME.length())) {
+      str = str.replace('\\', '/');
+    }
+
     try {
       return new URI(str);
     } catch (URISyntaxException ex) {
