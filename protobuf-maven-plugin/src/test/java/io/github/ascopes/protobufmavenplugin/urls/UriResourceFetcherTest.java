@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fs.FileUtils;
 import io.github.ascopes.protobufmavenplugin.fs.TemporarySpace;
+import io.github.ascopes.protobufmavenplugin.system.HostSystem;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,6 +47,8 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.maven.execution.MavenSession;
@@ -77,6 +80,9 @@ class UriResourceFetcherTest {
 
   @Mock
   UrlFactory urlFactory;
+
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+  HostSystem hostSystem;
 
   @InjectMocks
   UriResourceFetcher uriResourceFetcher;
@@ -400,6 +406,67 @@ class UriResourceFetcherTest {
     // Then
     assertThat(result)
         .isEmpty();
+  }
+
+  @DisplayName("Executable keeps file extensions defined in  $PATHEXT")
+  @Test
+  void executableExtensionsAreHandledCorrectly() throws Exception {
+    // Given
+    var txtUri = URI.create("file:///foo/foo/bar/baz.txt");
+    var txtUrl = someUrlWithResolvedContent(txtUri, false, "");
+    var exeUri = URI.create("file:///foo/foo/bar/baz.exe");
+    var exeUrl = someUrlWithResolvedContent(exeUri, false, "");
+    var cmdUri = URI.create("file:///foo/foo/bar/baz.CMD");
+    var cmdUrl = someUrlWithResolvedContent(cmdUri, false, "");
+    var ps1Uri = URI.create("file:///foo/foo/bar/baz.ps1");
+    var ps1Url = someUrlWithResolvedContent(ps1Uri, false, "");
+    var batUri = URI.create("file:///foo/foo/bar/baz.bat");
+    var batUrl = someUrlWithResolvedContent(batUri, false, "");
+    var shUri = URI.create("file:///foo/foo/bar/baz.sh");
+    var shUrl = someUrlWithResolvedContent(shUri, false, "");
+    when(urlFactory.create(txtUri))
+        .thenReturn(txtUrl);
+    when(urlFactory.create(exeUri))
+        .thenReturn(exeUrl);
+    when(urlFactory.create(cmdUri))
+        .thenReturn(cmdUrl);
+    when(urlFactory.create(ps1Uri))
+        .thenReturn(ps1Url);
+    when(urlFactory.create(batUri))
+        .thenReturn(batUrl);
+    when(urlFactory.create(shUri))
+        .thenReturn(shUrl);
+    when(hostSystem.getSystemPathExtensions()).thenReturn(
+        Stream.of(".exe", ".cmd", ".BAT", ".ps1", ".sh")
+            .collect(Collectors.toCollection(TreeSet::new)));
+
+    // When
+    var txtResult = uriResourceFetcher.fetchFileFromUri(txtUri, ".exe", false);
+    var exeResult = uriResourceFetcher.fetchFileFromUri(exeUri, ".noExe", false);
+    var cmdResult = uriResourceFetcher.fetchFileFromUri(cmdUri, ".exe", false);
+    var ps1Result = uriResourceFetcher.fetchFileFromUri(ps1Uri, ".exe", false);
+    var batResult = uriResourceFetcher.fetchFileFromUri(batUri, ".exe", false);
+    var shResult = uriResourceFetcher.fetchFileFromUri(shUri, ".exe", false);
+
+    // Then
+    assertThat(txtResult)
+        .isNotEmpty();
+    assertThat(txtResult.get().toString()).endsWith(".exe");
+    assertThat(exeResult)
+        .isNotEmpty();
+    assertThat(exeResult.get().toString()).endsWith(".exe");
+    assertThat(cmdResult)
+        .isNotEmpty();
+    assertThat(cmdResult.get().toString()).endsWith(".CMD");
+    assertThat(ps1Result)
+        .isNotEmpty();
+    assertThat(ps1Result.get().toString()).endsWith(".ps1");
+    assertThat(batResult)
+        .isNotEmpty();
+    assertThat(batResult.get().toString()).endsWith(".bat");
+    assertThat(shResult)
+        .isNotEmpty();
+    assertThat(shResult.get().toString()).endsWith(".sh");
   }
 
   static Stream<URI> fileUris() {

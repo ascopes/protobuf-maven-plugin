@@ -108,6 +108,29 @@ class UriPlexusConverterTest {
         .isInstanceOf(URISyntaxException.class);
   }
 
+  @DisplayName("Backslashes in file URIs are converted to forward slashes")
+  @Test
+  void backslashesInFileUrisAreConvertedToForwardSlashes() throws ComponentConfigurationException {
+    // Given
+    var converterLookup = new DefaultConverterLookup();
+    var configuration = new DefaultPlexusConfiguration("uri", "file:///C:\\foo\\bar");
+    var evaluator = new DefaultExpressionEvaluator();
+
+    // When
+    var result = converter.fromConfiguration(
+        converterLookup,
+        configuration,
+        URI.class,
+        null,
+        getClass().getClassLoader(),
+        evaluator
+    );
+
+    // Then
+    assertThat(result)
+        .isEqualTo(URI.create("file:///C:/foo/bar"));
+  }
+
   @DisplayName("Null values are returned directly")
   @Test
   void nullValuesAreReturnedDirectly() throws ComponentConfigurationException {
