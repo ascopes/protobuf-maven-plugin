@@ -20,8 +20,9 @@ import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
 import java.net.URI;
 import java.util.Optional;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Default;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
 
@@ -34,13 +35,17 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
-@Modifiable
-@KindHint(kind = "url", implementation = UriProtocPluginBean.class)
+@Data
+@Immutable
+@KindHint("url")
 public abstract non-sealed class UriProtocPlugin implements ProtocPlugin {
 
-  public abstract @Nullable Digest getDigest();
-
   public abstract URI getUrl();
+
+  @Default
+  public @Nullable Digest getDigest() {
+    return null;
+  }
 
   @Default.Boolean(false)
   public abstract boolean isOptional();
