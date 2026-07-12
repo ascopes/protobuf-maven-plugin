@@ -35,7 +35,7 @@
   <properties>
     <grpc.version>1.82.1</grpc.version>
     <kotlin.version>2.4.0</kotlin.version>
-    <proto-google-common-protos.version>2.72.0</proto-google-common-protos.version>
+    <proto-google-common-protos.version>2.73.0</proto-google-common-protos.version>
     <scala.version>3.8.4</scala.version>
     <scalapb.digest>SHA1:01b4b553fb25598244a7f22f2e63fb2f81c52551</scalapb.digest>
     <scalapb.version>1.0.0-alpha.3</scalapb.version>
