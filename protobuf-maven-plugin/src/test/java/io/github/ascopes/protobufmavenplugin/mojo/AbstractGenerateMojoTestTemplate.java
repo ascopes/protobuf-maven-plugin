@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import io.github.ascopes.protobufmavenplugin.dependencies.DependencyResolutionDepth;
-import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependencyBean;
+import io.github.ascopes.protobufmavenplugin.dependencies.MavenDependency;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.fixtures.UsesSystemProperties;
 import io.github.ascopes.protobufmavenplugin.generation.GenerationRequest;
@@ -38,7 +38,11 @@ import io.github.ascopes.protobufmavenplugin.generation.Language;
 import io.github.ascopes.protobufmavenplugin.generation.ProtobufBuildOrchestrator;
 import io.github.ascopes.protobufmavenplugin.generation.SourceRootRegistrar;
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.BinaryMavenProtocPlugin;
-import io.github.ascopes.protobufmavenplugin.plugins.distributions.JvmMavenProtocPluginBean;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutableBinaryMavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutableJvmMavenProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutablePathProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutableUriProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.JvmMavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.PathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.UriProtocPlugin;
@@ -395,7 +399,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenImportDependenciesNullExpectEmptyListInRequest(
-      @Nullable List<MavenDependencyBean> dependencies
+      @Nullable List<MavenDependency> dependencies
   ) throws Throwable {
     // Given
     mojo.importDependencies = dependencies;
@@ -414,7 +418,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   void whenImportDependenciesProvidedExpectPluginsInRequest() throws Throwable {
     // Given
-    List<MavenDependencyBean> plugins = mock();
+    List<MavenDependency> plugins = mock();
     mojo.importDependencies = plugins;
 
     // When
@@ -715,10 +719,10 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   void whenPluginsProvidedExpectPluginsInRequest() throws Throwable {
     // Given
     List<ProtocPlugin> plugins = List.of(
-        mock(JvmMavenProtocPluginBean.class),
-        mock(BinaryMavenProtocPlugin.class),
-        mock(UriProtocPlugin.class),
-        mock(PathProtocPlugin.class)
+        mock(ImmutableJvmMavenProtocPlugin.class),
+        mock(ImmutableBinaryMavenProtocPlugin.class),
+        mock(ImmutableUriProtocPlugin.class),
+        mock(ImmutablePathProtocPlugin.class)
     );
     mojo.plugins = plugins;
 
@@ -841,7 +845,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDependenciesNullExpectEmptyListInRequest(
-      @Nullable List<MavenDependencyBean> dependencies
+      @Nullable List<MavenDependency> dependencies
   ) throws Throwable {
     // Given
     mojo.sourceDependencies = dependencies;
@@ -860,7 +864,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   void whenSourceDependenciesProvidedExpectDependenciesInRequest() throws Throwable {
     // Given
-    List<MavenDependencyBean> plugins = mock();
+    List<MavenDependency> plugins = mock();
     mojo.sourceDependencies = plugins;
 
     // When
@@ -877,7 +881,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @NullAndEmptySource
   @ParameterizedTest(name = "when {0}")
   void whenSourceDescriptorDependenciesNullExpectEmptyListInRequest(
-      @Nullable List<MavenDependencyBean> dependencies
+      @Nullable List<MavenDependency> dependencies
   ) throws Throwable {
     // Given
     mojo.sourceDescriptorDependencies = dependencies;
@@ -898,7 +902,7 @@ abstract class AbstractGenerateMojoTestTemplate<A extends AbstractGenerateMojo> 
   @Test
   void whenSourceDescriptorDependenciesProvidedExpectDependenciesInRequest() throws Throwable {
     // Given
-    List<MavenDependencyBean> plugins = mock();
+    List<MavenDependency> plugins = mock();
     mojo.sourceDescriptorDependencies = plugins;
 
     // When
