@@ -42,7 +42,7 @@ jobs:
           fetch-depth: 2
 
       - name: Initialize Java
-        uses: actions/setup-java@v5.6.0
+        uses: actions/setup-java@v5.7.0
         with:
           distribution: zulu
           java-version: 25
@@ -80,7 +80,7 @@ jobs:
           fetch-depth: 2
 
       - name: Initialize Java
-        uses: actions/setup-java@v5.6.0
+        uses: actions/setup-java@v5.7.0
         with:
           distribution: zulu
           java-version: 25
@@ -172,7 +172,7 @@ jobs:
           fetch-depth: 2
 
       - name: Initialize Java
-        uses: actions/setup-java@v5.6.0
+        uses: actions/setup-java@v5.7.0
         with:
           distribution: zulu
           java-version: 25
