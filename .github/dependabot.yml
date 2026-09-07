@@ -1,6 +1,19 @@
 version: 2
 
 updates:
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: weekly
+      timezone: Europe/London
+    target-branch: main
+    assignees:
+      - ascopes
+    groups:
+      devcontainers:
+        patterns:
+          - "*"
+
   - package-ecosystem: github-actions
     directory: /
     open-pull-requests-limit: 999
