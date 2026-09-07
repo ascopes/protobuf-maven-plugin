@@ -12,16 +12,15 @@ updates:
       - ascopes
     labels:
       - dependencies
+    groups:
+      actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: maven
     directories:
       - /
       - /protobuf-maven-plugin/src/it/setup
-    #groups:
-    #  # Group all Maven updates into a single PR.
-    #  maven:
-    #    patterns:
-    #      - "*"
     schedule:
       interval: weekly
       timezone: Europe/London
@@ -31,6 +30,15 @@ updates:
       - ascopes
     labels:
       - dependencies
+    groups:
+      maven:
+        patterns:
+          - "*"
+        exclude-patterns:
+          # Excluded from grouping to generate individual PRs:
+          # Error Prone and NullAway versions must be kept in lockstep.
+          - "com.google.errorprone:*"
+          - "com.uber.nullaway:*"
     ignore:
       # Maven versions should be kept in lockstep with the version
       # of Maven that is in use.
