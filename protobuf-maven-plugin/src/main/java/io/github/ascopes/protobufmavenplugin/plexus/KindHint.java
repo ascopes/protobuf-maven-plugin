@@ -25,6 +25,9 @@ import org.immutables.value.Value.Style;
 /**
  * Marker to advise the "kind" of the implementation when used with a sealed-type hierarchy.
  *
+ * <p>When this marker is spotted, the {@code ConverterLookup} will be consulted to produce
+ * an instance of that type.
+ *
  * @author Ashley Scopes
  * @since 4.1.0
  */
@@ -38,20 +41,5 @@ public @interface KindHint {
    *
    * @return the kind.
    */
-  String kind();
-
-  /**
-   * The implementation that the kind should point to.
-   *
-   * <p>This is needed until
-   * <a href="https://github.com/ascopes/protobuf-maven-plugin/pull/880">GH-880</a>
-   * can be merged, as we cannot easily infer the immutable implementation class from the base
-   * when working with the Immutables library. GH-880 will enable better integration with that
-   * library based on compile-time metadata that avoids this issue. We may just need to include
-   * this annotation in {@link Style#passAnnotations()} to achieve this correctly closer to the
-   * time.
-   *
-   * @return the implementation type.
-   */
-  Class<?> implementation();
+  String value();
 }
