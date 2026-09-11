@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
+import com.github.marschall.memoryfilesystem.MemoryFileSystemProvider;
 import io.github.ascopes.protobufmavenplugin.fixtures.TestFileSystem;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,7 +30,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.jspecify.annotations.Nullable;
@@ -38,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 
 /**
@@ -253,6 +257,39 @@ class FileUtilsTest {
               newDir1.resolve("bbb.txt"),
               newDir2.resolve("ccc.txt")
           );
+    }
+  }
+
+  @DisplayName(".rebaseFileTree(...) makes target file writable by owner.")
+  @ParameterizedTest(name = "{0}")
+  @ValueSource(strings = {"windows", "linux"})
+  void rebaseFileTreeMakesTargetFileWritableByOwner(String os) throws IOException {
+    // Given
+    try (
+        var sourceFs = "windows".equals(os) ? TestFileSystem.windows() : TestFileSystem.linux();
+        var targetFs = "windows".equals(os) ? TestFileSystem.windows() : TestFileSystem.linux()
+    ) {
+      var sourceDir = sourceFs.getRoot().resolve("base").resolve("dir");
+      Files.createDirectories(sourceDir);
+      Path sourceFile = sourceDir.resolve("foo.txt");
+      Files.writeString(sourceFile, "foo");
+
+      if (os.equals("windows")) {
+        Files.setAttribute(sourceFile, "dos:readonly", true);
+      } else {
+        Files.setAttribute(sourceFile, "posix:permissions", Set.of(PosixFilePermission.OWNER_READ));
+      }
+      assertThat(Files.isWritable(sourceFile)).isFalse();
+
+      var targetDir = targetFs.getRoot().resolve("target").resolve("directory");
+
+      // When
+      try (var files = Files.walk(sourceDir)) {
+        FileUtils.rebaseFileTree(sourceDir, targetDir, files);
+      }
+
+      // Then
+      assertThat(targetDir.resolve("foo.txt")).isWritable();
     }
   }
 

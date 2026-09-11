@@ -31,6 +31,8 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.DosFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -154,11 +157,39 @@ public final class FileUtils {
       );
 
       if (!Files.isDirectory(newPath)) {
+        setWritable(newPath);
         newPaths.add(newPath);
       }
     }
 
     return Collections.unmodifiableList(newPaths);
+  }
+
+  private static void setWritable(Path path) {
+    if (!Files.isWritable(path)) {
+      log.trace("Making \"{}\" writable", path);
+      DosFileAttributeView dosView =
+          Files.getFileAttributeView(path, DosFileAttributeView.class);
+      if (dosView != null) {
+        try {
+          dosView.setReadOnly(false);
+        } catch (IOException e) {
+          log.warn("Failed to set read-only attribute of \"{}\"", path, e);
+        }
+      }
+
+      PosixFileAttributeView posixView =
+          Files.getFileAttributeView(path, PosixFileAttributeView.class);
+      if (posixView != null) {
+        try {
+          Set<PosixFilePermission> perms = posixView.readAttributes().permissions();
+          perms.add(PosixFilePermission.OWNER_WRITE);
+          posixView.setPermissions(perms);
+        } catch (IOException e) {
+          log.warn("Failed to set POSIX permissions of \"{}\"", path, e);
+        }
+      }
+    }
   }
 
   public static InputStream newBufferedInputStream(
