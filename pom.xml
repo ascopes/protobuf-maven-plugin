@@ -98,7 +98,7 @@
     <jsonassert.version>2.0-rc1</jsonassert.version>
     <junit.version>6.0.0</junit.version>
     <maven-core.version>3.9.16</maven-core.version>
-    <maven-plugin-annotations.version>3.15.2</maven-plugin-annotations.version>
+    <maven-plugin-annotations.version>3.16.0</maven-plugin-annotations.version>
     <maven-plugin-api.version>3.9.16</maven-plugin-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.27</maven-resolver-api.version>
@@ -108,7 +108,7 @@
     <mockito.version>5.23.0</mockito.version>
     <nullaway.version>0.14.1</nullaway.version>
     <protobuf.version>4.36.1</protobuf.version>
-    <slf4j.version>2.0.18</slf4j.version>
+    <slf4j.version>2.0.19</slf4j.version>
     <wiremock.version>3.13.2</wiremock.version>
 
     <!-- Plugins -->
@@ -126,8 +126,8 @@
     <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     <maven-jxr-plugin.version>3.6.0</maven-jxr-plugin.version>
-    <maven-plugin-plugin.version>3.15.2</maven-plugin-plugin.version>
-    <maven-plugin-report-plugin.version>3.15.2</maven-plugin-report-plugin.version>
+    <maven-plugin-plugin.version>3.16.0</maven-plugin-plugin.version>
+    <maven-plugin-report-plugin.version>3.16.0</maven-plugin-report-plugin.version>
     <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
