@@ -17,7 +17,6 @@ package io.github.ascopes.protobufmavenplugin.plexus;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.inject.Named;
