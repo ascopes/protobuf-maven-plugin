@@ -107,7 +107,7 @@
     <memoryfilesystem.version>2.8.2</memoryfilesystem.version>
     <mockito.version>5.23.0</mockito.version>
     <nullaway.version>0.14.1</nullaway.version>
-    <protobuf.version>4.36.1</protobuf.version>
+    <protobuf.version>4.36.2</protobuf.version>
     <slf4j.version>2.0.19</slf4j.version>
     <wiremock.version>3.13.2</wiremock.version>
 
@@ -121,7 +121,7 @@
     <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-    <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+    <maven-install-plugin.version>3.2.0</maven-install-plugin.version>
     <maven-invoker-plugin.version>3.10.1</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
