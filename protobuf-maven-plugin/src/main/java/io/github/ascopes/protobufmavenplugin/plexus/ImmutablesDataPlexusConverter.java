@@ -28,6 +28,7 @@ import org.codehaus.plexus.component.configurator.converters.basic.AbstractBasic
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+import org.eclipse.sisu.Description;
 import org.immutables.datatype.Datatype;
 import org.jspecify.annotations.Nullable;
 
@@ -45,6 +46,7 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since TBC
  */
+@Description("Converter for immutables-generated models that utilises generated builder classes")
 @Named
 @Singleton
 final class ImmutablesDataPlexusConverter extends AbstractBasicConverter {
