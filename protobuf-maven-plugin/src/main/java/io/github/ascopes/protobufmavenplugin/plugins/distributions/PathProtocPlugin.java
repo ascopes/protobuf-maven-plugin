@@ -18,8 +18,9 @@ package io.github.ascopes.protobufmavenplugin.plugins.distributions;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Default;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
 
@@ -33,8 +34,9 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 2.0.0
  */
-@Modifiable
-@KindHint(kind = "path", implementation = PathProtocPluginBean.class)
+@Data
+@Immutable
+@KindHint("path")
 public abstract non-sealed class PathProtocPlugin implements ProtocPlugin {
 
   public abstract String getName();

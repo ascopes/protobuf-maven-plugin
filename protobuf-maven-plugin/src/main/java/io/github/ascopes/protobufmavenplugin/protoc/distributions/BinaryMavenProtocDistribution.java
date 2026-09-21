@@ -18,9 +18,9 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.NonNull;
 
 /**
@@ -33,9 +33,9 @@ import org.jspecify.annotations.NonNull;
  * @author Ashley Scopes
  * @since 5.1.0
  */
+@Data
 @Immutable
-@KindHint(kind = "binary-maven", implementation = BinaryMavenProtocDistributionBean.class)
-@Modifiable
+@KindHint("binary-maven")
 public abstract non-sealed class BinaryMavenProtocDistribution
     extends MavenArtifact
     implements ProtocDistribution {

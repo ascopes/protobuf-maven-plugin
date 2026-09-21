@@ -539,6 +539,20 @@
           <artifactId>maven-plugin-plugin</artifactId>
           <version>${maven-plugin-plugin.version}</version>
 
+          <configuration>
+            <!-- Work-around for QDox within maven-plugin-plugin failing to parse valid
+                 source code in generated source files.
+
+                 See:
+                   - https://github.com/apache/maven-plugin-tools/issues/944#event-31441388530
+                   - https://github.com/apache/maven-plugin-tools/pull/1046
+                   - https://github.com/apache/maven-plugin-tools/issues/1080
+            -->
+            <excludedScanDirectories>
+              <excludedScanDirectory>${project.build.directory}/generated-sources/annotations</excludedScanDirectory>
+            </excludedScanDirectories>
+          </configuration>
+
           <executions>
             <execution>
               <id>generate-plugin-help-descriptor</id>

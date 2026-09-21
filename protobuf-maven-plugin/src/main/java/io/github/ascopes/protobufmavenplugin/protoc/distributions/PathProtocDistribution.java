@@ -17,9 +17,9 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Modifiable;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -28,9 +28,9 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 5.1.0
  */
+@Data
 @Immutable
-@KindHint(kind = "path", implementation = PathProtocDistributionBean.class)
-@Modifiable
+@KindHint("path")
 public abstract non-sealed class PathProtocDistribution implements ProtocDistribution {
 
   /**
