@@ -41,6 +41,7 @@ import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutableBina
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutableJvmMavenProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutablePathProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.plugins.distributions.ImmutableUriProtocPlugin;
+import io.github.ascopes.protobufmavenplugin.plugins.distributions.ProtocPlugin;
 import io.github.ascopes.protobufmavenplugin.protoc.distributions.ImmutableBinaryMavenProtocDistribution;
 import io.github.ascopes.protobufmavenplugin.utils.ResolutionException;
 import java.io.IOException;
