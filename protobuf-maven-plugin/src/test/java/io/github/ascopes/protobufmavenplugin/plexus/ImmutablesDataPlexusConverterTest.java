@@ -26,8 +26,10 @@ import io.github.ascopes.protobufmavenplugin.plexus.testdata.ValidInnerModel;
 import io.github.ascopes.protobufmavenplugin.plexus.testdata.ValidOuterModel;
 import java.io.StringReader;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.component.configurator.converters.lookup.ConverterLookup;
 import org.codehaus.plexus.component.configurator.converters.lookup.DefaultConverterLookup;
 import org.codehaus.plexus.component.configurator.expression.DefaultExpressionEvaluator;
@@ -110,6 +112,31 @@ class ImmutablesDataPlexusConverterTest {
                     .bar(98765)
                     .build()))
             .build());
+  }
+
+  @DisplayName(".fromConfiguration(...) raises an exception for undefined attributes")
+  @Test
+  void fromConfigurationRaisesExceptionForUndefinedAttributes() throws Exception {
+    // Given
+    var configuration = xml2PlexusConfiguration("""
+        <something>
+          <undefined-attribute>this doesnt exist</undefined-attribute>
+        </something>
+        """.stripIndent());
+
+    // Then
+    assertThatExceptionOfType(ComponentConfigurationException.class)
+        .isThrownBy(() -> converterLookup.lookupConverterForType(ValidOuterModel.class)
+            .fromConfiguration(
+                converterLookup,
+                configuration,
+                ValidOuterModel.class,
+                null,
+                getClass().getClassLoader(),
+                expressionEvaluator
+            ))
+        .withMessage("No attribute undefined-attribute exists for ValidOuterModel")
+        .withCauseExactlyInstanceOf(NoSuchElementException.class);
   }
 
   @DisplayName(
