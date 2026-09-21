@@ -42,10 +42,7 @@ public abstract non-sealed class UriProtocPlugin implements ProtocPlugin {
 
   public abstract URI getUrl();
 
-  @Default
-  public @Nullable Digest getDigest() {
-    return null;
-  }
+  public abstract @Nullable Digest getDigest();
 
   @Default.Boolean(false)
   public abstract boolean isOptional();
