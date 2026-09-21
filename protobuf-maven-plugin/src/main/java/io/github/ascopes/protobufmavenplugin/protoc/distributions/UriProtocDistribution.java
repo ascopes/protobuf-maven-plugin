@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.protoc.distributions;
 import io.github.ascopes.protobufmavenplugin.digests.Digest;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import java.net.URI;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
@@ -27,6 +28,7 @@ import org.jspecify.annotations.Nullable;
  * @author Ashley Scopes
  * @since 5.1.0
  */
+@Data
 @Immutable
 @KindHint("url")
 public abstract non-sealed class UriProtocDistribution implements ProtocDistribution {

@@ -18,6 +18,7 @@ package io.github.ascopes.protobufmavenplugin.plugins.distributions;
 import io.github.ascopes.protobufmavenplugin.dependencies.MavenArtifact;
 import io.github.ascopes.protobufmavenplugin.plexus.KindHint;
 import io.github.ascopes.protobufmavenplugin.utils.DeadCodeGenerated;
+import org.immutables.datatype.Data;
 import org.immutables.value.Value.Immutable;
 
 /**
@@ -27,6 +28,7 @@ import org.immutables.value.Value.Immutable;
  * @author Ashley Scopes
  * @since 4.1.0
  */
+@Data
 @Immutable
 @KindHint("binary-maven")
 public abstract non-sealed class BinaryMavenProtocPlugin

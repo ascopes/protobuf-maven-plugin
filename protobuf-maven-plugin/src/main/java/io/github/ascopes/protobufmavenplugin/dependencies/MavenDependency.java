@@ -21,7 +21,6 @@ import org.immutables.datatype.Data;
 import org.immutables.value.Value.Immutable;
 import org.jspecify.annotations.Nullable;
 
-
 /**
  * Representation of a Maven dependency.
  *
