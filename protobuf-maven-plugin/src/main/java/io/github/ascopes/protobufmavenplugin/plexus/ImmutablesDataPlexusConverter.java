@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * safely (see GH-974 and GH-976).
  *
  * @author Ashley Scopes
- * @since TBC
+ * @since 5.1.10
  */
 @Description("Converter for immutables-generated models that utilises generated builder classes")
 @Named
