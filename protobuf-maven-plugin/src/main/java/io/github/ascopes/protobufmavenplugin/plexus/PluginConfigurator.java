@@ -38,7 +38,7 @@ import org.eclipse.sisu.Description;
 @Description("Configures Plexus to work with this Maven Plugin")
 @Named(PluginConfigurator.NAME)
 @Singleton
-public class PluginConfigurator extends BasicComponentConfigurator {
+public final class PluginConfigurator extends BasicComponentConfigurator {
 
   public static final String NAME = "protobuf-maven-plugin-configurator";
 
