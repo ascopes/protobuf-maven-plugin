@@ -64,6 +64,11 @@ public final class AnnotationProxy {
   private static <A extends Annotation> A proxy(Class<A> targetCls, Annotation annotation) {
     var sourceCls = annotation.annotationType();
 
+    // XXX: verify if we can shortcut safely here to avoid filling up metaspace.
+    //if (targetCls.getClassLoader() == sourceClass.getClassLoader()) {
+    //  return annotation;
+    //}
+
     log.debug(
         "Proxying {} from {} ({}) to {} ({}) to mitigate classloader mismatch",
         annotation,
