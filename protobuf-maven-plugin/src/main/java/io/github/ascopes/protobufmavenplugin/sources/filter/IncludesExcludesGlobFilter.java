@@ -15,10 +15,13 @@
  */
 package io.github.ascopes.protobufmavenplugin.sources.filter;
 
-import java.nio.file.FileSystems;
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Predicate;
 
 /**
@@ -29,36 +32,48 @@ import java.util.function.Predicate;
  */
 public final class IncludesExcludesGlobFilter implements FileFilter {
 
-  private final List<PathMatcher> includes;
-  private final List<PathMatcher> excludes;
+  private final List<String> includes;
+  private final List<String> excludes;
+  private final Map<FileSystem, PathMatchers> pathMatchers = 
+      Collections.synchronizedMap(new WeakHashMap<>());
 
   public IncludesExcludesGlobFilter(List<String> includes, List<String> excludes) {
-    this.includes = compile(includes);
-    this.excludes = compile(excludes);
+    this.includes = includes;
+    this.excludes = excludes;
   }
 
   @Override
   public boolean matches(Path rootPath, Path filePath) {
     var relativePath = rootPath.relativize(filePath);
 
-    if (excludes.stream().anyMatch(path(relativePath))) {
+    var matchers = lookupPathMatchers(relativePath.getFileSystem());
+
+    if (matchers.excludes.stream().anyMatch(path(relativePath))) {
       // File was explicitly excluded.
       return false;
     }
 
     // File was explicitly included when inclusions were present, or no inclusions were present
     // so we allow all files anyway.
-    return includes.isEmpty() || includes.stream().anyMatch(path(relativePath));
+    return matchers.includes.isEmpty() || matchers.includes.stream().anyMatch(path(relativePath));
   }
 
-  private static List<PathMatcher> compile(List<String> globs) {
+  private static List<PathMatcher> compile(List<String> globs, FileSystem fileSystem) {
     return globs.stream()
         .map("glob:"::concat)
-        .map(FileSystems.getDefault()::getPathMatcher)
+        .map(fileSystem::getPathMatcher)
         .toList();
   }
 
   private static Predicate<PathMatcher> path(Path path) {
     return pathMatcher -> pathMatcher.matches(path);
+  }
+  
+  private PathMatchers lookupPathMatchers(FileSystem fileSystem) {
+    return pathMatchers.computeIfAbsent(fileSystem, fs ->
+        new PathMatchers(compile(includes, fs), compile(excludes, fs)));
+  }
+
+  private static record PathMatchers(List<PathMatcher> includes, List<PathMatcher> excludes) {
   }
 }
