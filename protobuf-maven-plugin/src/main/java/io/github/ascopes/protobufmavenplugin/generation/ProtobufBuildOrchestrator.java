@@ -274,6 +274,7 @@ public final class ProtobufBuildOrchestrator {
                 .filter(Objects::nonNull)
         )
         .flatMap(identity())
+        .distinct()
         .forEach(outputDirectory -> registrar.registerSourceRoot(mavenSession, outputDirectory));
   }
 
