@@ -97,9 +97,9 @@
     <json.version>20260814</json.version>
     <jsonassert.version>2.0-rc1</jsonassert.version>
     <junit.version>6.0.0</junit.version>
-    <maven-core.version>3.9.16</maven-core.version>
+    <maven-core.version>3.10.0</maven-core.version>
     <maven-plugin-annotations.version>3.16.0</maven-plugin-annotations.version>
-    <maven-plugin-api.version>3.9.16</maven-plugin-api.version>
+    <maven-plugin-api.version>3.10.0</maven-plugin-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
     <maven-resolver-api.version>1.9.27</maven-resolver-api.version>
     <!-- GH-772: must be kept on v1 for Maven 3.9.x -->
