@@ -112,7 +112,7 @@
     <wiremock.version>3.13.2</wiremock.version>
 
     <!-- Plugins -->
-    <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     <license-maven-plugin.version>5.1.2</license-maven-plugin.version>
     <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
@@ -140,7 +140,7 @@
     <!-- Plugin dependencies -->
     <checkstyle.version>12.0.1</checkstyle.version>
     <maven-fluido-skin.version>2.1.0</maven-fluido-skin.version>
-    <maven-surefire-junit5-tree-reporter.version>1.5.1</maven-surefire-junit5-tree-reporter.version>
+    <maven-surefire-junit5-tree-reporter.version>2.0.0</maven-surefire-junit5-tree-reporter.version>
 
     <!--
         - Force bytebuddy experimental support for some exotic platforms.
