@@ -121,7 +121,8 @@ jobs:
 
           - title: win/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
             os-name: windows-11-arm
-            java-version: 21  # This is the earliest-supported version on Windows ARM
+            # This is the earliest-supported version on Windows ARM
+            java-version: 21
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
@@ -153,7 +154,7 @@ jobs:
           - title: lnx/x86/mvn4.0.0/jdk17
             os-name: ubuntu-24.04
             java-version: 17
-            maven-version: 4.0.0-rc-5
+            maven-version: 4.0.0-rc-7
 
     steps:
       - name: Checkout repository
