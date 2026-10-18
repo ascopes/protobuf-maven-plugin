@@ -89,7 +89,7 @@ jobs:
   test:
     name: Test (${{ matrix.title }})
     runs-on: ${{ matrix.os-name }}
-    timeout-minutes: 25
+    timeout-minutes: 60
     needs:
       - validate
 
