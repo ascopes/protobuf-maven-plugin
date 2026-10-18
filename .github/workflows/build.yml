@@ -104,7 +104,7 @@ jobs:
           ###
 
           - title: lnx/x86/mvn3.9.6/jdk17
-            os-name: ubuntu-24.04
+            os-name: ubuntu-26.04
             java-version: 17
             maven-version: 3.9.6  # Minimum version
 
@@ -126,33 +126,27 @@ jobs:
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
-            os-name: ubuntu-24.04-arm
+            os-name: ubuntu-26.04-arm
             java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: lnx/x86/mvn${{ needs.validate.outputs.default_maven_version }}/jdk17
-            os-name: ubuntu-24.04
+            os-name: ubuntu-26.04
             java-version: 17
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk21
-            os-name: ubuntu-24.04-arm
+            os-name: ubuntu-26.04-arm
             java-version: 21
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
           - title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk25
-            os-name: ubuntu-24.04-arm
+            os-name: ubuntu-26.04-arm
             java-version: 25
             maven-version: "${{ needs.validate.outputs.default_maven_version }}"
 
-          # FIXME: enable when Groovy in maven-invoker-plugin supports Java 27 bytecode.
-          #- title: lnx/arm/mvn${{ needs.validate.outputs.default_maven_version }}/jdk27
-          #  os-name: ubuntu-24.04-arm
-          #  java-version: 27
-          #  maven-version: "${{ needs.validate.outputs.default_maven_version }}"
-
           - title: lnx/x86/mvn4.0.0/jdk17
-            os-name: ubuntu-24.04
+            os-name: ubuntu-26.04
             java-version: 17
             maven-version: 4.0.0-rc-7
 
