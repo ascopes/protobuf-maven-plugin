@@ -30,6 +30,9 @@
   <description>Generates compilable sources from Protobuf definitions.</description>
   <packaging>maven-plugin</packaging>
 
+  <!-- Seems Sonatype sites override this to a broken path if it is not specified. -->
+  <url>${project.parent.url}</url>
+
   <prerequisites>
     <!-- Versions before 3.9.6 cannot handle Java 17 bytecode in Eclipse Sisu. -->
     <maven>3.9.6</maven>
