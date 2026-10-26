@@ -69,6 +69,7 @@ import org.mockito.stubbing.Answer;
 //  with Aether?
 @DisplayName("AetherMavenArtifactPathResolver tests")
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("DistinctVarargsChecker")  // google/error-prone#6240
 class AetherMavenArtifactPathResolverTest {
 
   @TempDir
