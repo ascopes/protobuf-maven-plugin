@@ -191,3 +191,21 @@ and then proceed to generate gRPC wrappers and Reactor gRPC wrappers.
   </executions>
 </plugin>
 ```
+
+## Contributing
+
+Contributions, big or small, are always welcome. This includes, but is not limited to, raising bug fixes, improving documentation, new features,
+or reproducing any issues raised.
+
+Other areas of contribution that would always be greatly appreciated include:
+
+- Integration with new protoc features
+- Improvements to unit tests
+- Improvements to incremental compilation functionality
+- Improvements to integration tests
+- Maven 4.0.0 compatibility and optimisation
+- Enabling access to additional runner types for CI/CD, such as those running on Solaris,
+  mainframe silicon such as IBM, SPARC, etc
+- Integration with WASMified builds of `protoc` that can be hooked into using WASM runtimes
+
+In these cases, please raise an issue or discussion first so there is a space to discuss decisions and changes, if appropriate.
