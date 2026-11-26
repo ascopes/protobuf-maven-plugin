@@ -11,4 +11,3 @@
 # Help git-diff render these correctly
 *.groovy         diff=java
 *.scala          diff=java
-
