@@ -41,7 +41,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -107,18 +106,14 @@ public final class FileUtils {
     }
   }
 
-  public static void makeExecutable(Path file) throws IOException {
+  public static void makeExecutable(Path path) {
     try {
-      log.trace("Ensuring \"{}\" is executable, if possible", file);
-      var perms = new HashSet<>(Files.getPosixFilePermissions(file));
-      perms.add(PosixFilePermission.OWNER_EXECUTE);
-      Files.setPosixFilePermissions(file, perms);
-    } catch (UnsupportedOperationException ex) {
-      log.trace(
-          "File system holding \"{}\" does not support setting POSIX file permissions, "
-              + "continuing without setting executable bits",
-          file
-      );
+      log.trace("Ensuring \"{}\" is executable, if possible", path);
+      var permissions = new HashSet<>(Files.getPosixFilePermissions(path));
+      permissions.add(PosixFilePermission.OWNER_EXECUTE);
+      Files.setPosixFilePermissions(path, permissions);
+    } catch (UnsupportedOperationException | IOException ex) {
+      log.debug("Failed to set executable bits on \"{}\", continuing anyway", path, ex);
     }
   }
 
@@ -133,6 +128,7 @@ public final class FileUtils {
     while (iter.hasNext()) {
       var existingPath = iter.next();
       var newPath = newRoot;
+
       // Rebuild the new target path using the fragments from the original relative
       // path. This enables us to relativize paths on different file systems correctly.
       for (var part : existingRoot.relativize(existingPath)) {
@@ -157,7 +153,7 @@ public final class FileUtils {
       );
 
       if (!Files.isDirectory(newPath)) {
-        setWritable(newPath);
+        makeWritable(newPath);
         newPaths.add(newPath);
       }
     }
@@ -165,27 +161,29 @@ public final class FileUtils {
     return Collections.unmodifiableList(newPaths);
   }
 
-  private static void setWritable(Path path) {
+  private static void makeWritable(Path path) {
     log.trace("Making \"{}\" writable", path);
-    DosFileAttributeView dosView =
-        Files.getFileAttributeView(path, DosFileAttributeView.class);
+
+    var dosView = Files.getFileAttributeView(path, DosFileAttributeView.class);
     if (dosView != null) {
       try {
         dosView.setReadOnly(false);
-      } catch (IOException e) {
-        log.warn("Failed to set dos read-only attribute of \"{}\"", path, e);
+      } catch (IOException ex) {
+        // GH-1085: Systems like NFS return a LinuxDosFileAttributeView where
+        // the read-only flag is not supported. This will raise an error for
+        // each case.
+        log.debug("Failed to set DOS read-only attribute on \"{}\", continuing anyway", path, ex);
       }
     }
 
-    PosixFileAttributeView posixView =
-        Files.getFileAttributeView(path, PosixFileAttributeView.class);
+    var posixView = Files.getFileAttributeView(path, PosixFileAttributeView.class);
     if (posixView != null) {
       try {
-        Set<PosixFilePermission> perms = posixView.readAttributes().permissions();
-        perms.add(PosixFilePermission.OWNER_WRITE);
-        posixView.setPermissions(perms);
-      } catch (IOException e) {
-        log.warn("Failed to set POSIX permissions of \"{}\"", path, e);
+        var permissions = new HashSet<>(posixView.readAttributes().permissions());
+        permissions.add(PosixFilePermission.OWNER_WRITE);
+        posixView.setPermissions(permissions);
+      } catch (IOException ex) {
+        log.debug("Failed to set POSIX permissions on \"{}\", continuing anyway", path, ex);
       }
     }
   }
